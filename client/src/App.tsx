@@ -11,6 +11,7 @@ import Skills from "@/pages/skills";
 import Projects from "@/pages/projects";
 import Portfolio from "@/pages/portfolio";
 import Learning from "@/pages/learning";
+import CourseDetail from "@/pages/course-detail";
 import EditPortfolio from "@/pages/edit-portfolio";
 import PublicPortfolio from "@/pages/public-portfolio";
 import NotFound from "@/pages/not-found";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/projects" component={Projects} />
       <Route path="/portfolio" component={Portfolio} />
       <Route path="/learning" component={Learning} />
+      <Route path="/course/:id" component={CourseDetail} />
       <Route path="/edit-portfolio" component={EditPortfolio} />
       <Route path="/portfolio/:username" component={PublicPortfolio} />
       <Route component={NotFound} />

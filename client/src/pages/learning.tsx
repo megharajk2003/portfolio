@@ -394,10 +394,12 @@ export default function Learning() {
                       </div>
                     </div>
 
-                    <Button className="w-full" variant="outline">
-                      View Program
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </Button>
+                    <Link href={`/course/${course.id}`}>
+                      <Button className="w-full" variant="outline">
+                        View Program
+                        <ExternalLink className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
