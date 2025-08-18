@@ -379,59 +379,175 @@ export default function PublicPortfolio() {
             <div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Skills & Expertise</h2>
               
-              {/* Skills by Category */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Code className="mr-2 h-5 w-5 text-blue-600" />
-                      Technical Skills
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+              {/* Skills Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card className="text-center">
+                  <CardContent className="p-6">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">
+                      {visibleSkills.filter(s => s.category === 'technical').length}
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">Technical Skills</div>
+                  </CardContent>
+                </Card>
+                <Card className="text-center">
+                  <CardContent className="p-6">
+                    <div className="text-3xl font-bold text-green-600 mb-2">
+                      {visibleSkills.filter(s => s.category === 'soft').length}
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">Soft Skills</div>
+                  </CardContent>
+                </Card>
+                <Card className="text-center">
+                  <CardContent className="p-6">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">
+                      {Math.round(visibleSkills.reduce((sum, skill) => sum + skill.level, 0) / visibleSkills.length) || 0}%
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">Average Level</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Skills by Category - Compact Cards */}
+              <div className="space-y-8">
+                {/* Technical Skills */}
+                {visibleSkills.filter(skill => skill.category === "technical").length > 0 && (
+                  <div>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Code className="w-6 h-6 text-blue-600" />
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Technical Skills
+                      </h3>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        {visibleSkills.filter(skill => skill.category === "technical").length}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {visibleSkills
                         .filter(skill => skill.category === "technical")
                         .map((skill) => (
-                          <div key={skill.id}>
-                            <div className="flex justify-between text-sm mb-2">
-                              <span className="font-medium text-gray-900 dark:text-white">
-                                {skill.name}
-                              </span>
-                              <span className="text-gray-500">{skill.level}%</span>
-                            </div>
-                            <Progress value={skill.level} className="h-2" />
-                          </div>
+                          <Card key={skill.id} className="hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <div className="mb-3">
+                                <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                                  {skill.name}
+                                </h4>
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star 
+                                        key={i} 
+                                        className={`h-3 w-3 ${
+                                          i < Math.floor(skill.level / 20) 
+                                            ? 'text-yellow-400 fill-current' 
+                                            : 'text-gray-300'
+                                        }`} 
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-xs text-gray-500">{skill.level}%</span>
+                                </div>
+                                
+                                {skill.level >= 80 && (
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                    Expert
+                                  </Badge>
+                                )}
+                                {skill.level >= 60 && skill.level < 80 && (
+                                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                    Advanced
+                                  </Badge>
+                                )}
+                                {skill.level >= 40 && skill.level < 60 && (
+                                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                                    Intermediate
+                                  </Badge>
+                                )}
+                                {skill.level < 40 && (
+                                  <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                                    Beginner
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
                         ))}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                )}
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Users className="mr-2 h-5 w-5 text-green-600" />
-                      Soft Skills
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                {/* Soft Skills */}
+                {visibleSkills.filter(skill => skill.category === "soft").length > 0 && (
+                  <div>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Users className="w-6 h-6 text-green-600" />
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Soft Skills
+                      </h3>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        {visibleSkills.filter(skill => skill.category === "soft").length}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {visibleSkills
                         .filter(skill => skill.category === "soft")
                         .map((skill) => (
-                          <div key={skill.id}>
-                            <div className="flex justify-between text-sm mb-2">
-                              <span className="font-medium text-gray-900 dark:text-white">
-                                {skill.name}
-                              </span>
-                              <span className="text-gray-500">{skill.level}%</span>
-                            </div>
-                            <Progress value={skill.level} className="h-2" />
-                          </div>
+                          <Card key={skill.id} className="hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <div className="mb-3">
+                                <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                                  {skill.name}
+                                </h4>
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star 
+                                        key={i} 
+                                        className={`h-3 w-3 ${
+                                          i < Math.floor(skill.level / 20) 
+                                            ? 'text-yellow-400 fill-current' 
+                                            : 'text-gray-300'
+                                        }`} 
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-xs text-gray-500">{skill.level}%</span>
+                                </div>
+                                
+                                {skill.level >= 80 && (
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                    Expert
+                                  </Badge>
+                                )}
+                                {skill.level >= 60 && skill.level < 80 && (
+                                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                    Advanced
+                                  </Badge>
+                                )}
+                                {skill.level >= 40 && skill.level < 60 && (
+                                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                                    Intermediate
+                                  </Badge>
+                                )}
+                                {skill.level < 40 && (
+                                  <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                                    Beginner
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
                         ))}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                )}
               </div>
 
               {/* Tools & Technologies */}
@@ -442,7 +558,7 @@ export default function PublicPortfolio() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {["React", "Node.js", "TypeScript", "Python", "AWS", "Docker", "PostgreSQL", "MongoDB", "GraphQL", "Next.js", "Tailwind CSS", "Figma"].map((tool) => (
-                      <Badge key={tool} variant="secondary" className="text-sm">
+                      <Badge key={tool} variant="secondary" className="text-sm px-3 py-1">
                         {tool}
                       </Badge>
                     ))}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { type skills } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
+import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -119,52 +120,112 @@ export default function Skills() {
             </Button>
           </div>
 
-          {/* Skills by Category */}
+          {/* Skills Overview Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">
+                  {skills.filter(s => s.category === 'technical').length}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400">Technical Skills</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-green-600 mb-2">
+                  {skills.filter(s => s.category === 'soft').length}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400">Soft Skills</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-purple-600 mb-2">
+                  {Math.round(skills.reduce((sum, skill) => sum + skill.level, 0) / skills.length) || 0}%
+                </div>
+                <div className="text-gray-600 dark:text-gray-400">Average Level</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Skills Grid by Category */}
           {Object.keys(groupedSkills).length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {Object.entries(groupedSkills).map(([category, categorySkills]: [string, any]) => {
                 const IconComponent = getCategoryIcon(category);
                 return (
-                  <Card key={category}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2 capitalize">
-                        <IconComponent className="h-5 w-5" />
-                        <span>{category} Skills</span>
-                        <Badge className={getCategoryColor(category)}>
-                          {categorySkills.length}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        {categorySkills.map((skill: any) => (
-                          <div key={skill.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium text-gray-900 dark:text-white">
-                                  {skill.name}
-                                </h4>
-                                <div className="flex items-center space-x-2">
-                                  <Button variant="ghost" size="sm">
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                  <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                                    <Trash2 className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Progress value={skill.level} className="flex-1" />
-                                <span className="text-sm text-gray-500 min-w-[3rem]">
-                                  {skill.level}%
-                                </span>
+                  <div key={category}>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <IconComponent className="w-6 h-6 text-blue-600" />
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white capitalize">
+                        {category} Skills
+                      </h3>
+                      <Badge variant="outline" className={getCategoryColor(category)}>
+                        {categorySkills.length}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                      {categorySkills.map((skill: any) => (
+                        <Card key={skill.id} className="group hover:shadow-lg transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                                {skill.name}
+                              </h4>
+                              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500">
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <div className="flex">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star 
+                                      key={i} 
+                                      className={`h-3 w-3 ${
+                                        i < Math.floor(skill.level / 20) 
+                                          ? 'text-yellow-400 fill-current' 
+                                          : 'text-gray-300'
+                                      }`} 
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-xs text-gray-500">{skill.level}%</span>
+                              </div>
+                              
+                              {skill.level >= 80 && (
+                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                  Expert
+                                </Badge>
+                              )}
+                              {skill.level >= 60 && skill.level < 80 && (
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                  Advanced
+                                </Badge>
+                              )}
+                              {skill.level >= 40 && skill.level < 60 && (
+                                <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                                  Intermediate
+                                </Badge>
+                              )}
+                              {skill.level < 40 && (
+                                <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                                  Beginner
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -246,6 +307,9 @@ export default function Skills() {
             </CardContent>
           </Card>
         </div>
+        
+        {/* Footer */}
+        <Footer />
       </main>
     </div>
   );

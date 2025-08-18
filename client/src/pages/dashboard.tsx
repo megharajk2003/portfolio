@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { type profiles } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
+import Footer from "@/components/ui/footer";
 import StatsGrid from "@/components/stats-grid";
 import LearningModules from "@/components/learning-modules";
 import SkillRadarChart from "@/components/skill-radar-chart";
@@ -179,6 +180,9 @@ export default function Dashboard() {
             <QuickActions />
           </div>
         </div>
+        
+        {/* Footer */}
+        <Footer />
       </main>
     </div>
   );

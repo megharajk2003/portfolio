@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "wouter";
+import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -413,6 +414,9 @@ export default function Learning() {
             </div>
           </div>
         </div>
+        
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   );
