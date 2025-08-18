@@ -1,5 +1,5 @@
 import { 
-  type User, type InsertUser, type Profile, type InsertProfile,
+  type User, type InsertUser, type UpsertUser, type Profile, type InsertProfile,
   type WorkExperience, type InsertWorkExperience, type Education, type InsertEducation,
   type Skill, type InsertSkill, type Project, type InsertProject,
   type Certification, type InsertCertification, type Achievement, type InsertAchievement,
@@ -14,9 +14,10 @@ import { eq, and, gte, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
-  // User management
+  // User management (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  // Legacy methods
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
@@ -84,16 +85,28 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Mandatory methods for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 
+  // Legacy methods
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;

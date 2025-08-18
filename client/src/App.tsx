@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
 import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
 import Experience from "@/pages/experience";
@@ -14,23 +15,33 @@ import Learning from "@/pages/learning";
 import CourseDetail from "@/pages/course-detail";
 import EditPortfolio from "@/pages/edit-portfolio";
 import PublicPortfolio from "@/pages/public-portfolio";
+import Landing from "@/pages/landing";
+import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/profile" component={Profile} />
-      <Route path="/experience" component={Experience} />
-      <Route path="/education" component={Education} />
-      <Route path="/skills" component={Skills} />
-      <Route path="/projects" component={Projects} />
-      <Route path="/portfolio" component={Portfolio} />
-      <Route path="/learning" component={Learning} />
-      <Route path="/course/:id" component={CourseDetail} />
-      <Route path="/edit-portfolio" component={EditPortfolio} />
-      <Route path="/portfolio/:username" component={PublicPortfolio} />
+      {isLoading || !isAuthenticated ? (
+        <Route path="/" component={Landing} />
+      ) : (
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/experience" component={Experience} />
+          <Route path="/education" component={Education} />
+          <Route path="/skills" component={Skills} />
+          <Route path="/projects" component={Projects} />
+          <Route path="/portfolio" component={Portfolio} />
+          <Route path="/learning" component={Learning} />
+          <Route path="/course/:id" component={CourseDetail} />
+          <Route path="/edit-portfolio" component={EditPortfolio} />
+          <Route path="/portfolio/:username" component={PublicPortfolio} />
+        </>
+      )}
       <Route component={NotFound} />
     </Switch>
   );
