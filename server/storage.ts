@@ -5,8 +5,12 @@ import {
   type Certification, type InsertCertification, type Achievement, type InsertAchievement,
   type LearningModule, type UserProgress, type InsertUserProgress,
   type UserStats, type DailyActivity, type InsertDailyActivity,
-  type SectionSettings, type InsertSectionSettings
+  type SectionSettings, type InsertSectionSettings,
+  users, profiles, workExperience, education, skills, projects, certifications, achievements,
+  learningModules, userProgress, userStats, dailyActivity, sectionSettings
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, gte, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -77,6 +81,268 @@ export interface IStorage {
   // Section settings
   getSectionSettings(userId: string): Promise<SectionSettings[]>;
   updateSectionSettings(userId: string, sectionName: string, settings: Partial<SectionSettings>): Promise<SectionSettings>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    
+    // Initialize user stats
+    await db.insert(userStats).values({
+      userId: user.id,
+      totalXp: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActivityDate: null,
+      portfolioViews: 0,
+    });
+
+    return user;
+  }
+
+  async getProfile(userId: string): Promise<Profile | undefined> {
+    const [profile] = await db.select().from(profiles).where(eq(profiles.userId, userId));
+    return profile || undefined;
+  }
+
+  async createProfile(insertProfile: InsertProfile): Promise<Profile> {
+    const [profile] = await db.insert(profiles).values(insertProfile).returning();
+    return profile;
+  }
+
+  async updateProfile(userId: string, profileUpdate: Partial<Profile>): Promise<Profile | undefined> {
+    const [updated] = await db
+      .update(profiles)
+      .set(profileUpdate)
+      .where(eq(profiles.userId, userId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getWorkExperience(userId: string): Promise<WorkExperience[]> {
+    return await db.select().from(workExperience).where(eq(workExperience.userId, userId));
+  }
+
+  async createWorkExperience(insertExperience: InsertWorkExperience): Promise<WorkExperience> {
+    const [experience] = await db.insert(workExperience).values(insertExperience).returning();
+    return experience;
+  }
+
+  async updateWorkExperience(id: string, experienceUpdate: Partial<WorkExperience>): Promise<WorkExperience | undefined> {
+    const [updated] = await db
+      .update(workExperience)
+      .set(experienceUpdate)
+      .where(eq(workExperience.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteWorkExperience(id: string): Promise<boolean> {
+    const result = await db.delete(workExperience).where(eq(workExperience.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getEducation(userId: string): Promise<Education[]> {
+    return await db.select().from(education).where(eq(education.userId, userId));
+  }
+
+  async createEducation(insertEducation: InsertEducation): Promise<Education> {
+    const [edu] = await db.insert(education).values(insertEducation).returning();
+    return edu;
+  }
+
+  async updateEducation(id: string, educationUpdate: Partial<Education>): Promise<Education | undefined> {
+    const [updated] = await db
+      .update(education)
+      .set(educationUpdate)
+      .where(eq(education.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteEducation(id: string): Promise<boolean> {
+    const result = await db.delete(education).where(eq(education.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getSkills(userId: string): Promise<Skill[]> {
+    return await db.select().from(skills).where(eq(skills.userId, userId));
+  }
+
+  async createSkill(insertSkill: InsertSkill): Promise<Skill> {
+    const [skill] = await db.insert(skills).values(insertSkill).returning();
+    return skill;
+  }
+
+  async updateSkill(id: string, skillUpdate: Partial<Skill>): Promise<Skill | undefined> {
+    const [updated] = await db
+      .update(skills)
+      .set(skillUpdate)
+      .where(eq(skills.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteSkill(id: string): Promise<boolean> {
+    const result = await db.delete(skills).where(eq(skills.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getProjects(userId: string): Promise<Project[]> {
+    return await db.select().from(projects).where(eq(projects.userId, userId));
+  }
+
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const [project] = await db.insert(projects).values(insertProject).returning();
+    return project;
+  }
+
+  async updateProject(id: string, projectUpdate: Partial<Project>): Promise<Project | undefined> {
+    const [updated] = await db
+      .update(projects)
+      .set(projectUpdate)
+      .where(eq(projects.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    const result = await db.delete(projects).where(eq(projects.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getCertifications(userId: string): Promise<Certification[]> {
+    return await db.select().from(certifications).where(eq(certifications.userId, userId));
+  }
+
+  async createCertification(insertCertification: InsertCertification): Promise<Certification> {
+    const [certification] = await db.insert(certifications).values(insertCertification).returning();
+    return certification;
+  }
+
+  async updateCertification(id: string, certificationUpdate: Partial<Certification>): Promise<Certification | undefined> {
+    const [updated] = await db
+      .update(certifications)
+      .set(certificationUpdate)
+      .where(eq(certifications.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteCertification(id: string): Promise<boolean> {
+    const result = await db.delete(certifications).where(eq(certifications.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getAchievements(userId: string): Promise<Achievement[]> {
+    return await db.select().from(achievements).where(eq(achievements.userId, userId));
+  }
+
+  async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
+    const [achievement] = await db.insert(achievements).values(insertAchievement).returning();
+    return achievement;
+  }
+
+  async updateAchievement(id: string, achievementUpdate: Partial<Achievement>): Promise<Achievement | undefined> {
+    const [updated] = await db
+      .update(achievements)
+      .set(achievementUpdate)
+      .where(eq(achievements.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteAchievement(id: string): Promise<boolean> {
+    const result = await db.delete(achievements).where(eq(achievements.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getLearningModules(): Promise<LearningModule[]> {
+    return await db.select().from(learningModules).where(eq(learningModules.isActive, true));
+  }
+
+  async getLearningModule(id: string): Promise<LearningModule | undefined> {
+    const [module] = await db.select().from(learningModules).where(eq(learningModules.id, id));
+    return module || undefined;
+  }
+
+  async getUserProgress(userId: string): Promise<UserProgress[]> {
+    return await db.select().from(userProgress).where(eq(userProgress.userId, userId));
+  }
+
+  async createUserProgress(insertProgress: InsertUserProgress): Promise<UserProgress> {
+    const [progress] = await db.insert(userProgress).values(insertProgress).returning();
+    return progress;
+  }
+
+  async updateUserProgress(userId: string, moduleId: string, progressUpdate: Partial<UserProgress>): Promise<UserProgress | undefined> {
+    const [updated] = await db
+      .update(userProgress)
+      .set(progressUpdate)
+      .where(and(eq(userProgress.userId, userId), eq(userProgress.moduleId, moduleId)))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getUserStats(userId: string): Promise<UserStats | undefined> {
+    const [stats] = await db.select().from(userStats).where(eq(userStats.userId, userId));
+    return stats || undefined;
+  }
+
+  async updateUserStats(userId: string, statsUpdate: Partial<UserStats>): Promise<UserStats> {
+    const [updated] = await db
+      .update(userStats)
+      .set(statsUpdate)
+      .where(eq(userStats.userId, userId))
+      .returning();
+    return updated;
+  }
+
+  async getDailyActivity(userId: string, startDate: string, endDate: string): Promise<DailyActivity[]> {
+    return await db
+      .select()
+      .from(dailyActivity)
+      .where(
+        and(
+          eq(dailyActivity.userId, userId),
+          gte(dailyActivity.date, startDate),
+          lte(dailyActivity.date, endDate)
+        )
+      );
+  }
+
+  async createDailyActivity(insertActivity: InsertDailyActivity): Promise<DailyActivity> {
+    const [activity] = await db.insert(dailyActivity).values(insertActivity).returning();
+    return activity;
+  }
+
+  async getSectionSettings(userId: string): Promise<SectionSettings[]> {
+    return await db.select().from(sectionSettings).where(eq(sectionSettings.userId, userId));
+  }
+
+  async updateSectionSettings(userId: string, sectionName: string, settingsUpdate: Partial<SectionSettings>): Promise<SectionSettings> {
+    const [updated] = await db
+      .update(sectionSettings)
+      .set(settingsUpdate)
+      .where(and(eq(sectionSettings.userId, userId), eq(sectionSettings.sectionName, sectionName)))
+      .returning();
+    return updated;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -641,4 +907,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
