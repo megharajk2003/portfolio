@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, User, Briefcase, GraduationCap, 
-  Cog, FolderOpen, BookOpen, ExternalLink, Flame 
+  Cog, FolderOpen, BookOpen, ExternalLink, Flame, X
 } from "lucide-react";
 
 const navigation = [
@@ -15,20 +16,32 @@ const navigation = [
   { name: "Learning", href: "/learning", icon: BookOpen },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const [location] = useLocation();
 
   return (
-    <aside className="w-64 bg-white shadow-lg border-r border-gray-200 fixed h-full z-10">
+    <aside className="w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 fixed h-full z-10">
       <div className="p-6">
+        {/* Mobile close button */}
+        {onClose && (
+          <div className="lg:hidden flex justify-end mb-4">
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
         {/* Logo */}
         <div className="flex items-center space-x-3 mb-8">
           <div className="w-10 h-10 bg-gradient-to-r from-primary to-purple-600 rounded-lg flex items-center justify-center">
             <User className="text-white h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">FlowCV</h1>
-            <p className="text-sm text-gray-500">Dashboard</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">FlowCV</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Dashboard</p>
           </div>
         </div>
 
@@ -57,8 +70,9 @@ export default function Sidebar() {
                     "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
                     isActive
                       ? "bg-primary text-white"
-                      : "text-gray-600 hover:bg-gray-50"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   )}
+                  onClick={() => onClose && onClose()}
                 >
                   <IconComponent className="h-5 w-5" />
                   <span>{item.name}</span>
@@ -74,9 +88,12 @@ export default function Sidebar() {
         </nav>
 
         {/* Portfolio Link */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Link href="/portfolio">
-            <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors">
+            <div 
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors"
+              onClick={() => onClose && onClose()}
+            >
               <ExternalLink className="h-5 w-5" />
               <span>View Portfolio</span>
             </div>

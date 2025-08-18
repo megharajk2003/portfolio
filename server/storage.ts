@@ -99,6 +99,160 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
+    // Create sample user
+    const userId = "user-1";
+    const user: User = {
+      id: userId,
+      username: "megharaj",
+      email: "megharaj@example.com",
+      password: "password123",
+      createdAt: new Date()
+    };
+    this.users.set(userId, user);
+
+    // Create sample profile
+    const profileId = randomUUID();
+    const profile: Profile = {
+      id: profileId,
+      userId,
+      name: "Megharaj K",
+      role: "Full Stack Developer",
+      email: "megharaj@example.com",
+      phone: "+91 12345 67890",
+      location: "Tamil Nadu, India",
+      photoUrl: null,
+      summary: "Passionate full-stack developer with experience in MERN stack and modern web technologies.",
+      portfolioTheme: "modern",
+      isPublic: true
+    };
+    this.profiles.set(profileId, profile);
+
+    // Create sample skills
+    const skills = [
+      { name: "JavaScript", level: 90, category: "technical" },
+      { name: "React", level: 85, category: "technical" },
+      { name: "Node.js", level: 80, category: "technical" },
+      { name: "TypeScript", level: 75, category: "technical" },
+      { name: "MongoDB", level: 70, category: "technical" },
+      { name: "UI/UX Design", level: 65, category: "design" },
+      { name: "Figma", level: 60, category: "design" },
+      { name: "Communication", level: 85, category: "soft" },
+      { name: "Problem Solving", level: 90, category: "soft" },
+      { name: "Leadership", level: 75, category: "soft" }
+    ];
+
+    skills.forEach(skill => {
+      const skillId = randomUUID();
+      this.skills.set(skillId, {
+        id: skillId,
+        userId,
+        name: skill.name,
+        level: skill.level,
+        category: skill.category,
+        isVisible: true
+      });
+    });
+
+    // Create sample projects
+    const projects = [
+      {
+        title: "Hospital Management System",
+        description: "Full-stack web application for managing hospital operations with patient records, appointments, and staff management.",
+        technologies: ["React", "Node.js", "MongoDB", "Express"],
+        link: "https://hospital-demo.example.com",
+        githubLink: "https://github.com/megharaj/hospital-management"
+      },
+      {
+        title: "E-Commerce Platform",
+        description: "Modern e-commerce solution with payment gateway integration and admin dashboard.",
+        technologies: ["Next.js", "Stripe", "PostgreSQL", "Tailwind"],
+        link: "https://ecommerce-demo.example.com",
+        githubLink: "https://github.com/megharaj/ecommerce-platform"
+      },
+      {
+        title: "Task Management App",
+        description: "Collaborative task management tool with real-time updates and team collaboration features.",
+        technologies: ["Vue.js", "Socket.io", "Redis", "Docker"],
+        link: null,
+        githubLink: "https://github.com/megharaj/task-manager"
+      }
+    ];
+
+    projects.forEach(project => {
+      const projectId = randomUUID();
+      this.projects.set(projectId, {
+        id: projectId,
+        userId,
+        title: project.title,
+        description: project.description,
+        technologies: project.technologies,
+        link: project.link,
+        githubLink: project.githubLink,
+        isVisible: true
+      });
+    });
+
+    // Create sample achievements
+    const achievements = [
+      {
+        title: "Smart India Hackathon Finalist",
+        description: "Reached finals in national-level hackathon with innovative healthcare solution",
+        year: "2024"
+      },
+      {
+        title: "AWS Certified Developer",
+        description: "Achieved AWS Developer Associate certification",
+        year: "2024"
+      },
+      {
+        title: "Open Source Contributor",
+        description: "Active contributor to React ecosystem with 50+ contributions",
+        year: "2023"
+      }
+    ];
+
+    achievements.forEach(achievement => {
+      const achievementId = randomUUID();
+      this.achievements.set(achievementId, {
+        id: achievementId,
+        userId,
+        title: achievement.title,
+        description: achievement.description,
+        year: achievement.year,
+        isVisible: true
+      });
+    });
+
+    // Create sample work experience
+    const workExp = {
+      title: "Software Developer Intern",
+      company: "ABC Tech Solutions",
+      startDate: "2024-06",
+      endDate: "2024-12",
+      description: "Developed REST APIs and optimized database queries. Built responsive web applications using React and Node.js."
+    };
+
+    const workId = randomUUID();
+    this.workExperience.set(workId, {
+      id: workId,
+      userId,
+      ...workExp,
+      isVisible: true
+    });
+
+    // Initialize user stats
+    const statsId = randomUUID();
+    const stats: UserStats = {
+      id: statsId,
+      userId,
+      totalXp: 2847,
+      currentStreak: 5,
+      longestStreak: 12,
+      lastActivityDate: new Date(),
+      portfolioViews: 1234
+    };
+    this.userStats.set(userId, stats);
+
     // Create sample learning modules
     const modules = [
       {
@@ -196,7 +350,18 @@ export class MemStorage implements IStorage {
 
   async createProfile(insertProfile: InsertProfile): Promise<Profile> {
     const id = randomUUID();
-    const profile: Profile = { ...insertProfile, id };
+    const profile: Profile = { 
+      ...insertProfile, 
+      id,
+      summary: insertProfile.summary ?? null,
+      role: insertProfile.role ?? null,
+      email: insertProfile.email ?? null,
+      phone: insertProfile.phone ?? null,
+      location: insertProfile.location ?? null,
+      photoUrl: insertProfile.photoUrl ?? null,
+      portfolioTheme: insertProfile.portfolioTheme ?? "modern",
+      isPublic: insertProfile.isPublic ?? false
+    };
     this.profiles.set(id, profile);
     return profile;
   }
@@ -216,7 +381,13 @@ export class MemStorage implements IStorage {
 
   async createWorkExperience(insertExperience: InsertWorkExperience): Promise<WorkExperience> {
     const id = randomUUID();
-    const experience: WorkExperience = { ...insertExperience, id };
+    const experience: WorkExperience = { 
+      ...insertExperience, 
+      id,
+      endDate: insertExperience.endDate ?? null,
+      description: insertExperience.description ?? null,
+      isVisible: insertExperience.isVisible ?? true
+    };
     this.workExperience.set(id, experience);
     return experience;
   }
@@ -240,7 +411,12 @@ export class MemStorage implements IStorage {
 
   async createEducation(insertEducation: InsertEducation): Promise<Education> {
     const id = randomUUID();
-    const education: Education = { ...insertEducation, id };
+    const education: Education = { 
+      ...insertEducation, 
+      id,
+      endDate: insertEducation.endDate ?? null,
+      isVisible: insertEducation.isVisible ?? true
+    };
     this.education.set(id, education);
     return education;
   }
@@ -264,7 +440,13 @@ export class MemStorage implements IStorage {
 
   async createSkill(insertSkill: InsertSkill): Promise<Skill> {
     const id = randomUUID();
-    const skill: Skill = { ...insertSkill, id };
+    const skill: Skill = { 
+      ...insertSkill, 
+      id,
+      level: insertSkill.level ?? 1,
+      category: insertSkill.category ?? "technical",
+      isVisible: insertSkill.isVisible ?? true
+    };
     this.skills.set(id, skill);
     return skill;
   }
@@ -288,7 +470,15 @@ export class MemStorage implements IStorage {
 
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = randomUUID();
-    const project: Project = { ...insertProject, id };
+    const project: Project = { 
+      ...insertProject, 
+      id,
+      description: insertProject.description ?? null,
+      technologies: insertProject.technologies ?? null,
+      link: insertProject.link ?? null,
+      githubLink: insertProject.githubLink ?? null,
+      isVisible: insertProject.isVisible ?? true
+    };
     this.projects.set(id, project);
     return project;
   }
