@@ -1,266 +1,718 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { 
+  Profile, WorkExperience, Education, Skill, Project, Certification, Achievement 
+} from "@shared/schema";
 import { 
-  Mail, Phone, MapPin, ExternalLink, Github, 
-  Calendar, Building, GraduationCap 
+  Mail, Phone, MapPin, ExternalLink, Github, Calendar, Building, 
+  GraduationCap, Award, Download, Star, Users, Code, Palette,
+  BookOpen, Trophy, Target, Heart, Globe, Linkedin, Twitter,
+  MessageCircle, FileText, ChevronRight, CheckCircle, TrendingUp,
+  Briefcase, User, Quote, Send
 } from "lucide-react";
 
 export default function PublicPortfolio() {
   const [, params] = useRoute("/portfolio/:username");
+  const [activeTab, setActiveTab] = useState("about");
   const username = params?.username;
 
   // Mock user ID mapping - in real app this would be resolved from username
   const CURRENT_USER_ID = "user-1";
 
-  const { data: profile } = useQuery({
+  const { data: profile } = useQuery<Profile>({
     queryKey: ["/api/profile", CURRENT_USER_ID],
   });
 
-  const { data: workExperience = [] } = useQuery({
+  const { data: workExperience = [] } = useQuery<WorkExperience[]>({
     queryKey: ["/api/work-experience", CURRENT_USER_ID],
   });
 
-  const { data: education = [] } = useQuery({
+  const { data: education = [] } = useQuery<Education[]>({
     queryKey: ["/api/education", CURRENT_USER_ID],
   });
 
-  const { data: skills = [] } = useQuery({
+  const { data: skills = [] } = useQuery<Skill[]>({
     queryKey: ["/api/skills", CURRENT_USER_ID],
   });
 
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ["/api/projects", CURRENT_USER_ID],
   });
 
-  const { data: certifications = [] } = useQuery({
+  const { data: certifications = [] } = useQuery<Certification[]>({
     queryKey: ["/api/certifications", CURRENT_USER_ID],
   });
 
+  const { data: achievements = [] } = useQuery<Achievement[]>({
+    queryKey: ["/api/achievements", CURRENT_USER_ID],
+  });
+
+  // Mock additional data for comprehensive portfolio
+  const portfolioStats = {
+    projectsCompleted: projects.length,
+    yearsExperience: 5,
+    clientsSatisfied: 50,
+    certificationsEarned: certifications.length + 8
+  };
+
+  const testimonials = [
+    {
+      name: "Sarah Johnson",
+      role: "Product Manager at TechCorp",
+      company: "TechCorp",
+      quote: "Working with this developer was exceptional. They delivered high-quality code on time and exceeded our expectations.",
+      rating: 5,
+      image: "/api/placeholder/60/60"
+    },
+    {
+      name: "Michael Chen",
+      role: "CTO at StartupXYZ",
+      company: "StartupXYZ", 
+      quote: "Incredible problem-solving skills and attention to detail. Would definitely work with them again.",
+      rating: 5,
+      image: "/api/placeholder/60/60"
+    },
+    {
+      name: "Emily Rodriguez",
+      role: "Design Lead at Creative Studio",
+      company: "Creative Studio",
+      quote: "Great collaboration and communication throughout the project. Delivered exactly what we needed.",
+      rating: 5,
+      image: "/api/placeholder/60/60"
+    }
+  ];
+
+  const socialLinks = [
+    { icon: Linkedin, href: "https://linkedin.com/in/username", label: "LinkedIn" },
+    { icon: Github, href: "https://github.com/username", label: "GitHub" },
+    { icon: Twitter, href: "https://twitter.com/username", label: "Twitter" },
+    { icon: Globe, href: "https://website.com", label: "Website" }
+  ];
+
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Portfolio Not Found</h1>
-          <p className="text-gray-600">The portfolio for "{username}" could not be found.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Portfolio Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-400">The portfolio for "{username}" could not be found.</p>
         </div>
       </div>
     );
   }
 
+  const visibleSkills = skills.filter(skill => skill.isVisible);
+  const visibleProjects = projects.filter(project => project.isVisible);
+  const visibleWorkExperience = workExperience.filter(exp => exp.isVisible);
+  const visibleEducation = education.filter(edu => edu.isVisible);
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-purple-600 text-white py-16">
-        <div className="max-w-4xl mx-auto px-8">
-          <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <span className="text-3xl font-bold">
-                {profile.name?.charAt(0) || "M"}
-              </span>
+      <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <Badge variant="outline" className="w-fit">
+                  <Trophy className="h-3 w-3 mr-1" />
+                  Available for new projects
+                </Badge>
+                <h1 className="text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                  Hi, I'm <span className="text-blue-600">{profile.name || "Megharaj K"}</span>
+                </h1>
+                <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
+                  {profile.role || "Full Stack Developer & UI/UX Designer"}
+                </p>
+                <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
+                  {profile.summary || "Passionate about creating exceptional digital experiences. I specialize in building scalable web applications and crafting intuitive user interfaces that solve real-world problems."}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Let's Talk
+                </Button>
+                <Button size="lg" variant="outline">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download CV
+                </Button>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                {socialLinks.map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-blue-600 transition-colors"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{profile.name || "Megharaj K"}</h1>
-              <p className="text-xl opacity-90 mb-4">{profile.role || "Full Stack Developer"}</p>
-              <div className="flex items-center space-x-4 text-sm opacity-80">
-                <span className="flex items-center">
-                  <Mail className="mr-1 h-4 w-4" />
-                  {profile.email || "megharaj@example.com"}
-                </span>
-                <span className="flex items-center">
-                  <Phone className="mr-1 h-4 w-4" />
-                  {profile.phone || "+91 12345 67890"}
-                </span>
-                <span className="flex items-center">
-                  <MapPin className="mr-1 h-4 w-4" />
-                  {profile.location || "Tamil Nadu, India"}
-                </span>
+
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative">
+                <div className="w-80 h-80 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center">
+                  <Avatar className="w-72 h-72 border-4 border-white shadow-2xl">
+                    <AvatarImage src="/api/placeholder/300/300" alt={profile.name} />
+                    <AvatarFallback className="text-6xl font-bold text-white bg-transparent">
+                      {profile.name?.charAt(0) || "M"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg">
+                  <Star className="h-6 w-6 text-yellow-500" />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-4xl mx-auto px-8 py-12">
-        {/* About Section */}
-        {profile.summary && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>About Me</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700 leading-relaxed">{profile.summary}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Skills Section */}
-        {skills.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {skills.filter(skill => skill.isVisible).map((skill) => (
-                  <div key={skill.id}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-gray-700">{skill.name}</span>
-                      <span className="text-gray-500">{skill.level}%</span>
-                    </div>
-                    <Progress value={skill.level} className="h-2" />
-                  </div>
-                ))}
+      {/* Stats Section */}
+      <section className="bg-white dark:bg-gray-800 py-16 border-b">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">
+                {portfolioStats.projectsCompleted}+
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="text-gray-600 dark:text-gray-400">Projects Completed</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {portfolioStats.yearsExperience}+
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">Years Experience</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-purple-600 mb-2">
+                {portfolioStats.clientsSatisfied}+
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">Happy Clients</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-orange-600 mb-2">
+                {portfolioStats.certificationsEarned}+
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">Certifications</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        {/* Projects Section */}
-        {projects.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Projects</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projects.filter(project => project.isVisible).map((project) => (
-                  <div key={project.id} className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">{project.title}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{project.description}</p>
-                    {project.technologies && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {project.technologies.map((tech, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {tech}
-                          </Badge>
+      {/* Main Content Tabs */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-6 mb-12">
+            <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="experience">Experience</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="education">Education</TabsTrigger>
+            <TabsTrigger value="contact">Contact</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="about" className="space-y-12">
+            {/* About Me */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">About Me</h2>
+                <div className="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p>
+                    {profile.summary || "I'm a passionate full-stack developer with over 5 years of experience creating digital solutions that make a difference. My journey began with a curiosity about how things work, which led me to discover the power of code to transform ideas into reality."}
+                  </p>
+                  <p>
+                    I specialize in building scalable web applications using modern technologies like React, Node.js, and cloud platforms. My approach combines technical expertise with user-centered design thinking to create products that are not only functional but delightful to use.
+                  </p>
+                  <p>
+                    When I'm not coding, you'll find me exploring new technologies, contributing to open-source projects, or sharing knowledge with the developer community through articles and mentoring.
+                  </p>
+                </div>
+
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Core Values</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      <span className="text-gray-700 dark:text-gray-300">User-first approach</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Heart className="h-5 w-5 text-red-600" />
+                      <span className="text-gray-700 dark:text-gray-300">Quality over quantity</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-5 w-5 text-green-600" />
+                      <span className="text-gray-700 dark:text-gray-300">Collaborative mindset</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                      <span className="text-gray-700 dark:text-gray-300">Continuous learning</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                {/* Personal Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <User className="mr-2 h-5 w-5" />
+                      Personal Info
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <Mail className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm">{profile.email || "megharaj@example.com"}</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Phone className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm">{profile.phone || "+91 12345 67890"}</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <MapPin className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm">{profile.location || "Tamil Nadu, India"}</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Calendar className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm">Available for new projects</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Achievements Highlights */}
+                {achievements.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Trophy className="mr-2 h-5 w-5" />
+                        Recent Achievements
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {achievements.slice(0, 3).map((achievement) => (
+                          <div key={achievement.id} className="flex items-center space-x-3">
+                            <Award className="h-4 w-4 text-yellow-500" />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {achievement.title}
+                              </p>
+                              <p className="text-xs text-gray-500">{achievement.issuer}</p>
+                            </div>
+                          </div>
                         ))}
                       </div>
-                    )}
-                    <div className="flex space-x-2">
-                      {project.link && (
-                        <Button size="sm" variant="outline" asChild>
-                          <a href={project.link} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            Demo
-                          </a>
-                        </Button>
-                      )}
-                      {project.githubLink && (
-                        <Button size="sm" variant="outline" asChild>
-                          <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
-                            <Github className="mr-1 h-3 w-3" />
-                            Code
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </TabsContent>
 
-        {/* Work Experience Section */}
-        {workExperience.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Work Experience</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <TabsContent value="experience" className="space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Work Experience</h2>
               <div className="space-y-6">
-                {workExperience.filter(exp => exp.isVisible).map((exp) => (
-                  <div key={exp.id} className="border-l-2 border-primary pl-4">
-                    <h3 className="font-semibold text-gray-900">{exp.title}</h3>
-                    <div className="flex items-center text-gray-600 text-sm mb-2">
-                      <Building className="mr-1 h-4 w-4" />
-                      <span className="mr-4">{exp.company}</span>
-                      <Calendar className="mr-1 h-4 w-4" />
-                      <span>{exp.startDate} - {exp.endDate || "Present"}</span>
-                    </div>
-                    {exp.description && (
-                      <p className="text-gray-700">{exp.description}</p>
-                    )}
-                  </div>
+                {visibleWorkExperience.map((exp, index) => (
+                  <Card key={exp.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                            <Building className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                              {exp.position}
+                            </h3>
+                            <p className="text-blue-600 font-medium">{exp.company}</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="shrink-0">
+                          {exp.startDate} - {exp.endDate || "Present"}
+                        </Badge>
+                      </div>
+                      
+                      {exp.description && (
+                        <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                          {exp.description}
+                        </p>
+                      )}
+                      
+                      {exp.achievements && exp.achievements.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-gray-900 dark:text-white text-sm">Key Achievements:</h4>
+                          <ul className="space-y-1">
+                            {exp.achievements.map((achievement, i) => (
+                              <li key={i} className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                                <span>{achievement}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </TabsContent>
 
-        {/* Education Section */}
-        {education.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Education</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {education.filter(edu => edu.isVisible).map((edu) => (
-                  <div key={edu.id} className="flex items-start space-x-3">
-                    <GraduationCap className="h-5 w-5 text-primary mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
-                      <p className="text-gray-600">{edu.institution}</p>
-                      <p className="text-sm text-gray-500">
-                        {edu.startDate} - {edu.endDate || "Present"}
-                      </p>
+          <TabsContent value="skills" className="space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Skills & Expertise</h2>
+              
+              {/* Skills by Category */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Code className="mr-2 h-5 w-5 text-blue-600" />
+                      Technical Skills
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {visibleSkills
+                        .filter(skill => skill.category === "technical")
+                        .map((skill) => (
+                          <div key={skill.id}>
+                            <div className="flex justify-between text-sm mb-2">
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {skill.name}
+                              </span>
+                              <span className="text-gray-500">{skill.level}%</span>
+                            </div>
+                            <Progress value={skill.level} className="h-2" />
+                          </div>
+                        ))}
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Users className="mr-2 h-5 w-5 text-green-600" />
+                      Soft Skills
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {visibleSkills
+                        .filter(skill => skill.category === "soft")
+                        .map((skill) => (
+                          <div key={skill.id}>
+                            <div className="flex justify-between text-sm mb-2">
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {skill.name}
+                              </span>
+                              <span className="text-gray-500">{skill.level}%</span>
+                            </div>
+                            <Progress value={skill.level} className="h-2" />
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tools & Technologies */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tools & Technologies</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {["React", "Node.js", "TypeScript", "Python", "AWS", "Docker", "PostgreSQL", "MongoDB", "GraphQL", "Next.js", "Tailwind CSS", "Figma"].map((tool) => (
+                      <Badge key={tool} variant="secondary" className="text-sm">
+                        {tool}
+                      </Badge>
+                    ))}
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="projects" className="space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Featured Projects</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {visibleProjects.map((project) => (
+                  <Card key={project.id} className="hover:shadow-lg transition-shadow group">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <Code className="h-5 w-5 text-white" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            {project.title}
+                          </h3>
+                        </div>
+                        <div className="flex space-x-2">
+                          {project.link && (
+                            <Button size="sm" variant="outline" asChild>
+                              <a href={project.link} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                          {project.githubLink && (
+                            <Button size="sm" variant="outline" asChild>
+                              <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
+                                <Github className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {project.description && (
+                        <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                          {project.description}
+                        </p>
+                      )}
+                      
+                      {project.technologies && project.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {project.technologies.map((tech, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center space-x-4">
+                          <span className="flex items-center">
+                            <Calendar className="mr-1 h-3 w-3" />
+                            {project.startDate}
+                          </span>
+                          {project.status && (
+                            <Badge 
+                              variant={project.status === "completed" ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {project.status}
+                            </Badge>
+                          )}
+                        </div>
+                        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </TabsContent>
 
-        {/* Certifications Section */}
-        {certifications.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Certifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {certifications.filter(cert => cert.isVisible).map((cert) => (
-                  <div key={cert.id} className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{cert.title}</h3>
-                      <p className="text-gray-600">{cert.issuer}</p>
-                      <p className="text-sm text-gray-500">{cert.date}</p>
-                    </div>
-                    {cert.link && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={cert.link} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
+          <TabsContent value="education" className="space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Education & Certifications</h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Education */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Academic Background</h3>
+                  {visibleEducation.map((edu) => (
+                    <Card key={edu.id}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start space-x-4">
+                          <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                            <GraduationCap className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {edu.degree}
+                            </h4>
+                            <p className="text-green-600 font-medium">{edu.school}</p>
+                            <p className="text-sm text-gray-500 mb-2">
+                              {edu.startDate} - {edu.endDate}
+                            </p>
+                            {edu.description && (
+                              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                {edu.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Certifications */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Certifications</h3>
+                  {certifications.map((cert) => (
+                    <Card key={cert.id}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start space-x-4">
+                          <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                            <Award className="h-6 w-6 text-yellow-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {cert.name}
+                            </h4>
+                            <p className="text-yellow-600 font-medium">{cert.issuer}</p>
+                            <p className="text-sm text-gray-500 mb-2">
+                              Issued: {cert.issueDate}
+                            </p>
+                            {cert.credentialUrl && (
+                              <a
+                                href={cert.credentialUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm flex items-center"
+                              >
+                                View Certificate
+                                <ExternalLink className="ml-1 h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Let's Work Together</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                  I'm always interested in hearing about new opportunities and exciting projects. 
+                  Whether you have a project in mind or just want to chat about technology, feel free to reach out.
+                </p>
+
+                <div className="space-y-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                          <Mail className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Email</h3>
+                          <p className="text-gray-600 dark:text-gray-400">{profile.email || "megharaj@example.com"}</p>
+                        </div>
+                      </div>
+                      <Button className="w-full">
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Email
                       </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                    </CardContent>
+                  </Card>
 
-        {/* Contact CTA */}
-        <Card>
-          <CardContent className="p-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Let's Work Together</h2>
-            <p className="text-gray-600 mb-4">
-              Interested in collaborating? I'd love to hear from you.
-            </p>
-            <Button size="lg" asChild>
-              <a href={`mailto:${profile.email || "megharaj@example.com"}`}>
-                Get In Touch
-              </a>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {socialLinks.map((social, index) => (
+                      <a
+                        key={index}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <social.icon className="h-5 w-5 mr-2" />
+                        {social.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">What People Say</h3>
+                <div className="space-y-6">
+                  {testimonials.map((testimonial, index) => (
+                    <Card key={index}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start space-x-4">
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={testimonial.image} alt={testimonial.name} />
+                            <AvatarFallback>{testimonial.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center mb-2">
+                              <div className="flex">
+                                {[...Array(testimonial.rating)].map((_, i) => (
+                                  <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 italic">
+                              "{testimonial.quote}"
+                            </p>
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                {testimonial.name}
+                              </p>
+                              <p className="text-gray-500 text-xs">
+                                {testimonial.role} at {testimonial.company}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-50 dark:bg-gray-800 border-t py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <p className="text-gray-600 dark:text-gray-400">
+                © 2024 {profile.name || "Megharaj K"}. All rights reserved.
+              </p>
+            </div>
+            <div className="flex space-x-4">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-600 transition-colors"
+                  aria-label={social.label}
+                >
+                  <social.icon className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
