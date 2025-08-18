@@ -4,6 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
+import Profile from "@/pages/profile";
+import Experience from "@/pages/experience";
+import Education from "@/pages/education";
+import Skills from "@/pages/skills";
+import Projects from "@/pages/projects";
 import Portfolio from "@/pages/portfolio";
 import Learning from "@/pages/learning";
 import EditPortfolio from "@/pages/edit-portfolio";
@@ -15,6 +20,11 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/experience" component={Experience} />
+      <Route path="/education" component={Education} />
+      <Route path="/skills" component={Skills} />
+      <Route path="/projects" component={Projects} />
       <Route path="/portfolio" component={Portfolio} />
       <Route path="/learning" component={Learning} />
       <Route path="/edit-portfolio" component={EditPortfolio} />
