@@ -43,23 +43,24 @@ import { eq, and, gte, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
-  // User management for Clerk Auth
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  // Legacy methods
+  sessionStore: any;
+  // User management for JWT Auth
+  getUserById(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
   // Profile management
-  getProfile(userId: string): Promise<Profile | undefined>;
+  getProfile(userId: number): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(
-    userId: string,
+    userId: number,
     profile: Partial<Profile>
   ): Promise<Profile | undefined>;
 
   // Work Experience
-  getWorkExperience(userId: string): Promise<WorkExperience[]>;
+  getWorkExperience(userId: number): Promise<WorkExperience[]>;
   createWorkExperience(
     experience: InsertWorkExperience
   ): Promise<WorkExperience>;
@@ -70,7 +71,7 @@ export interface IStorage {
   deleteWorkExperience(id: string): Promise<boolean>;
 
   // Education
-  getEducation(userId: string): Promise<Education[]>;
+  getEducation(userId: number): Promise<Education[]>;
   createEducation(education: InsertEducation): Promise<Education>;
   updateEducation(
     id: string,
@@ -79,13 +80,13 @@ export interface IStorage {
   deleteEducation(id: string): Promise<boolean>;
 
   // Skills
-  getSkills(userId: string): Promise<Skill[]>;
+  getSkills(userId: number): Promise<Skill[]>;
   createSkill(skill: InsertSkill): Promise<Skill>;
   updateSkill(id: string, skill: Partial<Skill>): Promise<Skill | undefined>;
   deleteSkill(id: string): Promise<boolean>;
 
   // Projects
-  getProjects(userId: string): Promise<Project[]>;
+  getProjects(userId: number): Promise<Project[]>;
   createProject(project: InsertProject): Promise<Project>;
   updateProject(
     id: string,
@@ -94,7 +95,7 @@ export interface IStorage {
   deleteProject(id: string): Promise<boolean>;
 
   // Certifications
-  getCertifications(userId: string): Promise<Certification[]>;
+  getCertifications(userId: number): Promise<Certification[]>;
   createCertification(
     certification: InsertCertification
   ): Promise<Certification>;
@@ -105,7 +106,7 @@ export interface IStorage {
   deleteCertification(id: string): Promise<boolean>;
 
   // Achievements
-  getAchievements(userId: string): Promise<Achievement[]>;
+  getAchievements(userId: number): Promise<Achievement[]>;
   createAchievement(achievement: InsertAchievement): Promise<Achievement>;
   updateAchievement(
     id: string,
@@ -118,42 +119,63 @@ export interface IStorage {
   getLearningModule(id: string): Promise<LearningModule | undefined>;
 
   // User progress
-  getUserProgress(userId: string): Promise<UserProgress[]>;
+  getUserProgress(userId: number): Promise<UserProgress[]>;
   createUserProgress(progress: InsertUserProgress): Promise<UserProgress>;
   updateUserProgress(
-    userId: string,
+    userId: number,
     moduleId: string,
     progress: Partial<UserProgress>
   ): Promise<UserProgress | undefined>;
 
   // User stats
-  getUserStats(userId: string): Promise<UserStats | undefined>;
+  getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(
-    userId: string,
+    userId: number,
     stats: Partial<UserStats>
   ): Promise<UserStats>;
 
   // Daily activity
   getDailyActivity(
-    userId: string,
+    userId: number,
     startDate: string,
     endDate: string
   ): Promise<DailyActivity[]>;
   createDailyActivity(activity: InsertDailyActivity): Promise<DailyActivity>;
 
   // Section settings
-  getSectionSettings(userId: string): Promise<SectionSettings[]>;
+  getSectionSettings(userId: number): Promise<SectionSettings[]>;
   updateSectionSettings(
-    userId: string,
+    userId: number,
     sectionName: string,
     settings: Partial<SectionSettings>
   ): Promise<SectionSettings>;
 }
 
+import createMemoryStore from "memorystore";
+import session from "express-session";
+
+const MemoryStore = createMemoryStore(session);
+
 export class DatabaseStorage implements IStorage {
-  // User management for Clerk Auth
-  async getUser(id: string): Promise<User | undefined> {
+  sessionStore: session.SessionStore;
+
+  constructor() {
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // 24 hours
+    });
+  }
+
+  // User management for JWT Auth
+  async getUserById(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
     return user || undefined;
   }
 
@@ -194,7 +216,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getProfile(userId: string): Promise<Profile | undefined> {
+  async getProfile(userId: number): Promise<Profile | undefined> {
     const [profile] = await db
       .select()
       .from(profiles)
@@ -211,7 +233,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProfile(
-    userId: string,
+    userId: number,
     profileUpdate: Partial<Profile>
   ): Promise<Profile | undefined> {
     const [updated] = await db

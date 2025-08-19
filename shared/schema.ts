@@ -1,22 +1,36 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, decimal } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  integer,
+  boolean,
+  timestamp,
+  jsonb,
+  decimal,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User storage table for Clerk Auth
+// User storage table for JWT Auth
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey(), // Clerk user ID
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  profileImageUrl: varchar("profile_image_url", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const profiles = pgTable("profiles", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   role: text("role"),
   email: text("email"),
@@ -29,8 +43,12 @@ export const profiles = pgTable("profiles", {
 });
 
 export const workExperience = pgTable("work_experience", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   company: text("company").notNull(),
   startDate: text("start_date").notNull(),
@@ -40,8 +58,12 @@ export const workExperience = pgTable("work_experience", {
 });
 
 export const education = pgTable("education", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   institution: text("institution").notNull(),
   degree: text("degree").notNull(),
   startDate: text("start_date").notNull(),
@@ -50,8 +72,12 @@ export const education = pgTable("education", {
 });
 
 export const skills = pgTable("skills", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   level: integer("level").notNull().default(1), // 1-100
   category: text("category").default("technical"),
@@ -59,8 +85,12 @@ export const skills = pgTable("skills", {
 });
 
 export const projects = pgTable("projects", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
   technologies: text("technologies").array(),
@@ -70,8 +100,12 @@ export const projects = pgTable("projects", {
 });
 
 export const certifications = pgTable("certifications", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   issuer: text("issuer").notNull(),
   date: text("date").notNull(),
@@ -80,8 +114,12 @@ export const certifications = pgTable("certifications", {
 });
 
 export const achievements = pgTable("achievements", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
   year: text("year"),
@@ -89,7 +127,9 @@ export const achievements = pgTable("achievements", {
 });
 
 export const learningModules = pgTable("learning_modules", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -99,9 +139,15 @@ export const learningModules = pgTable("learning_modules", {
 });
 
 export const userProgress = pgTable("user_progress", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  moduleId: varchar("module_id").notNull().references(() => learningModules.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  moduleId: varchar("module_id")
+    .notNull()
+    .references(() => learningModules.id, { onDelete: "cascade" }),
   currentLesson: integer("current_lesson").default(0),
   isCompleted: boolean("is_completed").default(false),
   xpEarned: integer("xp_earned").default(0),
@@ -109,8 +155,12 @@ export const userProgress = pgTable("user_progress", {
 });
 
 export const userStats = pgTable("user_stats", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   totalXp: integer("total_xp").default(0),
   currentStreak: integer("current_streak").default(0),
   longestStreak: integer("longest_streak").default(0),
@@ -119,36 +169,71 @@ export const userStats = pgTable("user_stats", {
 });
 
 export const dailyActivity = pgTable("daily_activity", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   date: text("date").notNull(), // YYYY-MM-DD format
   xpEarned: integer("xp_earned").default(0),
   lessonsCompleted: integer("lessons_completed").default(0),
 });
 
 export const sectionSettings = pgTable("section_settings", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   sectionName: text("section_name").notNull(),
   isVisible: boolean("is_visible").default(true),
   sortOrder: integer("sort_order").default(0),
 });
 
-// Insert schemas for Clerk Auth
-export const upsertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
-export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
-export const insertProfileSchema = createInsertSchema(profiles).omit({ id: true });
-export const insertWorkExperienceSchema = createInsertSchema(workExperience).omit({ id: true });
-export const insertEducationSchema = createInsertSchema(education).omit({ id: true });
+// Insert schemas for JWT Auth
+export const upsertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertProfileSchema = createInsertSchema(profiles).omit({
+  id: true,
+});
+export const insertWorkExperienceSchema = createInsertSchema(
+  workExperience
+).omit({ id: true });
+export const insertEducationSchema = createInsertSchema(education).omit({
+  id: true,
+});
 export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
-export const insertProjectSchema = createInsertSchema(projects).omit({ id: true });
-export const insertCertificationSchema = createInsertSchema(certifications).omit({ id: true });
-export const insertAchievementSchema = createInsertSchema(achievements).omit({ id: true });
-export const insertUserProgressSchema = createInsertSchema(userProgress).omit({ id: true, completedAt: true });
-export const insertDailyActivitySchema = createInsertSchema(dailyActivity).omit({ id: true });
-export const insertSectionSettingsSchema = createInsertSchema(sectionSettings).omit({ id: true });
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+});
+export const insertCertificationSchema = createInsertSchema(
+  certifications
+).omit({ id: true });
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+});
+export const insertUserProgressSchema = createInsertSchema(userProgress).omit({
+  id: true,
+  completedAt: true,
+});
+export const insertDailyActivitySchema = createInsertSchema(dailyActivity).omit(
+  { id: true }
+);
+export const insertSectionSettingsSchema = createInsertSchema(
+  sectionSettings
+).omit({ id: true });
 
-// Types for Clerk Auth
+// Types for JWT Auth
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;

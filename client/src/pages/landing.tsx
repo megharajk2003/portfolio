@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/ui/footer";
-import { SignInButton, SignUpButton } from "@clerk/clerk-react";
+import { Link } from "wouter";
 import {
   Rocket,
   Users,
@@ -38,14 +38,14 @@ export default function Landing() {
               knowme
             </span>
           </div>
-          <SignInButton mode="modal">
+          <Link href="/auth">
             <Button
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               data-testid="button-login"
             >
               Sign In
             </Button>
-          </SignInButton>
+          </Link>
         </div>
       </header>
 
@@ -73,7 +73,7 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <SignUpButton mode="modal">
+            <Link href="/auth">
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -82,7 +82,7 @@ export default function Landing() {
                 Get Started Free
                 <ChevronRight className="ml-2 w-5 h-5" />
               </Button>
-            </SignUpButton>
+            </Link>
             <Button size="lg" variant="outline" data-testid="button-view-demo">
               View Demo Portfolio
             </Button>
@@ -207,7 +207,7 @@ export default function Landing() {
               Join thousands of professionals who are already using knowme to
               advance their careers.
             </p>
-            <SignUpButton mode="modal">
+            <Link href="/auth">
               <Button
                 size="lg"
                 variant="secondary"
@@ -217,7 +217,7 @@ export default function Landing() {
                 Start Building Today
                 <ChevronRight className="ml-2 w-5 h-5" />
               </Button>
-            </SignUpButton>
+            </Link>
           </CardContent>
         </Card>
       </section>

@@ -1,24 +1,18 @@
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth } from "@/hooks/useAuth";
 
-export const useClerkAuth = () => {
-  const { isSignedIn, isLoaded, userId, getToken } = useAuth();
-  const { user } = useUser();
+export const useAuthStatus = () => {
+  const { user, isLoading } = useAuth();
 
   return {
-    isSignedIn,
-    isLoaded,
-    userId,
+    isSignedIn: !!user,
+    isLoaded: !isLoading,
+    userId: user?.id,
     user,
-    getToken,
   };
 };
 
-export const useAuthHeaders = async () => {
-  const { getToken } = useAuth();
-  const token = await getToken();
-
+export const useAuthHeaders = () => {
   return {
-    Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
 };

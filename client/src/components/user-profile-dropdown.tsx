@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";
 import { LogOut, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "wouter";
 
 export function UserProfileDropdown() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const { handleLogout } = useLogout();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -28,6 +28,15 @@ export function UserProfileDropdown() {
 
   if (!user) return null;
 
+  const displayName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.username;
+  const initials =
+    user.firstName && user.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`
+      : user.username[0].toUpperCase();
+
   return (
     <div className="relative" ref={dropdownRef}>
       <Button
@@ -36,12 +45,11 @@ export function UserProfileDropdown() {
         onClick={() => setIsOpen(!isOpen)}
       >
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user.imageUrl} alt={user.fullName || "User"} />
-          <AvatarFallback>
-            {user.firstName?.[0] ||
-              user.emailAddresses[0]?.emailAddress[0] ||
-              "U"}
-          </AvatarFallback>
+          <AvatarImage
+            src={user.profileImageUrl || ""}
+            alt={displayName || "User"}
+          />
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div className="flex-1 text-left">
           <p className="text-sm font-medium truncate">

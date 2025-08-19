@@ -1,20 +1,15 @@
-import { useClerk } from "@clerk/clerk-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
 
 export function useLogout() {
-  const { signOut } = useClerk();
-  const queryClient = useQueryClient();
+  const { logoutMutation } = useAuth();
 
   const handleLogout = async () => {
     try {
-      // Clear all cached data
-      queryClient.clear();
-
       // Clear local storage
       localStorage.clear();
 
-      // Sign out from Clerk
-      await signOut();
+      // Trigger logout mutation
+      await logoutMutation.mutateAsync();
 
       // Force redirect to landing page
       window.location.href = "/";

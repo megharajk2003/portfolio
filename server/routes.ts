@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
+import { setupAuth } from "./auth";
 import {
   insertUserSchema,
   insertProfileSchema,
@@ -17,54 +17,14 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth routes for Clerk
-  app.get(
-    "/api/auth/user",
-    ClerkExpressRequireAuth(),
-    async (req: any, res) => {
-      try {
-        const userId = req.auth.userId;
-        let user = await storage.getUser(userId);
-
-        // If user doesn't exist, create from Clerk data
-        if (!user) {
-          const userData = {
-            id: userId,
-            email: req.auth.emailAddress,
-            firstName: req.auth.firstName,
-            lastName: req.auth.lastName,
-            profileImageUrl: req.auth.imageUrl,
-          };
-          user = await storage.upsertUser(userData);
-        }
-
-        res.json(user);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-
-        // Narrow error type safely
-        if (error instanceof Error) {
-          console.error("Full error:", error);
-          return res.status(500).json({
-            message: "Failed to fetch user",
-            error: error.message,
-            stack: error.stack,
-          });
-        }
-
-        // fallback if it's not an instance of Error
-        return res.status(500).json({
-          message: "Unknown error occurred",
-          error: JSON.stringify(error),
-        });
-      }
-    }
-  );
+  // sets up /api/register, /api/login, /api/logout, /api/user
+  setupAuth(app);
 
   // Profile routes
   app.get("/api/profile/:userId", async (req, res) => {
     try {
-      const profile = await storage.getProfile(req.params.userId);
+      const userId = parseInt(req.params.userId);
+      const profile = await storage.getProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -116,7 +76,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/profile/:userId", async (req, res) => {
     try {
-      const profile = await storage.updateProfile(req.params.userId, req.body);
+      const userId = parseInt(req.params.userId);
+      const profile = await storage.updateProfile(userId, req.body);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -143,7 +104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Work Experience routes
   app.get("/api/work-experience/:userId", async (req, res) => {
     try {
-      const experiences = await storage.getWorkExperience(req.params.userId);
+      const userId = parseInt(req.params.userId);
+      const experiences = await storage.getWorkExperience(userId);
       res.json(experiences);
     } catch (error) {
       console.error("Error fetching work experience:", error);

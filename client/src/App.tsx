@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import ClerkProviderWrapper from "@/components/clerk-provider";
+import AuthProviderWrapper from "@/components/clerk-provider";
 import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
 import Experience from "@/pages/experience";
@@ -18,11 +18,13 @@ import CourseDetail from "@/pages/course-detail";
 import EditPortfolio from "@/pages/edit-portfolio";
 import PublicPortfolio from "@/pages/public-portfolio";
 import Landing from "@/pages/landing";
+import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import Home from "./pages/home";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+  const isAuthenticated = !!user;
   const [location, navigate] = useLocation();
 
   // Redirect to dashboard when user is authenticated and on root path
@@ -34,11 +36,8 @@ function Router() {
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      {isAuthenticated ? (
         <>
-          <Route path="/check" component={Dashboard} />
           <Route path="/dashboard" component={Home} />
           <Route path="/profile" component={Profile} />
           <Route path="/experience" component={Experience} />
@@ -51,6 +50,11 @@ function Router() {
           <Route path="/edit-portfolio" component={EditPortfolio} />
           <Route path="/portfolio/:username" component={PublicPortfolio} />
         </>
+      ) : (
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/auth" component={AuthPage} />
+        </>
       )}
       <Route component={NotFound} />
     </Switch>
@@ -59,14 +63,14 @@ function Router() {
 
 function App() {
   return (
-    <ClerkProviderWrapper>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProviderWrapper>
         <TooltipProvider>
           <Toaster />
           <Router />
         </TooltipProvider>
-      </QueryClientProvider>
-    </ClerkProviderWrapper>
+      </AuthProviderWrapper>
+    </QueryClientProvider>
   );
 }
 
