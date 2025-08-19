@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
 import { 
   insertUserSchema, insertProfileSchema, insertWorkExperienceSchema,
   insertEducationSchema, insertSkillSchema, insertProjectSchema,
@@ -10,14 +10,24 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes for Clerk
+  app.get('/api/auth/user', ClerkExpressRequireAuth(), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const userId = req.auth.userId;
+      let user = await storage.getUser(userId);
+      
+      // If user doesn't exist, create from Clerk data
+      if (!user) {
+        const userData = {
+          id: userId,
+          email: req.auth.emailAddress,
+          firstName: req.auth.firstName,
+          lastName: req.auth.lastName,
+          profileImageUrl: req.auth.imageUrl,
+        };
+        user = await storage.upsertUser(userData);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -25,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   // Profile routes  
-  app.get("/api/profile/:userId", isAuthenticated, async (req, res) => {
+  app.get("/api/profile/:userId", ClerkExpressRequireAuth(), async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const existingUser = await storage.getUserByEmail(userData.email);

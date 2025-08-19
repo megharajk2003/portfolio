@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/ui/footer";
+import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { 
   Rocket, Users, Trophy, Zap, Star, ChevronRight, 
   Code, Palette, BookOpen, Target, Award, TrendingUp 
@@ -21,13 +22,14 @@ export default function Landing() {
               FlowCV
             </span>
           </div>
-          <Button 
-            onClick={() => window.location.href = '/api/login'}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            data-testid="button-login"
-          >
-            Sign In
-          </Button>
+          <SignInButton mode="modal">
+            <Button 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              data-testid="button-login"
+            >
+              Sign In
+            </Button>
+          </SignInButton>
         </div>
       </header>
 
@@ -51,15 +53,16 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button 
-              size="lg" 
-              onClick={() => window.location.href = '/api/login'}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              data-testid="button-get-started"
-            >
-              Get Started Free
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </Button>
+            <SignUpButton mode="modal">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                data-testid="button-get-started"
+              >
+                Get Started Free
+                <ChevronRight className="ml-2 w-5 h-5" />
+              </Button>
+            </SignUpButton>
             <Button size="lg" variant="outline" data-testid="button-view-demo">
               View Demo Portfolio
             </Button>
@@ -179,16 +182,17 @@ export default function Landing() {
             <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
               Join thousands of professionals who are already using FlowCV to advance their careers.
             </p>
-            <Button 
-              size="lg" 
-              variant="secondary"
-              onClick={() => window.location.href = '/api/login'}
-              className="bg-white text-blue-600 hover:bg-gray-100"
-              data-testid="button-start-building"
-            >
-              Start Building Today
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </Button>
+            <SignUpButton mode="modal">
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="bg-white text-blue-600 hover:bg-gray-100"
+                data-testid="button-start-building"
+              >
+                Start Building Today
+                <ChevronRight className="ml-2 w-5 h-5" />
+              </Button>
+            </SignUpButton>
           </CardContent>
         </Card>
       </section>

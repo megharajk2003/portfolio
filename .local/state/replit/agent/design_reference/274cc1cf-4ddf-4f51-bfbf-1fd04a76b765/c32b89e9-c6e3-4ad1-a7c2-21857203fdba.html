@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowCV Replica - Professional Portfolio Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- @COMPONENT: MainNavigation [authenticated user navigation] -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-circle text-white text-lg"></i>
+                        </div>
+                        <span class="ml-2 text-xl font-semibold text-gray-900">FlowCV Pro</span>
+                    </div>
+                    <div class="hidden md:ml-8 md:flex md:space-x-8">
+                        <a href="#dashboard" class="text-primary border-b-2 border-primary px-1 pt-1 pb-4 text-sm font-medium">Dashboard</a>
+                        <a href="#portfolio" class="text-gray-500 hover:text-gray-700 px-1 pt-1 pb-4 text-sm font-medium transition-colors">Edit Portfolio</a>
+                        <a href="#learning" class="text-gray-500 hover:text-gray-700 px-1 pt-1 pb-4 text-sm font-medium transition-colors">Learning</a>
+                        <a href="#public" class="text-gray-500 hover:text-gray-700 px-1 pt-1 pb-4 text-sm font-medium transition-colors">View Public</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
+                        <i class="fas fa-fire text-warning text-sm"></i>
+                        <span class="text-sm font-medium text-gray-700" data-bind="user.streak">7 day streak</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-primary/10 px-3 py-1 rounded-full">
+                        <i class="fas fa-star text-primary text-sm"></i>
+                        <span class="text-sm font-medium text-primary" data-bind="user.xp">1,250 XP</span>
+                    </div>
+                    <div class="relative">
+                        <!-- Profile image placeholder -->
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40" alt="Profile" class="h-8 w-8 rounded-full" data-mock="true">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- @END_COMPONENT: MainNavigation -->
+
+    <!-- @COMPONENT: DashboardView [main dashboard container] -->
+    <div id="dashboard-view" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- @COMPONENT: LearningActivityHeader [gamification and quick actions] -->
+        <div class="mb-8">
+            <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 text-white mb-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">Good morning, <span data-bind="user.name">Megharaj</span>! 👋</h1>
+                        <p class="text-primary-100 mb-4">Ready to level up your skills today?</p>
+                        <div class="flex flex-wrap gap-4 text-sm">
+                            <div class="flex items-center">
+                                <i class="fas fa-fire mr-2"></i>
+                                <span data-bind="user.stats.streak">7-day learning streak</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-trophy mr-2"></i>
+                                <span data-bind="user.stats.completedModules">12 modules completed</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span data-bind="user.stats.studyTime">2.5h studied this week</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 lg:mt-0">
+                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold" data-bind="user.xp">1,250</div>
+                            <div class="text-sm text-primary-100">Total XP</div>
+                            <div class="w-full bg-white/30 rounded-full h-2 mt-2">
+                                <div class="bg-white h-2 rounded-full" style="width: 65%" data-bind="user.xpProgress"></div>
+                            </div>
+                            <div class="text-xs text-primary-100 mt-1">350 XP to next level</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <button class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 text-left group" data-event="click:startLearning">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="h-10 w-10 bg-success/10 rounded-lg flex items-center justify-center group-hover:bg-success/20 transition-colors">
+                            <i class="fas fa-play text-success"></i>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-1">Continue Learning</h3>
+                    <p class="text-sm text-gray-500">React Advanced Patterns</p>
+                </button>
+
+                <button class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 text-left group" data-event="click:addExperience">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                            <i class="fas fa-plus text-primary"></i>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-1">Add Experience</h3>
+                    <p class="text-sm text-gray-500">Update your work history</p>
+                </button>
+
+                <button class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 text-left group" data-event="click:exportResume">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="h-10 w-10 bg-warning/10 rounded-lg flex items-center justify-center group-hover:bg-warning/20 transition-colors">
+                            <i class="fas fa-download text-warning"></i>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-1">Export Resume</h3>
+                    <p class="text-sm text-gray-500">Download PDF version</p>
+                </button>
+
+                <button class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 text-left group" data-event="click:viewPortfolio">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="h-10 w-10 bg-secondary/10 rounded-lg flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                            <i class="fas fa-external-link-alt text-secondary"></i>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-1">View Portfolio</h3>
+                    <p class="text-sm text-gray-500">See your public page</p>
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LearningActivityHeader -->
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <!-- @COMPONENT: ActivityHeatmap [GitHub-style calendar] -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Learning Activity</h3>
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <span>Less</span>
+                            <div class="flex space-x-1">
+                                <div class="w-3 h-3 bg-gray-200 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-success/30 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-success/60 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-success rounded-sm"></div>
+                            </div>
+                            <span>More</span>
+                        </div>
+                    </div>
+                    <!-- @FUNCTIONALITY: Calendar heatmap should show daily activity using a calendar grid -->
+                    <div class="grid grid-cols-7 gap-1 text-xs">
+                        <div class="text-gray-500 text-center py-2">S</div>
+                        <div class="text-gray-500 text-center py-2">M</div>
+                        <div class="text-gray-500 text-center py-2">T</div>
+                        <div class="text-gray-500 text-center py-2">W</div>
+                        <div class="text-gray-500 text-center py-2">T</div>
+                        <div class="text-gray-500 text-center py-2">F</div>
+                        <div class="text-gray-500 text-center py-2">S</div>
+                        <!-- @MAP: generateCalendarDays().map(day => ( -->
+                        <div class="w-3 h-3 bg-gray-200 rounded-sm" data-mock="true"></div>
+                        <div class="w-3 h-3 bg-success/30 rounded-sm" data-mock="true"></div>
+                        <div class="w-3 h-3 bg-success rounded-sm" data-mock="true"></div>
+                        <div class="w-3 h-3 bg-success/60 rounded-sm" data-mock="true"></div>
+                        <div class="w-3 h-3 bg-gray-200 rounded-sm" data-mock="true"></div>
+                        <div class="w-3 h-3 bg-success/30 rounded-sm" data-mock="true"></div>
+                        <div class="w-3 h-3 bg-success rounded-sm" data-mock="true"></div>
+                        <!-- Repeat pattern for full calendar... -->
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ActivityHeatmap -->
+
+                <!-- @COMPONENT: SkillsVisualization [radar and bar charts] -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Skills Overview</h3>
+                        <button class="text-sm text-primary hover:text-primary/80 font-medium" data-event="click:editSkills">Edit Skills</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Skills Progress Bars -->
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Technical Skills</h4>
+                            <div class="space-y-4">
+                                <!-- @MAP: skills.map(skill => ( -->
+                                <div data-bind="skill" data-mock="true">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm font-medium text-gray-700">React</span>
+                                        <span class="text-sm text-gray-500">Advanced</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <div data-mock="true">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Node.js</span>
+                                        <span class="text-sm text-gray-500">Intermediate</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-success h-2 rounded-full" style="width: 70%"></div>
+                                    </div>
+                                </div>
+                                <div data-mock="true">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm font-medium text-gray-700">MongoDB</span>
+                                        <span class="text-sm text-gray-500">Intermediate</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-secondary h-2 rounded-full" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                                <div data-mock="true">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm font-medium text-gray-700">TypeScript</span>
+                                        <span class="text-sm text-gray-500">Beginner</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-warning h-2 rounded-full" style="width: 45%"></div>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+
+                        <!-- Skill Categories Radar -->
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Skill Categories</h4>
+                            <div class="relative h-48 flex items-center justify-center">
+                                <!-- @FUNCTIONALITY: Radar chart should be implemented using Chart.js or similar library -->
+                                <div class="text-center">
+                                    <div class="w-32 h-32 rounded-full border-4 border-primary/20 flex items-center justify-center mb-4" data-mock="true">
+                                        <div class="text-2xl text-primary">📊</div>
+                                    </div>
+                                    <p class="text-sm text-gray-500">Skill radar chart visualization</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-around text-xs text-gray-500 mt-4">
+                                <span>Frontend</span>
+                                <span>Backend</span>
+                                <span>Database</span>
+                                <span>DevOps</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: SkillsVisualization -->
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- @COMPONENT: RecentActivity [learning progress and achievements] -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                    <div class="space-y-4">
+                        <!-- @MAP: recentActivity.map(activity => ( -->
+                        <div class="flex items-start space-x-3" data-mock="true">
+                            <div class="h-8 w-8 bg-success/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-check text-success text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Completed React Hooks module</p>
+                                <p class="text-xs text-gray-500">+50 XP • 2 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3" data-mock="true">
+                            <div class="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-plus text-primary text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Added new work experience</p>
+                                <p class="text-xs text-gray-500">Software Developer Intern at ABC Tech</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3" data-mock="true">
+                            <div class="h-8 w-8 bg-warning/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-trophy text-warning text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Earned 7-day streak badge</p>
+                                <p class="text-xs text-gray-500">Keep up the momentum!</p>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: RecentActivity -->
+
+                <!-- @COMPONENT: LearningModulesPreview [current modules and progress] -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Active Learning</h3>
+                        <a href="#learning" class="text-sm text-primary hover:text-primary/80 font-medium">View All</a>
+                    </div>
+                    <div class="space-y-4">
+                        <!-- @MAP: activeModules.map(module => ( -->
+                        <div class="border border-gray-200 rounded-lg p-4" data-mock="true">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-medium text-gray-900">React Advanced Patterns</h4>
+                                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">In Progress</span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                    <span>Progress</span>
+                                    <span>3/8 lessons</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 37.5%"></div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">Next: Compound Components Pattern</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4" data-mock="true">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-medium text-gray-900">MongoDB Optimization</h4>
+                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Not Started</span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                    <span>Progress</span>
+                                    <span>0/12 lessons</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">Estimated time: 4 hours</p>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: LearningModulesPreview -->
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: DashboardView -->
+
+    <!-- @COMPONENT: PortfolioEditView [section management and theming] -->
+    <div id="portfolio-edit-view" class="hidden max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Edit Portfolio</h1>
+            <p class="text-gray-600">Customize which sections appear on your public portfolio and choose your theme.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Section Visibility Settings -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Section Visibility</h3>
+                    <div class="space-y-4">
+                        <!-- @MAP: portfolioSections.map(section => ( -->
+                        <div class="flex items-center justify-between py-2" data-bind="section" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-user text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Personal Details</p>
+                                    <p class="text-sm text-gray-500">Name, contact, location</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-file-text text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Summary</p>
+                                    <p class="text-sm text-gray-500">About me section</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-briefcase text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Work Experience</p>
+                                    <p class="text-sm text-gray-500">Employment history</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-graduation-cap text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Education</p>
+                                    <p class="text-sm text-gray-500">Academic background</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-code text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Skills</p>
+                                    <p class="text-sm text-gray-500">Technical abilities</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-project-diagram text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Projects</p>
+                                    <p class="text-sm text-gray-500">Portfolio projects</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-certificate text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Certifications</p>
+                                    <p class="text-sm text-gray-500">Professional credentials</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2" data-mock="true">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-book text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Learning Progress</p>
+                                    <p class="text-sm text-gray-500">Skills development</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked data-event="change:toggleSection">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+
+                <!-- Theme Selection -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Portfolio Theme</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- @MAP: portfolioThemes.map(theme => ( -->
+                        <label class="relative cursor-pointer" data-mock="true">
+                            <input type="radio" name="theme" value="modern-light" class="sr-only peer" checked>
+                            <div class="border-2 border-gray-200 peer-checked:border-primary rounded-lg p-4 peer-checked:bg-primary/5">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-12 w-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded border"></div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Modern Light</p>
+                                        <p class="text-sm text-gray-500">Clean, professional design</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="relative cursor-pointer" data-mock="true">
+                            <input type="radio" name="theme" value="modern-dark" class="sr-only peer">
+                            <div class="border-2 border-gray-200 peer-checked:border-primary rounded-lg p-4 peer-checked:bg-primary/5">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-12 w-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded border"></div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Modern Dark</p>
+                                        <p class="text-sm text-gray-500">Sleek dark theme</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="relative cursor-pointer" data-mock="true">
+                            <input type="radio" name="theme" value="creative" class="sr-only peer">
+                            <div class="border-2 border-gray-200 peer-checked:border-primary rounded-lg p-4 peer-checked:bg-primary/5">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-12 w-16 bg-gradient-to-br from-primary to-secondary rounded border"></div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Creative</p>
+                                        <p class="text-sm text-gray-500">Vibrant and expressive</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Preview</h3>
+                    <button class="text-sm text-primary hover:text-primary/80 font-medium" data-event="click:openFullPreview">Full Preview</button>
+                </div>
+                <!-- Preview content would be dynamically generated based on selected sections and theme -->
+                <div class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
+                    <i class="fas fa-eye text-gray-400 text-2xl mb-4"></i>
+                    <p class="text-gray-500">Portfolio preview will appear here</p>
+                    <button class="mt-4 text-primary hover:text-primary/80 text-sm font-medium" data-event="click:generatePreview">Generate Preview</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 flex justify-end space-x-4">
+            <button class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors" data-event="click:discardChanges">Discard Changes</button>
+            <button class="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg font-medium transition-colors" data-event="click:saveSettings">Save Settings</button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: PortfolioEditView -->
+
+    <!-- @COMPONENT: LearningView [modules and lesson interface] -->
+    <div id="learning-view" class="hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Learning Hub</h1>
+            <p class="text-gray-600">Expand your skills with structured learning modules and earn XP for your progress.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Learning Categories Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 sticky top-24">
+                    <h3 class="font-semibold text-gray-900 mb-4">Categories</h3>
+                    <nav class="space-y-2">
+                        <!-- @MAP: learningCategories.map(category => ( -->
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium" data-mock="true">
+                            <i class="fas fa-code text-sm"></i>
+                            <span>Frontend</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700" data-mock="true">
+                            <i class="fas fa-server text-sm"></i>
+                            <span>Backend</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700" data-mock="true">
+                            <i class="fas fa-database text-sm"></i>
+                            <span>Database</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700" data-mock="true">
+                            <i class="fas fa-cloud text-sm"></i>
+                            <span>DevOps</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700" data-mock="true">
+                            <i class="fas fa-handshake text-sm"></i>
+                            <span>Soft Skills</span>
+                        </a>
+                        <!-- @END_MAP )) -->
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Learning Modules Content -->
+            <div class="lg:col-span-3">
+                <!-- Current Module Progress (if any) -->
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-1">Continue Learning</h3>
+                            <p class="text-primary-100 mb-3" data-bind="currentModule.title">React Advanced Patterns</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span>Lesson 3 of 8</span>
+                                <span>•</span>
+                                <span>37% Complete</span>
+                            </div>
+                        </div>
+                        <button class="bg-white text-primary px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors" data-event="click:continueModule">Continue</button>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-white/30 rounded-full h-2">
+                            <div class="bg-white h-2 rounded-full" style="width: 37%" data-bind="currentModule.progress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Modules -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- @MAP: availableModules.map(module => ( -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-react text-primary text-xl"></i>
+                            </div>
+                            <span class="text-xs bg-success/10 text-success px-2 py-1 rounded-full">New</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Advanced React Patterns</h3>
+                        <p class="text-sm text-gray-600 mb-4">Master compound components, render props, and custom hooks for scalable React applications.</p>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>8 lessons</span>
+                            <span>4-6 hours</span>
+                            <span>+400 XP</span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="flex space-x-1">
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-gray-300 text-xs"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">(4.2)</span>
+                        </div>
+                        
+                        <button class="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors" data-event="click:startModule">Start Module</button>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="h-12 w-12 bg-success/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-node text-success text-xl"></i>
+                            </div>
+                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">In Progress</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Node.js Performance</h3>
+                        <p class="text-sm text-gray-600 mb-4">Learn to optimize Node.js applications with clustering, caching, and profiling techniques.</p>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>12 lessons</span>
+                            <span>6-8 hours</span>
+                            <span>+600 XP</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                <span>Progress</span>
+                                <span>2/12 lessons</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-success h-2 rounded-full" style="width: 16.7%"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-success text-white py-2 rounded-lg font-medium hover:bg-success/90 transition-colors" data-event="click:continueModule">Continue</button>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-database text-secondary text-xl"></i>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-lock text-gray-400 text-xs"></i>
+                                <span class="text-xs text-gray-500">Locked</span>
+                            </div>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">MongoDB Optimization</h3>
+                        <p class="text-sm text-gray-600 mb-4">Advanced database optimization techniques including indexing, aggregation pipelines, and sharding.</p>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>15 lessons</span>
+                            <span>8-10 hours</span>
+                            <span>+750 XP</span>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500 mb-4">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Requires: Complete Node.js Performance
+                        </div>
+                        
+                        <button class="w-full bg-gray-200 text-gray-500 py-2 rounded-lg font-medium cursor-not-allowed" disabled>Locked</button>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="h-12 w-12 bg-warning/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-comments text-warning text-xl"></i>
+                            </div>
+                            <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Popular</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Communication Skills</h3>
+                        <p class="text-sm text-gray-600 mb-4">Enhance your professional communication, presentation skills, and team collaboration abilities.</p>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>6 lessons</span>
+                            <span>3-4 hours</span>
+                            <span>+300 XP</span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="flex space-x-1">
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                                <i class="fas fa-star text-warning text-xs"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">(4.9)</span>
+                        </div>
+                        
+                        <button class="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors" data-event="click:startModule">Start Module</button>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LearningView -->
+
+    <!-- @COMPONENT: PublicPortfolioView [shareable portfolio page] -->
+    <div id="public-portfolio-view" class="hidden min-h-screen bg-white">
+        <!-- Portfolio Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary text-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="text-center">
+                    <!-- Professional headshot placeholder -->
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="Professional headshot" class="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white/20" data-mock="true">
+                    <h1 class="text-4xl font-bold mb-2" data-bind="user.personal.name">Megharaj K</h1>
+                    <p class="text-xl text-primary-100 mb-4" data-bind="user.personal.role">Full Stack Developer</p>
+                    <p class="text-primary-100 max-w-2xl mx-auto mb-6" data-bind="user.summary">Passionate full-stack developer with experience in MERN stack, focused on creating efficient and scalable web applications.</p>
+                    
+                    <div class="flex items-center justify-center space-x-6 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <span data-bind="user.personal.email">megharaj@example.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            <span data-bind="user.personal.phone">+91 12345 67890</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span data-bind="user.personal.location">Tamil Nadu, India</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <button class="bg-white text-primary px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors" data-event="click:downloadResume">
+                            <i class="fas fa-download mr-2"></i>
+                            Download Resume
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Portfolio Content -->
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            
+            <!-- Skills Section -->
+            <section class="mb-16" data-bind="sections.skills">
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">Skills & Expertise</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-4">Technical Skills</h3>
+                        <div class="space-y-4">
+                            <!-- @MAP: skills.map(skill => ( -->
+                            <div data-mock="true">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-medium text-gray-700">React</span>
+                                    <span class="text-sm text-gray-500">Advanced</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div data-mock="true">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-medium text-gray-700">Node.js</span>
+                                    <span class="text-sm text-gray-500">Intermediate</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-success h-2 rounded-full" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            <div data-mock="true">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-medium text-gray-700">MongoDB</span>
+                                    <span class="text-sm text-gray-500">Intermediate</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-secondary h-2 rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-4">Learning Progress</h3>
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 rounded-lg p-4" data-mock="true">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium text-gray-700">React Advanced Patterns</span>
+                                    <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">In Progress</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 37%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">3/8 modules completed</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4" data-mock="true">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium text-gray-700">Database Optimization</span>
+                                    <span class="text-xs bg-success/10 text-success px-2 py-1 rounded-full">Completed</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-success h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">+500 XP earned</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="mb-16" data-bind="sections.projects">
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">Featured Projects</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- @MAP: projects.map(project => ( -->
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow" data-mock="true">
+                        <!-- Project screenshot placeholder -->
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200" alt="Hospital Management System screenshot" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="font-semibold text-gray-900 mb-2">Hospital Management System</h3>
+                            <p class="text-gray-600 mb-4">Full-stack web application for managing patient records, appointments, and hospital operations.</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">React</span>
+                                <span class="px-2 py-1 bg-success/10 text-success text-xs rounded-full">Express</span>
+                                <span class="px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full">MySQL</span>
+                            </div>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-primary hover:text-primary/80 text-sm font-medium">View Demo</a>
+                                <a href="#" class="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                    <i class="fab fa-github mr-1"></i>Source Code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow" data-mock="true">
+                        <!-- E-commerce app screenshot -->
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200" alt="E-commerce platform screenshot" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="font-semibold text-gray-900 mb-2">E-commerce Platform</h3>
+                            <p class="text-gray-600 mb-4">Modern e-commerce solution with payment integration, inventory management, and admin dashboard.</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Next.js</span>
+                                <span class="px-2 py-1 bg-success/10 text-success text-xs rounded-full">Node.js</span>
+                                <span class="px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full">MongoDB</span>
+                            </div>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-primary hover:text-primary/80 text-sm font-medium">View Demo</a>
+                                <a href="#" class="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                    <i class="fab fa-github mr-1"></i>Source Code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+
+            <!-- Work Experience Section -->
+            <section class="mb-16" data-bind="sections.work">
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">Work Experience</h2>
+                <div class="space-y-8">
+                    <!-- @MAP: workExperience.map(job => ( -->
+                    <div class="relative pl-8 border-l-2 border-gray-200" data-mock="true">
+                        <div class="absolute w-4 h-4 bg-primary rounded-full -left-2 top-0"></div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Software Developer Intern</h3>
+                            <p class="text-primary font-medium mb-2">ABC Tech Solutions</p>
+                            <p class="text-sm text-gray-500 mb-3">June 2024 - December 2024</p>
+                            <p class="text-gray-600">Developed and maintained REST APIs using Node.js and Express. Optimized database queries resulting in 30% performance improvement. Collaborated with frontend team to integrate APIs with React applications.</p>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+
+            <!-- Education Section -->
+            <section class="mb-16" data-bind="sections.education">
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">Education</h2>
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <!-- @MAP: education.map(edu => ( -->
+                    <div data-mock="true">
+                        <h3 class="font-semibold text-gray-900">Bachelor of Engineering - Computer Science</h3>
+                        <p class="text-primary font-medium mb-2">XYZ University</p>
+                        <p class="text-sm text-gray-500">2020 - 2024</p>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Portfolio Footer -->
+        <footer class="bg-gray-900 text-white py-8">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="mb-4">Let's connect and build something amazing together!</p>
+                <div class="flex justify-center space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                </div>
+                <p class="text-sm text-gray-400 mt-4">Built with FlowCV Pro</p>
+            </div>
+        </footer>
+    </div>
+    <!-- @END_COMPONENT: PublicPortfolioView -->
+
+    <script>
+        // TODO: Implement React component state management and data binding
+        // TODO: Add API integration for CRUD operations
+        // TODO: Implement PDF export functionality using react-pdf or similar
+        // TODO: Add real-time progress tracking and XP calculation
+        // TODO: Implement learning module content delivery system
+        
+        (function() {
+            // Basic view switching functionality for demo purposes
+            const navLinks = document.querySelectorAll('nav a[href^="#"]');
+            const views = ['dashboard-view', 'portfolio-edit-view', 'learning-view', 'public-portfolio-view'];
+            
+            function showView(viewId) {
+                views.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.classList.toggle('hidden', id !== viewId);
+                    }
+                });
+                
+                // Update active nav state
+                navLinks.forEach(link => {
+                    const href = link.getAttribute('href').substring(1);
+                    link.classList.toggle('text-primary', href === viewId.replace('-view', ''));
+                    link.classList.toggle('border-b-2', href === viewId.replace('-view', ''));
+                    link.classList.toggle('border-primary', href === viewId.replace('-view', ''));
+                    link.classList.toggle('text-gray-500', href !== viewId.replace('-view', ''));
+                });
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = e.target.getAttribute('href').substring(1);
+                    showView(target + '-view');
+                });
+            });
+            
+            // Show dashboard by default
+            showView('dashboard-view');
+        })();
+    </script>
+</body>
+</html>

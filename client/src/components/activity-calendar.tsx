@@ -14,24 +14,25 @@ export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
   const generateActivityData = () => {
     const data = [];
     const today = new Date();
-    
+
     for (let i = 27; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      
+
       // Mock activity intensity (0-3)
       const intensity = Math.floor(Math.random() * 4);
       data.push({
-        date: date.toISOString().split('T')[0],
+        date: date.toISOString().split("T")[0],
         xpEarned: intensity * 20,
         intensity,
       });
     }
-    
+
     return data;
   };
 
-  const activityData = dailyActivity.length > 0 ? dailyActivity : generateActivityData();
+  const activityData =
+    dailyActivity.length > 0 ? dailyActivity : generateActivityData();
 
   const getIntensityClass = (intensity: number) => {
     switch (intensity) {
@@ -60,24 +61,18 @@ export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
       </CardHeader>
       <CardContent>
         {/* GitHub-style contribution grid */}
-        <div className="grid grid-cols-7 gap-1">
-          {/* Week days header */}
-          {weekDays.map((day, index) => (
-            <div key={index} className="text-xs text-gray-500 text-center py-1">
-              {day}
-            </div>
-          ))}
-          
-          {/* Activity squares */}
+        <div className="grid grid-flow-col grid-rows-7 gap-1">
           {activityData.map((day, index) => (
             <div
               key={index}
-              className={`w-3 h-3 rounded-sm ${getIntensityClass(day.intensity || 0)}`}
+              className={`w-3 h-3 rounded-sm ${getIntensityClass(
+                day.intensity || 0
+              )}`}
               title={`${day.date}: ${day.xpEarned || 0} XP`}
             />
           ))}
         </div>
-        
+
         <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
           <span>Less</span>
           <div className="flex space-x-1">

@@ -1,22 +1,11 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, decimal, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table for Replit Auth
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
-// User storage table for Replit Auth
+// User storage table for Clerk Auth
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(), // Clerk user ID
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
@@ -145,9 +134,9 @@ export const sectionSettings = pgTable("section_settings", {
   sortOrder: integer("sort_order").default(0),
 });
 
-// Insert schemas for Replit Auth
+// Insert schemas for Clerk Auth
 export const upsertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
-export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertProfileSchema = createInsertSchema(profiles).omit({ id: true });
 export const insertWorkExperienceSchema = createInsertSchema(workExperience).omit({ id: true });
 export const insertEducationSchema = createInsertSchema(education).omit({ id: true });
@@ -159,7 +148,7 @@ export const insertUserProgressSchema = createInsertSchema(userProgress).omit({ 
 export const insertDailyActivitySchema = createInsertSchema(dailyActivity).omit({ id: true });
 export const insertSectionSettingsSchema = createInsertSchema(sectionSettings).omit({ id: true });
 
-// Types for Replit Auth
+// Types for Clerk Auth
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;

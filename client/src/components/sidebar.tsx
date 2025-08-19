@@ -1,9 +1,18 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, User, Briefcase, GraduationCap, 
-  Cog, FolderOpen, BookOpen, ExternalLink, Flame, X
+import { UserProfileDropdown } from "./user-profile-dropdown";
+import {
+  LayoutDashboard,
+  User,
+  Briefcase,
+  GraduationCap,
+  Cog,
+  FolderOpen,
+  BookOpen,
+  ExternalLink,
+  Flame,
+  X,
 } from "lucide-react";
 
 const navigation = [
@@ -25,7 +34,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <aside className="w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 fixed h-full z-10">
-      <div className="p-6">
+      <div className="p-4">
         {/* Mobile close button */}
         {onClose && (
           <div className="lg:hidden flex justify-end mb-4">
@@ -40,20 +49,23 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <User className="text-white h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">FlowCV</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Dashboard</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              FlowCV
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Dashboard
+            </p>
           </div>
         </div>
 
-        {/* User Stats */}
-        <div className="bg-gradient-to-r from-primary to-purple-600 rounded-xl p-4 mb-6 text-white">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm opacity-90">Total XP</span>
-            <span className="text-lg font-bold">2,847</span>
+        <div className="bg-gradient-to-r from-primary to-purple-600 rounded-lg p-3 mb-4 text-white">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs opacity-90">Total XP</span>
+            <span className="text-sm font-bold">2,847</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <Flame className="h-4 w-4 text-yellow-300" />
-            <span className="text-sm">5 day streak</span>
+          <div className="flex items-center space-x-1">
+            <Flame className="h-3 w-3 text-yellow-300" />
+            <span className="text-xs">5 day streak</span>
           </div>
         </div>
 
@@ -61,8 +73,10 @@ export default function Sidebar({ onClose }: SidebarProps) {
         <nav className="space-y-2">
           {navigation.map((item) => {
             const IconComponent = item.icon;
-            const isActive = location === item.href || (item.href === "/dashboard" && location === "/");
-            
+            const isActive =
+              location === item.href ||
+              (item.href === "/dashboard" && location === "/");
+
             return (
               <Link key={item.name} href={item.href}>
                 <div
@@ -90,14 +104,19 @@ export default function Sidebar({ onClose }: SidebarProps) {
         {/* Portfolio Link */}
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Link href="/portfolio">
-            <div 
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors"
+            <div
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors mb-4"
               onClick={() => onClose && onClose()}
             >
               <ExternalLink className="h-5 w-5" />
               <span>View Portfolio</span>
             </div>
           </Link>
+        </div>
+
+        {/* User Profile */}
+        <div className="absolute bottom-4 left-4 right-4">
+          <UserProfileDropdown />
         </div>
       </div>
     </aside>

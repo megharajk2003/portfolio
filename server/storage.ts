@@ -14,7 +14,7 @@ import { eq, and, gte, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
-  // User management (mandatory for Replit Auth)
+  // User management for Clerk Auth
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   // Legacy methods
@@ -85,7 +85,7 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // Mandatory methods for Replit Auth
+  // User management for Clerk Auth
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;

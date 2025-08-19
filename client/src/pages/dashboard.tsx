@@ -37,21 +37,23 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0 lg:static lg:inset-0
-      `}>
+      `}
+      >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
-      
+
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen">
         {/* Header */}
@@ -67,7 +69,7 @@ export default function Dashboard() {
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              
+
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   Welcome back, <span className="text-primary">Megharaj</span>!
@@ -77,7 +79,7 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2 sm:space-x-4">
               {/* PDF Export Button - Hidden on mobile */}
               <Button
@@ -88,7 +90,7 @@ export default function Dashboard() {
                 <FileText className="mr-2 h-4 w-4" />
                 Export PDF
               </Button>
-              
+
               {/* Mobile PDF button */}
               <Button
                 onClick={handleExportPDF}
@@ -98,10 +100,14 @@ export default function Dashboard() {
               >
                 <FileText className="h-5 w-5" />
               </Button>
-              
+
               {/* Notifications */}
               <div className="relative">
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                >
                   <Bell className="h-5 w-5" />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     3
@@ -119,9 +125,15 @@ export default function Dashboard() {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={profile?.photoUrl || ""} alt={profile?.name || ""} />
+                    <AvatarImage
+                      src={profile?.photoUrl || ""}
+                      alt={profile?.name || ""}
+                    />
                     <AvatarFallback className="text-xl">
-                      {profile?.name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
+                      {profile?.name
+                        ?.split(" ")
+                        .map((n: string) => n[0])
+                        .join("") || "U"}
                     </AvatarFallback>
                   </Avatar>
                 </div>
@@ -138,7 +150,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <Link href="/profile">
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
                   <Edit className="w-4 h-4" />
                   <span>Edit Profile</span>
                 </Button>
@@ -156,7 +172,9 @@ export default function Dashboard() {
 
           {/* Learning Activity - Now before Learning Modules */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Learning Activity</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Learning Activity
+            </h3>
             <ActivityCalendar userId={CURRENT_USER_ID} />
           </section>
 
@@ -165,13 +183,17 @@ export default function Dashboard() {
 
           {/* Skill Dashboard */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Skill Dashboard</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Skill Dashboard
+            </h3>
             <SkillRadarChart userId={CURRENT_USER_ID} />
           </section>
 
           {/* Projects & Achievements */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Projects & Achievements</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Projects & Achievements
+            </h3>
             <ProjectsAchievements userId={CURRENT_USER_ID} />
           </section>
 
@@ -180,7 +202,7 @@ export default function Dashboard() {
             <QuickActions />
           </div>
         </div>
-        
+
         {/* Footer */}
         <Footer />
       </main>
