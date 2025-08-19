@@ -23,7 +23,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile routes
   app.get("/api/profile/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userIdStr = req.params.userId;
+
+      // Validate userId is a number
+      const userId = parseInt(userIdStr);
+      if (isNaN(userId)) {
+        return res.status(400).json({
+          message: "Invalid user ID format. User ID must be a number.",
+        });
+      }
+
       const profile = await storage.getProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });

@@ -46,16 +46,16 @@ export interface IStorage {
   sessionStore: any;
   // User management for JWT Auth
   getUserById(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
 
   // Profile management
-  getProfile(userId: number): Promise<Profile | undefined>;
+  getProfile(userId: string): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(
-    userId: number,
+    userId: string,
     profile: Partial<Profile>
   ): Promise<Profile | undefined>;
 
@@ -168,14 +168,6 @@ export class DatabaseStorage implements IStorage {
   // User management for JWT Auth
   async getUserById(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.username, username));
     return user || undefined;
   }
 

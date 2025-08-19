@@ -20,7 +20,7 @@ import PublicPortfolio from "@/pages/public-portfolio";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
-import Home from "./pages/home";
+import Home from "./pages/dashboard";
 
 function Router() {
   const { user, isLoading } = useAuth();

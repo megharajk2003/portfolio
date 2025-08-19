@@ -17,9 +17,8 @@ import { Loader2 } from "lucide-react";
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
-  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
-    username: "",
     email: "",
     password: "",
     firstName: "",
@@ -73,17 +72,17 @@ export default function AuthPage() {
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-username">Username</Label>
+                    <Label htmlFor="login-email">Email</Label>
                     <Input
-                      id="login-username"
-                      type="text"
-                      placeholder="Enter your username"
-                      value={loginForm.username}
+                      id="login-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={loginForm.email}
                       onChange={(e) =>
-                        setLoginForm({ ...loginForm, username: e.target.value })
+                        setLoginForm({ ...loginForm, email: e.target.value })
                       }
                       required
-                      data-testid="input-login-username"
+                      data-testid="input-login-email"
                     />
                   </div>
                   <div className="space-y-2">
@@ -150,23 +149,7 @@ export default function AuthPage() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-username">Username</Label>
-                    <Input
-                      id="register-username"
-                      type="text"
-                      placeholder="johndoe"
-                      value={registerForm.username}
-                      onChange={(e) =>
-                        setRegisterForm({
-                          ...registerForm,
-                          username: e.target.value,
-                        })
-                      }
-                      required
-                      data-testid="input-register-username"
-                    />
-                  </div>
+                  {/* Username field removed - email-only registration */}
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
                     <Input

@@ -1,41 +1,71 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type profiles } from "@shared/schema";
+// FIX: Import the 'profiles' table object itself, not its type.
+import { profiles } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import Footer from "@/components/ui/footer";
 import StatsGrid from "@/components/stats-grid";
 import LearningModules from "@/components/learning-modules";
 import SkillRadarChart from "@/components/skill-radar-chart";
-import ProjectsAchievements from "@/components/projects-achievements";
-import ActivityCalendar from "@/components/activity-calendar";
-import QuickActions from "@/components/quick-actions";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, FileText, Menu, X, Edit } from "lucide-react";
-import { Link } from "wouter";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { useLogout } from "@/hooks/useLogout";
+import {
+  LogOut,
+  User,
+  Settings,
+  Bell,
+  Calendar,
+  TrendingUp,
+  BookOpen,
+  Target,
+  Award,
+  Zap,
+  Edit,
+  FileText,
+  Link,
+  Menu,
+} from "lucide-react";
+import ProfileCompletionNotification from "@/components/profile-completion-notification";
+import ActivityCalendar from "@/components/activity-calendar";
+import ProjectsAchievements from "@/components/projects-achievements";
+import QuickActions from "@/components/quick-actions";
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 
-// Mock user ID for demo - in real app this would come from auth
-const CURRENT_USER_ID = "user-1";
+// FIX: Infer the type for a single profile row from the Drizzle schema.
+type Profile = typeof profiles.$inferSelect;
 
-export default function Dashboard() {
+export default function Home() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const { user } = useAuth();
+  const { handleLogout } = useLogout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { data: userStats } = useQuery({
-    queryKey: ["/api/user-stats", CURRENT_USER_ID],
+  const userId = user?.id?.toString() ?? "1"; // Fallback for demo
+
+  // FIX: Use the correctly inferred 'Profile' type for the query data.
+  const { data: profile } = useQuery<Profile>({
+    queryKey: ["/api/profile", userId],
   });
 
-  const { data: profile } = useQuery<typeof profiles.$inferSelect>({
-    queryKey: ["/api/profile", CURRENT_USER_ID],
+  const { data: userStats } = useQuery({
+    queryKey: ["/api/user-stats", userId],
   });
 
   const handleExportPDF = () => {
     // PDF export functionality will be implemented
     console.log("Exporting PDF...");
   };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
@@ -46,10 +76,10 @@ export default function Dashboard() {
       {/* Sidebar */}
       <div
         className={`
-        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0 lg:static lg:inset-0
-      `}
+          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0 
+        `}
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
@@ -72,7 +102,13 @@ export default function Dashboard() {
 
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                  Welcome back, <span className="text-primary">Megharaj</span>!
+                  Welcome back,{" "}
+                  <span className="text-primary">
+                    {user?.firstName ||
+                      profile?.name?.split(" ")[0] ||
+                      "Professional"}
+                  </span>
+                  !
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
                   Manage your portfolio and continue learning
@@ -119,6 +155,9 @@ export default function Dashboard() {
         </header>
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+          {/* Profile Completion Notification */}
+          <ProfileCompletionNotification />
+
           {/* Hero Section */}
           <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
@@ -139,13 +178,17 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {profile?.name || "User Name"}
+                    {profile?.name ||
+                      `${user?.firstName || ""} ${
+                        user?.lastName || ""
+                      }`.trim() ||
+                      "User Name"}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 font-medium">
                     {profile?.role || "Professional Role"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {profile?.email || "email@example.com"}
+                    {profile?.email || user?.email || "email@example.com"}
                   </p>
                 </div>
               </div>
@@ -163,7 +206,7 @@ export default function Dashboard() {
           </section>
 
           {/* Stats Cards */}
-          <StatsGrid userId={CURRENT_USER_ID} />
+          <StatsGrid userId={userId} />
 
           {/* Quick Actions - Mobile First */}
           <div className="lg:hidden">
@@ -175,18 +218,18 @@ export default function Dashboard() {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Learning Activity
             </h3>
-            <ActivityCalendar userId={CURRENT_USER_ID} />
+            <ActivityCalendar userId={userId} />
           </section>
 
           {/* Learning Modules */}
-          <LearningModules userId={CURRENT_USER_ID} />
+          <LearningModules userId={userId} />
 
           {/* Skill Dashboard */}
           <section>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Skill Dashboard
             </h3>
-            <SkillRadarChart userId={CURRENT_USER_ID} />
+            <SkillRadarChart userId={userId} />
           </section>
 
           {/* Projects & Achievements */}
@@ -194,7 +237,7 @@ export default function Dashboard() {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Projects & Achievements
             </h3>
-            <ProjectsAchievements userId={CURRENT_USER_ID} />
+            <ProjectsAchievements userId={userId} />
           </section>
 
           {/* Right sidebar content for desktop */}

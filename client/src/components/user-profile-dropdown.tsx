@@ -31,11 +31,11 @@ export function UserProfileDropdown() {
   const displayName =
     user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`
-      : user.username;
+      : user.email;
   const initials =
     user.firstName && user.lastName
       ? `${user.firstName[0]}${user.lastName[0]}`
-      : user.username[0].toUpperCase();
+      : user.email[0].toUpperCase();
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -53,7 +53,7 @@ export function UserProfileDropdown() {
         </Avatar>
         <div className="flex-1 text-left">
           <p className="text-sm font-medium truncate">
-            {user.firstName || user.emailAddresses[0]?.emailAddress}
+            {user.firstName || user.email}
           </p>
         </div>
       </Button>
@@ -64,19 +64,17 @@ export function UserProfileDropdown() {
             <div className="flex items-center space-x-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage
-                  src={user.imageUrl}
-                  alt={user.fullName || "User"}
+                  src={user.profileImageUrl || ""}
+                  alt={user.firstName || "User"}
                 />
                 <AvatarFallback>
-                  {user.firstName?.[0] ||
-                    user.emailAddresses[0]?.emailAddress[0] ||
-                    "U"}
+                  {user.firstName?.[0] || user.email[0] || "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-sm">{user.fullName}</p>
+                {displayName}
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {user.emailAddresses[0]?.emailAddress}
+                  {user.email[0].toUpperCase() + user.email.slice(1)}
                 </p>
               </div>
             </div>

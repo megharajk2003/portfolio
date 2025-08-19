@@ -190,7 +190,7 @@ export default function Profile() {
                           <Mail className="w-4 h-4" />
                           <span>
                             {profile?.email ||
-                              user?.emailAddresses?.[0]?.emailAddress ||
+                              user?.email?.[0] ||
                               "Add your email"}
                           </span>
                         </div>
