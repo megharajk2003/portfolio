@@ -1,66 +1,65 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
-import { 
-  insertUserSchema, insertProfileSchema, insertWorkExperienceSchema,
-  insertEducationSchema, insertSkillSchema, insertProjectSchema,
-  insertCertificationSchema, insertAchievementSchema, insertUserProgressSchema,
-  insertDailyActivitySchema, insertSectionSettingsSchema
+import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
+import {
+  insertUserSchema,
+  insertProfileSchema,
+  insertWorkExperienceSchema,
+  insertEducationSchema,
+  insertSkillSchema,
+  insertProjectSchema,
+  insertCertificationSchema,
+  insertAchievementSchema,
+  insertUserProgressSchema,
+  insertDailyActivitySchema,
+  insertSectionSettingsSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes for Clerk
-  app.get('/api/auth/user', ClerkExpressRequireAuth(), async (req: any, res) => {
-    try {
-      const userId = req.auth.userId;
-      let user = await storage.getUser(userId);
-      
-      // If user doesn't exist, create from Clerk data
-      if (!user) {
-        const userData = {
-          id: userId,
-          email: req.auth.emailAddress,
-          firstName: req.auth.firstName,
-          lastName: req.auth.lastName,
-          profileImageUrl: req.auth.imageUrl,
-        };
-        user = await storage.upsertUser(userData);
-      }
-      
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-  // Profile routes  
-  app.get("/api/profile/:userId", ClerkExpressRequireAuth(), async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      const existingUser = await storage.getUserByEmail(userData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-      }
-      const user = await storage.createUser(userData);
-      res.json({ id: user.id, username: user.username, email: user.email });
-    } catch (error) {
-      res.status(400).json({ message: "Invalid user data" });
-    }
-  });
+  app.get(
+    "/api/auth/user",
+    ClerkExpressRequireAuth(),
+    async (req: any, res) => {
+      try {
+        const userId = req.auth.userId;
+        let user = await storage.getUser(userId);
 
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await storage.getUserByEmail(email);
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        // If user doesn't exist, create from Clerk data
+        if (!user) {
+          const userData = {
+            id: userId,
+            email: req.auth.emailAddress,
+            firstName: req.auth.firstName,
+            lastName: req.auth.lastName,
+            profileImageUrl: req.auth.imageUrl,
+          };
+          user = await storage.upsertUser(userData);
+        }
+
+        res.json(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+
+        // Narrow error type safely
+        if (error instanceof Error) {
+          console.error("Full error:", error);
+          return res.status(500).json({
+            message: "Failed to fetch user",
+            error: error.message,
+            stack: error.stack,
+          });
+        }
+
+        // fallback if it's not an instance of Error
+        return res.status(500).json({
+          message: "Unknown error occurred",
+          error: JSON.stringify(error),
+        });
       }
-      res.json({ id: user.id, username: user.username, email: user.email });
-    } catch (error) {
-      res.status(400).json({ message: "Login failed" });
     }
-  });
+  );
 
   // Profile routes
   app.get("/api/profile/:userId", async (req, res) => {
@@ -71,7 +70,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(profile);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch profile" });
+      console.error("Error fetching profile:", error);
+
+      // Narrow error type safely
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch profile",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      // fallback if it's not an instance of Error
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -81,7 +96,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {
-      res.status(400).json({ message: "Invalid profile data" });
+      console.error("Error creating profile:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create profile",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -93,7 +122,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(profile);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update profile" });
+      console.error("Error updating profile:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update profile",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -103,7 +146,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const experiences = await storage.getWorkExperience(req.params.userId);
       res.json(experiences);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch work experience" });
+      console.error("Error fetching work experience:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch work experience",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -113,19 +170,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const experience = await storage.createWorkExperience(experienceData);
       res.json(experience);
     } catch (error) {
-      res.status(400).json({ message: "Invalid work experience data" });
+      console.error("Error creating work experience:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create work experience",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
   app.patch("/api/work-experience/:id", async (req, res) => {
     try {
-      const experience = await storage.updateWorkExperience(req.params.id, req.body);
+      const experience = await storage.updateWorkExperience(
+        req.params.id,
+        req.body
+      );
       if (!experience) {
         return res.status(404).json({ message: "Work experience not found" });
       }
       res.json(experience);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update work experience" });
+      console.error("Error updating work experience:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update work experience",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -137,7 +225,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Work experience deleted" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete work experience" });
+      console.error("Error deleting work experience:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to delete work experience",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -147,7 +249,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const education = await storage.getEducation(req.params.userId);
       res.json(education);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch education" });
+      console.error("Error fetching education:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch education",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -157,7 +273,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const education = await storage.createEducation(educationData);
       res.json(education);
     } catch (error) {
-      res.status(400).json({ message: "Invalid education data" });
+      console.error("Error creating education:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create education",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -169,7 +299,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(education);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update education" });
+      console.error("Error updating education:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update education",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -181,7 +325,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Education deleted" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete education" });
+      console.error("Error deleting education:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to delete education",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -191,7 +349,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const skills = await storage.getSkills(req.params.userId);
       res.json(skills);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch skills" });
+      console.error("Error fetching skills:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch skills",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -201,7 +373,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const skill = await storage.createSkill(skillData);
       res.json(skill);
     } catch (error) {
-      res.status(400).json({ message: "Invalid skill data" });
+      console.error("Error creating skill:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create skill",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -213,7 +399,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(skill);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update skill" });
+      console.error("Error updating skill:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update skill",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -225,7 +425,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Skill deleted" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete skill" });
+      console.error("Error deleting skill:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to delete skill",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -235,7 +449,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projects = await storage.getProjects(req.params.userId);
       res.json(projects);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch projects" });
+      console.error("Error fetching projects:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch projects",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -245,7 +473,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.createProject(projectData);
       res.json(project);
     } catch (error) {
-      res.status(400).json({ message: "Invalid project data" });
+      console.error("Error creating project:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create project",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -257,7 +499,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(project);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update project" });
+      console.error("Error updating project:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update project",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -269,7 +525,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Project deleted" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete project" });
+      console.error("Error deleting project:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to delete project",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -279,29 +549,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certifications = await storage.getCertifications(req.params.userId);
       res.json(certifications);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch certifications" });
+      console.error("Error fetching certifications:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch certifications",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
   app.post("/api/certifications", async (req, res) => {
     try {
       const certificationData = insertCertificationSchema.parse(req.body);
-      const certification = await storage.createCertification(certificationData);
+      const certification = await storage.createCertification(
+        certificationData
+      );
       res.json(certification);
     } catch (error) {
-      res.status(400).json({ message: "Invalid certification data" });
+      console.error("Error creating certification:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create certification",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
   app.patch("/api/certifications/:id", async (req, res) => {
     try {
-      const certification = await storage.updateCertification(req.params.id, req.body);
+      const certification = await storage.updateCertification(
+        req.params.id,
+        req.body
+      );
       if (!certification) {
         return res.status(404).json({ message: "Certification not found" });
       }
       res.json(certification);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update certification" });
+      console.error("Error updating certification:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update certification",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -313,7 +630,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Certification deleted" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete certification" });
+      console.error("Error deleting certification:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to delete certification",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -323,7 +654,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const achievements = await storage.getAchievements(req.params.userId);
       res.json(achievements);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch achievements" });
+      console.error("Error fetching achievements:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch achievements",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -333,19 +678,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const achievement = await storage.createAchievement(achievementData);
       res.json(achievement);
     } catch (error) {
-      res.status(400).json({ message: "Invalid achievement data" });
+      console.error("Error creating achievement:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create achievement",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
   app.patch("/api/achievements/:id", async (req, res) => {
     try {
-      const achievement = await storage.updateAchievement(req.params.id, req.body);
+      const achievement = await storage.updateAchievement(
+        req.params.id,
+        req.body
+      );
       if (!achievement) {
         return res.status(404).json({ message: "Achievement not found" });
       }
       res.json(achievement);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update achievement" });
+      console.error("Error updating achievement:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update achievement",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -357,7 +733,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Achievement deleted" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete achievement" });
+      console.error("Error deleting achievement:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to delete achievement",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -367,7 +757,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const modules = await storage.getLearningModules();
       res.json(modules);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch learning modules" });
+      console.error("Error fetching learning modules:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch learning modules",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -379,7 +783,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(module);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch learning module" });
+      console.error("Error fetching learning module:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch learning module",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -389,7 +807,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const progress = await storage.getUserProgress(req.params.userId);
       res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user progress" });
+      console.error("Error fetching user progress:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch user progress",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -399,19 +831,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const progress = await storage.createUserProgress(progressData);
       res.json(progress);
     } catch (error) {
-      res.status(400).json({ message: "Invalid progress data" });
+      console.error("Error creating user progress:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to create user progress",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
   app.patch("/api/user-progress/:userId/:moduleId", async (req, res) => {
     try {
-      const progress = await storage.updateUserProgress(req.params.userId, req.params.moduleId, req.body);
+      const progress = await storage.updateUserProgress(
+        req.params.userId,
+        req.params.moduleId,
+        req.body
+      );
       if (!progress) {
         return res.status(404).json({ message: "Progress not found" });
       }
       res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update progress" });
+      console.error("Error updating user progress:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to update progress",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -424,7 +888,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user stats" });
+      console.error("Error fetching user stats:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to fetch user stats",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
     }
   });
 
@@ -442,9 +920,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { startDate, endDate } = req.query;
       const activity = await storage.getDailyActivity(
-        req.params.userId, 
-        startDate as string || "2024-01-01", 
-        endDate as string || "2024-12-31"
+        req.params.userId,
+        (startDate as string) || "2024-01-01",
+        (endDate as string) || "2024-12-31"
       );
       res.json(activity);
     } catch (error) {
@@ -475,8 +953,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/section-settings/:userId/:sectionName", async (req, res) => {
     try {
       const settings = await storage.updateSectionSettings(
-        req.params.userId, 
-        req.params.sectionName, 
+        req.params.userId,
+        req.params.sectionName,
         req.body
       );
       res.json(settings);

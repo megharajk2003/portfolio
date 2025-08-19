@@ -1,11 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/ui/footer";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
-import { 
-  Rocket, Users, Trophy, Zap, Star, ChevronRight, 
-  Code, Palette, BookOpen, Target, Award, TrendingUp 
+import {
+  Rocket,
+  Users,
+  Trophy,
+  Zap,
+  Star,
+  ChevronRight,
+  Code,
+  Palette,
+  BookOpen,
+  Target,
+  Award,
+  TrendingUp,
 } from "lucide-react";
 
 export default function Landing() {
@@ -19,11 +35,11 @@ export default function Landing() {
               <Rocket className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              FlowCV
+              knowme
             </span>
           </div>
           <SignInButton mode="modal">
-            <Button 
+            <Button
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               data-testid="button-login"
             >
@@ -40,22 +56,26 @@ export default function Landing() {
             <Zap className="w-4 h-4 mr-2" />
             Portfolio + Learning Platform
           </Badge>
-          
+
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             Build Your
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Career </span>
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {" "}
+              Career{" "}
+            </span>
             Portfolio
           </h1>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Create stunning portfolios, track your skills, and accelerate your learning with our 
-            gamified platform designed for modern professionals.
+            Create stunning portfolios, track your skills, and accelerate your
+            learning with our gamified platform designed for modern
+            professionals.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <SignUpButton mode="modal">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 data-testid="button-get-started"
               >
@@ -105,7 +125,8 @@ export default function Landing() {
               </div>
               <CardTitle>Professional Portfolios</CardTitle>
               <CardDescription>
-                Create stunning, customizable portfolios that showcase your work and skills.
+                Create stunning, customizable portfolios that showcase your work
+                and skills.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -117,7 +138,8 @@ export default function Landing() {
               </div>
               <CardTitle>Skill Tracking</CardTitle>
               <CardDescription>
-                Monitor your progress with detailed analytics and skill assessments.
+                Monitor your progress with detailed analytics and skill
+                assessments.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -141,7 +163,8 @@ export default function Landing() {
               </div>
               <CardTitle>Project Showcase</CardTitle>
               <CardDescription>
-                Display your projects with live links, GitHub integration, and detailed descriptions.
+                Display your projects with live links, GitHub integration, and
+                detailed descriptions.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -165,7 +188,8 @@ export default function Landing() {
               </div>
               <CardTitle>Achievements</CardTitle>
               <CardDescription>
-                Earn badges and certifications as you complete learning milestones.
+                Earn badges and certifications as you complete learning
+                milestones.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -180,11 +204,12 @@ export default function Landing() {
               Ready to Build Your Future?
             </h2>
             <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of professionals who are already using FlowCV to advance their careers.
+              Join thousands of professionals who are already using knowme to
+              advance their careers.
             </p>
             <SignUpButton mode="modal">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="secondary"
                 className="bg-white text-blue-600 hover:bg-gray-100"
                 data-testid="button-start-building"

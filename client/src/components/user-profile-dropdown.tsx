@@ -51,7 +51,7 @@ export function UserProfileDropdown() {
       </Button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+        <div className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[100] max-h-64 overflow-y-auto">
           <div className="p-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3">
               <Avatar className="h-10 w-10">
@@ -78,7 +78,7 @@ export function UserProfileDropdown() {
             <Link href="/profile">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-sm"
+                className="w-full justify-start text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
                 <User className="h-4 w-4 mr-2" />

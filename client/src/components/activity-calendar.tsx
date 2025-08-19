@@ -5,17 +5,21 @@ interface ActivityCalendarProps {
   userId: string;
 }
 
+// Define the number of days to show in the calendar
+const TOTAL_DAYS = 365;
+
 export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
-  const { data: dailyActivity = [] } = useQuery({
+  const { data: dailyActivity = [] } = useQuery<
+    { date: string; xpEarned: number; intensity: number }[]
+  >({
     queryKey: ["/api/daily-activity", userId],
   });
 
-  // Generate mock activity data for the last 28 days
+  // Generate mock activity data for the last 365 days
   const generateActivityData = () => {
     const data = [];
     const today = new Date();
-
-    for (let i = 27; i >= 0; i--) {
+    for (let i = TOTAL_DAYS - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
 
@@ -27,59 +31,107 @@ export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
         intensity,
       });
     }
-
     return data;
   };
 
   const activityData =
     dailyActivity.length > 0 ? dailyActivity : generateActivityData();
 
+  // --- Helper Functions and Data for Yearly View ---
+
   const getIntensityClass = (intensity: number) => {
     switch (intensity) {
       case 0:
-        return "bg-gray-200";
+        return "bg-gray-200 dark:bg-gray-700";
       case 1:
-        return "bg-green-200";
+        return "bg-blue-200 dark:bg-blue-900";
       case 2:
-        return "bg-green-400";
+        return "bg-blue-400 dark:bg-blue-700";
       case 3:
-        return "bg-green-600";
+        return "bg-blue-600 dark:bg-blue-500";
       default:
-        return "bg-gray-200";
+        return "bg-gray-200 dark:bg-gray-700";
     }
   };
 
-  const weekDays = ["S", "M", "T", "W", "T", "F", "S"];
+  // Get the start date (365 days ago) to calculate the first day's offset
+  const today = new Date();
+  const startDate = new Date();
+  startDate.setDate(today.getDate() - TOTAL_DAYS + 1);
+  const startDayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+  // Create an array of month labels for the header
+  const monthLabels = Array.from({ length: 12 }).map((_, i) => {
+    const month = new Date();
+    month.setMonth(today.getMonth() - 11 + i);
+    return month.toLocaleString("default", { month: "short" });
+  });
 
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Learning Activity</CardTitle>
-          <span className="text-sm text-gray-500">Last 30 days</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Last year
+          </span>
         </div>
       </CardHeader>
       <CardContent>
-        {/* GitHub-style contribution grid */}
-        <div className="grid grid-flow-col grid-rows-7 gap-1">
-          {activityData.map((day, index) => (
-            <div
-              key={index}
-              className={`w-3 h-3 rounded-sm ${getIntensityClass(
-                day.intensity || 0
-              )}`}
-              title={`${day.date}: ${day.xpEarned || 0} XP`}
-            />
-          ))}
+        <div className="flex flex-col">
+          {/* Month Labels */}
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 ml-8 mb-2">
+            {monthLabels.map((month) => (
+              <span key={month} className="flex-1 text-center">
+                {month}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            {/* Day Labels (M, W, F) */}
+            <div className="grid grid-rows-7 gap-y-[3px] text-xs text-gray-500 dark:text-gray-400 -mt-1">
+              <span className="block h-3">Mon</span>
+
+              <span className="block h-3">Tue</span>
+
+              <span className="block h-3">Wed</span>
+              <span className="block h-3">Thur</span>
+              <span className="block h-3">Fri</span>
+              <span className="block h-3">Sat</span>
+              <span className="block h-3">Sun</span>
+              <span></span>
+            </div>
+
+            {/* GitHub-style contribution grid */}
+            <div className="grid grid-rows-7 grid-flow-col gap-1 w-full">
+              {/* Add empty cells to align the first day of the year correctly */}
+              {Array.from({ length: startDayOfWeek }).map((_, index) => (
+                <div key={`pad-${index}`} className="w-3 h-3 rounded-sm" />
+              ))}
+
+              {/* Map over the activity data */}
+              {activityData.map((day, index) => (
+                <div
+                  key={index}
+                  className={`w-3 h-3 rounded-sm ${getIntensityClass(
+                    day.intensity || 0
+                  )}`}
+                  title={`${day.date}: ${day.xpEarned || 0} XP`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+        {/* Legend */}
+        <div className="flex justify-end items-center mt-4 text-xs text-gray-500 dark:text-gray-400 space-x-2">
           <span>Less</span>
           <div className="flex space-x-1">
-            <div className="w-3 h-3 bg-gray-200 rounded-sm" />
-            <div className="w-3 h-3 bg-green-200 rounded-sm" />
-            <div className="w-3 h-3 bg-green-400 rounded-sm" />
-            <div className="w-3 h-3 bg-green-600 rounded-sm" />
+            <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded-sm" />
+            <div className="w-3 h-3 bg-blue-200 dark:bg-blue-900 rounded-sm" />
+            <div className="w-3 h-3 bg-blue-400 dark:bg-blue-700 rounded-sm" />
+            <div className="w-3 h-3 bg-blue-600 dark:bg-blue-500 rounded-sm" />
           </div>
           <span>More</span>
         </div>

@@ -28,7 +28,16 @@ import {
   Target,
   Award,
   Zap,
+  Edit,
+  FileText,
+  Link,
+  Menu,
 } from "lucide-react";
+import ProfileCompletionNotification from "@/components/profile-completion-notification";
+import ActivityCalendar from "@/components/activity-calendar";
+import ProjectsAchievements from "@/components/projects-achievements";
+import QuickActions from "@/components/quick-actions";
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 
 const CURRENT_USER_ID = "user-1";
 
@@ -40,222 +49,203 @@ export default function Home() {
   const { data: profile } = useQuery({
     queryKey: ["/api/profile", CURRENT_USER_ID],
   });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const userId = user?.id || "user_sample_1"; // Fallback for demo
+
+  const { data: userStats } = useQuery({
+    queryKey: ["/api/user-stats", userId],
+  });
+
+  const handleExportPDF = () => {
+    // PDF export functionality will be implemented
+    console.log("Exporting PDF...");
+  };
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-      <main className="flex-1 overflow-y-auto ml-64">
+      {/* Sidebar */}
+      <div
+        className={`
+            fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            lg:translate-x-0 
+          `}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      {/* Main content */}
+      <main className="lg:ml-64 min-h-screen">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 border-b">
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Welcome back,{" "}
-                {user?.firstName || profile?.name || "Professional"}! 👋
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Ready to continue your learning journey?
-              </p>
-            </div>
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
+              {/* Mobile menu button */}
               <Button
-                variant="outline"
-                size="sm"
-                data-testid="button-notifications"
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(true)}
               >
-                <Bell className="w-4 h-4 mr-2" />
-                Notifications
+                <Menu className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="sm" data-testid="button-profile">
-                <User className="w-4 h-4 mr-2" />
-                Profile
-              </Button>
+
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                  Welcome back,{" "}
+                  <span className="text-primary">
+                    {user?.firstName ||
+                      profile?.name?.split(" ")[0] ||
+                      "Professional"}
+                  </span>
+                  !
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
+                  Manage your portfolio and continue learning
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* PDF Export Button - Hidden on mobile */}
               <Button
-                variant="outline"
+                onClick={handleExportPDF}
+                className="hidden sm:flex bg-red-600 text-white hover:bg-red-700"
                 size="sm"
-                onClick={() => {
-                  const { handleLogout } = useLogout();
-                  handleLogout();
-                }}
-                data-testid="button-logout"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
+                <FileText className="mr-2 h-4 w-4" />
+                Export PDF
               </Button>
+
+              {/* Mobile PDF button */}
+              <Button
+                onClick={handleExportPDF}
+                variant="ghost"
+                size="icon"
+                className="sm:hidden"
+              >
+                <FileText className="h-5 w-5" />
+              </Button>
+
+              {/* Notifications */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                >
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    3
+                  </span>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="p-6">
-          {/* Quick Actions */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Quick Actions
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                data-testid="card-learning"
-              >
-                <CardContent className="p-4 flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Continue Learning
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      3 modules in progress
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+          {/* Profile Completion Notification */}
+          <ProfileCompletionNotification />
 
-              <Card
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                data-testid="card-portfolio"
-              >
-                <CardContent className="p-4 flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                    <User className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Update Portfolio
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Add new projects
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                data-testid="card-goals"
-              >
-                <CardContent className="p-4 flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                    <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Set Goals
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Plan your next step
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                data-testid="card-achievements"
-              >
-                <CardContent className="p-4 flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-                    <Award className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      View Achievements
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      See your progress
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Stats Overview */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Your Progress
-            </h2>
-            <StatsGrid userId={""} />
-          </div>
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Learning Progress */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Current Learning
-              </h2>
-              <LearningModules userId={""} />
-            </div>
-
-            {/* Skills Overview */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Skills Overview
-              </h2>
-              <SkillRadarChart userId={""} />
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Recent Activity
-            </h2>
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                      <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900 dark:text-white">
-                        Completed "React Advanced Patterns" - Earned 50 XP
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        2 hours ago
-                      </p>
-                    </div>
-                    <Badge variant="secondary">+50 XP</Badge>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900 dark:text-white">
-                        Updated portfolio with new project
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        1 day ago
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                      <Award className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900 dark:text-white">
-                        Achieved "JavaScript Expert" badge
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        3 days ago
-                      </p>
-                    </div>
-                    <Badge variant="outline">Achievement</Badge>
-                  </div>
+          {/* Hero Section */}
+          <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage
+                      src={profile?.photoUrl || ""}
+                      alt={profile?.name || ""}
+                    />
+                    <AvatarFallback className="text-xl">
+                      {profile?.name
+                        ?.split(" ")
+                        .map((n: string) => n[0])
+                        .join("") || "U"}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {profile?.name ||
+                      `${user?.firstName || ""} ${
+                        user?.lastName || ""
+                      }`.trim() ||
+                      "User Name"}
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">
+                    {profile?.role || "Professional Role"}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {profile?.email ||
+                      user?.emailAddresses?.[0]?.emailAddress ||
+                      "email@example.com"}
+                  </p>
+                </div>
+              </div>
+              <Link href="/profile">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Edit Profile</span>
+                </Button>
+              </Link>
+            </div>
+          </section>
+
+          {/* Stats Cards */}
+          <StatsGrid userId={userId} />
+
+          {/* Quick Actions - Mobile First */}
+          <div className="lg:hidden">
+            <QuickActions />
+          </div>
+
+          {/* Learning Activity - Now before Learning Modules */}
+          <section>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Learning Activity
+            </h3>
+            <ActivityCalendar userId={userId} />
+          </section>
+
+          {/* Learning Modules */}
+          <LearningModules userId={userId} />
+
+          {/* Skill Dashboard */}
+          <section>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Skill Dashboard
+            </h3>
+            <SkillRadarChart userId={userId} />
+          </section>
+
+          {/* Projects & Achievements */}
+          <section>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Projects & Achievements
+            </h3>
+            <ProjectsAchievements userId={userId} />
+          </section>
+
+          {/* Right sidebar content for desktop */}
+          <div className="hidden lg:block">
+            <QuickActions />
           </div>
         </div>
 
+        {/* Footer */}
         <Footer />
       </main>
     </div>

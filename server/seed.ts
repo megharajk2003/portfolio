@@ -1,17 +1,28 @@
 import { db } from "./db";
-import { 
-  users, profiles, skills, projects, achievements, workExperience, 
-  learningModules, userStats 
+import {
+  users,
+  profiles,
+  skills,
+  projects,
+  achievements,
+  workExperience,
+  learningModules,
+  userStats,
 } from "@shared/schema";
 
 async function seedDatabase() {
   try {
     // Create sample user
-    const [user] = await db.insert(users).values({
-      username: "megharaj",
-      email: "megharaj@example.com",
-      password: "password123"
-    }).returning();
+    const [user] = await db
+      .insert(users)
+      .values({
+        id: "user_sample_1",
+        email: "megharaj@example.com",
+        firstName: "Megharaj",
+        lastName: "K",
+        profileImageUrl: null,
+      })
+      .returning();
 
     console.log("Created user:", user.id);
 
@@ -23,9 +34,10 @@ async function seedDatabase() {
       email: "megharaj@example.com",
       phone: "+91 12345 67890",
       location: "Tamil Nadu, India",
-      summary: "Passionate full-stack developer with experience in MERN stack and modern web technologies.",
+      summary:
+        "Passionate full-stack developer with experience in MERN stack and modern web technologies.",
       portfolioTheme: "modern",
-      isPublic: true
+      isPublic: true,
     });
 
     // Create sample skills
@@ -39,7 +51,7 @@ async function seedDatabase() {
       { name: "Figma", level: 60, category: "design" },
       { name: "Communication", level: 85, category: "soft" },
       { name: "Problem Solving", level: 90, category: "soft" },
-      { name: "Leadership", level: 75, category: "soft" }
+      { name: "Leadership", level: 75, category: "soft" },
     ];
 
     for (const skill of skillsData) {
@@ -48,7 +60,7 @@ async function seedDatabase() {
         name: skill.name,
         level: skill.level,
         category: skill.category,
-        isVisible: true
+        isVisible: true,
       });
     }
 
@@ -56,25 +68,28 @@ async function seedDatabase() {
     const projectsData = [
       {
         title: "Hospital Management System",
-        description: "Full-stack web application for managing hospital operations with patient records, appointments, and staff management.",
+        description:
+          "Full-stack web application for managing hospital operations with patient records, appointments, and staff management.",
         technologies: ["React", "Node.js", "MongoDB", "Express"],
         link: "https://hospital-demo.example.com",
-        githubLink: "https://github.com/megharaj/hospital-management"
+        githubLink: "https://github.com/megharaj/hospital-management",
       },
       {
         title: "E-Commerce Platform",
-        description: "Modern e-commerce solution with payment gateway integration and admin dashboard.",
+        description:
+          "Modern e-commerce solution with payment gateway integration and admin dashboard.",
         technologies: ["Next.js", "Stripe", "PostgreSQL", "Tailwind"],
         link: "https://ecommerce-demo.example.com",
-        githubLink: "https://github.com/megharaj/ecommerce-platform"
+        githubLink: "https://github.com/megharaj/ecommerce-platform",
       },
       {
         title: "Task Management App",
-        description: "Collaborative task management tool with real-time updates and team collaboration features.",
+        description:
+          "Collaborative task management tool with real-time updates and team collaboration features.",
         technologies: ["Vue.js", "Socket.io", "Redis", "Docker"],
         link: null,
-        githubLink: "https://github.com/megharaj/task-manager"
-      }
+        githubLink: "https://github.com/megharaj/task-manager",
+      },
     ];
 
     for (const project of projectsData) {
@@ -85,7 +100,7 @@ async function seedDatabase() {
         technologies: project.technologies,
         link: project.link,
         githubLink: project.githubLink,
-        isVisible: true
+        isVisible: true,
       });
     }
 
@@ -93,19 +108,21 @@ async function seedDatabase() {
     const achievementsData = [
       {
         title: "Smart India Hackathon Finalist",
-        description: "Reached finals in national-level hackathon with innovative healthcare solution",
-        year: "2024"
+        description:
+          "Reached finals in national-level hackathon with innovative healthcare solution",
+        year: "2024",
       },
       {
         title: "AWS Certified Developer",
         description: "Achieved AWS Developer Associate certification",
-        year: "2024"
+        year: "2024",
       },
       {
         title: "Open Source Contributor",
-        description: "Active contributor to React ecosystem with 50+ contributions",
-        year: "2023"
-      }
+        description:
+          "Active contributor to React ecosystem with 50+ contributions",
+        year: "2023",
+      },
     ];
 
     for (const achievement of achievementsData) {
@@ -114,7 +131,7 @@ async function seedDatabase() {
         title: achievement.title,
         description: achievement.description,
         year: achievement.year,
-        isVisible: true
+        isVisible: true,
       });
     }
 
@@ -125,8 +142,9 @@ async function seedDatabase() {
       company: "ABC Tech Solutions",
       startDate: "2024-06",
       endDate: "2024-12",
-      description: "Developed REST APIs and optimized database queries. Built responsive web applications using React and Node.js.",
-      isVisible: true
+      description:
+        "Developed REST APIs and optimized database queries. Built responsive web applications using React and Node.js.",
+      isVisible: true,
     });
 
     // Initialize user stats
@@ -136,7 +154,7 @@ async function seedDatabase() {
       currentStreak: 5,
       longestStreak: 12,
       lastActivityDate: new Date(),
-      portfolioViews: 1234
+      portfolioViews: 1234,
     });
 
     // Create sample learning modules
@@ -147,42 +165,100 @@ async function seedDatabase() {
         category: "Programming",
         xpReward: 150,
         lessons: [
-          { title: "Arrow Functions", content: "Learn about arrow function syntax", xp: 30 },
-          { title: "Destructuring", content: "Master object and array destructuring", xp: 30 },
-          { title: "Async/Await", content: "Handle asynchronous operations", xp: 40 },
+          {
+            title: "Arrow Functions",
+            content: "Learn about arrow function syntax",
+            xp: 30,
+          },
+          {
+            title: "Destructuring",
+            content: "Master object and array destructuring",
+            xp: 30,
+          },
+          {
+            title: "Async/Await",
+            content: "Handle asynchronous operations",
+            xp: 40,
+          },
           { title: "Modules", content: "Import and export modules", xp: 25 },
-          { title: "Classes", content: "Object-oriented programming in JS", xp: 25 }
+          {
+            title: "Classes",
+            content: "Object-oriented programming in JS",
+            xp: 25,
+          },
         ],
         isActive: true,
       },
       {
         title: "React.js Advanced Patterns",
-        description: "Learn advanced React patterns including hooks, context, and performance optimization",
+        description:
+          "Learn advanced React patterns including hooks, context, and performance optimization",
         category: "Frontend",
         xpReward: 200,
         lessons: [
-          { title: "Custom Hooks", content: "Create reusable custom hooks", xp: 40 },
-          { title: "Context API", content: "State management with Context", xp: 40 },
-          { title: "Performance Optimization", content: "Memo, useMemo, useCallback", xp: 50 },
-          { title: "Error Boundaries", content: "Handle errors gracefully", xp: 35 },
-          { title: "Testing", content: "Unit testing React components", xp: 35 }
+          {
+            title: "Custom Hooks",
+            content: "Create reusable custom hooks",
+            xp: 40,
+          },
+          {
+            title: "Context API",
+            content: "State management with Context",
+            xp: 40,
+          },
+          {
+            title: "Performance Optimization",
+            content: "Memo, useMemo, useCallback",
+            xp: 50,
+          },
+          {
+            title: "Error Boundaries",
+            content: "Handle errors gracefully",
+            xp: 35,
+          },
+          {
+            title: "Testing",
+            content: "Unit testing React components",
+            xp: 35,
+          },
         ],
         isActive: true,
       },
       {
         title: "Node.js & Express",
-        description: "Build robust backend applications with Node.js and Express",
+        description:
+          "Build robust backend applications with Node.js and Express",
         category: "Backend",
         xpReward: 180,
         lessons: [
-          { title: "Express Basics", content: "Setting up Express server", xp: 30 },
-          { title: "Middleware", content: "Understanding middleware functions", xp: 35 },
-          { title: "Authentication", content: "JWT and session management", xp: 45 },
-          { title: "Database Integration", content: "Connect to databases", xp: 40 },
-          { title: "API Design", content: "RESTful API best practices", xp: 30 }
+          {
+            title: "Express Basics",
+            content: "Setting up Express server",
+            xp: 30,
+          },
+          {
+            title: "Middleware",
+            content: "Understanding middleware functions",
+            xp: 35,
+          },
+          {
+            title: "Authentication",
+            content: "JWT and session management",
+            xp: 45,
+          },
+          {
+            title: "Database Integration",
+            content: "Connect to databases",
+            xp: 40,
+          },
+          {
+            title: "API Design",
+            content: "RESTful API best practices",
+            xp: 30,
+          },
         ],
         isActive: true,
-      }
+      },
     ];
 
     for (const module of modulesData) {

@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -17,11 +18,19 @@ import CourseDetail from "@/pages/course-detail";
 import EditPortfolio from "@/pages/edit-portfolio";
 import PublicPortfolio from "@/pages/public-portfolio";
 import Landing from "@/pages/landing";
-import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
+import Home from "./pages/home";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [location, navigate] = useLocation();
+
+  // Redirect to dashboard when user is authenticated and on root path
+  useEffect(() => {
+    if (isAuthenticated && !isLoading && location === "/") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, location, navigate]);
 
   return (
     <Switch>
@@ -29,8 +38,8 @@ function Router() {
         <Route path="/" component={Landing} />
       ) : (
         <>
-          <Route path="/" component={Home} />
-          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/check" component={Dashboard} />
+          <Route path="/dashboard" component={Home} />
           <Route path="/profile" component={Profile} />
           <Route path="/experience" component={Experience} />
           <Route path="/education" component={Education} />
