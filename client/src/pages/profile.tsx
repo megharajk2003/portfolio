@@ -1869,9 +1869,225 @@ export default function Profile() {
             </TabsList>
 
             <TabsContent value="basic" className="space-y-6">
-              <SimpleComprehensiveForm
-                onSuccess={() => setActiveTab("academic")}
-              />
+              {/* Personal Details Card with Edit */}
+              <Card className="relative">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>Personal Details</span>
+                    </CardTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Toggle edit mode or show comprehensive form
+                        setActiveTab("basic");
+                        // You could add state here to show just personal details form
+                      }}
+                      data-testid="button-edit-personal-basic"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-6">
+                    <div className="relative">
+                      <Avatar className="w-20 h-20">
+                        <AvatarImage
+                          src={profile?.personalDetails?.photo || ""}
+                          alt={profile?.personalDetails?.fullName || ""}
+                        />
+                        <AvatarFallback className="text-xl">
+                          {profile?.personalDetails?.fullName
+                            ?.split(" ")
+                            .map((n: string) => n[0])
+                            .join("") ||
+                            user?.firstName?.[0] ||
+                            "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.fullName ||
+                            `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+                            "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.roleOrTitle || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.dob || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.gender || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.nationality || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.location ? (
+                            profile.personalDetails.location.city &&
+                            profile.personalDetails.location.state
+                              ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
+                              : profile.personalDetails.location.city ||
+                                profile.personalDetails.location.state ||
+                                profile.personalDetails.location.country
+                          ) : (
+                            "Not provided"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {profile?.personalDetails?.summary ? (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
+                      <p className="text-gray-700 dark:text-gray-300 mt-1">
+                        {profile.personalDetails.summary}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+                      <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        Add a professional summary to highlight your experience and goals.
+                      </p>
+                    </div>
+                  )}
+
+                  {profile?.personalDetails?.languagesKnown && profile.personalDetails.languagesKnown.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Languages Known</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {profile.personalDetails.languagesKnown.map((lang, index) => (
+                          <Badge key={index} variant="secondary">{lang}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Contact Details Card with Edit */}
+              <Card className="relative">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <Mail className="h-5 w-5" />
+                      <span>Contact Details</span>
+                    </CardTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Toggle edit mode or show comprehensive form
+                        setActiveTab("basic");
+                        // You could add state here to show just contact details form
+                      }}
+                      data-testid="button-edit-contact-basic"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.email || user?.email || "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.phone || "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.website ? (
+                          <a href={profile.contactDetails.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.website}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.linkedin ? (
+                          <a href={profile.contactDetails.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.linkedin}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub/Portfolio</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.githubOrPortfolio ? (
+                          <a href={profile.contactDetails.githubOrPortfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.githubOrPortfolio}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Twitter</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.twitter ? (
+                          <a href={profile.contactDetails.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.twitter}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Edit Form (Hidden by default, shown when edit is clicked) */}
+              <div className="mt-6">
+                <SimpleComprehensiveForm
+                  onSuccess={() => {
+                    // Refresh the profile data and stay on basic tab
+                    queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+                  }}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="academic" className="space-y-6">
@@ -2158,11 +2374,11 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub/Portfolio</label>
                       <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.github ? (
-                          <a href={profile.contactDetails.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                            {profile.contactDetails.github}
+                        {profile?.contactDetails?.githubOrPortfolio ? (
+                          <a href={profile.contactDetails.githubOrPortfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.githubOrPortfolio}
                           </a>
                         ) : (
                           "Not provided"
