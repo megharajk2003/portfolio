@@ -1983,34 +1983,34 @@ export default function Profile() {
             </TabsContent>
 
             <TabsContent value="view" className="space-y-6">
-              {/* Profile Preview Card */}
+              {/* Personal Details Card */}
               <Card className="relative">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center space-x-2">
                       <User className="h-5 w-5" />
-                      <span>Profile Preview</span>
+                      <span>Personal Details</span>
                     </CardTitle>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setActiveTab("basic")}
-                      data-testid="button-edit-profile"
+                      data-testid="button-edit-personal"
                     >
                       <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
+                      Edit
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4">
                   <div className="flex items-center space-x-6">
                     <div className="relative">
-                      <Avatar className="w-24 h-24">
+                      <Avatar className="w-20 h-20">
                         <AvatarImage
                           src={profile?.personalDetails?.photo || ""}
                           alt={profile?.personalDetails?.fullName || ""}
                         />
-                        <AvatarFallback className="text-2xl">
+                        <AvatarFallback className="text-xl">
                           {profile?.personalDetails?.fullName
                             ?.split(" ")
                             .map((n: string) => n[0])
@@ -2020,80 +2020,180 @@ export default function Profile() {
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <div className="flex-1">
-                      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {profile?.personalDetails?.fullName ||
-                          `${user?.firstName || ""} ${
-                            user?.lastName || ""
-                          }`.trim() ||
-                          "Add your name"}
-                      </h1>
-                      <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
-                        {profile?.personalDetails?.roleOrTitle ||
-                          "Add your professional role"}
-                      </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <Mail className="w-4 h-4" />
-                          <span>
-                            {profile?.contactDetails?.email ||
-                              user?.email ||
-                              "Add your email"}
-                          </span>
-                        </div>
-                        {profile?.contactDetails?.phone && (
-                          <div className="flex items-center space-x-1">
-                            <Phone className="w-4 h-4" />
-                            <span>{profile.contactDetails.phone}</span>
-                          </div>
-                        )}
-                        {profile?.personalDetails?.location && (
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>
-                              {profile.personalDetails.location.city &&
-                              profile.personalDetails.location.state
-                                ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}`
-                                : profile.personalDetails.location.city ||
-                                  profile.personalDetails.location.state ||
-                                  profile.personalDetails.location.country ||
-                                  "Add your location"}
-                            </span>
-                          </div>
-                        )}
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.fullName ||
+                            `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+                            "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.roleOrTitle || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.dob || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.gender || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.nationality || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.personalDetails?.location ? (
+                            profile.personalDetails.location.city &&
+                            profile.personalDetails.location.state
+                              ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
+                              : profile.personalDetails.location.city ||
+                                profile.personalDetails.location.state ||
+                                profile.personalDetails.location.country
+                          ) : (
+                            "Not provided"
+                          )}
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {profile?.personalDetails?.summary ? (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        Professional Summary
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300">
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
+                      <p className="text-gray-700 dark:text-gray-300 mt-1">
                         {profile.personalDetails.summary}
                       </p>
                     </div>
                   ) : (
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
-                      <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Add a professional summary to highlight your experience
-                        and goals.
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+                      <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        Add a professional summary to highlight your experience and goals.
                       </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        onClick={() => setActiveTab("basic")}
-                        data-testid="button-add-summary"
-                      >
-                        Add Summary
-                      </Button>
                     </div>
                   )}
 
-                  {/* Academic Summary */}
+                  {profile?.personalDetails?.languagesKnown && profile.personalDetails.languagesKnown.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Languages Known</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {profile.personalDetails.languagesKnown.map((lang, index) => (
+                          <Badge key={index} variant="secondary">{lang}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Contact Details Card */}
+              <Card className="relative">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <Mail className="h-5 w-5" />
+                      <span>Contact Details</span>
+                    </CardTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setActiveTab("basic")}
+                      data-testid="button-edit-contact"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.email || user?.email || "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.phone || "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.website ? (
+                          <a href={profile.contactDetails.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.website}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.linkedin ? (
+                          <a href={profile.contactDetails.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.linkedin}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.github ? (
+                          <a href={profile.contactDetails.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.github}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Twitter</label>
+                      <p className="text-lg text-gray-900 dark:text-white">
+                        {profile?.contactDetails?.twitter ? (
+                          <a href={profile.contactDetails.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            {profile.contactDetails.twitter}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Academic Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="h-5 w-5" />
+                    <span>Portfolio Summary</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {categories
                       .filter((cat) => cat.count > 0)
