@@ -357,14 +357,13 @@ export const workExperienceItemSchema = z.object({
 
 // Work experience schema with userId for API operations
 export const workExperienceWithUserSchema = z.object({
-  userId: z.string(),
-  organization: z.string(),
-  roleOrPosition: z.string(),
+  userId: z.string().transform(Number),
+  company: z.string(),
+  position: z.string(),
+  location: z.string().optional(),
   startDate: z.string(),
   endDate: z.string().optional(),
-  responsibilities: z.string().optional(), // Allow string input from forms
-  skillsOrToolsUsed: z.string().optional(), // Allow string input from forms
-  description: z.string().optional(), // Add missing field from form
+  description: z.string().optional(),
 });
 
 export const internshipItemSchema = z.object({
@@ -496,23 +495,17 @@ export const certificationWithUserSchema = z.object({
 
 // Publication schema with userId for API operations
 export const publicationWithUserSchema = z.object({
-  userId: z.string(),
+  userId: z.string().transform(Number),
   title: z.string(),
-  type: z.enum([
-    "Research Paper",
-    "Portfolio Work",
-    "Article",
-    "Book",
-    "Other",
-  ]),
-  journalOrPlatform: z.string(),
-  year: z.number(),
-  url: z.string().url().optional(),
+  type: z.string(),
+  journal: z.string(),
+  year: z.string(),
+  url: z.string().optional(),
 });
 
 // Organization schema with userId for API operations
 export const organizationWithUserSchema = z.object({
-  userId: z.string(),
+  userId: z.string().transform(Number),
   name: z.string(),
   role: z.string(),
   year: z.string(),
