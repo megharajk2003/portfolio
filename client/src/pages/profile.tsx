@@ -1008,7 +1008,7 @@ export default function Profile() {
       
       // Prepare data for API
       const apiData = {
-        userId: userId,
+        userId: userId.toString(),
         ...data
       };
 
@@ -1285,12 +1285,12 @@ export default function Profile() {
 
                     {category.isExpanded && (
                       <CardContent className="pt-0">
-                        {category.count === 0 ? (
+                        {category.count === 0 && activeForm !== category.id ? (
                           <EmptyState
                             category={category}
                             onAddEntry={() => setActiveForm(category.id)}
                           />
-                        ) : (
+                        ) : category.count > 0 ? (
                           <div className="space-y-3">
                             {category.items.map((item) => (
                               <ItemCard
@@ -1319,7 +1319,7 @@ export default function Profile() {
                               </Button>
                             </div>
                           </div>
-                        )}
+                        ) : null}
 
                         {/* Add Entry Form */}
                         {activeForm === category.id && (
