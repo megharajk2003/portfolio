@@ -8,9 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { 
-  Profile, WorkExperience, Education, Skill, Project, Certification, Achievement 
-} from "@shared/schema";
+import type { Profile } from "@shared/schema";
 import { 
   Mail, Phone, MapPin, ExternalLink, Github, Calendar, Building, 
   GraduationCap, Award, Download, Star, Users, Code, Palette,
@@ -24,34 +22,34 @@ export default function PublicPortfolio() {
   const [activeTab, setActiveTab] = useState("about");
   const username = params?.username;
 
-  // Mock user ID mapping - in real app this would be resolved from username
-  const CURRENT_USER_ID = "user-1";
+  // Mock user ID mapping - in real app this would be resolved from username  
+  const CURRENT_USER_ID = "1";
 
   const { data: profile } = useQuery<Profile>({
     queryKey: ["/api/profile", CURRENT_USER_ID],
   });
 
-  const { data: workExperience = [] } = useQuery<WorkExperience[]>({
+  const { data: workExperience = [] } = useQuery<any[]>({
     queryKey: ["/api/work-experience", CURRENT_USER_ID],
   });
 
-  const { data: education = [] } = useQuery<Education[]>({
+  const { data: education = [] } = useQuery<any[]>({
     queryKey: ["/api/education", CURRENT_USER_ID],
   });
 
-  const { data: skills = [] } = useQuery<Skill[]>({
+  const { data: skills = [] } = useQuery<any[]>({
     queryKey: ["/api/skills", CURRENT_USER_ID],
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<any[]>({
     queryKey: ["/api/projects", CURRENT_USER_ID],
   });
 
-  const { data: certifications = [] } = useQuery<Certification[]>({
+  const { data: certifications = [] } = useQuery<any[]>({
     queryKey: ["/api/certifications", CURRENT_USER_ID],
   });
 
-  const { data: achievements = [] } = useQuery<Achievement[]>({
+  const { data: achievements = [] } = useQuery<any[]>({
     queryKey: ["/api/achievements", CURRENT_USER_ID],
   });
 
@@ -108,10 +106,10 @@ export default function PublicPortfolio() {
     );
   }
 
-  const visibleSkills = skills.filter(skill => skill.isVisible);
-  const visibleProjects = projects.filter(project => project.isVisible);
-  const visibleWorkExperience = workExperience.filter(exp => exp.isVisible);
-  const visibleEducation = education.filter(edu => edu.isVisible);
+  const visibleSkills = skills; // All skills are visible by default
+  const visibleProjects = projects; // All projects are visible by default
+  const visibleWorkExperience = workExperience; // All work experience is visible by default
+  const visibleEducation = education; // All education is visible by default
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -126,13 +124,13 @@ export default function PublicPortfolio() {
                   Available for new projects
                 </Badge>
                 <h1 className="text-5xl font-bold text-gray-900 dark:text-white leading-tight">
-                  Hi, I'm <span className="text-blue-600">{profile.name || "Megharaj K"}</span>
+                  Hi, I'm <span className="text-blue-600">{profile.personalDetails?.fullName || "Professional"}</span>
                 </h1>
                 <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
-                  {profile.role || "Full Stack Developer & UI/UX Designer"}
+                  {profile.personalDetails?.roleOrTitle || "Full Stack Developer & UI/UX Designer"}
                 </p>
                 <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
-                  {profile.summary || "Passionate about creating exceptional digital experiences. I specialize in building scalable web applications and crafting intuitive user interfaces that solve real-world problems."}
+                  {profile.personalDetails?.summary || "Passionate about creating exceptional digital experiences. I specialize in building scalable web applications and crafting intuitive user interfaces that solve real-world problems."}
                 </p>
               </div>
 
@@ -167,9 +165,9 @@ export default function PublicPortfolio() {
               <div className="relative">
                 <div className="w-80 h-80 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center">
                   <Avatar className="w-72 h-72 border-4 border-white shadow-2xl">
-                    <AvatarImage src="/api/placeholder/300/300" alt={profile.name} />
+                    <AvatarImage src="/api/placeholder/300/300" alt={profile.personalDetails?.fullName} />
                     <AvatarFallback className="text-6xl font-bold text-white bg-transparent">
-                      {profile.name?.charAt(0) || "M"}
+                      {profile.personalDetails?.fullName?.charAt(0) || "P"}
                     </AvatarFallback>
                   </Avatar>
                 </div>
