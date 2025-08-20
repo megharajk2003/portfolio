@@ -964,33 +964,31 @@ export default function Profile() {
     enabled: !!userId,
   });
 
-  // Update categories when data loads
-  React.useEffect(() => {
-    setCategories((prev) =>
-      prev.map((cat) => {
-        switch (cat.id) {
-          case "education":
-            return { ...cat, items: educationData, count: educationData.length };
-          case "certifications":
-            return { ...cat, items: certificationsData, count: certificationsData.length };
-          case "skills":
-            return { ...cat, items: skillsData, count: skillsData.length };
-          case "projects":
-            return { ...cat, items: projectsData, count: projectsData.length };
-          case "work-experience":
-            return { ...cat, items: workExperienceData, count: workExperienceData.length };
-          case "publications":
-            return { ...cat, items: publicationsData, count: publicationsData.length };
-          case "organizations":
-            return { ...cat, items: organizationsData, count: organizationsData.length };
-          case "volunteer":
-            return { ...cat, items: volunteerData, count: volunteerData.length };
-          default:
-            return cat;
-        }
-      })
-    );
-  }, [educationData, certificationsData, skillsData, projectsData, workExperienceData, publicationsData, organizationsData, volunteerData]);
+  // Update categories when data loads - using useMemo to prevent infinite re-renders
+  const categoriesWithData = React.useMemo(() => {
+    return categories.map((cat) => {
+      switch (cat.id) {
+        case "education":
+          return { ...cat, items: educationData, count: educationData.length };
+        case "certifications":
+          return { ...cat, items: certificationsData, count: certificationsData.length };
+        case "skills":
+          return { ...cat, items: skillsData, count: skillsData.length };
+        case "projects":
+          return { ...cat, items: projectsData, count: projectsData.length };
+        case "work-experience":
+          return { ...cat, items: workExperienceData, count: workExperienceData.length };
+        case "publications":
+          return { ...cat, items: publicationsData, count: publicationsData.length };
+        case "organizations":
+          return { ...cat, items: organizationsData, count: organizationsData.length };
+        case "volunteer":
+          return { ...cat, items: volunteerData, count: volunteerData.length };
+        default:
+          return cat;
+      }
+    });
+  }, [categories, educationData, certificationsData, skillsData, projectsData, workExperienceData, publicationsData, organizationsData, volunteerData]);
 
   // Toggle category expansion
   const toggleCategory = (categoryId: string) => {
@@ -1244,11 +1242,11 @@ export default function Profile() {
 
             <TabsContent value="academic" className="space-y-6">
               {/* Statistics */}
-              <CategoryStats categories={categories} />
+              <CategoryStats categories={categoriesWithData} />
 
               {/* Categories */}
               <div className="space-y-4">
-                {categories.map((category) => (
+                {categoriesWithData.map((category) => (
                   <Card key={category.id} className="overflow-hidden">
                     <CardHeader
                       className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
