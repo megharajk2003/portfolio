@@ -93,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/profile", async (req, res) => {
     try {
       const profileData = insertProfileSchema.parse(req.body);
-      const profile = await (storage as any).upsertProfile(profileData);
+      const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {
       console.error("Error upserting profile:", error);
@@ -1187,10 +1187,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Section settings routes
-  app.get("/api/section-settings/:userId", async (req, res) => {
+  app.get("/api/section-settings/:userId/:sectionName", async (req, res) => {
     try {
       const settings = await storage.getSectionSettings(
-        parseInt(req.params.userId)
+        parseInt(req.params.userId),
+        req.params.sectionName
       );
       res.json(settings);
     } catch (error) {
@@ -1200,11 +1201,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/section-settings/:userId/:sectionName", async (req, res) => {
     try {
-      const settings = await storage.updateSectionSettings(
-        parseInt(req.params.userId),
-        req.params.sectionName,
-        req.body
-      );
+      const settings = await storage.upsertSectionSettings({
+        userId: parseInt(req.params.userId),
+        sectionName: req.params.sectionName,
+        ...req.body
+      });
       res.json(settings);
     } catch (error) {
       res.status(500).json({ message: "Failed to update section settings" });
