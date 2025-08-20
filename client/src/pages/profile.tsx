@@ -2937,7 +2937,357 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              {/* Academic Summary */}
+              {/* Academic Details Sections */}
+              {/* Education Section */}
+              {educationData && educationData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <GraduationCap className="h-5 w-5" />
+                      <span>Education</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {educationData.map((edu, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {edu.degree || "Degree"} in {edu.fieldOfStudy || "Field of Study"}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                              {edu.institution}
+                            </p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                              <span>{edu.level}</span>
+                              {edu.yearOfPassing && <span>Graduated: {edu.yearOfPassing}</span>}
+                              {edu.gradeOrScore && <span>Grade: {edu.gradeOrScore}</span>}
+                            </div>
+                            {edu.description && (
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">{edu.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Skills Section */}
+              {skillsData && skillsData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Star className="h-5 w-5" />
+                      <span>Skills</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {["technical", "soft", "tools"].map((category) => {
+                        const categorySkills = skillsData.filter(skill => skill.category === category);
+                        if (categorySkills.length === 0) return null;
+                        
+                        return (
+                          <div key={category}>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-2 capitalize">
+                              {category === "soft" ? "Soft Skills" : category}
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {categorySkills.map((skill, index) => (
+                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                  <span className="text-gray-900 dark:text-white">{skill.name}</span>
+                                  <div className="flex items-center space-x-1">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`w-4 h-4 ${
+                                          i < skill.level
+                                            ? "text-yellow-400 fill-current"
+                                            : "text-gray-300 dark:text-gray-600"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Work Experience Section */}
+              {workExperienceData && workExperienceData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Building className="h-5 w-5" />
+                      <span>Work Experience</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {workExperienceData.map((work, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {work.roleOrPosition}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                              {work.organization}
+                            </p>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {work.startDate} {work.endDate ? `- ${work.endDate}` : "- Present"}
+                            </div>
+                            {work.description && (
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">{work.description}</p>
+                            )}
+                            {work.responsibilities && (
+                              <div className="mt-2">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Key Responsibilities:</p>
+                                <p className="text-gray-700 dark:text-gray-300">{work.responsibilities}</p>
+                              </div>
+                            )}
+                            {work.skillsOrToolsUsed && (
+                              <div className="mt-2">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Skills & Tools:</p>
+                                <p className="text-gray-700 dark:text-gray-300">{work.skillsOrToolsUsed}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Projects Section */}
+              {projectsData && projectsData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Briefcase className="h-5 w-5" />
+                      <span>Projects</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {projectsData.map((project, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {project.title}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                              {project.domain}
+                            </p>
+                            {(project.startDate || project.endDate) && (
+                              <div className="text-sm text-gray-500 mt-1">
+                                {project.startDate} {project.endDate ? `- ${project.endDate}` : ""}
+                              </div>
+                            )}
+                            <p className="text-gray-700 dark:text-gray-300 mt-2">{project.description}</p>
+                            {project.toolsOrMethods && (
+                              <div className="mt-2">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tools & Methods:</p>
+                                <p className="text-gray-700 dark:text-gray-300">{project.toolsOrMethods}</p>
+                              </div>
+                            )}
+                            {project.outcome && (
+                              <div className="mt-2">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Outcome:</p>
+                                <p className="text-gray-700 dark:text-gray-300">{project.outcome}</p>
+                              </div>
+                            )}
+                            <div className="flex space-x-3 mt-3">
+                              {project.url && (
+                                <a
+                                  href={project.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm"
+                                >
+                                  View Project
+                                </a>
+                              )}
+                              {project.githubUrl && (
+                                <a
+                                  href={project.githubUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm"
+                                >
+                                  GitHub
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Certifications Section */}
+              {certificationsData && certificationsData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Award className="h-5 w-5" />
+                      <span>Certifications</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {certificationsData.map((cert, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {cert.title}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                              {cert.organization}
+                            </p>
+                            {cert.year && (
+                              <div className="text-sm text-gray-500 mt-1">
+                                Year: {cert.year}
+                              </div>
+                            )}
+                            {cert.description && (
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">{cert.description}</p>
+                            )}
+                            {cert.url && (
+                              <a
+                                href={cert.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm mt-2 inline-block"
+                              >
+                                View Certificate
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Publications Section */}
+              {publicationsData && publicationsData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="h-5 w-5" />
+                      <span>Publications & Research</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {publicationsData.map((pub, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {pub.title}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                              {pub.journalOrPlatform}
+                            </p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                              <span>Type: {pub.type}</span>
+                              <span>Year: {pub.year}</span>
+                            </div>
+                            {pub.url && (
+                              <a
+                                href={pub.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm mt-2 inline-block"
+                              >
+                                Read Publication
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Volunteer Experience Section */}
+              {volunteerData && volunteerData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Heart className="h-5 w-5" />
+                      <span>Volunteer Experience</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {volunteerData.map((vol, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {vol.role}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                              {vol.organization}
+                            </p>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {vol.year}
+                            </div>
+                            <p className="text-gray-700 dark:text-gray-300 mt-2">{vol.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Achievements Section */}
+              {achievementsData && achievementsData.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Trophy className="h-5 w-5" />
+                      <span>Achievements</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {achievementsData.map((achievement, index) => (
+                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                              {achievement.title}
+                            </h3>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">
+                              {achievement.organization}
+                            </p>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {achievement.year}
+                            </div>
+                            <p className="text-gray-700 dark:text-gray-300 mt-2">{achievement.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Portfolio Summary */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
