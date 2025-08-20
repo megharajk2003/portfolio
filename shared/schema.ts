@@ -223,6 +223,74 @@ export const sectionSettings = pgTable("section_settings", {
   sortOrder: integer("sort_order").default(0),
 });
 
+// Portfolio Tables for Individual Items
+export const workExperience = pgTable("work_experience", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  company: text("company").notNull(),
+  position: text("position").notNull(),
+  location: text("location"),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date"),
+  description: text("description"),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const volunteerExperience = pgTable("volunteer_experience", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  organization: text("organization").notNull(),
+  role: text("role").notNull(),
+  description: text("description").notNull(),
+  year: text("year").notNull(),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const publications = pgTable("publications", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  type: text("type").notNull(),
+  journal: text("journal").notNull(),
+  year: text("year").notNull(),
+  url: text("url"),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const organizations = pgTable("organizations", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  year: text("year").notNull(),
+  contribution: text("contribution").notNull(),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Zod Schemas for Validation
 export const personalDetailsSchema = z.object({
   photo: z.string().optional(),
@@ -453,7 +521,7 @@ export const organizationWithUserSchema = z.object({
 
 // Volunteer schema with userId for API operations
 export const volunteerWithUserSchema = z.object({
-  userId: z.string(),
+  userId: z.string().transform(Number),
   organization: z.string(),
   role: z.string(),
   description: z.string(),
