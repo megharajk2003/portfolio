@@ -10,12 +10,20 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface ProfileData {
   profile?: {
-    name?: string;
-    role?: string;
-    email?: string;
-    phone?: string;
-    location?: string;
-    summary?: string;
+    personalDetails?: {
+      fullName?: string;
+      roleOrTitle?: string;
+      location?: {
+        city?: string;
+        state?: string;
+        country?: string;
+      };
+      summary?: string;
+    };
+    contactDetails?: {
+      email?: string;
+      phone?: string;
+    };
   };
   skills?: any[];
   projects?: any[];
@@ -28,22 +36,22 @@ function calculateProfileCompletion(data: ProfileData): {
   missingFields: string[];
 } {
   const requiredFields = [
-    { key: "profile.name", label: "Full Name", value: data.profile?.name },
+    { key: "profile.fullName", label: "Full Name", value: data.profile?.personalDetails?.fullName },
     {
       key: "profile.role",
       label: "Professional Role",
-      value: data.profile?.role,
+      value: data.profile?.personalDetails?.roleOrTitle,
     },
-    { key: "profile.phone", label: "Phone Number", value: data.profile?.phone },
+    { key: "profile.phone", label: "Phone Number", value: data.profile?.contactDetails?.phone },
     {
       key: "profile.location",
       label: "Location",
-      value: data.profile?.location,
+      value: data.profile?.personalDetails?.location?.city || data.profile?.personalDetails?.location?.state || data.profile?.personalDetails?.location?.country,
     },
     {
       key: "profile.summary",
       label: "Professional Summary",
-      value: data.profile?.summary,
+      value: data.profile?.personalDetails?.summary,
     },
   ];
 

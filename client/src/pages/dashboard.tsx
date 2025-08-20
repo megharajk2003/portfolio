@@ -105,7 +105,7 @@ export default function Home() {
                   Welcome back,{" "}
                   <span className="text-primary">
                     {user?.firstName ||
-                      profile?.name?.split(" ")[0] ||
+                      profile?.personalDetails?.fullName?.split(" ")[0] ||
                       "Professional"}
                   </span>
                   !
@@ -165,11 +165,11 @@ export default function Home() {
                 <div className="relative">
                   <Avatar className="w-16 h-16">
                     <AvatarImage
-                      src={profile?.photoUrl || ""}
-                      alt={profile?.name || ""}
+                      src={profile?.personalDetails?.photo || ""}
+                      alt={profile?.personalDetails?.fullName || ""}
                     />
                     <AvatarFallback className="text-xl">
-                      {profile?.name
+                      {profile?.personalDetails?.fullName
                         ?.split(" ")
                         .map((n: string) => n[0])
                         .join("") || "U"}
@@ -178,17 +178,17 @@ export default function Home() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {profile?.name ||
+                    {profile?.personalDetails?.fullName ||
                       `${user?.firstName || ""} ${
                         user?.lastName || ""
                       }`.trim() ||
                       "User Name"}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 font-medium">
-                    {profile?.role || "Professional Role"}
+                    {profile?.personalDetails?.roleOrTitle || "Professional Role"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {profile?.email || user?.email || "email@example.com"}
+                    {profile?.contactDetails?.email || user?.email || "email@example.com"}
                   </p>
                 </div>
               </div>

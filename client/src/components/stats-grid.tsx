@@ -7,24 +7,85 @@ interface StatsGridProps {
   userId: string;
 }
 
+interface ProfileData {
+  personalDetails?: {
+    fullName?: string;
+    roleOrTitle?: string;
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+    };
+    summary?: string;
+  };
+  contactDetails?: {
+    email?: string;
+    phone?: string;
+  };
+}
+
+interface UserStatsData {
+  currentStreak?: number;
+  portfolioViews?: number;
+}
+
 export default function StatsGrid({ userId }: StatsGridProps) {
-  const { data: userStats } = useQuery({
+  const { data: userStats } = useQuery<UserStatsData>({
     queryKey: ["/api/user-stats", userId],
   });
 
-  const { data: profile } = useQuery({
+  const { data: profile } = useQuery<ProfileData>({
     queryKey: ["/api/profile", userId],
   });
 
-  // Mock data for demo
+  const { data: skills } = useQuery({
+    queryKey: ["/api/skills", userId],
+  });
+
+  const { data: projects } = useQuery({
+    queryKey: ["/api/projects", userId],
+  });
+
+  const { data: workExperience } = useQuery({
+    queryKey: ["/api/work-experience", userId],
+  });
+
+  const { data: education } = useQuery({
+    queryKey: ["/api/education", userId],
+  });
+
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = () => {
+    const requiredFields = [
+      profile?.personalDetails?.fullName,
+      profile?.personalDetails?.roleOrTitle,
+      profile?.contactDetails?.phone,
+      profile?.personalDetails?.location?.city || profile?.personalDetails?.location?.state || profile?.personalDetails?.location?.country,
+      profile?.personalDetails?.summary,
+    ];
+
+    const optionalSections = [
+      (skills as any[])?.length > 0,
+      (projects as any[])?.length > 0,
+      (workExperience as any[])?.length > 0,
+      (education as any[])?.length > 0,
+    ];
+
+    const allItems = [...requiredFields, ...optionalSections];
+    const completedItems = allItems.filter(Boolean).length;
+    return Math.round((completedItems / allItems.length) * 100);
+  };
+
+  const profileCompletion = calculateProfileCompletion();
+
   const stats = [
     {
       title: "Profile Completion",
-      value: "85%",
+      value: `${profileCompletion}%`,
       icon: User,
       color: "text-primary",
       bgColor: "bg-primary bg-opacity-10",
-      progress: 85,
+      progress: profileCompletion,
     },
     {
       title: "Learning Streak",
