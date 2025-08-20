@@ -76,7 +76,7 @@ const educationSchema = z.object({
 const certificationSchema = z.object({
   title: z.string().min(1, "Certification title is required"),
   organization: z.string().min(1, "Organization is required"),
-  year: z.number().min(1900, "Valid year required"),
+  year: z.number().min(1900, "Valid year required").optional(),
   url: z.string().url().optional(),
   description: z.string().optional(),
 });
@@ -355,6 +355,8 @@ function AddEntryForm({
   }
 
   const onSubmit = (data: any) => {
+    console.log("🚀 AddEntryForm onSubmit called with data:", data);
+    console.log("🚀 Category ID:", category.id);
     onAdd({ ...data, id: Date.now().toString() });
     onCancel();
   };
@@ -645,7 +647,17 @@ function AddEntryForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(
+            (data) => {
+              console.log("✅ Form validation passed, calling onSubmit with data:", data);
+              onSubmit(data);
+            },
+            (errors) => {
+              console.error("❌ Form validation errors:", errors);
+              console.log("📋 Current form values:", form.getValues());
+              console.log("🔍 Form state:", form.formState);
+            }
+          )} className="space-y-4">
             {renderFormFields()}
             <div className="flex justify-end space-x-2">
               <Button
