@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +24,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { Profile } from "@shared/schema";
 import { SectionManager } from "./section-manager";
 import { AddContentModal } from "./add-content-modal";
 import {
@@ -191,6 +192,25 @@ export default function SimpleComprehensiveForm({
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const userId = user?.id;
+
+  // Fetch existing profile data to autofill
+  const { data: existingProfile, isLoading } = useQuery<Profile>({
+    queryKey: ["/api/profile", userId],
+    enabled: !!userId,
+  });
+
+  // Fetch existing education data
+  const { data: existingEducation = [] } = useQuery({
+    queryKey: ["/api/education", userId],
+    enabled: !!userId,
+  });
+
+  // Fetch existing work experience data
+  const { data: existingWorkExperience = [] } = useQuery({
+    queryKey: ["/api/work-experience", userId],
+    enabled: !!userId,
+  });
 
   const personalForm = useForm<PersonalDetailsData>({
     resolver: zodResolver(personalDetailsSchema),
@@ -219,16 +239,139 @@ export default function SimpleComprehensiveForm({
     },
   });
 
-  // Initialize forms with user data
+  // Initialize forms with existing data
   useEffect(() => {
-    if (user) {
-      personalForm.setValue(
-        "fullName",
-        `${user.firstName || ""} ${user.lastName || ""}`.trim()
-      );
-      contactForm.setValue("email", user.email || "");
+    if (user || existingProfile) {
+      const profile = existingProfile;
+
+      // Autofill personal details
+      if (profile?.personalDetails) {
+        const personalDetails = profile.personalDetails;
+        personalForm.reset({
+          fullName:
+            personalDetails.fullName ||
+            `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
+          roleOrTitle: personalDetails.roleOrTitle || "",
+          dob: personalDetails.dob || "",
+          gender: personalDetails.gender,
+          summary: personalDetails.summary || "",
+          nationality: personalDetails.nationality || "",
+          city: personalDetails.location?.city || "",
+          state: personalDetails.location?.state || "",
+          country: personalDetails.location?.country || "",
+          pincode: personalDetails.location?.pincode || "",
+        });
+      } else if (user) {
+        personalForm.setValue(
+          "fullName",
+          `${user.firstName || ""} ${user.lastName || ""}`.trim()
+        );
+      }
+
+      // Autofill contact details
+      if (profile?.contactDetails) {
+        const contactDetails = profile.contactDetails;
+        contactForm.reset({
+          email: contactDetails.email || user?.email || "",
+          phone: contactDetails.phone || "",
+          linkedin: contactDetails.linkedin || "",
+          githubOrPortfolio: contactDetails.githubOrPortfolio || "",
+          website: contactDetails.website || "",
+          twitter: contactDetails.twitter || "",
+        });
+      } else if (user) {
+        contactForm.setValue("email", user.email || "");
+      }
+
+      // Autofill other details sections
+      if (profile?.otherDetails) {
+        const otherDetails = profile.otherDetails;
+
+        setSections((prev) => ({
+          ...prev,
+          education: (otherDetails.education || []).map(
+            (edu: any, index: number) => ({
+              id: edu.id || `education-${index}`,
+              title: edu.institution,
+              subtitle: edu.level,
+              description: edu.degree,
+              year: edu.yearOfPassing?.toString(),
+              isVisible: true,
+            })
+          ),
+          workExperience: (otherDetails.workExperience || []).map(
+            (exp: any, index: number) => ({
+              id: exp.id || `work-${index}`,
+              title: exp.roleOrPosition,
+              organization: exp.organization,
+              startDate: exp.startDate,
+              endDate: exp.endDate,
+              responsibilities: exp.responsibilities,
+              skills: exp.skillsOrToolsUsed,
+              isVisible: true,
+            })
+          ),
+          skills: {
+            technical: (otherDetails.skills?.technical || []).map(
+              (skill: string, index: number) => ({
+                id: `tech-${index}`,
+                title: skill,
+                isVisible: true,
+              })
+            ),
+            domainSpecific: (otherDetails.skills?.domainSpecific || []).map(
+              (skill: string, index: number) => ({
+                id: `domain-${index}`,
+                title: skill,
+                isVisible: true,
+              })
+            ),
+            soft: (otherDetails.skills?.soft || []).map(
+              (skill: string, index: number) => ({
+                id: `soft-${index}`,
+                title: skill,
+                isVisible: true,
+              })
+            ),
+            tools: (otherDetails.skills?.tools || []).map(
+              (skill: string, index: number) => ({
+                id: `tool-${index}`,
+                title: skill,
+                isVisible: true,
+              })
+            ),
+          },
+          certifications: (otherDetails.certifications || []).map(
+            (cert: any, index: number) => ({
+              id: cert.id || `cert-${index}`,
+              title: cert.title,
+              organization: cert.organization,
+              year: cert.year?.toString(),
+              isVisible: true,
+            })
+          ),
+          projects: (otherDetails.projects || []).map(
+            (project: any, index: number) => ({
+              id: project.id || `project-${index}`,
+              title: project.title,
+              description: project.description,
+              subtitle: project.domain,
+              skills: project.toolsOrMethods,
+              isVisible: true,
+            })
+          ),
+          achievements: (otherDetails.achievements || []).map(
+            (achievement: string, index: number) => ({
+              id: `achievement-${index}`,
+              title: achievement,
+              isVisible: true,
+            })
+          ),
+          // Add other sections as needed
+        }));
+      }
     }
-  }, [user, personalForm, contactForm]);
+  }, [user, existingProfile, personalForm, contactForm]);
 
   const saveProfileMutation = useMutation({
     mutationFn: async () => {
@@ -326,9 +469,17 @@ export default function SimpleComprehensiveForm({
         isPublic: false,
       };
 
-      return apiRequest("POST", "/api/profile", comprehensiveProfile);
+      // Use PUT for upsert functionality
+      return apiRequest("PUT", "/api/profile", comprehensiveProfile);
     },
     onSuccess: () => {
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/profile", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/education", userId] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/work-experience", userId],
+      });
+
       toast({
         title: "Profile Saved",
         description: "Your comprehensive profile has been saved successfully.",

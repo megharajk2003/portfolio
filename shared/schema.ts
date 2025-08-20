@@ -267,7 +267,28 @@ export const educationItemSchema = z.object({
   gradeOrScore: z.string().optional(),
 });
 
+// Education schema with userId for API operations
+export const educationWithUserSchema = z.object({
+  userId: z.string(),
+  level: z.string(),
+  institution: z.string(),
+  degree: z.string().optional(),
+  yearOfPassing: z.number().optional(),
+  gradeOrScore: z.string().optional(),
+});
+
 export const workExperienceItemSchema = z.object({
+  organization: z.string(),
+  roleOrPosition: z.string(),
+  startDate: z.string(),
+  endDate: z.string().optional(),
+  responsibilities: z.array(z.string()),
+  skillsOrToolsUsed: z.array(z.string()),
+});
+
+// Work experience schema with userId for API operations
+export const workExperienceWithUserSchema = z.object({
+  userId: z.string(),
   organization: z.string(),
   roleOrPosition: z.string(),
   startDate: z.string(),
@@ -362,8 +383,8 @@ export const comprehensiveProfileSchema = z.object({
 });
 
 // Insert schemas for individual portfolio sections
-export const insertWorkExperienceSchema = workExperienceItemSchema;
-export const insertEducationSchema = educationItemSchema;
+export const insertWorkExperienceSchema = workExperienceWithUserSchema;
+export const insertEducationSchema = educationWithUserSchema;
 export const insertSkillSchema = z.object({
   category: z.string(),
   name: z.string(),
@@ -443,6 +464,10 @@ export type InsertSectionSettings = z.infer<typeof insertSectionSettingsSchema>;
 // Portfolio section types
 export type InsertWorkExperience = z.infer<typeof insertWorkExperienceSchema>;
 export type InsertEducation = z.infer<typeof insertEducationSchema>;
+export type EducationWithUser = z.infer<typeof educationWithUserSchema>;
+export type WorkExperienceWithUser = z.infer<
+  typeof workExperienceWithUserSchema
+>;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertCertification = z.infer<typeof insertCertificationSchema>;

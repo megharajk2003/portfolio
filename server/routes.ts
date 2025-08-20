@@ -11,6 +11,8 @@ import {
   insertSectionSettingsSchema,
   insertWorkExperienceSchema,
   insertEducationSchema,
+  educationWithUserSchema,
+  workExperienceWithUserSchema,
   insertSkillSchema,
   insertProjectSchema,
   insertCertificationSchema,
@@ -72,6 +74,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Full error:", error);
         return res.status(500).json({
           message: "Failed to create profile",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
+    }
+  });
+
+  // Upsert profile endpoint - create or update existing profile
+  app.put("/api/profile", async (req, res) => {
+    try {
+      const profileData = insertProfileSchema.parse(req.body);
+      const profile = await (storage as any).upsertProfile(profileData);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error upserting profile:", error);
+
+      if (error instanceof Error) {
+        console.error("Full error:", error);
+        return res.status(500).json({
+          message: "Failed to upsert profile",
           error: error.message,
           stack: error.stack,
         });
@@ -162,9 +189,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/work-experience/:id", async (req, res) => {
     try {
+      const updateData = { ...req.body, userId: req.body.userId };
       const experience = await storage.updateWorkExperience(
         req.params.id,
-        req.body
+        updateData
       );
       if (!experience) {
         return res.status(404).json({ message: "Work experience not found" });
@@ -265,7 +293,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/education/:id", async (req, res) => {
     try {
-      const education = await storage.updateEducation(req.params.id, req.body);
+      const updateData = { ...req.body, userId: req.body.userId };
+      const education = await storage.updateEducation(
+        req.params.id,
+        updateData
+      );
       if (!education) {
         return res.status(404).json({ message: "Education not found" });
       }
