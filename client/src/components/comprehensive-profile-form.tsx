@@ -487,11 +487,6 @@ export default function SimpleComprehensiveForm({
             label: "Contact Details",
             icon: <Mail className="h-4 w-4" />,
           },
-          {
-            id: "sections",
-            label: "Portfolio Sections",
-            icon: <FileText className="h-4 w-4" />,
-          },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -726,92 +721,6 @@ export default function SimpleComprehensiveForm({
             </Form>
           </CardContent>
         </Card>
-      )}
-
-      {/* Portfolio Sections */}
-      {activeSection === "sections" && (
-        <div className="space-y-6">
-          <SectionManager
-            title="Education"
-            icon={<GraduationCap className="h-5 w-5" />}
-            entries={sections.education}
-            onAddEntry={() => handleAddEntry("education")}
-            onDeleteEntry={(id) => handleDeleteEntry("education", id)}
-          />
-
-          <SectionManager
-            title="Technical Skills"
-            icon={<Award className="h-5 w-5" />}
-            entries={sections.skills.technical}
-            onAddEntry={() => handleAddEntry("skills", "technical")}
-            onDeleteEntry={(id) => handleDeleteEntry("skills", id, "technical")}
-            suggestions={suggestions.skills.technical}
-            onSelectSuggestion={(suggestion) =>
-              handleSelectSuggestion("skills", suggestion, "technical")
-            }
-            showSuggestions={true}
-          />
-
-          <SectionManager
-            title="Work Experience"
-            icon={<Building className="h-5 w-5" />}
-            entries={sections.workExperience}
-            onAddEntry={() => handleAddEntry("workExperience")}
-            onDeleteEntry={(id) => handleDeleteEntry("workExperience", id)}
-          />
-
-          <SectionManager
-            title="Certifications"
-            icon={<BookOpen className="h-5 w-5" />}
-            entries={sections.certifications}
-            onAddEntry={() => handleAddEntry("certifications")}
-            onDeleteEntry={(id) => handleDeleteEntry("certifications", id)}
-            suggestions={suggestions.certifications}
-            onSelectSuggestion={(suggestion) =>
-              handleSelectSuggestion("certifications", suggestion)
-            }
-            showSuggestions={true}
-          />
-
-          <SectionManager
-            title="Achievements"
-            icon={<Trophy className="h-5 w-5" />}
-            entries={sections.achievements}
-            onAddEntry={() => handleAddEntry("achievements")}
-            onDeleteEntry={(id) => handleDeleteEntry("achievements", id)}
-            suggestions={suggestions.achievements}
-            onSelectSuggestion={(suggestion) =>
-              handleSelectSuggestion("achievements", suggestion)
-            }
-            showSuggestions={true}
-          />
-
-          <SectionManager
-            title="Interests & Hobbies"
-            icon={<Star className="h-5 w-5" />}
-            entries={sections.interests}
-            onAddEntry={() => handleAddEntry("interests")}
-            onDeleteEntry={(id) => handleDeleteEntry("interests", id)}
-            suggestions={suggestions.interests}
-            onSelectSuggestion={(suggestion) =>
-              handleSelectSuggestion("interests", suggestion)
-            }
-            showSuggestions={true}
-          />
-
-          {/* Add Content Button */}
-          <div className="flex justify-center pt-6">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setShowAddContentModal(true)}
-              className="flex items-center space-x-2"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Add Content</span>
-            </Button>
-          </div>
-        </div>
       )}
 
       {/* Save Button */}

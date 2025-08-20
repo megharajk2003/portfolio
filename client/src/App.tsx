@@ -20,7 +20,7 @@ import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import Home from "./pages/dashboard";
-import AcademicDetails from "./pages/academicdetails";
+
 function Router() {
   const { user, isLoading } = useAuth();
   const isAuthenticated = !!user;
@@ -39,7 +39,7 @@ function Router() {
         <>
           <Route path="/dashboard" component={Home} />
           <Route path="/profile" component={Profile} />
-          <Route path="/academic" component={AcademicDetails} />
+
           <Route path="/skills" component={Skills} />
           <Route path="/projects" component={Projects} />
           <Route path="/portfolio" component={Portfolio} />
