@@ -294,8 +294,9 @@ export const workExperienceWithUserSchema = z.object({
   roleOrPosition: z.string(),
   startDate: z.string(),
   endDate: z.string().optional(),
-  responsibilities: z.array(z.string()),
-  skillsOrToolsUsed: z.array(z.string()),
+  responsibilities: z.string().optional(), // Allow string input from forms
+  skillsOrToolsUsed: z.string().optional(), // Allow string input from forms
+  description: z.string().optional(), // Add missing field from form
 });
 
 export const internshipItemSchema = z.object({
@@ -407,10 +408,12 @@ export const projectWithUserSchema = z.object({
   title: z.string(),
   description: z.string(),
   domain: z.string(),
-  toolsOrMethods: z.array(z.string()),
+  toolsOrMethods: z.string().optional(), // Allow string input from forms
   outcome: z.string().optional(),
-  url: z.string().url().optional(),
-  githubUrl: z.string().url().optional(),
+  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  githubUrl: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  startDate: z.string().optional(), // Add missing fields from form
+  endDate: z.string().optional(),
 });
 
 // Certification schema with userId for API operations
@@ -418,8 +421,9 @@ export const certificationWithUserSchema = z.object({
   userId: z.string(),
   title: z.string(),
   organization: z.string(),
-  year: z.number(),
-  url: z.string().url().optional(),
+  year: z.number().optional(),
+  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  description: z.string().optional(), // Add missing field from form
 });
 
 // Publication schema with userId for API operations

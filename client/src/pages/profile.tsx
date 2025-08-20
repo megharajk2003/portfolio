@@ -91,10 +91,10 @@ const projectSchema = z.object({
   title: z.string().min(1, "Project title is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   domain: z.string().min(1, "Domain is required"),
-  toolsOrMethods: z.array(z.string()),
+  toolsOrMethods: z.string().optional(), // Simplified to string for input
   outcome: z.string().optional(),
-  url: z.string().url().optional(),
-  githubUrl: z.string().url().optional(),
+  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  githubUrl: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });
@@ -104,8 +104,8 @@ const workExperienceSchema = z.object({
   roleOrPosition: z.string().min(1, "Role is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
-  responsibilities: z.array(z.string()),
-  skillsOrToolsUsed: z.array(z.string()),
+  responsibilities: z.string().optional(), // Simplified to string for input
+  skillsOrToolsUsed: z.string().optional(), // Simplified to string for input  
   description: z.string().optional(),
 });
 
@@ -309,7 +309,7 @@ function AddEntryForm({
         return skillSchema;
       case "projects":
         return projectSchema;
-      case "workExperience":
+      case "work-experience":
         return workExperienceSchema;
       case "volunteer":
         return volunteerSchema;
@@ -349,6 +349,28 @@ function AddEntryForm({
         };
       case "skills":
         return { name: "", level: 3, category: "" };
+      case "projects":
+        return {
+          title: "",
+          description: "",
+          domain: "",
+          toolsOrMethods: "",
+          outcome: "",
+          url: "",
+          githubUrl: "",
+          startDate: "",
+          endDate: "",
+        };
+      case "work-experience":
+        return {
+          organization: "",
+          roleOrPosition: "",
+          startDate: "",
+          endDate: "",
+          responsibilities: "",
+          skillsOrToolsUsed: "",
+          description: "",
+        };
       default:
         return {};
     }
@@ -617,6 +639,305 @@ function AddEntryForm({
                         }
                       </div>
                     </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        );
+
+      case "projects":
+        return (
+          <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Title *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., E-commerce Website"
+                      data-testid="input-project-title"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description *</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Describe what you built and the key features..."
+                      data-testid="input-project-description"
+                      className="min-h-[100px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="domain"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Domain/Category *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-project-domain">
+                        <SelectValue placeholder="Select project domain" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suggestions.domains.map((domain) => (
+                        <SelectItem key={domain} value={domain}>
+                          {domain}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="toolsOrMethods"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Technologies/Tools Used</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., React, Node.js, MongoDB, AWS"
+                      data-testid="input-project-tools"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="outcome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Outcome</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="What was the result? Impact? Lessons learned?"
+                      data-testid="input-project-outcome"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        data-testid="input-project-start-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        data-testid="input-project-end-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Live Demo URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="https://myproject.com"
+                        data-testid="input-project-url"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="githubUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GitHub URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="https://github.com/username/repo"
+                        data-testid="input-project-github"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </>
+        );
+
+      case "work-experience":
+        return (
+          <>
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization/Company *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Google, Microsoft, Startup Inc."
+                      data-testid="input-work-organization"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="roleOrPosition"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role/Position *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Software Engineer, Product Manager"
+                      data-testid="input-work-role"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date *</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        data-testid="input-work-start-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date (Current if ongoing)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        data-testid="input-work-end-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="responsibilities"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Key Responsibilities</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="• Developed web applications using React and Node.js&#10;• Collaborated with cross-functional teams&#10;• Led code reviews and mentored junior developers"
+                      data-testid="input-work-responsibilities"
+                      className="min-h-[100px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="skillsOrToolsUsed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Skills & Tools Used</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Python, React, AWS, Docker, Agile"
+                      data-testid="input-work-skills"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Any additional context about your role, achievements, or impact..."
+                      data-testid="input-work-description"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
