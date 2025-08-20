@@ -410,8 +410,8 @@ export const projectWithUserSchema = z.object({
   domain: z.string(),
   toolsOrMethods: z.string().optional(), // Allow string input from forms
   outcome: z.string().optional(),
-  url: z.preprocess((val) => val === "" ? undefined : val, z.string().url().optional()),
-  githubUrl: z.preprocess((val) => val === "" ? undefined : val, z.string().url().optional()),
+  url: z.string().optional(),
+  githubUrl: z.string().optional(),
   startDate: z.string().optional(), // Add missing fields from form
   endDate: z.string().optional(),
 });
