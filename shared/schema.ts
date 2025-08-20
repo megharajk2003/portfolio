@@ -361,11 +361,29 @@ export const comprehensiveProfileSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
+// Insert schemas for individual portfolio sections
+export const insertWorkExperienceSchema = workExperienceItemSchema;
+export const insertEducationSchema = educationItemSchema;
+export const insertSkillSchema = z.object({
+  category: z.string(),
+  name: z.string(),
+  level: z.number().optional(),
+});
+export const insertProjectSchema = projectItemSchema;
+export const insertCertificationSchema = certificationItemSchema;
+export const insertAchievementSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  date: z.string(),
+});
+
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  profileImageUrl: z.string().nullable().optional(),
 });
 
 export const insertProfileSchema = z.object({
@@ -421,3 +439,11 @@ export type DailyActivity = typeof dailyActivity.$inferSelect;
 export type InsertDailyActivity = z.infer<typeof insertDailyActivitySchema>;
 export type SectionSettings = typeof sectionSettings.$inferSelect;
 export type InsertSectionSettings = z.infer<typeof insertSectionSettingsSchema>;
+
+// Portfolio section types
+export type InsertWorkExperience = z.infer<typeof insertWorkExperienceSchema>;
+export type InsertEducation = z.infer<typeof insertEducationSchema>;
+export type InsertSkill = z.infer<typeof insertSkillSchema>;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type InsertCertification = z.infer<typeof insertCertificationSchema>;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;

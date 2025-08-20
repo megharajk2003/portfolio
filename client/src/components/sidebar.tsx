@@ -18,8 +18,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Profile", href: "/profile", icon: User },
-  { name: "Experience", href: "/experience", icon: Briefcase },
-  { name: "Education", href: "/education", icon: GraduationCap },
+  { name: "academic", href: "/academic", icon: GraduationCap },
   { name: "Skills", href: "/skills", icon: Cog },
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Learning", href: "/learning", icon: BookOpen },

@@ -9,6 +9,12 @@ import {
   insertUserProgressSchema,
   insertDailyActivitySchema,
   insertSectionSettingsSchema,
+  insertWorkExperienceSchema,
+  insertEducationSchema,
+  insertSkillSchema,
+  insertProjectSchema,
+  insertCertificationSchema,
+  insertAchievementSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -770,7 +776,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User progress routes
   app.get("/api/user-progress/:userId", async (req, res) => {
     try {
-      const progress = await storage.getUserProgress(req.params.userId);
+      const progress = await storage.getUserProgress(
+        parseInt(req.params.userId)
+      );
       res.json(progress);
     } catch (error) {
       console.error("Error fetching user progress:", error);
@@ -818,7 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/user-progress/:userId/:moduleId", async (req, res) => {
     try {
       const progress = await storage.updateUserProgress(
-        req.params.userId,
+        parseInt(req.params.userId),
         req.params.moduleId,
         req.body
       );
@@ -848,7 +856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User stats routes
   app.get("/api/user-stats/:userId", async (req, res) => {
     try {
-      const stats = await storage.getUserStats(req.params.userId);
+      const stats = await storage.getUserStats(parseInt(req.params.userId));
       if (!stats) {
         return res.status(404).json({ message: "User stats not found" });
       }
@@ -874,7 +882,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/user-stats/:userId", async (req, res) => {
     try {
-      const stats = await storage.updateUserStats(req.params.userId, req.body);
+      const stats = await storage.updateUserStats(
+        parseInt(req.params.userId),
+        req.body
+      );
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to update user stats" });
@@ -886,7 +897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { startDate, endDate } = req.query;
       const activity = await storage.getDailyActivity(
-        req.params.userId,
+        parseInt(req.params.userId),
         (startDate as string) || "2024-01-01",
         (endDate as string) || "2024-12-31"
       );
@@ -909,7 +920,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Section settings routes
   app.get("/api/section-settings/:userId", async (req, res) => {
     try {
-      const settings = await storage.getSectionSettings(req.params.userId);
+      const settings = await storage.getSectionSettings(
+        parseInt(req.params.userId)
+      );
       res.json(settings);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch section settings" });
@@ -919,7 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/section-settings/:userId/:sectionName", async (req, res) => {
     try {
       const settings = await storage.updateSectionSettings(
-        req.params.userId,
+        parseInt(req.params.userId),
         req.params.sectionName,
         req.body
       );

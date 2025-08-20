@@ -80,11 +80,45 @@ export interface IStorage {
   ): Promise<DailyActivity | undefined>;
 
   getSectionSettings(userId: number): Promise<SectionSettings[]>;
+  createSectionSettings(
+    settings: InsertSectionSettings
+  ): Promise<SectionSettings>;
   updateSectionSettings(
     userId: number,
     sectionName: string,
     settings: Partial<SectionSettings>
   ): Promise<SectionSettings | undefined>;
+
+  // Portfolio section CRUD operations
+  getWorkExperience(userId: string): Promise<any[]>;
+  createWorkExperience(data: any): Promise<any>;
+  updateWorkExperience(id: string, data: any): Promise<any>;
+  deleteWorkExperience(id: string): Promise<boolean>;
+
+  getEducation(userId: string): Promise<any[]>;
+  createEducation(data: any): Promise<any>;
+  updateEducation(id: string, data: any): Promise<any>;
+  deleteEducation(id: string): Promise<boolean>;
+
+  getSkills(userId: string): Promise<any[]>;
+  createSkill(data: any): Promise<any>;
+  updateSkill(id: string, data: any): Promise<any>;
+  deleteSkill(id: string): Promise<boolean>;
+
+  getProjects(userId: string): Promise<any[]>;
+  createProject(data: any): Promise<any>;
+  updateProject(id: string, data: any): Promise<any>;
+  deleteProject(id: string): Promise<boolean>;
+
+  getCertifications(userId: string): Promise<any[]>;
+  createCertification(data: any): Promise<any>;
+  updateCertification(id: string, data: any): Promise<any>;
+  deleteCertification(id: string): Promise<boolean>;
+
+  getAchievements(userId: string): Promise<any[]>;
+  createAchievement(data: any): Promise<any>;
+  updateAchievement(id: string, data: any): Promise<any>;
+  deleteAchievement(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -97,6 +131,14 @@ export class MemStorage implements IStorage {
   private userStats: Map<number, UserStats> = new Map();
   private dailyActivity: Map<string, DailyActivity> = new Map(); // userId-date -> Activity
   private sectionSettings: Map<string, SectionSettings> = new Map(); // userId-sectionName -> Settings
+
+  // Portfolio section storage
+  private workExperience: Map<string, any> = new Map();
+  private education: Map<string, any> = new Map();
+  private skills: Map<string, any> = new Map();
+  private projects: Map<string, any> = new Map();
+  private certifications: Map<string, any> = new Map();
+  private achievements: Map<string, any> = new Map();
 
   constructor() {
     // Initialize with sample learning modules
@@ -150,17 +192,18 @@ export class MemStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const id = Date.now(); // Simple ID generation
     const newUser: User = {
-      ...user,
       id,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
-      profileImageUrl: user.profileImageUrl || null,
+      email: user.email,
+      password: user.password,
+      firstName: user.firstName ?? null,
+      lastName: user.lastName ?? null,
+      profileImageUrl: user.profileImageUrl ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     this.users.set(id, newUser);
-    this.usersByEmail.set(user.email, newUser);
+    this.usersByEmail.set(newUser.email, newUser);
     return newUser;
   }
 
@@ -169,10 +212,10 @@ export class MemStorage implements IStorage {
     if (existingUser) {
       const updatedUser = { ...existingUser, ...user, updatedAt: new Date() };
       this.users.set(existingUser.id, updatedUser);
-      this.usersByEmail.set(user.email, updatedUser);
+      this.usersByEmail.set(updatedUser.email, updatedUser);
       return updatedUser;
     }
-    return this.createUser(user);
+    return this.createUser(user as InsertUser);
   }
 
   // Profile management
@@ -229,7 +272,7 @@ export class MemStorage implements IStorage {
   // User Progress
   async getUserProgress(userId: number): Promise<UserProgress[]> {
     const userProgressList: UserProgress[] = [];
-    for (const [key, progress] of this.userProgress.entries()) {
+    for (const [key, progress] of Array.from(this.userProgress.entries())) {
       if (key.startsWith(`${userId}-`)) {
         userProgressList.push(progress);
       }
@@ -249,8 +292,12 @@ export class MemStorage implements IStorage {
   ): Promise<UserProgress> {
     const id = randomUUID();
     const newProgress: UserProgress = {
-      ...progress,
       id,
+      userId: progress.userId,
+      moduleId: progress.moduleId,
+      currentLesson: progress.currentLesson || null,
+      isCompleted: progress.isCompleted || null,
+      xpEarned: progress.xpEarned || null,
       completedAt: null,
     };
 
@@ -319,7 +366,7 @@ export class MemStorage implements IStorage {
     endDate: string
   ): Promise<DailyActivity[]> {
     const activities: DailyActivity[] = [];
-    for (const [key, activity] of this.dailyActivity.entries()) {
+    for (const [key, activity] of Array.from(this.dailyActivity.entries())) {
       if (
         key.startsWith(`${userId}-`) &&
         activity.date >= startDate &&
@@ -336,8 +383,11 @@ export class MemStorage implements IStorage {
   ): Promise<DailyActivity> {
     const id = randomUUID();
     const newActivity: DailyActivity = {
-      ...activity,
       id,
+      userId: activity.userId,
+      date: activity.date,
+      xpEarned: activity.xpEarned || null,
+      lessonsCompleted: activity.lessonsCompleted || null,
     };
 
     this.dailyActivity.set(`${activity.userId}-${activity.date}`, newActivity);
@@ -370,12 +420,12 @@ export class MemStorage implements IStorage {
   // Section Settings
   async getSectionSettings(userId: number): Promise<SectionSettings[]> {
     const settings: SectionSettings[] = [];
-    for (const [key, setting] of this.sectionSettings.entries()) {
+    for (const [key, setting] of Array.from(this.sectionSettings.entries())) {
       if (key.startsWith(`${userId}-`)) {
         settings.push(setting);
       }
     }
-    return settings.sort((a, b) => a.sortOrder - b.sortOrder);
+    return settings.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
   async updateSectionSettings(
@@ -400,6 +450,272 @@ export class MemStorage implements IStorage {
     this.sectionSettings.set(key, updatedSettings);
     return updatedSettings;
   }
+
+  async createSectionSettings(
+    settings: InsertSectionSettings
+  ): Promise<SectionSettings> {
+    const id = randomUUID();
+    const newSettings: SectionSettings = {
+      id,
+      userId: settings.userId,
+      sectionName: settings.sectionName,
+      isVisible: settings.isVisible || null,
+      sortOrder: settings.sortOrder || null,
+    };
+
+    this.sectionSettings.set(
+      `${settings.userId}-${settings.sectionName}`,
+      newSettings
+    );
+    return newSettings;
+  }
+
+  // Portfolio section CRUD implementations
+  async getWorkExperience(userId: string): Promise<any[]> {
+    const results: any[] = [];
+    for (const [key, experience] of Array.from(this.workExperience.entries())) {
+      if (key.startsWith(`${userId}-`)) {
+        results.push(experience);
+      }
+    }
+    return results;
+  }
+
+  async createWorkExperience(data: any): Promise<any> {
+    const id = randomUUID();
+    const newExperience = { ...data, id };
+    this.workExperience.set(`${data.userId}-${id}`, newExperience);
+    return newExperience;
+  }
+
+  async updateWorkExperience(id: string, data: any): Promise<any> {
+    const key = Array.from(this.workExperience.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      const existing = this.workExperience.get(key);
+      const updated = { ...existing, ...data };
+      this.workExperience.set(key, updated);
+      return updated;
+    }
+    return null;
+  }
+
+  async deleteWorkExperience(id: string): Promise<boolean> {
+    const key = Array.from(this.workExperience.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      this.workExperience.delete(key);
+      return true;
+    }
+    return false;
+  }
+
+  async getEducation(userId: string): Promise<any[]> {
+    const results: any[] = [];
+    for (const [key, edu] of Array.from(this.education.entries())) {
+      if (key.startsWith(`${userId}-`)) {
+        results.push(edu);
+      }
+    }
+    return results;
+  }
+
+  async createEducation(data: any): Promise<any> {
+    const id = randomUUID();
+    const newEducation = { ...data, id };
+    this.education.set(`${data.userId}-${id}`, newEducation);
+    return newEducation;
+  }
+
+  async updateEducation(id: string, data: any): Promise<any> {
+    const key = Array.from(this.education.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      const existing = this.education.get(key);
+      const updated = { ...existing, ...data };
+      this.education.set(key, updated);
+      return updated;
+    }
+    return null;
+  }
+
+  async deleteEducation(id: string): Promise<boolean> {
+    const key = Array.from(this.education.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      this.education.delete(key);
+      return true;
+    }
+    return false;
+  }
+
+  async getSkills(userId: string): Promise<any[]> {
+    const results: any[] = [];
+    for (const [key, skill] of Array.from(this.skills.entries())) {
+      if (key.startsWith(`${userId}-`)) {
+        results.push(skill);
+      }
+    }
+    return results;
+  }
+
+  async createSkill(data: any): Promise<any> {
+    const id = randomUUID();
+    const newSkill = { ...data, id };
+    this.skills.set(`${data.userId}-${id}`, newSkill);
+    return newSkill;
+  }
+
+  async updateSkill(id: string, data: any): Promise<any> {
+    const key = Array.from(this.skills.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      const existing = this.skills.get(key);
+      const updated = { ...existing, ...data };
+      this.skills.set(key, updated);
+      return updated;
+    }
+    return null;
+  }
+
+  async deleteSkill(id: string): Promise<boolean> {
+    const key = Array.from(this.skills.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      this.skills.delete(key);
+      return true;
+    }
+    return false;
+  }
+
+  async getProjects(userId: string): Promise<any[]> {
+    const results: any[] = [];
+    for (const [key, project] of Array.from(this.projects.entries())) {
+      if (key.startsWith(`${userId}-`)) {
+        results.push(project);
+      }
+    }
+    return results;
+  }
+
+  async createProject(data: any): Promise<any> {
+    const id = randomUUID();
+    const newProject = { ...data, id };
+    this.projects.set(`${data.userId}-${id}`, newProject);
+    return newProject;
+  }
+
+  async updateProject(id: string, data: any): Promise<any> {
+    const key = Array.from(this.projects.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      const existing = this.projects.get(key);
+      const updated = { ...existing, ...data };
+      this.projects.set(key, updated);
+      return updated;
+    }
+    return null;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    const key = Array.from(this.projects.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      this.projects.delete(key);
+      return true;
+    }
+    return false;
+  }
+
+  async getCertifications(userId: string): Promise<any[]> {
+    const results: any[] = [];
+    for (const [key, cert] of Array.from(this.certifications.entries())) {
+      if (key.startsWith(`${userId}-`)) {
+        results.push(cert);
+      }
+    }
+    return results;
+  }
+
+  async createCertification(data: any): Promise<any> {
+    const id = randomUUID();
+    const newCertification = { ...data, id };
+    this.certifications.set(`${data.userId}-${id}`, newCertification);
+    return newCertification;
+  }
+
+  async updateCertification(id: string, data: any): Promise<any> {
+    const key = Array.from(this.certifications.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      const existing = this.certifications.get(key);
+      const updated = { ...existing, ...data };
+      this.certifications.set(key, updated);
+      return updated;
+    }
+    return null;
+  }
+
+  async deleteCertification(id: string): Promise<boolean> {
+    const key = Array.from(this.certifications.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      this.certifications.delete(key);
+      return true;
+    }
+    return false;
+  }
+
+  async getAchievements(userId: string): Promise<any[]> {
+    const results: any[] = [];
+    for (const [key, achievement] of Array.from(this.achievements.entries())) {
+      if (key.startsWith(`${userId}-`)) {
+        results.push(achievement);
+      }
+    }
+    return results;
+  }
+
+  async createAchievement(data: any): Promise<any> {
+    const id = randomUUID();
+    const newAchievement = { ...data, id };
+    this.achievements.set(`${data.userId}-${id}`, newAchievement);
+    return newAchievement;
+  }
+
+  async updateAchievement(id: string, data: any): Promise<any> {
+    const key = Array.from(this.achievements.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      const existing = this.achievements.get(key);
+      const updated = { ...existing, ...data };
+      this.achievements.set(key, updated);
+      return updated;
+    }
+    return null;
+  }
+
+  async deleteAchievement(id: string): Promise<boolean> {
+    const key = Array.from(this.achievements.keys()).find((k) =>
+      k.endsWith(`-${id}`)
+    );
+    if (key) {
+      this.achievements.delete(key);
+      return true;
+    }
+    return false;
+  }
 }
 
 export class PgStorage implements IStorage {
@@ -421,20 +737,35 @@ export class PgStorage implements IStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(user).returning();
+    const result = await db
+      .insert(users)
+      .values({
+        email: user.email,
+        password: user.password,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+      })
+      .returning();
     return result[0];
   }
 
   async upsertUser(user: UpsertUser): Promise<User> {
     const result = await db
       .insert(users)
-      .values(user)
+      .values({
+        email: user.email,
+        password: user.password || "",
+        firstName: user.firstName || null,
+        lastName: user.lastName || null,
+        profileImageUrl: user.profileImageUrl || null,
+      })
       .onConflictDoUpdate({
         target: users.email,
         set: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
+          firstName: user.firstName || null,
+          lastName: user.lastName || null,
+          profileImageUrl: user.profileImageUrl || null,
           updatedAt: new Date(),
         },
       })
@@ -598,6 +929,16 @@ export class PgStorage implements IStorage {
       .where(eq(sectionSettings.userId, userId));
   }
 
+  async createSectionSettings(
+    settings: InsertSectionSettings
+  ): Promise<SectionSettings> {
+    const result = await db
+      .insert(sectionSettings)
+      .values(settings)
+      .returning();
+    return result[0];
+  }
+
   async updateSectionSettings(
     userId: number,
     sectionName: string,
@@ -614,6 +955,115 @@ export class PgStorage implements IStorage {
       )
       .returning();
     return result[0];
+  }
+
+  // Portfolio section CRUD operations - placeholder implementations
+  // These would normally access separate tables or profile JSON fields
+  async getWorkExperience(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.workExperience || [];
+  }
+
+  async createWorkExperience(data: any): Promise<any> {
+    // Placeholder - would normally insert into a separate table
+    return { ...data, id: randomUUID() };
+  }
+
+  async updateWorkExperience(id: string, data: any): Promise<any> {
+    // Placeholder - would normally update in a separate table
+    return { ...data, id };
+  }
+
+  async deleteWorkExperience(id: string): Promise<boolean> {
+    // Placeholder - would normally delete from a separate table
+    return true;
+  }
+
+  async getEducation(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.education || [];
+  }
+
+  async createEducation(data: any): Promise<any> {
+    return { ...data, id: randomUUID() };
+  }
+
+  async updateEducation(id: string, data: any): Promise<any> {
+    return { ...data, id };
+  }
+
+  async deleteEducation(id: string): Promise<boolean> {
+    return true;
+  }
+
+  async getSkills(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.skills
+      ? Object.values(profile.otherDetails.skills).flat()
+      : [];
+  }
+
+  async createSkill(data: any): Promise<any> {
+    return { ...data, id: randomUUID() };
+  }
+
+  async updateSkill(id: string, data: any): Promise<any> {
+    return { ...data, id };
+  }
+
+  async deleteSkill(id: string): Promise<boolean> {
+    return true;
+  }
+
+  async getProjects(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.projects || [];
+  }
+
+  async createProject(data: any): Promise<any> {
+    return { ...data, id: randomUUID() };
+  }
+
+  async updateProject(id: string, data: any): Promise<any> {
+    return { ...data, id };
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    return true;
+  }
+
+  async getCertifications(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.certifications || [];
+  }
+
+  async createCertification(data: any): Promise<any> {
+    return { ...data, id: randomUUID() };
+  }
+
+  async updateCertification(id: string, data: any): Promise<any> {
+    return { ...data, id };
+  }
+
+  async deleteCertification(id: string): Promise<boolean> {
+    return true;
+  }
+
+  async getAchievements(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.achievements || [];
+  }
+
+  async createAchievement(data: any): Promise<any> {
+    return { ...data, id: randomUUID() };
+  }
+
+  async updateAchievement(id: string, data: any): Promise<any> {
+    return { ...data, id };
+  }
+
+  async deleteAchievement(id: string): Promise<boolean> {
+    return true;
   }
 }
 

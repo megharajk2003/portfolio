@@ -8,8 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import AuthProviderWrapper from "@/components/clerk-provider";
 import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
-import Experience from "@/pages/experience";
-import Education from "@/pages/education";
+
 import Skills from "@/pages/skills";
 import Projects from "@/pages/projects";
 import Portfolio from "@/pages/portfolio";
@@ -21,7 +20,7 @@ import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import Home from "./pages/dashboard";
-
+import AcademicDetails from "./pages/academicdetails";
 function Router() {
   const { user, isLoading } = useAuth();
   const isAuthenticated = !!user;
@@ -40,8 +39,7 @@ function Router() {
         <>
           <Route path="/dashboard" component={Home} />
           <Route path="/profile" component={Profile} />
-          <Route path="/experience" component={Experience} />
-          <Route path="/education" component={Education} />
+          <Route path="/academic" component={AcademicDetails} />
           <Route path="/skills" component={Skills} />
           <Route path="/projects" component={Projects} />
           <Route path="/portfolio" component={Portfolio} />
