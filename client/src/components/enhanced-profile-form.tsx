@@ -192,16 +192,16 @@ export default function EnhancedProfileForm({
       const profile = existingProfile as Profile;
       const formData: Partial<BasicProfileData> = {
         name:
-          profile?.name ||
+          profile?.personalDetails?.fullName ||
           `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
-        role: profile?.role || "",
-        email: profile?.email || user?.email || "",
-        phone: profile?.phone || "",
-        location: profile?.location || "",
-        summary: profile?.summary || "",
-        githubUrl: profile?.githubUrl || "",
-        linkedinUrl: profile?.linkedinUrl || "",
-        portfolioUrl: profile?.portfolioUrl || "",
+        role: profile?.personalDetails?.roleOrTitle || "",
+        email: profile?.contactDetails?.email || user?.email || "",
+        phone: profile?.contactDetails?.phone || "",
+        location: profile?.personalDetails?.location?.city || "",
+        summary: profile?.personalDetails?.summary || "",
+        githubUrl: profile?.contactDetails?.githubOrPortfolio || "",
+        linkedinUrl: profile?.contactDetails?.linkedin || "",
+        portfolioUrl: profile?.contactDetails?.website || "",
       };
 
       if (!form.formState.isDirty) {
@@ -210,18 +210,24 @@ export default function EnhancedProfileForm({
 
       // Load existing sections data
       if (profile) {
+        const skills = profile.otherDetails?.skills;
+        const languages = profile.personalDetails?.languagesKnown;
+
         setSections((prev) => ({
           ...prev,
-          skills: profile.skillsSummary
-            ? profile.skillsSummary.split(",").map((skill, index) => ({
-                id: `skill-${index}`,
-                title: skill.trim(),
-                isVisible: true,
-              }))
-            : [],
+          skills:
+            skills && typeof skills === "object"
+              ? Object.values(skills)
+                  .flat()
+                  .map((skill: any, index: number) => ({
+                    id: `skill-${index}`,
+                    title: typeof skill === "string" ? skill : String(skill),
+                    isVisible: true,
+                  }))
+              : [],
           languages:
-            profile.languages && Array.isArray(profile.languages)
-              ? profile.languages.map((lang: string, index: number) => ({
+            languages && Array.isArray(languages)
+              ? languages.map((lang: string, index: number) => ({
                   id: `language-${index}`,
                   title: lang,
                   isVisible: true,
@@ -240,17 +246,34 @@ export default function EnhancedProfileForm({
         throw new Error("User ID is invalid.");
       }
 
-      // Combine basic profile data with sections data
+      // Structure the data according to the profile schema
       const profileData = {
-        ...data,
         userId: numericUserId,
-        skillsSummary: sections.skills
-          .map((s: SectionEntry) => s.title)
-          .join(", "),
-        languages: sections.languages.map((l: SectionEntry) => l.title),
-        achievements: sections.achievements.map((a: SectionEntry) => a.title),
-        certificates: sections.certificates.map((c: SectionEntry) => c.title),
-        organizations: sections.organizations.map((o: SectionEntry) => o.title),
+        personalDetails: {
+          fullName: data.name,
+          roleOrTitle: data.role,
+          summary: data.summary,
+          languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
+        },
+        contactDetails: {
+          email: data.email,
+          phone: data.phone,
+          linkedin: data.linkedinUrl,
+          githubOrPortfolio: data.githubUrl,
+          website: data.portfolioUrl,
+        },
+        otherDetails: {
+          skills: {
+            technical: sections.skills.map((s: SectionEntry) => s.title),
+          },
+          achievements: sections.achievements.map((a: SectionEntry) => a.title),
+          certifications: sections.certificates.map(
+            (c: SectionEntry) => c.title
+          ),
+          organizations: sections.organizations.map(
+            (o: SectionEntry) => o.title
+          ),
+        },
       };
 
       return apiRequest("POST", "/api/profile", profileData);
@@ -275,15 +298,33 @@ export default function EnhancedProfileForm({
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<BasicProfileData>) => {
+      // Structure the data according to the profile schema
       const profileData = {
-        ...data,
-        skillsSummary: sections.skills
-          .map((s: SectionEntry) => s.title)
-          .join(", "),
-        languages: sections.languages.map((l: SectionEntry) => l.title),
-        achievements: sections.achievements.map((a: SectionEntry) => a.title),
-        certificates: sections.certificates.map((c: SectionEntry) => c.title),
-        organizations: sections.organizations.map((o: SectionEntry) => o.title),
+        personalDetails: {
+          fullName: data.name,
+          roleOrTitle: data.role,
+          summary: data.summary,
+          languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
+        },
+        contactDetails: {
+          email: data.email,
+          phone: data.phone,
+          linkedin: data.linkedinUrl,
+          githubOrPortfolio: data.githubUrl,
+          website: data.portfolioUrl,
+        },
+        otherDetails: {
+          skills: {
+            technical: sections.skills.map((s: SectionEntry) => s.title),
+          },
+          achievements: sections.achievements.map((a: SectionEntry) => a.title),
+          certifications: sections.certificates.map(
+            (c: SectionEntry) => c.title
+          ),
+          organizations: sections.organizations.map(
+            (o: SectionEntry) => o.title
+          ),
+        },
       };
 
       return apiRequest("PATCH", `/api/profile/${userId}`, profileData);

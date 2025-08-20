@@ -17,6 +17,9 @@ import {
   insertProjectSchema,
   insertCertificationSchema,
   insertAchievementSchema,
+  insertPublicationSchema,
+  insertOrganizationSchema,
+  insertVolunteerSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -752,6 +755,240 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Unknown error occurred",
         error: JSON.stringify(error),
       });
+    }
+  });
+
+  // Publications routes
+  app.get("/api/publications/:userId", async (req, res) => {
+    try {
+      const publications = await storage.getPublications(req.params.userId);
+      res.json(publications);
+    } catch (error) {
+      console.error("Error fetching publications:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to fetch publications",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.post("/api/publications", async (req, res) => {
+    try {
+      const publicationData = insertPublicationSchema.parse(req.body);
+      const publication = await storage.createPublication(publicationData);
+      res.json(publication);
+    } catch (error) {
+      console.error("Error creating publication:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to create publication",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.patch("/api/publications/:id", async (req, res) => {
+    try {
+      const updateData = { ...req.body, userId: req.body.userId };
+      const publication = await storage.updatePublication(
+        req.params.id,
+        updateData
+      );
+      if (!publication) {
+        return res.status(404).json({ message: "Publication not found" });
+      }
+      res.json(publication);
+    } catch (error) {
+      console.error("Error updating publication:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to update publication",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.delete("/api/publications/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deletePublication(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Publication not found" });
+      }
+      res.json({ message: "Publication deleted" });
+    } catch (error) {
+      console.error("Error deleting publication:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to delete publication",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  // Organizations routes
+  app.get("/api/organizations/:userId", async (req, res) => {
+    try {
+      const organizations = await storage.getOrganizations(req.params.userId);
+      res.json(organizations);
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to fetch organizations",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.post("/api/organizations", async (req, res) => {
+    try {
+      const organizationData = insertOrganizationSchema.parse(req.body);
+      const organization = await storage.createOrganization(organizationData);
+      res.json(organization);
+    } catch (error) {
+      console.error("Error creating organization:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to create organization",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.patch("/api/organizations/:id", async (req, res) => {
+    try {
+      const updateData = { ...req.body, userId: req.body.userId };
+      const organization = await storage.updateOrganization(
+        req.params.id,
+        updateData
+      );
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      res.json(organization);
+    } catch (error) {
+      console.error("Error updating organization:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to update organization",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.delete("/api/organizations/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteOrganization(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      res.json({ message: "Organization deleted" });
+    } catch (error) {
+      console.error("Error deleting organization:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to delete organization",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  // Volunteer Experience routes
+  app.get("/api/volunteer/:userId", async (req, res) => {
+    try {
+      const volunteerExperience = await storage.getVolunteerExperience(
+        req.params.userId
+      );
+      res.json(volunteerExperience);
+    } catch (error) {
+      console.error("Error fetching volunteer experience:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to fetch volunteer experience",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.post("/api/volunteer", async (req, res) => {
+    try {
+      const volunteerData = insertVolunteerSchema.parse(req.body);
+      const volunteer = await storage.createVolunteerExperience(volunteerData);
+      res.json(volunteer);
+    } catch (error) {
+      console.error("Error creating volunteer experience:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to create volunteer experience",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.patch("/api/volunteer/:id", async (req, res) => {
+    try {
+      const updateData = { ...req.body, userId: req.body.userId };
+      const volunteer = await storage.updateVolunteerExperience(
+        req.params.id,
+        updateData
+      );
+      if (!volunteer) {
+        return res
+          .status(404)
+          .json({ message: "Volunteer experience not found" });
+      }
+      res.json(volunteer);
+    } catch (error) {
+      console.error("Error updating volunteer experience:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to update volunteer experience",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
+    }
+  });
+
+  app.delete("/api/volunteer/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteVolunteerExperience(req.params.id);
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({ message: "Volunteer experience not found" });
+      }
+      res.json({ message: "Volunteer experience deleted" });
+    } catch (error) {
+      console.error("Error deleting volunteer experience:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: "Failed to delete volunteer experience",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({ message: "Unknown error occurred" });
     }
   });
 

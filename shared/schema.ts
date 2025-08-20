@@ -385,13 +385,81 @@ export const comprehensiveProfileSchema = z.object({
 // Insert schemas for individual portfolio sections
 export const insertWorkExperienceSchema = workExperienceWithUserSchema;
 export const insertEducationSchema = educationWithUserSchema;
-export const insertSkillSchema = z.object({
+// Individual skill schema for API operations
+export const skillItemSchema = z.object({
   category: z.string(),
   name: z.string(),
   level: z.number().optional(),
 });
-export const insertProjectSchema = projectItemSchema;
-export const insertCertificationSchema = certificationItemSchema;
+
+export const skillWithUserSchema = z.object({
+  userId: z.string(),
+  category: z.string(),
+  name: z.string(),
+  level: z.number().optional(),
+});
+
+export const insertSkillSchema = skillWithUserSchema;
+// Project schema with userId for API operations
+export const projectWithUserSchema = z.object({
+  userId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  domain: z.string(),
+  toolsOrMethods: z.array(z.string()),
+  outcome: z.string().optional(),
+  url: z.string().url().optional(),
+  githubUrl: z.string().url().optional(),
+});
+
+// Certification schema with userId for API operations
+export const certificationWithUserSchema = z.object({
+  userId: z.string(),
+  title: z.string(),
+  organization: z.string(),
+  year: z.number(),
+  url: z.string().url().optional(),
+});
+
+// Publication schema with userId for API operations
+export const publicationWithUserSchema = z.object({
+  userId: z.string(),
+  title: z.string(),
+  type: z.enum([
+    "Research Paper",
+    "Portfolio Work",
+    "Article",
+    "Book",
+    "Other",
+  ]),
+  journalOrPlatform: z.string(),
+  year: z.number(),
+  url: z.string().url().optional(),
+});
+
+// Organization schema with userId for API operations
+export const organizationWithUserSchema = z.object({
+  userId: z.string(),
+  name: z.string(),
+  role: z.string(),
+  year: z.string(),
+  contribution: z.string(),
+});
+
+// Volunteer schema with userId for API operations
+export const volunteerWithUserSchema = z.object({
+  userId: z.string(),
+  organization: z.string(),
+  role: z.string(),
+  description: z.string(),
+  year: z.string(),
+});
+
+export const insertProjectSchema = projectWithUserSchema;
+export const insertCertificationSchema = certificationWithUserSchema;
+export const insertPublicationSchema = publicationWithUserSchema;
+export const insertOrganizationSchema = organizationWithUserSchema;
+export const insertVolunteerSchema = volunteerWithUserSchema;
 export const insertAchievementSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -472,3 +540,12 @@ export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertCertification = z.infer<typeof insertCertificationSchema>;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type InsertPublication = z.infer<typeof insertPublicationSchema>;
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+export type InsertVolunteer = z.infer<typeof insertVolunteerSchema>;
+export type SkillWithUser = z.infer<typeof skillWithUserSchema>;
+export type ProjectWithUser = z.infer<typeof projectWithUserSchema>;
+export type CertificationWithUser = z.infer<typeof certificationWithUserSchema>;
+export type PublicationWithUser = z.infer<typeof publicationWithUserSchema>;
+export type OrganizationWithUser = z.infer<typeof organizationWithUserSchema>;
+export type VolunteerWithUser = z.infer<typeof volunteerWithUserSchema>;

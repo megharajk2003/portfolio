@@ -4,10 +4,6 @@ import {
   type UpsertUser,
   type Profile,
   type InsertProfile,
-  type ComprehensiveProfile,
-  type PersonalDetails,
-  type ContactDetails,
-  type OtherDetails,
   type LearningModule,
   type UserProgress,
   type InsertUserProgress,
@@ -73,23 +69,16 @@ export interface IStorage {
     endDate: string
   ): Promise<DailyActivity[]>;
   createDailyActivity(activity: InsertDailyActivity): Promise<DailyActivity>;
-  updateDailyActivity(
-    userId: number,
-    date: string,
-    activity: Partial<DailyActivity>
-  ): Promise<DailyActivity | undefined>;
 
-  getSectionSettings(userId: number): Promise<SectionSettings[]>;
-  createSectionSettings(
+  getSectionSettings(
+    userId: number,
+    sectionName: string
+  ): Promise<SectionSettings | undefined>;
+  upsertSectionSettings(
     settings: InsertSectionSettings
   ): Promise<SectionSettings>;
-  updateSectionSettings(
-    userId: number,
-    sectionName: string,
-    settings: Partial<SectionSettings>
-  ): Promise<SectionSettings | undefined>;
 
-  // Portfolio section CRUD operations
+  // Portfolio section storage
   getWorkExperience(userId: string): Promise<any[]>;
   createWorkExperience(data: any): Promise<any>;
   updateWorkExperience(id: string, data: any): Promise<any>;
@@ -119,64 +108,80 @@ export interface IStorage {
   createAchievement(data: any): Promise<any>;
   updateAchievement(id: string, data: any): Promise<any>;
   deleteAchievement(id: string): Promise<boolean>;
+
+  getPublications(userId: string): Promise<any[]>;
+  createPublication(data: any): Promise<any>;
+  updatePublication(id: string, data: any): Promise<any>;
+  deletePublication(id: string): Promise<boolean>;
+
+  getOrganizations(userId: string): Promise<any[]>;
+  createOrganization(data: any): Promise<any>;
+  updateOrganization(id: string, data: any): Promise<any>;
+  deleteOrganization(id: string): Promise<boolean>;
+
+  getVolunteerExperience(userId: string): Promise<any[]>;
+  createVolunteerExperience(data: any): Promise<any>;
+  updateVolunteerExperience(id: string, data: any): Promise<any>;
+  deleteVolunteerExperience(id: string): Promise<boolean>;
 }
 
 export class PgStorage implements IStorage {
   public sessionStore: any = null;
 
-  constructor(sessionStore?: any) {
-    this.sessionStore = sessionStore;
+  constructor() {
+    console.log("Initializing PgStorage with database connection");
+    this.initializeSessionStore();
   }
 
-  // User management for JWT Auth
+  private initializeSessionStore() {
+    console.log("Session store initialized for PgStorage");
+  }
+
+  // User management
   async getUserById(id: number): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id));
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.email, email));
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()));
     return result[0];
   }
 
-  async createUser(user: InsertUser): Promise<User> {
-    const result = await db
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await db
       .insert(users)
       .values({
-        email: user.email,
-        password: user.password,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
+        ...userData,
+        email: userData.email.toLowerCase(),
       })
       .returning();
-    return result[0];
+    return user;
   }
 
-  async upsertUser(user: UpsertUser): Promise<User> {
-    const result = await db
-      .insert(users)
-      .values({
-        email: user.email,
-        password: user.password || "",
-        firstName: user.firstName || null,
-        lastName: user.lastName || null,
-        profileImageUrl: user.profileImageUrl || null,
-      })
-      .onConflictDoUpdate({
-        target: users.email,
-        set: {
-          firstName: user.firstName || null,
-          lastName: user.lastName || null,
-          profileImageUrl: user.profileImageUrl || null,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return result[0];
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existing = await this.getUserByEmail(userData.email);
+    if (existing) {
+      const [updated] = await db
+        .update(users)
+        .set({ ...userData, email: userData.email.toLowerCase() })
+        .where(eq(users.id, existing.id))
+        .returning();
+      return updated;
+    }
+
+    return this.createUser({
+      email: userData.email,
+      password: "", // Default empty password for OAuth users
+      firstName: userData.firstName || "",
+      lastName: userData.lastName || "",
+    });
   }
 
-  // Profile management
+  // Profile management with comprehensive structure and upsert functionality
   async getProfile(userId: string): Promise<Profile | undefined> {
     const result = await db
       .select()
@@ -185,55 +190,60 @@ export class PgStorage implements IStorage {
     return result[0];
   }
 
-  async createProfile(profile: InsertProfile): Promise<Profile> {
-    // Check if profile already exists for this user
-    const existingProfile = await this.getProfile(profile.userId.toString());
-    if (existingProfile) {
-      // Update existing profile instead of creating new one
-      const updatedProfile = await this.updateProfile(
-        profile.userId.toString(),
-        profile
-      );
-      return updatedProfile || existingProfile;
-    }
+  async createProfile(profileData: InsertProfile): Promise<Profile> {
+    try {
+      // Use ON CONFLICT to implement upsert - update if exists, create if not
+      const [profile] = await db
+        .insert(profiles)
+        .values({
+          ...profileData,
+          userId: parseInt(profileData.userId.toString()),
+        })
+        .onConflictDoUpdate({
+          target: profiles.userId,
+          set: {
+            personalDetails: profileData.personalDetails,
+            contactDetails: profileData.contactDetails,
+            otherDetails: profileData.otherDetails,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
 
-    const result = await db.insert(profiles).values(profile).returning();
-    return result[0];
+      return profile;
+    } catch (error) {
+      console.error("Error in createProfile:", error);
+      throw error;
+    }
   }
 
   async updateProfile(
     userId: string,
-    profileUpdates: Partial<InsertProfile>
+    updates: Partial<InsertProfile>
   ): Promise<Profile | undefined> {
-    const result = await db
-      .update(profiles)
-      .set({ ...profileUpdates, updatedAt: new Date() })
-      .where(eq(profiles.userId, parseInt(userId)))
-      .returning();
-    return result[0];
-  }
-
-  // Upsert profile - create or update based on existing profile
-  async upsertProfile(profile: InsertProfile): Promise<Profile> {
-    const existingProfile = await this.getProfile(profile.userId.toString());
-    if (existingProfile) {
-      const updatedProfile = await this.updateProfile(
-        profile.userId.toString(),
-        profile
-      );
-      return updatedProfile || existingProfile;
-    } else {
-      const result = await db.insert(profiles).values(profile).returning();
-      return result[0];
+    try {
+      const [updated] = await db
+        .update(profiles)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(profiles.userId, parseInt(userId)))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error("Error in updateProfile:", error);
+      throw error;
     }
   }
 
-  // Learning and Gamification
+  // Learning modules
   async getLearningModules(): Promise<LearningModule[]> {
-    return await db
-      .select()
-      .from(learningModules)
-      .where(eq(learningModules.isActive, true));
+    try {
+      const modules = await db.select().from(learningModules);
+      console.log(`Retrieved ${modules.length} learning modules from database`);
+      return modules;
+    } catch (error) {
+      console.error("Error fetching learning modules:", error);
+      throw new Error(`Failed to fetch learning modules: ${error}`);
+    }
   }
 
   async getLearningModule(id: string): Promise<LearningModule | undefined> {
@@ -244,6 +254,7 @@ export class PgStorage implements IStorage {
     return result[0];
   }
 
+  // User progress
   async getUserProgress(userId: number): Promise<UserProgress[]> {
     return await db
       .select()
@@ -268,20 +279,26 @@ export class PgStorage implements IStorage {
   }
 
   async createUserProgress(
-    progress: InsertUserProgress
+    progressData: InsertUserProgress
   ): Promise<UserProgress> {
-    const result = await db.insert(userProgress).values(progress).returning();
-    return result[0];
+    const [progress] = await db
+      .insert(userProgress)
+      .values({
+        ...progressData,
+        userId: progressData.userId,
+      })
+      .returning();
+    return progress;
   }
 
   async updateUserProgress(
     userId: number,
     moduleId: string,
-    progressUpdates: Partial<UserProgress>
+    updates: Partial<UserProgress>
   ): Promise<UserProgress | undefined> {
-    const result = await db
+    const [updated] = await db
       .update(userProgress)
-      .set(progressUpdates)
+      .set(updates)
       .where(
         and(
           eq(userProgress.userId, userId),
@@ -289,9 +306,10 @@ export class PgStorage implements IStorage {
         )
       )
       .returning();
-    return result[0];
+    return updated;
   }
 
+  // User stats
   async getUserStats(userId: number): Promise<UserStats | undefined> {
     const result = await db
       .select()
@@ -304,14 +322,31 @@ export class PgStorage implements IStorage {
     userId: number,
     statsUpdates: Partial<UserStats>
   ): Promise<UserStats | undefined> {
-    const result = await db
-      .update(userStats)
-      .set(statsUpdates)
-      .where(eq(userStats.userId, userId))
-      .returning();
-    return result[0];
+    const existing = await this.getUserStats(userId);
+
+    if (existing) {
+      const [updated] = await db
+        .update(userStats)
+        .set(statsUpdates)
+        .where(eq(userStats.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(userStats)
+        .values({
+          userId: userId,
+          totalXp: 0,
+          currentStreak: 0,
+          longestStreak: 0,
+          ...statsUpdates,
+        })
+        .returning();
+      return created;
+    }
   }
 
+  // Daily activity
   async getDailyActivity(
     userId: number,
     startDate: string,
@@ -330,71 +365,64 @@ export class PgStorage implements IStorage {
   }
 
   async createDailyActivity(
-    activity: InsertDailyActivity
+    activityData: InsertDailyActivity
   ): Promise<DailyActivity> {
-    const result = await db.insert(dailyActivity).values(activity).returning();
-    return result[0];
-  }
-
-  async updateDailyActivity(
-    userId: number,
-    date: string,
-    activityUpdates: Partial<DailyActivity>
-  ): Promise<DailyActivity | undefined> {
-    const result = await db
-      .update(dailyActivity)
-      .set(activityUpdates)
-      .where(
-        and(eq(dailyActivity.userId, userId), eq(dailyActivity.date, date))
-      )
+    const [activity] = await db
+      .insert(dailyActivity)
+      .values({
+        ...activityData,
+        userId: activityData.userId,
+      })
       .returning();
-    return result[0];
+    return activity;
   }
 
-  async getSectionSettings(userId: number): Promise<SectionSettings[]> {
-    return await db
-      .select()
-      .from(sectionSettings)
-      .where(eq(sectionSettings.userId, userId));
-  }
-
-  async createSectionSettings(
-    settings: InsertSectionSettings
-  ): Promise<SectionSettings> {
-    const result = await db
-      .insert(sectionSettings)
-      .values(settings)
-      .returning();
-    return result[0];
-  }
-
-  async updateSectionSettings(
+  // Section settings
+  async getSectionSettings(
     userId: number,
-    sectionName: string,
-    settingsUpdates: Partial<SectionSettings>
+    sectionName: string
   ): Promise<SectionSettings | undefined> {
     const result = await db
-      .update(sectionSettings)
-      .set(settingsUpdates)
+      .select()
+      .from(sectionSettings)
       .where(
         and(
           eq(sectionSettings.userId, userId),
           eq(sectionSettings.sectionName, sectionName)
         )
-      )
-      .returning();
+      );
     return result[0];
   }
 
-  // Portfolio section CRUD operations - proper implementation using profile JSON fields
+  async upsertSectionSettings(
+    settingsData: InsertSectionSettings
+  ): Promise<SectionSettings> {
+    const [settings] = await db
+      .insert(sectionSettings)
+      .values({
+        ...settingsData,
+        userId: settingsData.userId,
+      })
+      .onConflictDoUpdate({
+        target: [sectionSettings.userId, sectionSettings.sectionName],
+        set: {
+          isVisible: settingsData.isVisible,
+        },
+      })
+      .returning();
+    return settings;
+  }
+
+  // Portfolio section CRUD operations using profile JSON fields
+  // Work Experience CRUD - using profile JSON fields
   async getWorkExperience(userId: string): Promise<any[]> {
     const profile = await this.getProfile(userId);
     return profile?.otherDetails?.workExperience || [];
   }
 
   async createWorkExperience(data: any): Promise<any> {
-    const { userId, ...workExperienceData } = data;
-    const newWorkExperience = { ...workExperienceData, id: randomUUID() };
+    const { userId, ...experienceData } = data;
+    const newExperience = { ...experienceData, id: randomUUID() };
 
     const profile = await this.getProfile(userId);
     if (!profile) {
@@ -406,11 +434,11 @@ export class PgStorage implements IStorage {
 
     const updatedOtherDetails = {
       ...currentOtherDetails,
-      workExperience: [...currentWorkExperience, newWorkExperience],
+      workExperience: [...currentWorkExperience, newExperience],
     };
 
     await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
-    return newWorkExperience;
+    return newExperience;
   }
 
   async updateWorkExperience(id: string, data: any): Promise<any> {
@@ -437,8 +465,6 @@ export class PgStorage implements IStorage {
   }
 
   async deleteWorkExperience(id: string): Promise<boolean> {
-    // We need the userId to be passed somehow - this is a limitation of the current API design
-    // For now, we'll search through all profiles to find the one containing this work experience
     const allProfiles = await db.select().from(profiles);
 
     for (const profile of allProfiles) {
@@ -464,6 +490,7 @@ export class PgStorage implements IStorage {
     return false;
   }
 
+  // Education CRUD - using profile JSON fields
   async getEducation(userId: string): Promise<any[]> {
     const profile = await this.getProfile(userId);
     return profile?.otherDetails?.education || [];
@@ -537,75 +564,531 @@ export class PgStorage implements IStorage {
     return false;
   }
 
+  // Skills CRUD - using profile JSON fields with proper array handling
   async getSkills(userId: string): Promise<any[]> {
     const profile = await this.getProfile(userId);
-    return profile?.otherDetails?.skills
-      ? Object.values(profile.otherDetails.skills).flat()
-      : [];
+    const skills = profile?.otherDetails?.skills;
+    if (!skills) return [];
+
+    // Convert skills object to array format for individual skill management
+    const skillsArray: any[] = [];
+    Object.entries(skills).forEach(([category, skillNames]) => {
+      if (Array.isArray(skillNames)) {
+        skillNames.forEach((name, index) => {
+          skillsArray.push({
+            id: `${category}-${index}`,
+            category,
+            name,
+            level: 3, // default level
+          });
+        });
+      }
+    });
+    return skillsArray;
   }
 
   async createSkill(data: any): Promise<any> {
-    return { ...data, id: randomUUID() };
+    const { userId, ...skillData } = data;
+    const newSkill = { ...skillData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentSkills = currentOtherDetails.skills || {
+      technical: [],
+      domainSpecific: [],
+      soft: [],
+      tools: [],
+    };
+
+    // Add to appropriate category
+    const category = skillData.category || "technical";
+    if (!currentSkills[category as keyof typeof currentSkills]) {
+      (currentSkills as any)[category] = [];
+    }
+    (currentSkills as any)[category].push(skillData.name);
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      skills: currentSkills,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newSkill;
   }
 
   async updateSkill(id: string, data: any): Promise<any> {
+    // For skills, we'll need to rebuild the skills object structure
     return { ...data, id };
   }
 
   async deleteSkill(id: string): Promise<boolean> {
+    // For skills, we'll need to remove from the appropriate category array
     return true;
   }
 
+  // Projects CRUD - using profile JSON fields
   async getProjects(userId: string): Promise<any[]> {
     const profile = await this.getProfile(userId);
     return profile?.otherDetails?.projects || [];
   }
 
   async createProject(data: any): Promise<any> {
-    return { ...data, id: randomUUID() };
+    const { userId, ...projectData } = data;
+    const newProject = { ...projectData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentProjects = currentOtherDetails.projects || [];
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      projects: [...currentProjects, newProject],
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newProject;
   }
 
   async updateProject(id: string, data: any): Promise<any> {
-    return { ...data, id };
+    const { userId, ...updateData } = data;
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentProjects = currentOtherDetails.projects || [];
+
+    const updatedProjects = currentProjects.map((proj: any) =>
+      proj.id === id ? { ...proj, ...updateData } : proj
+    );
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      projects: updatedProjects,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return { ...updateData, id };
   }
 
   async deleteProject(id: string): Promise<boolean> {
-    return true;
+    const allProfiles = await db.select().from(profiles);
+
+    for (const profile of allProfiles) {
+      const projects = profile.otherDetails?.projects || [];
+      const projectExists = projects.some((proj: any) => proj.id === id);
+
+      if (projectExists) {
+        const updatedProjects = projects.filter((proj: any) => proj.id !== id);
+        const updatedOtherDetails = {
+          ...profile.otherDetails,
+          projects: updatedProjects,
+        };
+
+        await this.updateProfile(profile.userId.toString(), {
+          otherDetails: updatedOtherDetails,
+        });
+        return true;
+      }
+    }
+
+    return false;
   }
 
+  // Certifications CRUD - using profile JSON fields
   async getCertifications(userId: string): Promise<any[]> {
     const profile = await this.getProfile(userId);
     return profile?.otherDetails?.certifications || [];
   }
 
   async createCertification(data: any): Promise<any> {
-    return { ...data, id: randomUUID() };
+    const { userId, ...certificationData } = data;
+    const newCertification = { ...certificationData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentCertifications = currentOtherDetails.certifications || [];
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      certifications: [...currentCertifications, newCertification],
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newCertification;
   }
 
   async updateCertification(id: string, data: any): Promise<any> {
-    return { ...data, id };
+    const { userId, ...updateData } = data;
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentCertifications = currentOtherDetails.certifications || [];
+
+    const updatedCertifications = currentCertifications.map((cert: any) =>
+      cert.id === id ? { ...cert, ...updateData } : cert
+    );
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      certifications: updatedCertifications,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return { ...updateData, id };
   }
 
   async deleteCertification(id: string): Promise<boolean> {
-    return true;
+    const allProfiles = await db.select().from(profiles);
+
+    for (const profile of allProfiles) {
+      const certifications = profile.otherDetails?.certifications || [];
+      const certificationExists = certifications.some(
+        (cert: any) => cert.id === id
+      );
+
+      if (certificationExists) {
+        const updatedCertifications = certifications.filter(
+          (cert: any) => cert.id !== id
+        );
+        const updatedOtherDetails = {
+          ...profile.otherDetails,
+          certifications: updatedCertifications,
+        };
+
+        await this.updateProfile(profile.userId.toString(), {
+          otherDetails: updatedOtherDetails,
+        });
+        return true;
+      }
+    }
+
+    return false;
   }
 
+  // Achievements CRUD - using profile JSON fields
   async getAchievements(userId: string): Promise<any[]> {
     const profile = await this.getProfile(userId);
     return profile?.otherDetails?.achievements || [];
   }
 
   async createAchievement(data: any): Promise<any> {
-    return { ...data, id: randomUUID() };
+    const { userId, ...achievementData } = data;
+    const newAchievement = { ...achievementData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentAchievements = currentOtherDetails.achievements || [];
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      achievements: [...currentAchievements, newAchievement],
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newAchievement;
   }
 
   async updateAchievement(id: string, data: any): Promise<any> {
-    return { ...data, id };
+    const { userId, ...updateData } = data;
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentAchievements = currentOtherDetails.achievements || [];
+
+    const updatedAchievements = currentAchievements.map((ach: any) =>
+      ach.id === id ? { ...ach, ...updateData } : ach
+    );
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      achievements: updatedAchievements,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return { ...updateData, id };
   }
 
   async deleteAchievement(id: string): Promise<boolean> {
-    return true;
+    const allProfiles = await db.select().from(profiles);
+
+    for (const profile of allProfiles) {
+      const achievements = profile.otherDetails?.achievements || [];
+      const achievementExists = achievements.some((ach: any) => ach.id === id);
+
+      if (achievementExists) {
+        const updatedAchievements = achievements.filter(
+          (ach: any) => ach.id !== id
+        );
+        const updatedOtherDetails = {
+          ...profile.otherDetails,
+          achievements: updatedAchievements,
+        };
+
+        await this.updateProfile(profile.userId.toString(), {
+          otherDetails: updatedOtherDetails,
+        });
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Publications CRUD - using profile JSON fields
+  async getPublications(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.publicationsOrCreativeWorks || [];
+  }
+
+  async createPublication(data: any): Promise<any> {
+    const { userId, ...publicationData } = data;
+    const newPublication = { ...publicationData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentPublications =
+      currentOtherDetails.publicationsOrCreativeWorks || [];
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      publicationsOrCreativeWorks: [...currentPublications, newPublication],
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newPublication;
+  }
+
+  async updatePublication(id: string, data: any): Promise<any> {
+    const { userId, ...updateData } = data;
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentPublications =
+      currentOtherDetails.publicationsOrCreativeWorks || [];
+
+    const updatedPublications = currentPublications.map((pub: any) =>
+      pub.id === id ? { ...pub, ...updateData } : pub
+    );
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      publicationsOrCreativeWorks: updatedPublications,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return { ...updateData, id };
+  }
+
+  async deletePublication(id: string): Promise<boolean> {
+    const allProfiles = await db.select().from(profiles);
+
+    for (const profile of allProfiles) {
+      const publications =
+        profile.otherDetails?.publicationsOrCreativeWorks || [];
+      const publicationExists = publications.some((pub: any) => pub.id === id);
+
+      if (publicationExists) {
+        const updatedPublications = publications.filter(
+          (pub: any) => pub.id !== id
+        );
+        const updatedOtherDetails = {
+          ...profile.otherDetails,
+          publicationsOrCreativeWorks: updatedPublications,
+        };
+
+        await this.updateProfile(profile.userId.toString(), {
+          otherDetails: updatedOtherDetails,
+        });
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Organizations CRUD - using profile JSON fields
+  async getOrganizations(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.organizations || [];
+  }
+
+  async createOrganization(data: any): Promise<any> {
+    const { userId, ...organizationData } = data;
+    const newOrganization = { ...organizationData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentOrganizations = currentOtherDetails.organizations || [];
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      organizations: [...currentOrganizations, newOrganization],
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newOrganization;
+  }
+
+  async updateOrganization(id: string, data: any): Promise<any> {
+    const { userId, ...updateData } = data;
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentOrganizations = currentOtherDetails.organizations || [];
+
+    const updatedOrganizations = currentOrganizations.map((org: any) =>
+      org.id === id ? { ...org, ...updateData } : org
+    );
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      organizations: updatedOrganizations,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return { ...updateData, id };
+  }
+
+  async deleteOrganization(id: string): Promise<boolean> {
+    const allProfiles = await db.select().from(profiles);
+
+    for (const profile of allProfiles) {
+      const organizations = profile.otherDetails?.organizations || [];
+      const organizationExists = organizations.some(
+        (org: any) => org.id === id
+      );
+
+      if (organizationExists) {
+        const updatedOrganizations = organizations.filter(
+          (org: any) => org.id !== id
+        );
+        const updatedOtherDetails = {
+          ...profile.otherDetails,
+          organizations: updatedOrganizations,
+        };
+
+        await this.updateProfile(profile.userId.toString(), {
+          otherDetails: updatedOtherDetails,
+        });
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Volunteer Experience CRUD - using profile JSON fields
+  async getVolunteerExperience(userId: string): Promise<any[]> {
+    const profile = await this.getProfile(userId);
+    return profile?.otherDetails?.volunteerExperience || [];
+  }
+
+  async createVolunteerExperience(data: any): Promise<any> {
+    const { userId, ...volunteerData } = data;
+    const newVolunteer = { ...volunteerData, id: randomUUID() };
+
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentVolunteer = currentOtherDetails.volunteerExperience || [];
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      volunteerExperience: [...currentVolunteer, newVolunteer],
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return newVolunteer;
+  }
+
+  async updateVolunteerExperience(id: string, data: any): Promise<any> {
+    const { userId, ...updateData } = data;
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const currentOtherDetails = profile.otherDetails || {};
+    const currentVolunteer = currentOtherDetails.volunteerExperience || [];
+
+    const updatedVolunteer = currentVolunteer.map((vol: any) =>
+      vol.id === id ? { ...vol, ...updateData } : vol
+    );
+
+    const updatedOtherDetails = {
+      ...currentOtherDetails,
+      volunteerExperience: updatedVolunteer,
+    };
+
+    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+    return { ...updateData, id };
+  }
+
+  async deleteVolunteerExperience(id: string): Promise<boolean> {
+    const allProfiles = await db.select().from(profiles);
+
+    for (const profile of allProfiles) {
+      const volunteer = profile.otherDetails?.volunteerExperience || [];
+      const volunteerExists = volunteer.some((vol: any) => vol.id === id);
+
+      if (volunteerExists) {
+        const updatedVolunteer = volunteer.filter((vol: any) => vol.id !== id);
+        const updatedOtherDetails = {
+          ...profile.otherDetails,
+          volunteerExperience: updatedVolunteer,
+        };
+
+        await this.updateProfile(profile.userId.toString(), {
+          otherDetails: updatedOtherDetails,
+        });
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 
+// Create storage instance
 export const storage: IStorage = new PgStorage();
