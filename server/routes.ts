@@ -912,7 +912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Volunteer Experience routes
-  app.get("/api/volunteer/:userId", async (req, res) => {
+  app.get("/api/volunteer-experience/:userId", async (req, res) => {
     try {
       const volunteerExperience = await storage.getVolunteerExperience(
         req.params.userId
@@ -930,7 +930,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/volunteer", async (req, res) => {
+  app.post("/api/volunteer-experience", async (req, res) => {
     try {
       const volunteerData = insertVolunteerSchema.parse(req.body);
       const volunteer = await storage.createVolunteerExperience(volunteerData);
@@ -947,7 +947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/volunteer/:id", async (req, res) => {
+  app.patch("/api/volunteer-experience/:id", async (req, res) => {
     try {
       const updateData = { ...req.body, userId: req.body.userId };
       const volunteer = await storage.updateVolunteerExperience(
@@ -972,7 +972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/volunteer/:id", async (req, res) => {
+  app.delete("/api/volunteer-experience/:id", async (req, res) => {
     try {
       const deleted = await storage.deleteVolunteerExperience(req.params.id);
       if (!deleted) {

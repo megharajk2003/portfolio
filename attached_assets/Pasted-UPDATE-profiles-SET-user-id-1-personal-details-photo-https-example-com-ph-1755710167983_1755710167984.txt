@@ -1,0 +1,123 @@
+UPDATE profiles
+SET 
+  user_id = 1,
+  personal_details = '{
+    "photo": "https://example.com/photo.jpg",
+    "fullName": "John Doe",
+    "dob": "1990-05-15",
+    "gender": "Male",
+    "location": {
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "pincode": "10001"
+    },
+    "roleOrTitle": "Software Engineer",
+    "summary": "Experienced software engineer with expertise in full-stack development",
+    "languagesKnown": ["English", "Spanish", "French"],
+    "nationality": "American"
+  }'::jsonb,
+  contact_details = '{
+    "email": "john.doe@example.com",
+    "phone": "+1-555-0123",
+    "linkedin": "https://linkedin.com/in/johndoe",
+    "githubOrPortfolio": "https://github.com/johndoe",
+    "website": "https://johndoe.dev",
+    "twitter": "https://twitter.com/johndoe",
+    "otherProfiles": {
+      "behance": "https://behance.net/johndoe",
+      "dribbble": "https://dribbble.com/johndoe",
+      "researchgate": "https://researchgate.net/profile/johndoe",
+      "orcid": "https://orcid.org/0000-0000-0000-0000"
+    }
+  }'::jsonb,
+  other_details = '{
+    "education": [
+      {
+        "level": "Undergraduate",
+        "institution": "MIT",
+        "degree": "Computer Science",
+        "yearOfPassing": 2012,
+        "gradeOrScore": "3.8 GPA"
+      }
+    ],
+    "workExperience": [
+      {
+        "organization": "Tech Corp",
+        "roleOrPosition": "Senior Software Engineer",
+        "startDate": "2020-01",
+        "endDate": null,
+        "responsibilities": ["Lead development team", "Design system architecture"],
+        "skillsOrToolsUsed": ["React", "Node.js", "PostgreSQL"]
+      }
+    ],
+    "internships": [
+      {
+        "organization": "Startup Inc",
+        "roleOrPosition": "Software Intern",
+        "startDate": "2011-06",
+        "endDate": "2011-08",
+        "projectsOrTasks": ["Built mobile app", "Optimized database queries"],
+        "skillsOrToolsUsed": ["Java", "Android", "MySQL"]
+      }
+    ],
+    "projects": [
+      {
+        "title": "Portfolio Website",
+        "description": "Personal portfolio showcasing projects and skills",
+        "domain": "Technology",
+        "toolsOrMethods": ["React", "TypeScript", "Tailwind CSS"],
+        "outcome": "Increased online presence",
+        "url": "https://johndoe.dev",
+        "githubUrl": "https://github.com/johndoe/portfolio"
+      }
+    ],
+    "skills": {
+      "technical": ["JavaScript", "Python", "React", "Node.js"],
+      "domainSpecific": ["Web Development", "Database Design"],
+      "soft": ["Leadership", "Communication", "Problem Solving"],
+      "tools": ["Git", "Docker", "AWS", "PostgreSQL"]
+    },
+    "certifications": [
+      {
+        "title": "AWS Solutions Architect",
+        "organization": "Amazon Web Services",
+        "year": 2021,
+        "url": "https://aws.amazon.com/certification/"
+      }
+    ],
+    "organizations": [
+      {
+        "name": "Tech Community",
+        "role": "Volunteer",
+        "year": "2020-2023",
+        "contribution": "Mentored junior developers"
+      }
+    ],
+    "achievements": [
+      "Employee of the Year 2022",
+      "Published research paper on ML algorithms"
+    ],
+    "publicationsOrCreativeWorks": [
+      {
+        "title": "Modern Web Development Practices",
+        "type": "Article",
+        "journalOrPlatform": "Dev.to",
+        "year": 2023,
+        "url": "https://dev.to/johndoe/article"
+      }
+    ],
+    "volunteerExperience": [
+      {
+        "organization": "Code for Good",
+        "role": "Volunteer Developer",
+        "description": "Built websites for non-profits",
+        "year": "2019-2021"
+      }
+    ],
+    "interestsOrHobbies": ["Photography", "Hiking", "Open Source Contributing"]
+  }'::jsonb,
+  portfolio_theme = 'modern',
+  is_public = true,
+  updated_at = now()
+WHERE id = '576bea4c-0666-4fa5-88cc-2857968b430d';
