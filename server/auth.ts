@@ -65,10 +65,14 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
+
+  // FIX: Explicitly handle the case where a user is not found.
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUserById(id);
-      done(null, user);
+      // If a user is found, pass the user object to done.
+      // Otherwise, pass false to indicate the user for the session is invalid.
+      done(null, user || false);
     } catch (error) {
       done(error);
     }
@@ -84,6 +88,22 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
+      });
+
+      // Auto-create basic profile for new user
+      const fullName = `${req.body.firstName || ""} ${
+        req.body.lastName || ""
+      }`.trim();
+      await storage.createProfile({
+        userId: user.id,
+        name: fullName || req.body.email.split("@")[0], // Use email prefix if no name provided
+        role: "",
+        email: req.body.email,
+        phone: "",
+        location: "",
+        summary: "",
+        portfolioTheme: "modern",
+        isPublic: false,
       });
 
       req.login(user, (err) => {

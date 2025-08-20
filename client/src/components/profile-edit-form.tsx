@@ -18,10 +18,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { insertProfileSchema } from "@shared/schema";
-import { Save, User, Mail, Phone, MapPin, FileText } from "lucide-react";
+// FIX: Import the 'profiles' table object to infer its type
+import { insertProfileSchema, profiles } from "@shared/schema";
+import {
+  Save,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  FileText,
+  Github,
+  Linkedin,
+  Globe,
+  Award,
+  BookOpen,
+  Building,
+  Users,
+} from "lucide-react";
+import { ArrayField } from "./array-field";
 
-const profileFormSchema = insertProfileSchema.extend({
+// FIX: Infer the Profile type directly from the Drizzle schema for better type safety
+type Profile = typeof profiles.$inferSelect;
+
+const profileFormSchema = insertProfileSchema.omit({ userId: true }).extend({
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -43,6 +62,33 @@ const profileFormSchema = insertProfileSchema.extend({
     .min(50, "Summary must be at least 50 characters")
     .max(500, "Summary must be less than 500 characters"),
   email: z.string().email("Invalid email address").optional(),
+  // Social Links - optional
+  githubUrl: z.string().url("Invalid GitHub URL").optional().or(z.literal("")),
+  linkedinUrl: z
+    .string()
+    .url("Invalid LinkedIn URL")
+    .optional()
+    .or(z.literal("")),
+  portfolioUrl: z
+    .string()
+    .url("Invalid Portfolio URL")
+    .optional()
+    .or(z.literal("")),
+  leetcodeUrl: z
+    .string()
+    .url("Invalid LeetCode URL")
+    .optional()
+    .or(z.literal("")),
+  // Array fields - optional
+  otherLinks: z.array(z.string().url()).optional(),
+  languages: z.array(z.string().min(1)).optional(),
+  achievements: z.array(z.string().min(5)).optional(),
+  certificates: z.array(z.string().min(5)).optional(),
+  organizations: z.array(z.string().min(2)).optional(),
+  // Text fields - optional
+  educationSummary: z.string().max(500).optional(),
+  skillsSummary: z.string().max(500).optional(),
+  internshipExperience: z.string().max(500).optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileFormSchema>;
@@ -56,28 +102,20 @@ export default function ProfileEditForm({
   onSuccess,
   showCompactMode = false,
 }: ProfileEditFormProps) {
+  console.log(" Mouting ProfileEditForm...");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const userId = user?.id;
+  console.log(" User from useAuth:", user);
+  console.log(" Initial userId:", userId);
 
-  const { data: existingProfile, isLoading } = useQuery({
+  // FIX: Use the inferred Profile type for the useQuery hook
+  const { data: existingProfile, isLoading } = useQuery<Profile>({
     queryKey: ["/api/profile", userId],
     enabled: !!userId,
   });
-
-  // Define profile type for type safety
-  type ProfileType = {
-    name?: string;
-    role?: string;
-    email?: string;
-    phone?: string;
-    location?: string;
-    summary?: string;
-    photoUrl?: string | null;
-    portfolioTheme?: string;
-    isPublic?: boolean;
-  };
+  console.log(" Existing profile from useQuery:", existingProfile);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -88,35 +126,76 @@ export default function ProfileEditForm({
       phone: "",
       location: "",
       summary: "",
+      githubUrl: "",
+      linkedinUrl: "",
+      portfolioUrl: "",
+      leetcodeUrl: "",
+      otherLinks: [],
+      languages: [],
+      achievements: [],
+      certificates: [],
+      organizations: [],
+      educationSummary: "",
+      skillsSummary: "",
+      internshipExperience: "",
     },
   });
 
-  // Update form when user data or existing profile loads
   useEffect(() => {
+    console.log(
+      " useEffect triggered. User:",
+      user,
+      "ExistingProfile:",
+      existingProfile
+    );
     if (user || existingProfile) {
-      const profile = existingProfile as ProfileType;
+      const profile = existingProfile; // No need for type assertion now
       const formData: Partial<ProfileFormData> = {
         name:
           profile?.name ||
           `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
         role: profile?.role || "",
-        email: profile?.email || user?.emailAddresses?.[0]?.emailAddress || "",
+        email: profile?.email || user?.email || "",
         phone: profile?.phone || "",
         location: profile?.location || "",
         summary: profile?.summary || "",
+        githubUrl: profile?.githubUrl || "",
+        linkedinUrl: profile?.linkedinUrl || "",
+        portfolioUrl: profile?.portfolioUrl || "",
+        leetcodeUrl: profile?.leetcodeUrl || "",
+        otherLinks: profile?.otherLinks || [],
+        languages: profile?.languages || [],
+        achievements: profile?.achievements || [],
+        certificates: profile?.certificates || [],
+        organizations: profile?.organizations || [],
+        educationSummary: profile?.educationSummary || "",
+        skillsSummary: profile?.skillsSummary || "",
+        internshipExperience: profile?.internshipExperience || "",
       };
 
-      // Only update if the form hasn't been touched
       if (!form.formState.isDirty) {
+        console.log(" Populating form with data:", formData);
         form.reset(formData);
+      } else {
+        console.log(" Form is dirty, skipping reset.");
       }
     }
   }, [user, existingProfile, form]);
 
   const createProfileMutation = useMutation({
-    mutationFn: (data: ProfileFormData) =>
-      apiRequest("/api/profile", "POST", { ...data, userId }),
-    onSuccess: () => {
+    mutationFn: (data: ProfileFormData) => {
+      // FIX: Ensure userId is a number to match the database schema.
+      const numericUserId = Number(userId);
+      if (isNaN(numericUserId)) {
+        // This case should be handled by the !userId check, but it's a good safeguard.
+        throw new Error("User ID is invalid.");
+      }
+      const payload = { ...data, userId: numericUserId };
+      console.log(" createProfileMutation payload:", payload);
+      return apiRequest("POST", "/api/profile", payload);
+    },
+    onSuccess: (result) => {
+      console.log(" createProfileMutation success:", result);
       queryClient.invalidateQueries({ queryKey: ["/api/profile", userId] });
       toast({
         title: "Profile Created",
@@ -125,6 +204,7 @@ export default function ProfileEditForm({
       onSuccess?.();
     },
     onError: (error: any) => {
+      console.error(" createProfileMutation error:", error);
       toast({
         title: "Error",
         description:
@@ -135,9 +215,13 @@ export default function ProfileEditForm({
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: (data: Partial<ProfileFormData>) =>
-      apiRequest(`/api/profile/${userId}`, "PATCH", data),
-    onSuccess: () => {
+    // FIX: The data passed here should only be the form fields, not the userId.
+    mutationFn: (data: Partial<ProfileFormData>) => {
+      console.log(" updateProfileMutation payload:", data);
+      return apiRequest("PATCH", `/api/profile/${userId}`, data);
+    },
+    onSuccess: (result) => {
+      console.log(" updateProfileMutation success:", result);
       queryClient.invalidateQueries({ queryKey: ["/api/profile", userId] });
       toast({
         title: "Profile Updated",
@@ -146,6 +230,7 @@ export default function ProfileEditForm({
       onSuccess?.();
     },
     onError: (error: any) => {
+      console.error(" updateProfileMutation error:", error);
       toast({
         title: "Error",
         description:
@@ -156,7 +241,9 @@ export default function ProfileEditForm({
   });
 
   const onSubmit = async (data: ProfileFormData) => {
+    console.log(" onSubmit called with data:", data);
     if (!userId) {
+      console.log(" User ID is missing, aborting submit.");
       toast({
         title: "Error",
         description: "You must be logged in to update your profile.",
@@ -165,20 +252,32 @@ export default function ProfileEditForm({
       return;
     }
 
+    console.log(" Starting submission...");
+
     setIsSubmitting(true);
 
     try {
       if (existingProfile) {
-        await updateProfileMutation.mutateAsync(data);
+        console.log(" Updating profile for userId:", userId);
+        // FIX: Pass only the form data. The userId is already in the API endpoint URL.
+        const result = await updateProfileMutation.mutateAsync(data);
+        console.log(" Update profile success:", result);
       } else {
-        await createProfileMutation.mutateAsync(data);
+        console.log(" Creating profile for userId:", userId);
+        // The create mutation will handle adding the numeric userId.
+        const result = await createProfileMutation.mutateAsync(data);
+        console.log(" Create profile success:", result);
       }
+    } catch (err) {
+      console.error(" Profile API error:", err);
     } finally {
       setIsSubmitting(false);
+      console.log(" Finished profile submit process.");
     }
   };
 
   if (isLoading) {
+    console.log(" isLoading is true, rendering loading state.");
     return (
       <Card>
         <CardContent className="p-6">
@@ -211,7 +310,18 @@ export default function ProfileEditForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(
+              (data) => {
+                console.log(" Form passed validation:", data);
+                onSubmit(data);
+              },
+              (errors) => {
+                console.error(" Validation errors:", errors);
+              }
+            )}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -270,7 +380,7 @@ export default function ProfileEditForm({
                         type="email"
                         {...field}
                         data-testid="input-email"
-                        disabled={!!user?.emailAddresses?.[0]?.emailAddress}
+                        disabled={!!user?.email}
                       />
                     </FormControl>
                     <FormMessage />
@@ -343,6 +453,213 @@ export default function ProfileEditForm({
                     </p>
                   </FormItem>
                 )}
+              />
+
+              {/* Social Links Section */}
+              <div className="md:col-span-2 space-y-4">
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
+                    <Globe className="h-5 w-5" />
+                    <span>Social Links</span>
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="githubUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <Github className="h-4 w-4" />
+                            <span>GitHub URL</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://github.com/username"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="linkedinUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <Linkedin className="h-4 w-4" />
+                            <span>LinkedIn URL</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://linkedin.com/in/username"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="portfolioUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <Globe className="h-4 w-4" />
+                            <span>Portfolio URL</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://yourportfolio.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="leetcodeUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <Award className="h-4 w-4" />
+                            <span>LeetCode URL</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://leetcode.com/username"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Education Summary */}
+              <FormField
+                control={form.control}
+                name="educationSummary"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel className="flex items-center space-x-2">
+                      <BookOpen className="h-4 w-4" />
+                      <span>Education Summary</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="e.g., B.E - Electronics and Communication Engineering, Easwari engineering college (2020-2024), HSC from Chanakya matric hr sec school..."
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Brief summary of your educational background
+                    </p>
+                  </FormItem>
+                )}
+              />
+
+              {/* Skills Summary */}
+              <FormField
+                control={form.control}
+                name="skillsSummary"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel className="flex items-center space-x-2">
+                      <Award className="h-4 w-4" />
+                      <span>Skills Summary</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="e.g., Python, C++, JAVA, HTML, CSS, React, SQL, Machine Learning..."
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-xs text-gray-500 mt-1">
+                      List your key technical and professional skills
+                    </p>
+                  </FormItem>
+                )}
+              />
+
+              {/* Languages */}
+              <ArrayField
+                control={form.control}
+                name="languages"
+                label="Languages"
+                placeholder="e.g., Tamil, English, Hindi"
+                icon={<Users className="h-4 w-4" />}
+                description="Languages you can speak, read, or write"
+              />
+
+              {/* Achievements */}
+              <ArrayField
+                control={form.control}
+                name="achievements"
+                label="Achievements"
+                placeholder="e.g., Got 1st prize in D-SIM conducted at INVENTE'22, Shiv nadar university"
+                icon={<Award className="h-4 w-4" />}
+                description="Awards, competitions, recognitions, and notable accomplishments"
+              />
+
+              {/* Certificates */}
+              <ArrayField
+                control={form.control}
+                name="certificates"
+                label="Certificates"
+                placeholder="e.g., Problem solving python, INTRODUCTION TO INDUSTRIAL 4.o AND INDUSTRIAL INTERNET OF THINGS, NPTEL"
+                icon={<BookOpen className="h-4 w-4" />}
+                description="Professional certifications and course completions"
+              />
+
+              {/* Internship Experience */}
+              <FormField
+                control={form.control}
+                name="internshipExperience"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel className="flex items-center space-x-2">
+                      <Building className="h-4 w-4" />
+                      <span>Internship Experience</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="e.g., EMBEDDED SYSTEM WITH IOT, NSIC - Gained hands-on experience in IoT development and embedded systems..."
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Describe your internship experiences and what you learned
+                    </p>
+                  </FormItem>
+                )}
+              />
+
+              {/* Organizations */}
+              <ArrayField
+                control={form.control}
+                name="organizations"
+                label="Organizations"
+                placeholder="e.g., Street cause - NGO (volunteer), Rotaract (member)"
+                icon={<Users className="h-4 w-4" />}
+                description="Professional organizations, clubs, volunteer work"
               />
             </div>
 

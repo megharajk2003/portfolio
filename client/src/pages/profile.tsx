@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type profiles } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
-import ProfileEditForm from "@/components/profile-edit-form";
+import SimpleComprehensiveForm from "@/components/comprehensive-profile-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +27,7 @@ import {
   Star,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import type { Profile } from "@shared/schema";
 
 export default function Profile() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,7 +35,7 @@ export default function Profile() {
   const { user } = useAuth();
   const userId = user?.id || "user_sample_1"; // Fallback for demo
 
-  const { data: profile } = useQuery<typeof profiles.$inferSelect>({
+  const { data: profile } = useQuery<Profile>({
     queryKey: ["/api/profile", userId],
   });
 
@@ -127,13 +127,13 @@ export default function Profile() {
               <TabsTrigger value="edit" data-testid="tab-edit-profile">
                 Edit Profile
               </TabsTrigger>
-              <TabsTrigger value="view" data-testid="tab-view-profile">
-                View Profile
+              <TabsTrigger value="view" data-testid="tab-view-profile" disabled>
+                View Profile (Coming Soon)
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="edit" className="space-y-6">
-              <ProfileEditForm onSuccess={() => setActiveTab("view")} />
+              <SimpleComprehensiveForm onSuccess={() => setActiveTab("view")} />
             </TabsContent>
 
             <TabsContent value="view" className="space-y-6">
@@ -161,11 +161,11 @@ export default function Profile() {
                     <div className="relative">
                       <Avatar className="w-24 h-24">
                         <AvatarImage
-                          src={profile?.photoUrl || ""}
-                          alt={profile?.name || ""}
+                          src={profile?.personalDetails?.photo || ""}
+                          alt={profile?.personalDetails?.fullName || ""}
                         />
                         <AvatarFallback className="text-2xl">
-                          {profile?.name
+                          {profile?.personalDetails?.fullName
                             ?.split(" ")
                             .map((n: string) => n[0])
                             .join("") ||
@@ -176,47 +176,56 @@ export default function Profile() {
                     </div>
                     <div className="flex-1">
                       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {profile?.name ||
+                        {profile?.personalDetails?.fullName ||
                           `${user?.firstName || ""} ${
                             user?.lastName || ""
                           }`.trim() ||
                           "Add your name"}
                       </h1>
                       <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
-                        {profile?.role || "Add your professional role"}
+                        {profile?.personalDetails?.roleOrTitle ||
+                          "Add your professional role"}
                       </p>
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <div className="flex items-center space-x-1">
                           <Mail className="w-4 h-4" />
                           <span>
-                            {profile?.email ||
+                            {profile?.contactDetails?.email ||
                               user?.email?.[0] ||
                               "Add your email"}
                           </span>
                         </div>
-                        {profile?.phone && (
+                        {profile?.contactDetails?.phone && (
                           <div className="flex items-center space-x-1">
                             <Phone className="w-4 h-4" />
-                            <span>{profile.phone}</span>
+                            <span>{profile.contactDetails.phone}</span>
                           </div>
                         )}
-                        {profile?.location && (
+                        {profile?.personalDetails?.location && (
                           <div className="flex items-center space-x-1">
                             <MapPin className="w-4 h-4" />
-                            <span>{profile.location}</span>
+                            <span>
+                              {profile.personalDetails.location.city &&
+                              profile.personalDetails.location.state
+                                ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}`
+                                : profile.personalDetails.location.city ||
+                                  profile.personalDetails.location.state ||
+                                  profile.personalDetails.location.country ||
+                                  "Add your location"}
+                            </span>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {profile?.summary ? (
+                  {profile?.personalDetails?.summary ? (
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         Professional Summary
                       </h3>
                       <p className="text-gray-700 dark:text-gray-300">
-                        {profile.summary}
+                        {profile.personalDetails.summary}
                       </p>
                     </div>
                   ) : (

@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Comprehensive Profile Schema matching the provided structure
 export const profiles = pgTable("profiles", {
   id: varchar("id")
     .primaryKey()
@@ -31,101 +32,130 @@ export const profiles = pgTable("profiles", {
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  role: text("role"),
-  email: text("email"),
-  phone: text("phone"),
-  location: text("location"),
-  photoUrl: text("photo_url"),
-  summary: text("summary"),
+
+  // Personal Details Section
+  personalDetails: jsonb("personal_details").$type<{
+    photo?: string;
+    fullName: string;
+    dob?: string; // YYYY-MM-DD format
+    gender?: "Male" | "Female" | "Other";
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+      pincode?: string;
+    };
+    roleOrTitle?: string;
+    summary?: string;
+    languagesKnown?: string[];
+    nationality?: string;
+  }>(),
+
+  // Contact Details Section
+  contactDetails: jsonb("contact_details").$type<{
+    email?: string;
+    phone?: string;
+    linkedin?: string;
+    githubOrPortfolio?: string;
+    website?: string;
+    twitter?: string;
+    otherProfiles?: {
+      behance?: string;
+      dribbble?: string;
+      researchgate?: string;
+      orcid?: string;
+    };
+  }>(),
+
+  // Other Details Section
+  otherDetails: jsonb("other_details").$type<{
+    education?: {
+      level: string; // "School", "Undergraduate", "Postgraduate"
+      institution: string;
+      degree?: string;
+      yearOfPassing?: number;
+      gradeOrScore?: string;
+    }[];
+
+    workExperience?: {
+      organization: string;
+      roleOrPosition: string;
+      startDate: string; // YYYY-MM format
+      endDate?: string; // YYYY-MM format or null for current
+      responsibilities: string[];
+      skillsOrToolsUsed: string[];
+    }[];
+
+    internships?: {
+      organization: string;
+      roleOrPosition: string;
+      startDate: string; // YYYY-MM format
+      endDate: string; // YYYY-MM format
+      projectsOrTasks: string[];
+      skillsOrToolsUsed: string[];
+    }[];
+
+    projects?: {
+      title: string;
+      description: string;
+      domain: string; // "Business", "Marketing", "Technology", etc.
+      toolsOrMethods: string[];
+      outcome?: string;
+      url?: string;
+      githubUrl?: string;
+    }[];
+
+    skills?: {
+      technical: string[];
+      domainSpecific: string[];
+      soft: string[];
+      tools: string[];
+    };
+
+    certifications?: {
+      title: string;
+      organization: string;
+      year: number;
+      url?: string;
+    }[];
+
+    organizations?: {
+      name: string;
+      role: string;
+      year: string; // "2019-2020" format
+      contribution: string;
+    }[];
+
+    achievements?: string[];
+
+    publicationsOrCreativeWorks?: {
+      title: string;
+      type: "Research Paper" | "Portfolio Work" | "Article" | "Book" | "Other";
+      journalOrPlatform: string;
+      year: number;
+      url?: string;
+    }[];
+
+    volunteerExperience?: {
+      organization: string;
+      role: string;
+      description: string;
+      year: string; // "2020-2021" format
+    }[];
+
+    interestsOrHobbies?: string[];
+  }>(),
+
+  // Portfolio Settings
   portfolioTheme: text("portfolio_theme").default("modern"),
   isPublic: boolean("is_public").default(false),
+
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const workExperience = pgTable("work_experience", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  company: text("company").notNull(),
-  startDate: text("start_date").notNull(),
-  endDate: text("end_date"),
-  description: text("description"),
-  isVisible: boolean("is_visible").default(true),
-});
-
-export const education = pgTable("education", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  institution: text("institution").notNull(),
-  degree: text("degree").notNull(),
-  startDate: text("start_date").notNull(),
-  endDate: text("end_date"),
-  isVisible: boolean("is_visible").default(true),
-});
-
-export const skills = pgTable("skills", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  level: integer("level").notNull().default(1), // 1-100
-  category: text("category").default("technical"),
-  isVisible: boolean("is_visible").default(true),
-});
-
-export const projects = pgTable("projects", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description"),
-  technologies: text("technologies").array(),
-  link: text("link"),
-  githubLink: text("github_link"),
-  isVisible: boolean("is_visible").default(true),
-});
-
-export const certifications = pgTable("certifications", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  issuer: text("issuer").notNull(),
-  date: text("date").notNull(),
-  link: text("link"),
-  isVisible: boolean("is_visible").default(true),
-});
-
-export const achievements = pgTable("achievements", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description"),
-  year: text("year"),
-  isVisible: boolean("is_visible").default(true),
-});
-
+// Learning and Gamification Tables (unchanged)
 export const learningModules = pgTable("learning_modules", {
   id: varchar("id")
     .primaryKey()
@@ -192,65 +222,197 @@ export const sectionSettings = pgTable("section_settings", {
   sortOrder: integer("sort_order").default(0),
 });
 
-// Insert schemas for JWT Auth
-export const upsertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+// Zod Schemas for Validation
+export const personalDetailsSchema = z.object({
+  photo: z.string().optional(),
+  fullName: z.string().min(2, "Full name is required"),
+  dob: z.string().optional(),
+  gender: z.enum(["Male", "Female", "Other"]).optional(),
+  location: z
+    .object({
+      city: z.string().optional(),
+      state: z.string().optional(),
+      country: z.string().optional(),
+      pincode: z.string().optional(),
+    })
+    .optional(),
+  roleOrTitle: z.string().optional(),
+  summary: z.string().optional(),
+  languagesKnown: z.array(z.string()).optional(),
+  nationality: z.string().optional(),
 });
+
+export const contactDetailsSchema = z.object({
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  linkedin: z.string().url().optional(),
+  githubOrPortfolio: z.string().url().optional(),
+  website: z.string().url().optional(),
+  twitter: z.string().url().optional(),
+  otherProfiles: z
+    .object({
+      behance: z.string().url().optional(),
+      dribbble: z.string().url().optional(),
+      researchgate: z.string().url().optional(),
+      orcid: z.string().url().optional(),
+    })
+    .optional(),
+});
+
+export const educationItemSchema = z.object({
+  level: z.string(),
+  institution: z.string(),
+  degree: z.string().optional(),
+  yearOfPassing: z.number().optional(),
+  gradeOrScore: z.string().optional(),
+});
+
+export const workExperienceItemSchema = z.object({
+  organization: z.string(),
+  roleOrPosition: z.string(),
+  startDate: z.string(),
+  endDate: z.string().optional(),
+  responsibilities: z.array(z.string()),
+  skillsOrToolsUsed: z.array(z.string()),
+});
+
+export const internshipItemSchema = z.object({
+  organization: z.string(),
+  roleOrPosition: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  projectsOrTasks: z.array(z.string()),
+  skillsOrToolsUsed: z.array(z.string()),
+});
+
+export const projectItemSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  domain: z.string(),
+  toolsOrMethods: z.array(z.string()),
+  outcome: z.string().optional(),
+  url: z.string().url().optional(),
+  githubUrl: z.string().url().optional(),
+});
+
+export const skillsSchema = z.object({
+  technical: z.array(z.string()).optional(),
+  domainSpecific: z.array(z.string()).optional(),
+  soft: z.array(z.string()).optional(),
+  tools: z.array(z.string()).optional(),
+});
+
+export const certificationItemSchema = z.object({
+  title: z.string(),
+  organization: z.string(),
+  year: z.number(),
+  url: z.string().url().optional(),
+});
+
+export const organizationItemSchema = z.object({
+  name: z.string(),
+  role: z.string(),
+  year: z.string(),
+  contribution: z.string(),
+});
+
+export const publicationItemSchema = z.object({
+  title: z.string(),
+  type: z.enum([
+    "Research Paper",
+    "Portfolio Work",
+    "Article",
+    "Book",
+    "Other",
+  ]),
+  journalOrPlatform: z.string(),
+  year: z.number(),
+  url: z.string().url().optional(),
+});
+
+export const volunteerItemSchema = z.object({
+  organization: z.string(),
+  role: z.string(),
+  description: z.string(),
+  year: z.string(),
+});
+
+export const otherDetailsSchema = z.object({
+  education: z.array(educationItemSchema).optional(),
+  workExperience: z.array(workExperienceItemSchema).optional(),
+  internships: z.array(internshipItemSchema).optional(),
+  projects: z.array(projectItemSchema).optional(),
+  skills: skillsSchema.optional(),
+  certifications: z.array(certificationItemSchema).optional(),
+  organizations: z.array(organizationItemSchema).optional(),
+  achievements: z.array(z.string()).optional(),
+  publicationsOrCreativeWorks: z.array(publicationItemSchema).optional(),
+  volunteerExperience: z.array(volunteerItemSchema).optional(),
+  interestsOrHobbies: z.array(z.string()).optional(),
+});
+
+// Main Profile Schema
+export const comprehensiveProfileSchema = z.object({
+  userId: z.number(),
+  personalDetails: personalDetailsSchema.optional(),
+  contactDetails: contactDetailsSchema.optional(),
+  otherDetails: otherDetailsSchema.optional(),
+  portfolioTheme: z.string().optional(),
+  isPublic: z.boolean().optional(),
+});
+
+// Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const insertProfileSchema = createInsertSchema(profiles).omit({
-  id: true,
+
+export const insertProfileSchema = z.object({
+  userId: z.number(),
+  personalDetails: z.any().optional(),
+  contactDetails: z.any().optional(),
+  otherDetails: z.any().optional(),
+  portfolioTheme: z.string().optional(),
+  isPublic: z.boolean().optional(),
 });
-export const insertWorkExperienceSchema = createInsertSchema(
-  workExperience
-).omit({ id: true });
-export const insertEducationSchema = createInsertSchema(education).omit({
-  id: true,
-});
-export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
-export const insertProjectSchema = createInsertSchema(projects).omit({
-  id: true,
-});
-export const insertCertificationSchema = createInsertSchema(
-  certifications
-).omit({ id: true });
-export const insertAchievementSchema = createInsertSchema(achievements).omit({
-  id: true,
-});
+
 export const insertUserProgressSchema = createInsertSchema(userProgress).omit({
   id: true,
   completedAt: true,
 });
+
 export const insertDailyActivitySchema = createInsertSchema(dailyActivity).omit(
   { id: true }
 );
+
 export const insertSectionSettingsSchema = createInsertSchema(
   sectionSettings
 ).omit({ id: true });
 
-// Types for JWT Auth
-export type UpsertUser = z.infer<typeof upsertUserSchema>;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Types
 export type User = typeof users.$inferSelect;
-export type InsertProfile = z.infer<typeof insertProfileSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = InsertUser;
+
 export type Profile = typeof profiles.$inferSelect;
-export type InsertWorkExperience = z.infer<typeof insertWorkExperienceSchema>;
-export type WorkExperience = typeof workExperience.$inferSelect;
-export type InsertEducation = z.infer<typeof insertEducationSchema>;
-export type Education = typeof education.$inferSelect;
-export type InsertSkill = z.infer<typeof insertSkillSchema>;
-export type Skill = typeof skills.$inferSelect;
-export type InsertProject = z.infer<typeof insertProjectSchema>;
-export type Project = typeof projects.$inferSelect;
-export type InsertCertification = z.infer<typeof insertCertificationSchema>;
-export type Certification = typeof certifications.$inferSelect;
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
-export type Achievement = typeof achievements.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+export type ComprehensiveProfile = z.infer<typeof comprehensiveProfileSchema>;
+
+export type PersonalDetails = z.infer<typeof personalDetailsSchema>;
+export type ContactDetails = z.infer<typeof contactDetailsSchema>;
+export type OtherDetails = z.infer<typeof otherDetailsSchema>;
+
+export type EducationItem = z.infer<typeof educationItemSchema>;
+export type WorkExperienceItem = z.infer<typeof workExperienceItemSchema>;
+export type InternshipItem = z.infer<typeof internshipItemSchema>;
+export type ProjectItem = z.infer<typeof projectItemSchema>;
+export type Skills = z.infer<typeof skillsSchema>;
+export type CertificationItem = z.infer<typeof certificationItemSchema>;
+export type OrganizationItem = z.infer<typeof organizationItemSchema>;
+export type PublicationItem = z.infer<typeof publicationItemSchema>;
+export type VolunteerItem = z.infer<typeof volunteerItemSchema>;
+
 export type LearningModule = typeof learningModules.$inferSelect;
 export type InsertUserProgress = z.infer<typeof insertUserProgressSchema>;
 export type UserProgress = typeof userProgress.$inferSelect;

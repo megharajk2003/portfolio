@@ -5,12 +5,7 @@ import { setupAuth } from "./auth";
 import {
   insertUserSchema,
   insertProfileSchema,
-  insertWorkExperienceSchema,
-  insertEducationSchema,
-  insertSkillSchema,
-  insertProjectSchema,
-  insertCertificationSchema,
-  insertAchievementSchema,
+  comprehensiveProfileSchema,
   insertUserProgressSchema,
   insertDailyActivitySchema,
   insertSectionSettingsSchema,
@@ -33,7 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const profile = await storage.getProfile(userId);
+      const profile = await storage.getProfile(userId.toString());
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -85,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/profile/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = req.params.userId;
       const profile = await storage.updateProfile(userId, req.body);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
@@ -114,7 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/work-experience/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const experiences = await storage.getWorkExperience(userId);
+      const experiences = await storage.getWorkExperience(userId.toString());
       res.json(experiences);
     } catch (error) {
       console.error("Error fetching work experience:", error);
