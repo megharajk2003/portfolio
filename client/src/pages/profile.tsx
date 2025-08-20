@@ -77,7 +77,10 @@ const certificationSchema = z.object({
   title: z.string().min(1, "Certification title is required"),
   organization: z.string().min(1, "Organization is required"),
   year: z.number().min(1900, "Valid year required").optional(),
-  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  url: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
   description: z.string().optional(),
 });
 
@@ -93,8 +96,14 @@ const projectSchema = z.object({
   domain: z.string().min(1, "Domain is required"),
   toolsOrMethods: z.string().optional(), // Simplified to string for input
   outcome: z.string().optional(),
-  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
-  githubUrl: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  url: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
+  githubUrl: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });
@@ -105,7 +114,7 @@ const workExperienceSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
   responsibilities: z.string().optional(), // Simplified to string for input
-  skillsOrToolsUsed: z.string().optional(), // Simplified to string for input  
+  skillsOrToolsUsed: z.string().optional(), // Simplified to string for input
   description: z.string().optional(),
 });
 
@@ -713,7 +722,10 @@ function AddEntryForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Domain/Category *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger data-testid="select-project-domain">
                         <SelectValue placeholder="Select project domain" />
@@ -994,15 +1006,22 @@ function AddEntryForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Publication Type *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger data-testid="select-publication-type">
                         <SelectValue placeholder="Select publication type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Research Paper">Research Paper</SelectItem>
-                      <SelectItem value="Portfolio Work">Portfolio Work</SelectItem>
+                      <SelectItem value="Research Paper">
+                        Research Paper
+                      </SelectItem>
+                      <SelectItem value="Portfolio Work">
+                        Portfolio Work
+                      </SelectItem>
                       <SelectItem value="Article">Article</SelectItem>
                       <SelectItem value="Book">Book</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>
@@ -1242,17 +1261,23 @@ function AddEntryForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(
-            (data) => {
-              console.log("✅ Form validation passed, calling onSubmit with data:", data);
-              onSubmit(data);
-            },
-            (errors) => {
-              console.error("❌ Form validation errors:", errors);
-              console.log("📋 Current form values:", form.getValues());
-              console.log("🔍 Form state:", form.formState);
-            }
-          )} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(
+              (data) => {
+                console.log(
+                  "✅ Form validation passed, calling onSubmit with data:",
+                  data
+                );
+                onSubmit(data);
+              },
+              (errors) => {
+                console.error("❌ Form validation errors:", errors);
+                console.log("📋 Current form values:", form.getValues());
+                console.log("🔍 Form state:", form.formState);
+              }
+            )}
+            className="space-y-4"
+          >
             {renderFormFields()}
             <div className="flex justify-end space-x-2">
               <Button
@@ -1579,24 +1604,50 @@ export default function Profile() {
         case "education":
           return { ...cat, items: educationData, count: educationData.length };
         case "certifications":
-          return { ...cat, items: certificationsData, count: certificationsData.length };
+          return {
+            ...cat,
+            items: certificationsData,
+            count: certificationsData.length,
+          };
         case "skills":
           return { ...cat, items: skillsData, count: skillsData.length };
         case "projects":
           return { ...cat, items: projectsData, count: projectsData.length };
         case "workExperience":
-          return { ...cat, items: workExperienceData, count: workExperienceData.length };
+          return {
+            ...cat,
+            items: workExperienceData,
+            count: workExperienceData.length,
+          };
         case "publications":
-          return { ...cat, items: publicationsData, count: publicationsData.length };
+          return {
+            ...cat,
+            items: publicationsData,
+            count: publicationsData.length,
+          };
         case "organizations":
-          return { ...cat, items: organizationsData, count: organizationsData.length };
+          return {
+            ...cat,
+            items: organizationsData,
+            count: organizationsData.length,
+          };
         case "volunteer":
           return { ...cat, items: volunteerData, count: volunteerData.length };
         default:
           return cat;
       }
     });
-  }, [categories, educationData, certificationsData, skillsData, projectsData, workExperienceData, publicationsData, organizationsData, volunteerData]);
+  }, [
+    categories,
+    educationData,
+    certificationsData,
+    skillsData,
+    projectsData,
+    workExperienceData,
+    publicationsData,
+    organizationsData,
+    volunteerData,
+  ]);
 
   // Toggle category expansion
   const toggleCategory = (categoryId: string) => {
@@ -1628,29 +1679,29 @@ export default function Profile() {
     try {
       console.log("📝 Starting addEntry for:", categoryId, "with data:", data);
       setIsSubmitting(true);
-      
+
       // Prepare data for API
       const apiData = {
         userId: userId.toString(),
-        ...data
+        ...data,
       };
       console.log("📡 API call data:", apiData);
 
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
-        'workExperience': 'work-experience',
-        'volunteer': 'volunteer',
-        'publications': 'publications',
-        'organizations': 'organizations'
+        workExperience: "work-experience",
+        volunteer: "volunteer",
+        publications: "publications",
+        organizations: "organizations",
       };
       const apiEndpoint = apiEndpointMap[categoryId] || categoryId;
-      
+
       // Call the appropriate API endpoint
       console.log(`🌐 Making API call to: /api/${apiEndpoint}`);
       const response = await fetch(`/api/${apiEndpoint}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(apiData),
       });
@@ -1667,11 +1718,14 @@ export default function Profile() {
       console.log("✅ Item saved successfully:", savedItem);
 
       // Invalidate the relevant query to refresh data
-      console.log("🔄 Invalidating queries for:", [`/api/${apiEndpoint}`, userId]);
+      console.log("🔄 Invalidating queries for:", [
+        `/api/${apiEndpoint}`,
+        userId,
+      ]);
       await queryClient.invalidateQueries({
-        queryKey: [`/api/${apiEndpoint}`, userId]
+        queryKey: [`/api/${apiEndpoint}`, userId],
       });
-      
+
       setActiveForm(null);
       console.log("✨ Form closed and success toast shown");
       toast({
@@ -1694,18 +1748,18 @@ export default function Profile() {
   const deleteEntry = async (categoryId: string, itemId: string) => {
     try {
       setIsSubmitting(true);
-      
+
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
-        'workExperience': 'work-experience',
-        'volunteer': 'volunteer',
-        'publications': 'publications',
-        'organizations': 'organizations'
+        workExperience: "work-experience",
+        volunteer: "volunteer",
+        publications: "publications",
+        organizations: "organizations",
       };
       const apiEndpoint = apiEndpointMap[categoryId] || categoryId;
-      
+
       const response = await fetch(`/api/${apiEndpoint}/${itemId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
@@ -1714,9 +1768,9 @@ export default function Profile() {
 
       // Invalidate the relevant query to refresh data
       await queryClient.invalidateQueries({
-        queryKey: [`/api/${apiEndpoint}`, userId]
+        queryKey: [`/api/${apiEndpoint}`, userId],
       });
-      
+
       toast({
         title: "Entry Deleted",
         description: "Entry has been removed successfully.",
@@ -1870,221 +1924,15 @@ export default function Profile() {
 
             <TabsContent value="basic" className="space-y-6">
               {/* Personal Details Card with Edit */}
-              <Card className="relative">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>Personal Details</span>
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Toggle edit mode or show comprehensive form
-                        setActiveTab("basic");
-                        // You could add state here to show just personal details form
-                      }}
-                      data-testid="button-edit-personal-basic"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-6">
-                    <div className="relative">
-                      <Avatar className="w-20 h-20">
-                        <AvatarImage
-                          src={profile?.personalDetails?.photo || ""}
-                          alt={profile?.personalDetails?.fullName || ""}
-                        />
-                        <AvatarFallback className="text-xl">
-                          {profile?.personalDetails?.fullName
-                            ?.split(" ")
-                            .map((n: string) => n[0])
-                            .join("") ||
-                            user?.firstName?.[0] ||
-                            "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.fullName ||
-                            `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
-                            "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.roleOrTitle || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.dob || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.gender || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.nationality || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.location ? (
-                            profile.personalDetails.location.city &&
-                            profile.personalDetails.location.state
-                              ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
-                              : profile.personalDetails.location.city ||
-                                profile.personalDetails.location.state ||
-                                profile.personalDetails.location.country
-                          ) : (
-                            "Not provided"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {profile?.personalDetails?.summary ? (
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
-                      <p className="text-gray-700 dark:text-gray-300 mt-1">
-                        {profile.personalDetails.summary}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
-                      <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Add a professional summary to highlight your experience and goals.
-                      </p>
-                    </div>
-                  )}
-
-                  {profile?.personalDetails?.languagesKnown && profile.personalDetails.languagesKnown.length > 0 && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Languages Known</label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {profile.personalDetails.languagesKnown.map((lang, index) => (
-                          <Badge key={index} variant="secondary">{lang}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Contact Details Card with Edit */}
-              <Card className="relative">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center space-x-2">
-                      <Mail className="h-5 w-5" />
-                      <span>Contact Details</span>
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Toggle edit mode or show comprehensive form
-                        setActiveTab("basic");
-                        // You could add state here to show just contact details form
-                      }}
-                      data-testid="button-edit-contact-basic"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
-                      <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.email || user?.email || "Not provided"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</label>
-                      <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.phone || "Not provided"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
-                      <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.website ? (
-                          <a href={profile.contactDetails.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                            {profile.contactDetails.website}
-                          </a>
-                        ) : (
-                          "Not provided"
-                        )}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</label>
-                      <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.linkedin ? (
-                          <a href={profile.contactDetails.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                            {profile.contactDetails.linkedin}
-                          </a>
-                        ) : (
-                          "Not provided"
-                        )}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub/Portfolio</label>
-                      <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.githubOrPortfolio ? (
-                          <a href={profile.contactDetails.githubOrPortfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                            {profile.contactDetails.githubOrPortfolio}
-                          </a>
-                        ) : (
-                          "Not provided"
-                        )}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Twitter</label>
-                      <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.twitter ? (
-                          <a href={profile.contactDetails.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                            {profile.contactDetails.twitter}
-                          </a>
-                        ) : (
-                          "Not provided"
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Edit Form (Hidden by default, shown when edit is clicked) */}
               <div className="mt-6">
                 <SimpleComprehensiveForm
                   onSuccess={() => {
                     // Refresh the profile data and stay on basic tab
-                    queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+                    queryClient.invalidateQueries({
+                      queryKey: ["/api/profile"],
+                    });
                   }}
                 />
               </div>
@@ -2160,10 +2008,19 @@ export default function Profile() {
                               <Button
                                 variant="outline"
                                 onClick={() => {
-                                  console.log("🎯 Add Entry button clicked for category:", category.id);
-                                  console.log("🎯 Current activeForm state:", activeForm);
+                                  console.log(
+                                    "🎯 Add Entry button clicked for category:",
+                                    category.id
+                                  );
+                                  console.log(
+                                    "🎯 Current activeForm state:",
+                                    activeForm
+                                  );
                                   setActiveForm(category.id);
-                                  console.log("🎯 Setting activeForm to:", category.id);
+                                  console.log(
+                                    "🎯 Setting activeForm to:",
+                                    category.id
+                                  );
                                 }}
                                 data-testid={`button-add-${category.id}`}
                               >
@@ -2177,11 +2034,19 @@ export default function Profile() {
                         {/* Add Entry Form */}
                         {activeForm === category.id && (
                           <>
-                            {console.log("🎨 Rendering form for category:", category.id, "activeForm:", activeForm)}
+                            {console.log(
+                              "🎨 Rendering form for category:",
+                              category.id,
+                              "activeForm:",
+                              activeForm
+                            )}
                             <AddEntryForm
                               category={category}
                               onAdd={(data) => {
-                                console.log("📋 Form submitted with data:", data);
+                                console.log(
+                                  "📋 Form submitted with data:",
+                                  data
+                                );
                                 addEntry(category.id, data);
                               }}
                               onCancel={() => {
@@ -2238,50 +2103,64 @@ export default function Profile() {
                     </div>
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Full Name
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.fullName ||
-                            `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+                            `${user?.firstName || ""} ${
+                              user?.lastName || ""
+                            }`.trim() ||
                             "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Role/Title
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.roleOrTitle || "Not provided"}
+                          {profile?.personalDetails?.roleOrTitle ||
+                            "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Date of Birth
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.dob || "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Gender
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.gender || "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Nationality
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.nationality || "Not provided"}
+                          {profile?.personalDetails?.nationality ||
+                            "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Location
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.location ? (
-                            profile.personalDetails.location.city &&
-                            profile.personalDetails.location.state
+                          {profile?.personalDetails?.location
+                            ? profile.personalDetails.location.city &&
+                              profile.personalDetails.location.state
                               ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
                               : profile.personalDetails.location.city ||
                                 profile.personalDetails.location.state ||
                                 profile.personalDetails.location.country
-                          ) : (
-                            "Not provided"
-                          )}
+                            : "Not provided"}
                         </p>
                       </div>
                     </div>
@@ -2289,7 +2168,9 @@ export default function Profile() {
 
                   {profile?.personalDetails?.summary ? (
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Professional Summary
+                      </label>
                       <p className="text-gray-700 dark:text-gray-300 mt-1">
                         {profile.personalDetails.summary}
                       </p>
@@ -2298,21 +2179,29 @@ export default function Profile() {
                     <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
                       <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
                       <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Add a professional summary to highlight your experience and goals.
+                        Add a professional summary to highlight your experience
+                        and goals.
                       </p>
                     </div>
                   )}
 
-                  {profile?.personalDetails?.languagesKnown && profile.personalDetails.languagesKnown.length > 0 && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Languages Known</label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {profile.personalDetails.languagesKnown.map((lang, index) => (
-                          <Badge key={index} variant="secondary">{lang}</Badge>
-                        ))}
+                  {profile?.personalDetails?.languagesKnown &&
+                    profile.personalDetails.languagesKnown.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Languages Known
+                        </label>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {profile.personalDetails.languagesKnown.map(
+                            (lang, index) => (
+                              <Badge key={index} variant="secondary">
+                                {lang}
+                              </Badge>
+                            )
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </CardContent>
               </Card>
 
@@ -2338,22 +2227,35 @@ export default function Profile() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Email Address
+                      </label>
                       <p className="text-lg text-gray-900 dark:text-white">
-                        {profile?.contactDetails?.email || user?.email || "Not provided"}
+                        {profile?.contactDetails?.email ||
+                          user?.email ||
+                          "Not provided"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Phone Number
+                      </label>
                       <p className="text-lg text-gray-900 dark:text-white">
                         {profile?.contactDetails?.phone || "Not provided"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Website
+                      </label>
                       <p className="text-lg text-gray-900 dark:text-white">
                         {profile?.contactDetails?.website ? (
-                          <a href={profile.contactDetails.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                          <a
+                            href={profile.contactDetails.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
                             {profile.contactDetails.website}
                           </a>
                         ) : (
@@ -2362,10 +2264,17 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        LinkedIn
+                      </label>
                       <p className="text-lg text-gray-900 dark:text-white">
                         {profile?.contactDetails?.linkedin ? (
-                          <a href={profile.contactDetails.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                          <a
+                            href={profile.contactDetails.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
                             {profile.contactDetails.linkedin}
                           </a>
                         ) : (
@@ -2374,10 +2283,17 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub/Portfolio</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        GitHub/Portfolio
+                      </label>
                       <p className="text-lg text-gray-900 dark:text-white">
                         {profile?.contactDetails?.githubOrPortfolio ? (
-                          <a href={profile.contactDetails.githubOrPortfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                          <a
+                            href={profile.contactDetails.githubOrPortfolio}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
                             {profile.contactDetails.githubOrPortfolio}
                           </a>
                         ) : (
@@ -2386,10 +2302,17 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Twitter</label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Twitter
+                      </label>
                       <p className="text-lg text-gray-900 dark:text-white">
                         {profile?.contactDetails?.twitter ? (
-                          <a href={profile.contactDetails.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                          <a
+                            href={profile.contactDetails.twitter}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
                             {profile.contactDetails.twitter}
                           </a>
                         ) : (
