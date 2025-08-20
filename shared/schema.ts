@@ -31,6 +31,7 @@ export const profiles = pgTable("profiles", {
     .default(sql`gen_random_uuid()`),
   userId: integer("user_id")
     .notNull()
+    .unique()
     .references(() => users.id, { onDelete: "cascade" }),
 
   // Personal Details Section
