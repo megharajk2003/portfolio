@@ -1639,7 +1639,7 @@ export default function Profile() {
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
         'workExperience': 'work-experience',
-        'volunteer': 'volunteer-experience',
+        'volunteer': 'volunteer',
         'publications': 'publications',
         'organizations': 'organizations'
       };
@@ -1698,7 +1698,7 @@ export default function Profile() {
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
         'workExperience': 'work-experience',
-        'volunteer': 'volunteer-experience',
+        'volunteer': 'volunteer',
         'publications': 'publications',
         'organizations': 'organizations'
       };
