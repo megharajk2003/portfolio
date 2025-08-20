@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -922,6 +922,76 @@ export default function Profile() {
     queryKey: ["/api/profile", userId],
   });
 
+  // Load education data
+  const { data: educationData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/education", userId],
+    enabled: !!userId,
+  });
+
+  // Load other category data
+  const { data: certificationsData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/certifications", userId],
+    enabled: !!userId,
+  });
+
+  const { data: skillsData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/skills", userId],
+    enabled: !!userId,
+  });
+
+  const { data: projectsData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/projects", userId],
+    enabled: !!userId,
+  });
+
+  const { data: workExperienceData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/work-experience", userId],
+    enabled: !!userId,
+  });
+
+  const { data: publicationsData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/publications", userId],
+    enabled: !!userId,
+  });
+
+  const { data: organizationsData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/organizations", userId],
+    enabled: !!userId,
+  });
+
+  const { data: volunteerData = [] as any[] } = useQuery<any[]>({
+    queryKey: ["/api/volunteer-experience", userId],
+    enabled: !!userId,
+  });
+
+  // Update categories when data loads
+  React.useEffect(() => {
+    setCategories((prev) =>
+      prev.map((cat) => {
+        switch (cat.id) {
+          case "education":
+            return { ...cat, items: educationData, count: educationData.length };
+          case "certifications":
+            return { ...cat, items: certificationsData, count: certificationsData.length };
+          case "skills":
+            return { ...cat, items: skillsData, count: skillsData.length };
+          case "projects":
+            return { ...cat, items: projectsData, count: projectsData.length };
+          case "work-experience":
+            return { ...cat, items: workExperienceData, count: workExperienceData.length };
+          case "publications":
+            return { ...cat, items: publicationsData, count: publicationsData.length };
+          case "organizations":
+            return { ...cat, items: organizationsData, count: organizationsData.length };
+          case "volunteer":
+            return { ...cat, items: volunteerData, count: volunteerData.length };
+          default:
+            return cat;
+        }
+      })
+    );
+  }, [educationData, certificationsData, skillsData, projectsData, workExperienceData, publicationsData, organizationsData, volunteerData]);
+
   // Toggle category expansion
   const toggleCategory = (categoryId: string) => {
     setCategories((prev) =>
@@ -932,49 +1002,103 @@ export default function Profile() {
   };
 
   // Add new entry
-  const addEntry = (categoryId: string, data: any) => {
-    setCategories((prev) =>
-      prev.map((cat) => {
-        if (cat.id === categoryId) {
-          const newItem = {
-            ...data,
-            id: Date.now().toString(),
-            isVisible: true,
-          };
-          return {
-            ...cat,
-            items: [...cat.items, newItem],
-            count: cat.count + 1,
-          };
-        }
-        return cat;
-      })
-    );
-    setActiveForm(null);
-    toast({
-      title: "Entry Added",
-      description: `New ${categoryId} entry has been added successfully.`,
-    });
+  const addEntry = async (categoryId: string, data: any) => {
+    try {
+      setIsSubmitting(true);
+      
+      // Prepare data for API
+      const apiData = {
+        userId: userId,
+        ...data
+      };
+
+      // Call the appropriate API endpoint
+      const response = await fetch(`/api/${categoryId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to add ${categoryId} entry`);
+      }
+
+      const savedItem = await response.json();
+
+      // Update local state with saved item
+      setCategories((prev) =>
+        prev.map((cat) => {
+          if (cat.id === categoryId) {
+            return {
+              ...cat,
+              items: [...cat.items, savedItem],
+              count: cat.count + 1,
+            };
+          }
+          return cat;
+        })
+      );
+      
+      setActiveForm(null);
+      toast({
+        title: "Entry Added",
+        description: `New ${categoryId} entry has been saved successfully.`,
+      });
+    } catch (error) {
+      console.error(`Error adding ${categoryId}:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to add ${categoryId} entry. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Delete entry
-  const deleteEntry = (categoryId: string, itemId: string) => {
-    setCategories((prev) =>
-      prev.map((cat) => {
-        if (cat.id === categoryId) {
-          return {
-            ...cat,
-            items: cat.items.filter((item) => item.id !== itemId),
-            count: cat.count - 1,
-          };
-        }
-        return cat;
-      })
-    );
-    toast({
-      title: "Entry Deleted",
-      description: "Entry has been removed successfully.",
-    });
+  const deleteEntry = async (categoryId: string, itemId: string) => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/${categoryId}/${itemId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete ${categoryId} entry`);
+      }
+
+      // Update local state
+      setCategories((prev) =>
+        prev.map((cat) => {
+          if (cat.id === categoryId) {
+            return {
+              ...cat,
+              items: cat.items.filter((item) => item.id !== itemId),
+              count: cat.count - 1,
+            };
+          }
+          return cat;
+        })
+      );
+      
+      toast({
+        title: "Entry Deleted",
+        description: "Entry has been removed successfully.",
+      });
+    } catch (error) {
+      console.error(`Error deleting ${categoryId}:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to delete ${categoryId} entry. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Toggle item visibility
