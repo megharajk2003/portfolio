@@ -96,12 +96,13 @@ export function setupAuth(app: Express) {
       }`.trim();
       await storage.createProfile({
         userId: user.id,
-        name: fullName || req.body.email.split("@")[0], // Use email prefix if no name provided
-        role: "",
-        email: req.body.email,
-        phone: "",
-        location: "",
-        summary: "",
+        personalDetails: {
+          fullName: fullName || req.body.email.split("@")[0], // Use email prefix if no name provided
+        },
+        contactDetails: {
+          email: req.body.email,
+        },
+        otherDetails: {},
         portfolioTheme: "modern",
         isPublic: false,
       });
