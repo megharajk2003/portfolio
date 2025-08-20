@@ -77,7 +77,7 @@ const certificationSchema = z.object({
   title: z.string().min(1, "Certification title is required"),
   organization: z.string().min(1, "Organization is required"),
   year: z.number().min(1900, "Valid year required").optional(),
-  url: z.string().url().optional(),
+  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
   description: z.string().optional(),
 });
 
