@@ -410,8 +410,8 @@ export const projectWithUserSchema = z.object({
   domain: z.string(),
   toolsOrMethods: z.string().optional(), // Allow string input from forms
   outcome: z.string().optional(),
-  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
-  githubUrl: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  url: z.string().optional().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  githubUrl: z.string().optional().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
   startDate: z.string().optional(), // Add missing fields from form
   endDate: z.string().optional(),
 });
@@ -422,7 +422,7 @@ export const certificationWithUserSchema = z.object({
   title: z.string(),
   organization: z.string(),
   year: z.number().optional(),
-  url: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  url: z.string().optional().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
   description: z.string().optional(), // Add missing field from form
 });
 
