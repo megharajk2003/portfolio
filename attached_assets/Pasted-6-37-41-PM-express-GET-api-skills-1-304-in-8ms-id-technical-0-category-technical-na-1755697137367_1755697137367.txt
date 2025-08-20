@@ -1,0 +1,37 @@
+6:37:41 PM [express] GET /api/skills/1 304 in 8ms :: [{"id":"technical-0","category":"technical","na…
+6:37:41 PM [express] GET /api/projects/1 304 in 11ms :: []
+6:37:41 PM [express] GET /api/achievements/1 304 in 10ms :: []
+Error fetching skills: PostgresError: invalid input syntax for type integer: "NaN"
+    at ErrorResponse (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:480:6)
+    at Socket.data (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:315:9)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '22P02',
+  where: "unnamed portal parameter $1 = '...'",
+  file: 'numutils.c',
+  line: '619',
+  routine: 'pg_strtoint32_safe'
+}
+Full error: PostgresError: invalid input syntax for type integer: "NaN"
+    at ErrorResponse (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:480:6)
+    at Socket.data (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:315:9)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '22P02',
+  where: "unnamed portal parameter $1 = '...'",
+  file: 'numutils.c',
+  line: '619',
+  routine: 'pg_strtoint32_safe'
+}
