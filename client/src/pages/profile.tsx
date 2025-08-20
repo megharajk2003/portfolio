@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -916,6 +916,7 @@ export default function Profile() {
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const userId = user?.id || "user_sample_1";
 
   const { data: profile } = useQuery<Profile>({
@@ -1025,19 +1026,10 @@ export default function Profile() {
 
       const savedItem = await response.json();
 
-      // Update local state with saved item
-      setCategories((prev) =>
-        prev.map((cat) => {
-          if (cat.id === categoryId) {
-            return {
-              ...cat,
-              items: [...cat.items, savedItem],
-              count: cat.count + 1,
-            };
-          }
-          return cat;
-        })
-      );
+      // Invalidate the relevant query to refresh data
+      await queryClient.invalidateQueries({
+        queryKey: [`/api/${categoryId}`, userId]
+      });
       
       setActiveForm(null);
       toast({
@@ -1069,19 +1061,10 @@ export default function Profile() {
         throw new Error(`Failed to delete ${categoryId} entry`);
       }
 
-      // Update local state
-      setCategories((prev) =>
-        prev.map((cat) => {
-          if (cat.id === categoryId) {
-            return {
-              ...cat,
-              items: cat.items.filter((item) => item.id !== itemId),
-              count: cat.count - 1,
-            };
-          }
-          return cat;
-        })
-      );
+      // Invalidate the relevant query to refresh data
+      await queryClient.invalidateQueries({
+        queryKey: [`/api/${categoryId}`, userId]
+      });
       
       toast({
         title: "Entry Deleted",
