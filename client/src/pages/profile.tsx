@@ -139,6 +139,32 @@ const publicationSchema = z.object({
   url: z.string().url().optional(),
 });
 
+// Schemas for personal and contact details editing
+const personalDetailsSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  roleOrTitle: z.string().optional(),
+  dob: z.string().optional(),
+  gender: z.string().optional(),
+  nationality: z.string().optional(),
+  location: z.object({
+    city: z.string().optional(),
+    state: z.string().optional(),
+    country: z.string().optional(),
+  }).optional(),
+  summary: z.string().optional(),
+  languagesKnown: z.array(z.string()).optional(),
+  photo: z.string().optional(),
+});
+
+const contactDetailsSchema = z.object({
+  email: z.string().email("Invalid email address").optional(),
+  phone: z.string().optional(),
+  website: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  linkedin: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  githubOrPortfolio: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  twitter: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+});
+
 const organizationSchema = z.object({
   name: z.string().min(1, "Organization name is required"),
   role: z.string().min(1, "Role is required"),
@@ -297,6 +323,379 @@ const suggestions = {
     "Education",
   ],
 };
+
+// Personal Details Edit Form Component
+function PersonalDetailsEditForm({
+  profile,
+  user,
+  onCancel,
+  onSave,
+}: {
+  profile: any;
+  user: any;
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  const { toast } = useToast();
+  const form = useForm({
+    resolver: zodResolver(personalDetailsSchema),
+    defaultValues: {
+      fullName: profile?.personalDetails?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "",
+      roleOrTitle: profile?.personalDetails?.roleOrTitle || "",
+      dob: profile?.personalDetails?.dob || "",
+      gender: profile?.personalDetails?.gender || "",
+      nationality: profile?.personalDetails?.nationality || "",
+      location: {
+        city: profile?.personalDetails?.location?.city || "",
+        state: profile?.personalDetails?.location?.state || "",
+        country: profile?.personalDetails?.location?.country || "",
+      },
+      summary: profile?.personalDetails?.summary || "",
+      photo: profile?.personalDetails?.photo || "",
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await fetch(`/api/profile/${user?.id || "user_sample_1"}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personalDetails: data }),
+      });
+
+      if (response.ok) {
+        toast({ title: "Personal details updated successfully!" });
+        onSave();
+      } else {
+        throw new Error("Failed to update personal details");
+      }
+    } catch (error) {
+      toast({ title: "Error updating personal details", variant: "destructive" });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-2">
+            <User className="h-5 w-5" />
+            <span>Edit Personal Details</span>
+          </CardTitle>
+          <Button variant="outline" size="sm" onClick={onCancel}>
+            <X className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name *</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter your full name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="roleOrTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role/Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g., Software Engineer" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="date" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gender</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                        <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="nationality"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nationality</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g., Indian, American" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location.city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="City" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location.state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="State" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location.country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Country" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="summary"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Professional Summary</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      placeholder="Write a brief professional summary..."
+                      className="min-h-[100px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Contact Details Edit Form Component
+function ContactDetailsEditForm({
+  profile,
+  user,
+  onCancel,
+  onSave,
+}: {
+  profile: any;
+  user: any;
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  const { toast } = useToast();
+  const form = useForm({
+    resolver: zodResolver(contactDetailsSchema),
+    defaultValues: {
+      email: profile?.contactDetails?.email || user?.email || "",
+      phone: profile?.contactDetails?.phone || "",
+      website: profile?.contactDetails?.website || "",
+      linkedin: profile?.contactDetails?.linkedin || "",
+      githubOrPortfolio: profile?.contactDetails?.githubOrPortfolio || "",
+      twitter: profile?.contactDetails?.twitter || "",
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await fetch(`/api/profile/${user?.id || "user_sample_1"}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactDetails: data }),
+      });
+
+      if (response.ok) {
+        toast({ title: "Contact details updated successfully!" });
+        onSave();
+      } else {
+        throw new Error("Failed to update contact details");
+      }
+    } catch (error) {
+      toast({ title: "Error updating contact details", variant: "destructive" });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-2">
+            <Mail className="h-5 w-5" />
+            <span>Edit Contact Details</span>
+          </CardTitle>
+          <Button variant="outline" size="sm" onClick={onCancel}>
+            <X className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" placeholder="your.email@example.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="+1 (555) 123-4567" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://yourwebsite.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="linkedin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://linkedin.com/in/yourprofile" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="githubOrPortfolio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GitHub/Portfolio</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://github.com/yourusername" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="twitter"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Twitter</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://twitter.com/yourusername" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
 
 // Form component for adding new entries
 function AddEntryForm({
@@ -1545,6 +1944,8 @@ export default function Profile() {
   );
   const [activeForm, setActiveForm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingPersonal, setEditingPersonal] = useState(false);
+  const [editingContact, setEditingContact] = useState(false);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1923,19 +2324,231 @@ export default function Profile() {
             </TabsList>
 
             <TabsContent value="basic" className="space-y-6">
-              {/* Personal Details Card with Edit */}
+              {/* Personal Details Card */}
+              {!editingPersonal ? (
+                <Card className="relative">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center space-x-2">
+                        <User className="h-5 w-5" />
+                        <span>Personal Details</span>
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingPersonal(true)}
+                        data-testid="button-edit-personal-basic"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-6">
+                      <div className="relative">
+                        <Avatar className="w-20 h-20">
+                          <AvatarImage
+                            src={profile?.personalDetails?.photo || ""}
+                            alt={profile?.personalDetails?.fullName || ""}
+                          />
+                          <AvatarFallback className="text-xl">
+                            {profile?.personalDetails?.fullName
+                              ?.split(" ")
+                              .map((n: string) => n[0])
+                              .join("") ||
+                              user?.firstName?.[0] ||
+                              "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.fullName ||
+                              `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+                              "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.roleOrTitle || "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.dob || "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.gender || "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.nationality || "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.location ? (
+                              profile.personalDetails.location.city &&
+                              profile.personalDetails.location.state
+                                ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
+                                : profile.personalDetails.location.city ||
+                                  profile.personalDetails.location.state ||
+                                  profile.personalDetails.location.country
+                            ) : (
+                              "Not provided"
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-              {/* Edit Form (Hidden by default, shown when edit is clicked) */}
-              <div className="mt-6">
-                <SimpleComprehensiveForm
-                  onSuccess={() => {
-                    // Refresh the profile data and stay on basic tab
-                    queryClient.invalidateQueries({
-                      queryKey: ["/api/profile"],
-                    });
+                    {profile?.personalDetails?.summary ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
+                        <p className="text-gray-700 dark:text-gray-300 mt-1">
+                          {profile.personalDetails.summary}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+                        <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          Add a professional summary to highlight your experience and goals.
+                        </p>
+                      </div>
+                    )}
+
+                    {profile?.personalDetails?.languagesKnown && profile.personalDetails.languagesKnown.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Languages Known</label>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {profile.personalDetails.languagesKnown.map((lang, index) => (
+                            <Badge key={index} variant="secondary">{lang}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <PersonalDetailsEditForm 
+                  profile={profile} 
+                  user={user}
+                  onCancel={() => setEditingPersonal(false)}
+                  onSave={() => {
+                    setEditingPersonal(false);
+                    queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
                   }}
                 />
-              </div>
+              )}
+
+              {/* Contact Details Card */}
+              {!editingContact ? (
+                <Card className="relative">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center space-x-2">
+                        <Mail className="h-5 w-5" />
+                        <span>Contact Details</span>
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingContact(true)}
+                        data-testid="button-edit-contact-basic"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.contactDetails?.email || user?.email || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.contactDetails?.phone || "Not provided"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.contactDetails?.website ? (
+                            <a href={profile.contactDetails.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                              {profile.contactDetails.website}
+                            </a>
+                          ) : (
+                            "Not provided"
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.contactDetails?.linkedin ? (
+                            <a href={profile.contactDetails.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                              {profile.contactDetails.linkedin}
+                            </a>
+                          ) : (
+                            "Not provided"
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub/Portfolio</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.contactDetails?.githubOrPortfolio ? (
+                            <a href={profile.contactDetails.githubOrPortfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                              {profile.contactDetails.githubOrPortfolio}
+                            </a>
+                          ) : (
+                            "Not provided"
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Twitter</label>
+                        <p className="text-lg text-gray-900 dark:text-white">
+                          {profile?.contactDetails?.twitter ? (
+                            <a href={profile.contactDetails.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                              {profile.contactDetails.twitter}
+                            </a>
+                          ) : (
+                            "Not provided"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <ContactDetailsEditForm 
+                  profile={profile} 
+                  user={user}
+                  onCancel={() => setEditingContact(false)}
+                  onSave={() => {
+                    setEditingContact(false);
+                    queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+                  }}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="academic" className="space-y-6">
