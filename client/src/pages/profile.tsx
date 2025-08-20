@@ -371,6 +371,28 @@ function AddEntryForm({
           skillsOrToolsUsed: "",
           description: "",
         };
+      case "publications":
+        return {
+          title: "",
+          type: "",
+          journalOrPlatform: "",
+          year: undefined,
+          url: "",
+        };
+      case "volunteer":
+        return {
+          organization: "",
+          role: "",
+          description: "",
+          year: "",
+        };
+      case "organizations":
+        return {
+          name: "",
+          role: "",
+          year: "",
+          contribution: "",
+        };
       default:
         return {};
     }
@@ -946,6 +968,258 @@ function AddEntryForm({
           </>
         );
 
+      case "publications":
+        return (
+          <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publication Title *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Machine Learning in Healthcare Applications"
+                      data-testid="input-publication-title"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publication Type *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-publication-type">
+                        <SelectValue placeholder="Select publication type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Research Paper">Research Paper</SelectItem>
+                      <SelectItem value="Portfolio Work">Portfolio Work</SelectItem>
+                      <SelectItem value="Article">Article</SelectItem>
+                      <SelectItem value="Book">Book</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="journalOrPlatform"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Journal/Platform *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., IEEE Transactions, Medium, Personal Blog"
+                      data-testid="input-publication-journal"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publication Year *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      placeholder="e.g., 2024"
+                      data-testid="input-publication-year"
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value) || undefined)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publication URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="https://example.com/my-publication"
+                      data-testid="input-publication-url"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        );
+
+      case "volunteer":
+        return (
+          <>
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Red Cross, Local Shelter, Environmental Group"
+                      data-testid="input-volunteer-organization"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role/Position *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Volunteer Coordinator, Event Organizer"
+                      data-testid="input-volunteer-role"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year/Duration *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., 2023, 2022-2024"
+                      data-testid="input-volunteer-year"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description & Impact *</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Describe your volunteer work, responsibilities, and the impact you made..."
+                      data-testid="input-volunteer-description"
+                      className="min-h-[100px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        );
+
+      case "organizations":
+        return (
+          <>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization Name *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., IEEE, ACM, Professional Society"
+                      data-testid="input-organization-name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role/Position *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., Member, Secretary, Committee Member"
+                      data-testid="input-organization-role"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year/Duration *</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="e.g., 2023, 2022-Present"
+                      data-testid="input-organization-year"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contribution"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contribution/Activities *</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Describe your contributions, activities, or achievements within the organization..."
+                      data-testid="input-organization-contribution"
+                      className="min-h-[100px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        );
+
       default:
         return <div>Form fields for {category.title} coming soon...</div>;
     }
@@ -1363,7 +1637,13 @@ export default function Profile() {
       console.log("📡 API call data:", apiData);
 
       // Map categoryId to API endpoint
-      const apiEndpoint = categoryId === 'workExperience' ? 'work-experience' : categoryId;
+      const apiEndpointMap: { [key: string]: string } = {
+        'workExperience': 'work-experience',
+        'volunteer': 'volunteer-experience',
+        'publications': 'publications',
+        'organizations': 'organizations'
+      };
+      const apiEndpoint = apiEndpointMap[categoryId] || categoryId;
       
       // Call the appropriate API endpoint
       console.log(`🌐 Making API call to: /api/${apiEndpoint}`);
@@ -1415,7 +1695,16 @@ export default function Profile() {
     try {
       setIsSubmitting(true);
       
-      const response = await fetch(`/api/${categoryId}/${itemId}`, {
+      // Map categoryId to API endpoint
+      const apiEndpointMap: { [key: string]: string } = {
+        'workExperience': 'work-experience',
+        'volunteer': 'volunteer-experience',
+        'publications': 'publications',
+        'organizations': 'organizations'
+      };
+      const apiEndpoint = apiEndpointMap[categoryId] || categoryId;
+      
+      const response = await fetch(`/api/${apiEndpoint}/${itemId}`, {
         method: 'DELETE',
       });
 
@@ -1425,7 +1714,7 @@ export default function Profile() {
 
       // Invalidate the relevant query to refresh data
       await queryClient.invalidateQueries({
-        queryKey: [`/api/${categoryId}`, userId]
+        queryKey: [`/api/${apiEndpoint}`, userId]
       });
       
       toast({
