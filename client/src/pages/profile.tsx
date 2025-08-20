@@ -309,7 +309,7 @@ function AddEntryForm({
         return skillSchema;
       case "projects":
         return projectSchema;
-      case "work-experience":
+      case "workExperience":
         return workExperienceSchema;
       case "volunteer":
         return volunteerSchema;
@@ -361,7 +361,7 @@ function AddEntryForm({
           startDate: "",
           endDate: "",
         };
-      case "work-experience":
+      case "workExperience":
         return {
           organization: "",
           roleOrPosition: "",
@@ -818,7 +818,7 @@ function AddEntryForm({
           </>
         );
 
-      case "work-experience":
+      case "workExperience":
         return (
           <>
             <FormField
@@ -1310,7 +1310,7 @@ export default function Profile() {
           return { ...cat, items: skillsData, count: skillsData.length };
         case "projects":
           return { ...cat, items: projectsData, count: projectsData.length };
-        case "work-experience":
+        case "workExperience":
           return { ...cat, items: workExperienceData, count: workExperienceData.length };
         case "publications":
           return { ...cat, items: publicationsData, count: publicationsData.length };
@@ -1346,7 +1346,7 @@ export default function Profile() {
 
   const handleAddExperience = () => {
     console.log("🚀 QuickActions: Opening work experience form");
-    setActiveForm("work-experience");
+    setActiveForm("workExperience");
   };
 
   // Add new entry
@@ -1362,9 +1362,12 @@ export default function Profile() {
       };
       console.log("📡 API call data:", apiData);
 
+      // Map categoryId to API endpoint
+      const apiEndpoint = categoryId === 'workExperience' ? 'work-experience' : categoryId;
+      
       // Call the appropriate API endpoint
-      console.log(`🌐 Making API call to: /api/${categoryId}`);
-      const response = await fetch(`/api/${categoryId}`, {
+      console.log(`🌐 Making API call to: /api/${apiEndpoint}`);
+      const response = await fetch(`/api/${apiEndpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1384,9 +1387,9 @@ export default function Profile() {
       console.log("✅ Item saved successfully:", savedItem);
 
       // Invalidate the relevant query to refresh data
-      console.log("🔄 Invalidating queries for:", [`/api/${categoryId}`, userId]);
+      console.log("🔄 Invalidating queries for:", [`/api/${apiEndpoint}`, userId]);
       await queryClient.invalidateQueries({
-        queryKey: [`/api/${categoryId}`, userId]
+        queryKey: [`/api/${apiEndpoint}`, userId]
       });
       
       setActiveForm(null);
