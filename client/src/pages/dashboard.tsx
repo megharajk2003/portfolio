@@ -210,7 +210,11 @@ export default function Home() {
 
           {/* Quick Actions - Mobile First */}
           <div className="lg:hidden">
-            <QuickActions />
+            <QuickActions 
+              onAddCertification={() => console.log("Dashboard: Navigate to certification form")}
+              onAddProject={() => console.log("Dashboard: Navigate to project form")}
+              onAddExperience={() => console.log("Dashboard: Navigate to experience form")}
+            />
           </div>
 
           {/* Learning Activity - Now before Learning Modules */}
@@ -242,7 +246,11 @@ export default function Home() {
 
           {/* Right sidebar content for desktop */}
           <div className="hidden lg:block">
-            <QuickActions />
+            <QuickActions 
+              onAddCertification={() => console.log("Dashboard: Navigate to certification form")}
+              onAddProject={() => console.log("Dashboard: Navigate to project form")}
+              onAddExperience={() => console.log("Dashboard: Navigate to experience form")}
+            />
           </div>
         </div>
 

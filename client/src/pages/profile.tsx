@@ -1000,9 +1000,26 @@ export default function Profile() {
     );
   };
 
+  // Quick action handlers
+  const handleAddCertification = () => {
+    console.log("🚀 QuickActions: Opening certification form");
+    setActiveForm("certifications");
+  };
+
+  const handleAddProject = () => {
+    console.log("🚀 QuickActions: Opening project form");
+    setActiveForm("projects");
+  };
+
+  const handleAddExperience = () => {
+    console.log("🚀 QuickActions: Opening work experience form");
+    setActiveForm("work-experience");
+  };
+
   // Add new entry
   const addEntry = async (categoryId: string, data: any) => {
     try {
+      console.log("📝 Starting addEntry for:", categoryId, "with data:", data);
       setIsSubmitting(true);
       
       // Prepare data for API
@@ -1010,8 +1027,10 @@ export default function Profile() {
         userId: userId.toString(),
         ...data
       };
+      console.log("📡 API call data:", apiData);
 
       // Call the appropriate API endpoint
+      console.log(`🌐 Making API call to: /api/${categoryId}`);
       const response = await fetch(`/api/${categoryId}`, {
         method: 'POST',
         headers: {
@@ -1020,24 +1039,31 @@ export default function Profile() {
         body: JSON.stringify(apiData),
       });
 
+      console.log("📥 API response:", response.status, response.ok);
+
       if (!response.ok) {
-        throw new Error(`Failed to add ${categoryId} entry`);
+        const errorText = await response.text();
+        console.error("❌ API error response:", errorText);
+        throw new Error(`Failed to add ${categoryId} entry: ${errorText}`);
       }
 
       const savedItem = await response.json();
+      console.log("✅ Item saved successfully:", savedItem);
 
       // Invalidate the relevant query to refresh data
+      console.log("🔄 Invalidating queries for:", [`/api/${categoryId}`, userId]);
       await queryClient.invalidateQueries({
         queryKey: [`/api/${categoryId}`, userId]
       });
       
       setActiveForm(null);
+      console.log("✨ Form closed and success toast shown");
       toast({
         title: "Entry Added",
         description: `New ${categoryId} entry has been saved successfully.`,
       });
     } catch (error) {
-      console.error(`Error adding ${categoryId}:`, error);
+      console.error(`❌ Error adding ${categoryId}:`, error);
       toast({
         title: "Error",
         description: `Failed to add ${categoryId} entry. Please try again.`,
@@ -1292,7 +1318,12 @@ export default function Profile() {
                             <div className="flex justify-center pt-4">
                               <Button
                                 variant="outline"
-                                onClick={() => setActiveForm(category.id)}
+                                onClick={() => {
+                                  console.log("🎯 Add Entry button clicked for category:", category.id);
+                                  console.log("🎯 Current activeForm state:", activeForm);
+                                  setActiveForm(category.id);
+                                  console.log("🎯 Setting activeForm to:", category.id);
+                                }}
                                 data-testid={`button-add-${category.id}`}
                               >
                                 <Plus className="h-4 w-4 mr-2" />
@@ -1304,11 +1335,20 @@ export default function Profile() {
 
                         {/* Add Entry Form */}
                         {activeForm === category.id && (
-                          <AddEntryForm
-                            category={category}
-                            onAdd={(data) => addEntry(category.id, data)}
-                            onCancel={() => setActiveForm(null)}
-                          />
+                          <>
+                            {console.log("🎨 Rendering form for category:", category.id, "activeForm:", activeForm)}
+                            <AddEntryForm
+                              category={category}
+                              onAdd={(data) => {
+                                console.log("📋 Form submitted with data:", data);
+                                addEntry(category.id, data);
+                              }}
+                              onCancel={() => {
+                                console.log("❌ Form cancelled");
+                                setActiveForm(null);
+                              }}
+                            />
+                          </>
                         )}
                       </CardContent>
                     )}
