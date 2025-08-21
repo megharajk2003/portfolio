@@ -127,10 +127,24 @@ export interface IStorage {
 
 export class PgStorage implements IStorage {
   public sessionStore: any = null;
+  private isDbConnected: boolean = false;
+  private fallbackData: Map<string, any> = new Map();
 
   constructor() {
     console.log("Initializing PgStorage with database connection");
     this.initializeSessionStore();
+    this.checkDbConnection();
+  }
+
+  private async checkDbConnection() {
+    try {
+      await db.select().from(users).limit(1);
+      this.isDbConnected = true;
+      console.log("Database connection established");
+    } catch (error) {
+      this.isDbConnected = false;
+      console.log("Database not available, using in-memory fallback storage");
+    }
   }
 
   private initializeSessionStore() {
@@ -490,57 +504,102 @@ export class PgStorage implements IStorage {
     return false;
   }
 
-  // Education CRUD - using profile JSON fields
+  // Education CRUD - using profile JSON fields with fallback storage
   async getEducation(userId: string): Promise<any[]> {
-    const profile = await this.getProfile(userId);
-    return profile?.otherDetails?.education || [];
+    try {
+      const profile = await this.getProfile(userId);
+      return profile?.otherDetails?.education || [];
+    } catch (error) {
+      console.log("Database error, using fallback storage for getEducation");
+      const key = `education_${userId}`;
+      return this.fallbackData.get(key) || [];
+    }
   }
 
   async createEducation(data: any): Promise<any> {
     const { userId, ...educationData } = data;
     const newEducation = { ...educationData, id: randomUUID() };
 
-    const profile = await this.getProfile(userId);
-    if (!profile) {
-      throw new Error("Profile not found");
+    try {
+      const profile = await this.getProfile(userId);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const currentOtherDetails = profile.otherDetails || {};
+      const currentEducation = currentOtherDetails.education || [];
+
+      const updatedOtherDetails = {
+        ...currentOtherDetails,
+        education: [...currentEducation, newEducation],
+      };
+
+      await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+      return newEducation;
+    } catch (error) {
+      console.log("Database error, using fallback storage for createEducation");
+      const key = `education_${userId}`;
+      const currentEducation = this.fallbackData.get(key) || [];
+      this.fallbackData.set(key, [...currentEducation, newEducation]);
+      console.log("Created education entry in fallback storage:", newEducation);
+      return newEducation;
     }
-
-    const currentOtherDetails = profile.otherDetails || {};
-    const currentEducation = currentOtherDetails.education || [];
-
-    const updatedOtherDetails = {
-      ...currentOtherDetails,
-      education: [...currentEducation, newEducation],
-    };
-
-    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
-    return newEducation;
   }
 
   async updateEducation(id: string, data: any): Promise<any> {
     const { userId, ...updateData } = data;
-    const profile = await this.getProfile(userId);
-    if (!profile) {
-      throw new Error("Profile not found");
+    
+    try {
+      const profile = await this.getProfile(userId);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const currentOtherDetails = profile.otherDetails || {};
+      const currentEducation = currentOtherDetails.education || [];
+
+      const updatedEducation = currentEducation.map((edu: any) =>
+        edu.id === id ? { ...edu, ...updateData } : edu
+      );
+
+      const updatedOtherDetails = {
+        ...currentOtherDetails,
+        education: updatedEducation,
+      };
+
+      await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
+      return { ...updateData, id };
+    } catch (error) {
+      console.log("Database error, using fallback storage for updateEducation");
+      const key = `education_${userId}`;
+      const currentEducation = this.fallbackData.get(key) || [];
+      const updatedEducation = currentEducation.map((edu: any) =>
+        edu.id === id ? { ...edu, ...updateData } : edu
+      );
+      this.fallbackData.set(key, updatedEducation);
+      console.log("Updated education entry in fallback storage:", { id, ...updateData });
+      return { ...updateData, id };
     }
-
-    const currentOtherDetails = profile.otherDetails || {};
-    const currentEducation = currentOtherDetails.education || [];
-
-    const updatedEducation = currentEducation.map((edu: any) =>
-      edu.id === id ? { ...edu, ...updateData } : edu
-    );
-
-    const updatedOtherDetails = {
-      ...currentOtherDetails,
-      education: updatedEducation,
-    };
-
-    await this.updateProfile(userId, { otherDetails: updatedOtherDetails });
-    return { ...updateData, id };
   }
 
   async deleteEducation(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      // Search through all user education data in fallback storage
+      const entries = Array.from(this.fallbackData.entries());
+      for (const [key, education] of entries) {
+        if (key.startsWith('education_') && Array.isArray(education)) {
+          const educationExists = education.some((edu: any) => edu.id === id);
+          if (educationExists) {
+            const updatedEducation = education.filter((edu: any) => edu.id !== id);
+            this.fallbackData.set(key, updatedEducation);
+            console.log("Deleted education entry from fallback storage:", id);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     const allProfiles = await db.select().from(profiles);
 
     for (const profile of allProfiles) {

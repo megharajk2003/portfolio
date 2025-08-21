@@ -340,6 +340,8 @@ export const educationItemSchema = z.object({
   degree: z.string().optional(),
   yearOfPassing: z.number().optional(),
   gradeOrScore: z.string().optional(),
+  fieldOfStudy: z.string().optional(),
+  description: z.string().optional(),
 });
 
 // Education schema with userId for API operations
@@ -350,6 +352,8 @@ export const educationWithUserSchema = z.object({
   degree: z.string().optional(),
   yearOfPassing: z.number().optional(),
   gradeOrScore: z.string().optional(),
+  fieldOfStudy: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const workExperienceItemSchema = z.object({
