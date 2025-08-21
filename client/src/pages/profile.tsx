@@ -2015,6 +2015,9 @@ export default function Profile() {
     enabled: !!userId,
   });
 
+  // Extract achievements from profile data (stored as string array in otherDetails)
+  const achievementsData = profile?.otherDetails?.achievements || [];
+
   // Update categories when data loads - using useMemo to prevent infinite re-renders
   const categoriesWithData = React.useMemo(() => {
     return categories.map((cat) => {
@@ -3281,23 +3284,11 @@ export default function Profile() {
                       <span>Achievements</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {achievementsData.map((achievement, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
-                              {achievement.title}
-                            </h3>
-                            <p className="text-blue-600 dark:text-blue-400 font-medium">
-                              {achievement.organization}
-                            </p>
-                            <div className="text-sm text-gray-500 mt-1">
-                              {achievement.year}
-                            </div>
-                            <p className="text-gray-700 dark:text-gray-300 mt-2">{achievement.description}</p>
-                          </div>
-                        </div>
+                  <CardContent className="space-y-3">
+                    {achievementsData.map((achievement: string, index: number) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                        <p className="text-gray-700 dark:text-gray-300">{achievement}</p>
                       </div>
                     ))}
                   </CardContent>
