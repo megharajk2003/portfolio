@@ -453,7 +453,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects routes
   app.get("/api/projects/:userId", async (req, res) => {
     try {
+      console.log("API GET /api/projects/:userId - userId:", req.params.userId);
       const projects = await storage.getProjects(req.params.userId);
+      console.log(
+        "API GET /api/projects/:userId - projects from storage:",
+        projects
+      );
+      console.log(
+        "API GET /api/projects/:userId - projects count:",
+        projects.length
+      );
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -476,7 +485,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", async (req, res) => {
     try {
-      console.log("Project creation request body:", JSON.stringify(req.body, null, 2));
+      console.log(
+        "Project creation request body:",
+        JSON.stringify(req.body, null, 2)
+      );
       const projectData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(projectData);
       res.json(project);
@@ -659,7 +671,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Achievements routes
   app.get("/api/achievements/:userId", async (req, res) => {
     try {
+      console.log(
+        "API GET /api/achievements/:userId - userId:",
+        req.params.userId
+      );
       const achievements = await storage.getAchievements(req.params.userId);
+      console.log(
+        "API GET /api/achievements/:userId - achievements from storage:",
+        achievements
+      );
+      console.log(
+        "API GET /api/achievements/:userId - achievements count:",
+        achievements.length
+      );
       res.json(achievements);
     } catch (error) {
       console.error("Error fetching achievements:", error);
@@ -1205,7 +1229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settings = await storage.upsertSectionSettings({
         userId: parseInt(req.params.userId),
         sectionName: req.params.sectionName,
-        ...req.body
+        ...req.body,
       });
       res.json(settings);
     } catch (error) {

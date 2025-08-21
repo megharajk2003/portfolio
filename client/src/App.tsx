@@ -37,18 +37,52 @@ function Router() {
 
   // Protected routes - redirect to base URL and show toast if not authenticated
   useEffect(() => {
-    const protectedRoutes = ["/profile", "/dashboard", "/skills", "/projects", "/portfolio", "/learning", "/edit-portfolio", "/course"];
-    const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
-    
-    if (!isLoading && !isAuthenticated && isProtectedRoute) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access this page.",
-        variant: "destructive",
-      });
-      navigate("/", { replace: true });
-    }
+    const protectedRoutes = [
+      "/profile",
+      "/dashboard",
+      "/skills",
+      "/projects",
+      "/portfolio",
+      "/learning",
+      "/edit-portfolio",
+      "/course",
+    ];
+    const isProtectedRoute = protectedRoutes.some((route) =>
+      location.startsWith(route)
+    );
+
+    // Add a small delay to ensure authentication state is fully loaded
+    const timer = setTimeout(() => {
+      // Only check authentication after loading is complete AND user is definitely not authenticated
+      if (!isLoading && !isAuthenticated && isProtectedRoute) {
+        console.log(
+          "Auth check - isLoading:",
+          isLoading,
+          "isAuthenticated:",
+          isAuthenticated,
+          "location:",
+          location
+        );
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to access this page.",
+          variant: "destructive",
+        });
+        navigate("/", { replace: true });
+      }
+    }, 500); // 500ms delay to allow auth state to settle
+
+    return () => clearTimeout(timer);
   }, [isAuthenticated, isLoading, location, navigate, toast]);
+
+  // Show loading spinner during authentication check
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <Switch>

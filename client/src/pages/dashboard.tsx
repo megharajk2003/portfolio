@@ -50,7 +50,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const userId = user?.id?.toString() ?? "1"; // Fallback for demo
-
+  console.log("Dashboard - userId:", userId);
   // FIX: Use the correctly inferred 'Profile' type for the query data.
   const { data: profile } = useQuery<Profile>({
     queryKey: ["/api/profile", userId],
@@ -185,10 +185,13 @@ export default function Home() {
                       "User Name"}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 font-medium">
-                    {profile?.personalDetails?.roleOrTitle || "Professional Role"}
+                    {profile?.personalDetails?.roleOrTitle ||
+                      "Professional Role"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {profile?.contactDetails?.email || user?.email || "email@example.com"}
+                    {profile?.contactDetails?.email ||
+                      user?.email ||
+                      "email@example.com"}
                   </p>
                 </div>
               </div>
@@ -210,10 +213,16 @@ export default function Home() {
 
           {/* Quick Actions - Mobile First */}
           <div className="lg:hidden">
-            <QuickActions 
-              onAddCertification={() => console.log("Dashboard: Navigate to certification form")}
-              onAddProject={() => console.log("Dashboard: Navigate to project form")}
-              onAddExperience={() => console.log("Dashboard: Navigate to experience form")}
+            <QuickActions
+              onAddCertification={() =>
+                console.log("Dashboard: Navigate to certification form")
+              }
+              onAddProject={() =>
+                console.log("Dashboard: Navigate to project form")
+              }
+              onAddExperience={() =>
+                console.log("Dashboard: Navigate to experience form")
+              }
             />
           </div>
 
@@ -246,10 +255,16 @@ export default function Home() {
 
           {/* Right sidebar content for desktop */}
           <div className="hidden lg:block">
-            <QuickActions 
-              onAddCertification={() => console.log("Dashboard: Navigate to certification form")}
-              onAddProject={() => console.log("Dashboard: Navigate to project form")}
-              onAddExperience={() => console.log("Dashboard: Navigate to experience form")}
+            <QuickActions
+              onAddCertification={() =>
+                console.log("Dashboard: Navigate to certification form")
+              }
+              onAddProject={() =>
+                console.log("Dashboard: Navigate to project form")
+              }
+              onAddExperience={() =>
+                console.log("Dashboard: Navigate to experience form")
+              }
             />
           </div>
         </div>

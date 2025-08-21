@@ -2,80 +2,136 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Github, Trophy, Award, Star, Calendar } from "lucide-react";
-import type { Project, Achievement } from "@shared/schema";
+import {
+  ExternalLink,
+  Github,
+  Trophy,
+  Briefcase, // Changed from Github icon for title
+} from "lucide-react";
+// Make sure to import the Profile type from your shared schema
+import type { Project, Profile } from "@shared/schema";
 
 interface ProjectsAchievementsProps {
   userId: string;
 }
 
-export default function ProjectsAchievements({ userId }: ProjectsAchievementsProps) {
-  const { data: projects = [] } = useQuery<Project[]>({
+// Define the Project type as it's expected by the preview component
+// This ensures consistency across your app.
+interface PreviewProject {
+  id: string;
+  title: string;
+  description: string;
+  domain: string;
+  toolsOrMethods?: string;
+  outcome?: string;
+  url?: string;
+  githubUrl?: string;
+}
+
+export default function ProjectsAchievements({
+  userId,
+}: ProjectsAchievementsProps) {
+  // Use the new PreviewProject type for data consistency
+  const { data: projectsData = [] } = useQuery<PreviewProject[]>({
     queryKey: ["/api/projects", userId],
   });
 
-  const { data: achievements = [] } = useQuery<Achievement[]>({
-    queryKey: ["/api/achievements", userId],
+  // Fetch the main profile to get achievements, just like the preview tab does
+  const { data: profile } = useQuery<Profile>({
+    queryKey: ["/api/profile", userId],
   });
+
+  // Achievements are now an array of strings from the profile's otherDetails
+  const achievementsData = profile?.otherDetails?.achievements || [];
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-      {/* Projects Section */}
+      {/* ========================================================== */}
+      {/* Projects Section - Updated to match preview style        */}
+      {/* ========================================================== */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Github className="h-5 w-5 text-primary" />
+              <Briefcase className="h-5 w-5 text-primary" />
               Projects
             </CardTitle>
-            <Badge variant="outline">{projects.length} projects</Badge>
+            <Badge variant="outline">{projectsData.length} projects</Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {projects.filter(project => project.isVisible).map((project) => (
-              <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 text-lg">{project.title}</h3>
-                  <div className="flex space-x-2">
-                    {project.link && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={project.link} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    )}
-                    {project.githubLink && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
-                          <Github className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    )}
+            {projectsData.length > 0 ? (
+              projectsData.map((project) => (
+                <div
+                  key={project.id}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                        {project.title}
+                      </h3>
+                      <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                        {project.domain}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      {project.url && (
+                        <Button size="icon-sm" variant="outline" asChild>
+                          <a
+                            href={project.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                      {project.githubUrl && (
+                        <Button size="icon-sm" variant="outline" asChild>
+                          <a
+                            href={project.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Github className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-                
-                {project.description && (
-                  <p className="text-gray-600 text-sm mb-3 leading-relaxed">
+
+                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                     {project.description}
                   </p>
-                )}
-                
-                {project.technologies && project.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {project.technologies.map((tech, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-            
-            {projects.filter(project => project.isVisible).length === 0 && (
+
+                  {project.toolsOrMethods && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Tools & Methods
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-200 text-sm">
+                        {project.toolsOrMethods}
+                      </p>
+                    </div>
+                  )}
+
+                  {project.outcome && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Outcome
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-200 text-sm">
+                        {project.outcome}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
               <div className="text-center py-8 text-gray-500">
-                <Github className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No projects added yet</p>
                 <p className="text-sm">Start showcasing your work!</p>
               </div>
@@ -84,7 +140,9 @@ export default function ProjectsAchievements({ userId }: ProjectsAchievementsPro
         </CardContent>
       </Card>
 
-      {/* Achievements Section */}
+      {/* ========================================================== */}
+      {/* Achievements Section - Updated to match preview style    */}
+      {/* ========================================================== */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -92,55 +150,26 @@ export default function ProjectsAchievements({ userId }: ProjectsAchievementsPro
               <Trophy className="h-5 w-5 text-primary" />
               Achievements
             </CardTitle>
-            <Badge variant="outline">{achievements.length} achievements</Badge>
+            <Badge variant="outline">
+              {achievementsData.length} achievements
+            </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {achievements.filter(achievement => achievement.isVisible).map((achievement) => (
-              <div key={achievement.id} className="relative">
-                <div className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                  {/* Achievement Icon */}
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-                      {achievement.title.toLowerCase().includes('hackathon') && (
-                        <Star className="h-6 w-6 text-white" />
-                      )}
-                      {achievement.title.toLowerCase().includes('certified') && (
-                        <Award className="h-6 w-6 text-white" />
-                      )}
-                      {(!achievement.title.toLowerCase().includes('hackathon') && 
-                        !achievement.title.toLowerCase().includes('certified')) && (
-                        <Trophy className="h-6 w-6 text-white" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Achievement Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-gray-900 text-sm">
-                        {achievement.title}
-                      </h3>
-                      {achievement.year && (
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {achievement.year}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {achievement.description && (
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        {achievement.description}
-                      </p>
-                    )}
-                  </div>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {achievementsData.length > 0 ? (
+              achievementsData.map((achievement: string, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-md"
+                >
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                    {achievement}
+                  </p>
                 </div>
-              </div>
-            ))}
-            
-            {achievements.filter(achievement => achievement.isVisible).length === 0 && (
+              ))
+            ) : (
               <div className="text-center py-8 text-gray-500">
                 <Trophy className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No achievements added yet</p>

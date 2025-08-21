@@ -632,8 +632,17 @@ export class PgStorage implements IStorage {
 
   // Projects CRUD - using profile JSON fields
   async getProjects(userId: string): Promise<any[]> {
+    console.log("Storage getProjects - userId:", userId);
     const profile = await this.getProfile(userId);
-    return profile?.otherDetails?.projects || [];
+    console.log("Storage getProjects - profile:", profile);
+    console.log("Storage getProjects - otherDetails:", profile?.otherDetails);
+    console.log(
+      "Storage getProjects - projects:",
+      profile?.otherDetails?.projects
+    );
+    const projects = profile?.otherDetails?.projects || [];
+    console.log("Storage getProjects - returning projects:", projects);
+    return projects;
   }
 
   async createProject(data: any): Promise<any> {
@@ -784,8 +793,23 @@ export class PgStorage implements IStorage {
 
   // Achievements CRUD - using profile JSON fields
   async getAchievements(userId: string): Promise<any[]> {
+    console.log("Storage getAchievements - userId:", userId);
     const profile = await this.getProfile(userId);
-    return profile?.otherDetails?.achievements || [];
+    console.log("Storage getAchievements - profile:", profile);
+    console.log(
+      "Storage getAchievements - otherDetails:",
+      profile?.otherDetails
+    );
+    console.log(
+      "Storage getAchievements - achievements:",
+      profile?.otherDetails?.achievements
+    );
+    const achievements = profile?.otherDetails?.achievements || [];
+    console.log(
+      "Storage getAchievements - returning achievements:",
+      achievements
+    );
+    return achievements;
   }
 
   async createAchievement(data: any): Promise<any> {
