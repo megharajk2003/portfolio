@@ -34,13 +34,29 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
     return acc;
   }, {} as Record<string, number[]>);
 
-  const categoryAverages = Object.entries(skillsByCategory).map(([category, levels]) => {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "technical": return "#4F46E5";
+      case "soft": return "#059669"; 
+      case "tools": return "#DC2626";
+      case "domainspecific": return "#7C3AED";
+      case "creative": return "#EA580C";
+      default: return "#6B7280";
+    }
+  };
+
+  const categoryAverages = Object.entries(skillsByCategory).map(([category, levels], index) => {
     const averageLevel = (levels as number[]).reduce((sum: number, level: number) => sum + level, 0) / levels.length;
     const averagePercentage = levelToPercentage(averageLevel);
     return {
       category: category.charAt(0).toUpperCase() + category.slice(1),
       value: averagePercentage,
-      fill: category === "technical" ? "#4F46E5" : category === "design" ? "#7C3AED" : "#059669"
+      fill: getCategoryColor(category.toLowerCase()),
+      // Add unique identifier for each category
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+      // Ensure different radius for visual separation
+      innerRadius: 20 + (index * 15),
+      outerRadius: 60 + (index * 10)
     };
   });
 
@@ -80,13 +96,19 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
         <CardContent>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={categoryAverages}>
+              <RadialBarChart cx="50%" cy="50%" innerRadius="10%" outerRadius="80%" data={categoryAverages}>
                 <PolarAngleAxis tick={false} />
-                <RadialBar
-                  dataKey="value"
-                  cornerRadius={10}
-                  fill="#4F46E5"
-                />
+                {categoryAverages.map((entry, index) => (
+                  <RadialBar
+                    key={entry.category}
+                    dataKey="value"
+                    cornerRadius={4}
+                    fill={entry.fill}
+                    background={{ fill: '#f1f5f9' }}
+                    innerRadius={`${20 + index * 12}%`}
+                    outerRadius={`${35 + index * 12}%`}
+                  />
+                ))}
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload[0]) {
