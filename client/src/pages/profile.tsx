@@ -1698,6 +1698,874 @@ function AddEntryForm({
   );
 }
 
+// Edit entry form component  
+function EditEntryForm({
+  category,
+  item,
+  onUpdate,
+  onCancel,
+}: {
+  category: AcademicCategory;
+  item: any;
+  onUpdate: (data: any) => void;
+  onCancel: () => void;
+}) {
+  const getSchema = () => {
+    switch (category.id) {
+      case "education":
+        return educationSchema;
+      case "certifications":
+        return certificationSchema;
+      case "skills":
+        return skillSchema;
+      case "projects":
+        return projectSchema;
+      case "workExperience":
+        return workExperienceSchema;
+      case "volunteer":
+        return volunteerSchema;
+      case "publications":
+        return publicationSchema;
+      case "organizations":
+        return organizationSchema;
+      default:
+        return z.object({});
+    }
+  };
+
+  const getDefaultValues = () => {
+    switch (category.id) {
+      case "education":
+        return {
+          level: item.level || "",
+          institution: item.institution || "",
+          degree: item.degree || "",
+          yearOfPassing: item.yearOfPassing || undefined,
+          gradeOrScore: item.gradeOrScore || "",
+          fieldOfStudy: item.fieldOfStudy || "",
+          description: item.description || "",
+        };
+      case "certifications":
+        return {
+          title: item.title || "",
+          organization: item.organization || "",
+          year: item.year || undefined,
+          url: item.url || "",
+          description: item.description || "",
+        };
+      case "skills":
+        return {
+          name: item.name || "",
+          level: item.level || 1,
+          category: item.category || "",
+        };
+      case "projects":
+        return {
+          title: item.title || "",
+          description: item.description || "",
+          domain: item.domain || "",
+          toolsOrMethods: item.toolsOrMethods || "",
+          outcome: item.outcome || "",
+          url: item.url || "",
+          githubUrl: item.githubUrl || "",
+          startDate: item.startDate || "",
+          endDate: item.endDate || "",
+        };
+      case "workExperience":
+        return {
+          organization: item.organization || "",
+          roleOrPosition: item.roleOrPosition || "",
+          startDate: item.startDate || "",
+          endDate: item.endDate || "",
+          responsibilities: item.responsibilities || "",
+          skillsOrToolsUsed: item.skillsOrToolsUsed || "",
+          description: item.description || "",
+        };
+      case "volunteer":
+        return {
+          organization: item.organization || "",
+          role: item.role || "",
+          description: item.description || "",
+          year: item.year || "",
+        };
+      case "publications":
+        return {
+          title: item.title || "",
+          type: item.type || "Research Paper",
+          journalOrPlatform: item.journalOrPlatform || "",
+          year: item.year || new Date().getFullYear(),
+          url: item.url || "",
+        };
+      case "organizations":
+        return {
+          name: item.name || "",
+          role: item.role || "",
+          contribution: item.contribution || "",
+          year: item.year || "",
+        };
+      default:
+        return {};
+    }
+  };
+
+  const form = useForm({
+    resolver: zodResolver(getSchema()),
+    defaultValues: getDefaultValues(),
+  });
+
+  const onSubmit = (data: any) => {
+    console.log("📝 Updating entry with data:", data);
+    onUpdate(data);
+  };
+
+  const renderFormFields = () => {
+    const commonClasses = "space-y-4";
+    
+    switch (category.id) {
+      case "education":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="level"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Education Level</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select education level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suggestions.education.levels.map((level) => (
+                        <SelectItem key={level} value={level}>
+                          {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="institution"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Institution</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="University or School name" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="degree"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Degree (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Bachelor of Science" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fieldOfStudy"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Field of Study (optional)</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select field of study" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suggestions.education.fields.map((field_name) => (
+                        <SelectItem key={field_name} value={field_name}>
+                          {field_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="yearOfPassing"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year of Passing (optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      placeholder="2024"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gradeOrScore"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Grade/Score (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="A+ or 3.8 GPA" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Additional details..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case "certifications":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Certification Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="AWS Solutions Architect" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Issuing Organization</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Amazon Web Services" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year Obtained (optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      placeholder="2024"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Certificate URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="https://certificate-url.com" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="What you learned..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case "skills":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Skill Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="JavaScript" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="soft">Soft Skills</SelectItem>
+                      <SelectItem value="tools">Tools</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="level"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Proficiency Level (1-5)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="5"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case "projects":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="E-commerce Website" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Describe your project..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="domain"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Domain</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select domain" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suggestions.domains.map((domain) => (
+                        <SelectItem key={domain} value={domain}>
+                          {domain}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="toolsOrMethods"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tools/Methods (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="React, Node.js, MongoDB" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="outcome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Outcome (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Results achieved..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="https://project-demo.com" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="githubUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GitHub URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="https://github.com/user/repo" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date (optional)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date (optional)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        );
+
+      case "workExperience":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Company Name" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="roleOrPosition"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role/Position</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Software Engineer" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date (optional)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="responsibilities"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Responsibilities (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Key responsibilities..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="skillsOrToolsUsed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Skills/Tools Used (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="React, Python, AWS" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Additional details..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case "volunteer":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Non-profit Organization" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Volunteer Coordinator" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Describe your volunteer work..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="2024" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case "publications":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Research Paper Title" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Research Paper">Research Paper</SelectItem>
+                      <SelectItem value="Portfolio Work">Portfolio Work</SelectItem>
+                      <SelectItem value="Article">Article</SelectItem>
+                      <SelectItem value="Book">Book</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="journalOrPlatform"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Journal/Platform</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="IEEE, Medium, etc." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="https://publication-url.com" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case "organizations":
+        return (
+          <div className={commonClasses}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Professional Association" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Member, Board Member, etc." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contribution"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contribution</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Your contributions..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="2024" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="border-2 border-blue-200 dark:border-blue-800">
+      <CardHeader>
+        <CardTitle>Edit {category.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(
+              (data) => {
+                console.log("✅ Edit form submitted with data:", data);
+                onSubmit(data);
+              },
+              (errors) => {
+                console.error("❌ Edit form validation errors:", errors);
+                console.log("📋 Current form values:", form.getValues());
+                console.log("🔍 Form state:", form.formState);
+              }
+            )}
+            className="space-y-4"
+          >
+            {renderFormFields()}
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                data-testid="button-cancel-edit"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" data-testid="button-update-entry">
+                Update {category.title}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Item display component
 function ItemCard({
   item,
@@ -1968,6 +2836,7 @@ export default function Profile() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingContact, setEditingContact] = useState(false);
+  const [editingItem, setEditingItem] = useState<{ categoryId: string; item: any } | null>(null);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -2163,6 +3032,76 @@ export default function Profile() {
       toast({
         title: "Error",
         description: `Failed to add ${categoryId} entry. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Update existing entry
+  const updateEntry = async (categoryId: string, itemId: string, data: any) => {
+    try {
+      console.log("📝 Starting updateEntry for:", categoryId, "item:", itemId, "with data:", data);
+      setIsSubmitting(true);
+
+      // Prepare data for API
+      const apiData = {
+        userId: userId.toString(),
+        ...data,
+      };
+      console.log("📡 API call data:", apiData);
+
+      // Map categoryId to API endpoint
+      const apiEndpointMap: { [key: string]: string } = {
+        workExperience: "work-experience",
+        volunteer: "volunteer",
+        publications: "publications",
+        organizations: "organizations",
+      };
+      const apiEndpoint = apiEndpointMap[categoryId] || categoryId;
+
+      // Call the appropriate API endpoint
+      console.log(`🌐 Making API call to: /api/${apiEndpoint}/${itemId}`);
+      const response = await fetch(`/api/${apiEndpoint}/${itemId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      console.log("📥 API response:", response.status, response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ API error response:", errorText);
+        throw new Error(`Failed to update ${categoryId} entry: ${errorText}`);
+      }
+
+      const updatedItem = await response.json();
+      console.log("✅ Item updated successfully:", updatedItem);
+
+      // Invalidate the relevant query to refresh data
+      console.log("🔄 Invalidating queries for:", [
+        `/api/${apiEndpoint}`,
+        userId,
+      ]);
+      await queryClient.invalidateQueries({
+        queryKey: [`/api/${apiEndpoint}`, userId],
+      });
+
+      setEditingItem(null);
+      console.log("✨ Edit form closed and success toast shown");
+      toast({
+        title: "Entry Updated",
+        description: `${categoryId} entry has been updated successfully.`,
+      });
+    } catch (error) {
+      console.error(`❌ Error updating ${categoryId}:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to update ${categoryId} entry. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -2632,7 +3571,7 @@ export default function Profile() {
                                 item={item}
                                 categoryId={category.id}
                                 onEdit={() => {
-                                  /* TODO: Implement edit */
+                                  setEditingItem({ categoryId: category.id, item });
                                 }}
                                 onDelete={() =>
                                   deleteEntry(category.id, item.id)
@@ -2670,7 +3609,7 @@ export default function Profile() {
                         ) : null}
 
                         {/* Add Entry Form */}
-                        {activeForm === category.id && (
+                        {activeForm === category.id && !editingItem && (
                           <>
                             {console.log(
                               "🎨 Rendering form for category:",
@@ -2690,6 +3629,33 @@ export default function Profile() {
                               onCancel={() => {
                                 console.log("❌ Form cancelled");
                                 setActiveForm(null);
+                              }}
+                            />
+                          </>
+                        )}
+
+                        {/* Edit Entry Form */}
+                        {editingItem && editingItem.categoryId === category.id && (
+                          <>
+                            {console.log(
+                              "✏️ Rendering edit form for category:",
+                              category.id,
+                              "item:",
+                              editingItem.item
+                            )}
+                            <EditEntryForm
+                              category={category}
+                              item={editingItem.item}
+                              onUpdate={(data) => {
+                                console.log(
+                                  "📝 Edit form submitted with data:",
+                                  data
+                                );
+                                updateEntry(category.id, editingItem.item.id, data);
+                              }}
+                              onCancel={() => {
+                                console.log("❌ Edit form cancelled");
+                                setEditingItem(null);
                               }}
                             />
                           </>
@@ -3295,10 +4261,10 @@ export default function Profile() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {achievementsData.map((achievement: string, index: number) => (
+                    {achievementsData.map((achievement: any, index: number) => (
                       <div key={index} className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                        <p className="text-gray-700 dark:text-gray-300">{achievement}</p>
+                        <p className="text-gray-700 dark:text-gray-300">{achievement.title || achievement}</p>
                       </div>
                     ))}
                   </CardContent>
