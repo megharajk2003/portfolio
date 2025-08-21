@@ -127,7 +127,13 @@ export const profiles = pgTable("profiles", {
       contribution: string;
     }[];
 
-    achievements?: string[];
+    achievements?: {
+      id?: string;
+      title: string;
+      description?: string;
+      year?: string;
+      isVisible?: boolean;
+    }[];
 
     publicationsOrCreativeWorks?: {
       title: string;
@@ -376,13 +382,18 @@ export const internshipItemSchema = z.object({
 });
 
 export const projectItemSchema = z.object({
+  id: z.string().optional(),
   title: z.string(),
   description: z.string(),
   domain: z.string(),
+  technologies: z.array(z.string()).optional(),
   toolsOrMethods: z.array(z.string()),
   outcome: z.string().optional(),
   url: z.string().url().optional(),
+  link: z.string().url().optional(),
   githubUrl: z.string().url().optional(),
+  githubLink: z.string().url().optional(),
+  isVisible: z.boolean().default(true),
 });
 
 export const skillsSchema = z.object({
@@ -427,6 +438,14 @@ export const volunteerItemSchema = z.object({
   year: z.string(),
 });
 
+export const achievementItemSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  description: z.string().optional(),
+  year: z.string().optional(),
+  isVisible: z.boolean().default(true),
+});
+
 export const otherDetailsSchema = z.object({
   education: z.array(educationItemSchema).optional(),
   workExperience: z.array(workExperienceItemSchema).optional(),
@@ -435,7 +454,7 @@ export const otherDetailsSchema = z.object({
   skills: skillsSchema.optional(),
   certifications: z.array(certificationItemSchema).optional(),
   organizations: z.array(organizationItemSchema).optional(),
-  achievements: z.array(z.string()).optional(),
+  achievements: z.array(achievementItemSchema).optional(),
   publicationsOrCreativeWorks: z.array(publicationItemSchema).optional(),
   volunteerExperience: z.array(volunteerItemSchema).optional(),
   interestsOrHobbies: z.array(z.string()).optional(),
@@ -526,10 +545,11 @@ export const insertCertificationSchema = certificationWithUserSchema;
 export const insertPublicationSchema = publicationWithUserSchema;
 export const insertOrganizationSchema = organizationWithUserSchema;
 export const insertVolunteerSchema = volunteerWithUserSchema;
+
 export const insertAchievementSchema = z.object({
   title: z.string(),
-  description: z.string(),
-  date: z.string(),
+  description: z.string().optional(),
+  year: z.string().optional(),
 });
 
 // Insert schemas
@@ -580,11 +600,16 @@ export type EducationItem = z.infer<typeof educationItemSchema>;
 export type WorkExperienceItem = z.infer<typeof workExperienceItemSchema>;
 export type InternshipItem = z.infer<typeof internshipItemSchema>;
 export type ProjectItem = z.infer<typeof projectItemSchema>;
+export type AchievementItem = z.infer<typeof achievementItemSchema>;
 export type Skills = z.infer<typeof skillsSchema>;
 export type CertificationItem = z.infer<typeof certificationItemSchema>;
 export type OrganizationItem = z.infer<typeof organizationItemSchema>;
 export type PublicationItem = z.infer<typeof publicationItemSchema>;
 export type VolunteerItem = z.infer<typeof volunteerItemSchema>;
+
+// Export aliases for the component
+export type Project = ProjectItem;
+export type Achievement = AchievementItem;
 
 export type LearningModule = typeof learningModules.$inferSelect;
 export type InsertUserProgress = z.infer<typeof insertUserProgressSchema>;
