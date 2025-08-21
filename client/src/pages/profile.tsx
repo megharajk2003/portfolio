@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1813,6 +1813,15 @@ function EditEntryForm({
     defaultValues: getDefaultValues(),
   });
 
+  // Reset form with item data when item changes
+  useEffect(() => {
+    if (item) {
+      const defaultValues = getDefaultValues();
+      console.log("🔄 Resetting form with values:", defaultValues);
+      form.reset(defaultValues);
+    }
+  }, [item, form]);
+
   const onSubmit = (data: any) => {
     console.log("📝 Updating entry with data:", data);
     onUpdate(data);
@@ -2985,7 +2994,7 @@ export default function Profile() {
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
         workExperience: "work-experience",
-        volunteer: "volunteer",
+        volunteer: "volunteer-experience",
         publications: "publications",
         organizations: "organizations",
       };
@@ -3055,7 +3064,7 @@ export default function Profile() {
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
         workExperience: "work-experience",
-        volunteer: "volunteer",
+        volunteer: "volunteer-experience",
         publications: "publications",
         organizations: "organizations",
       };
@@ -3117,7 +3126,7 @@ export default function Profile() {
       // Map categoryId to API endpoint
       const apiEndpointMap: { [key: string]: string } = {
         workExperience: "work-experience",
-        volunteer: "volunteer",
+        volunteer: "volunteer-experience",
         publications: "publications",
         organizations: "organizations",
       };
