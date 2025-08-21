@@ -145,7 +145,19 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      // Development fallback - return demo user
+      if (process.env.NODE_ENV === 'development') {
+        return res.json({
+          id: 1,
+          email: "john.doe@example.com",
+          firstName: "John",
+          lastName: "Doe",
+          profileImageUrl: null,
+        });
+      }
+      return res.sendStatus(401);
+    }
     res.json({
       id: req.user.id,
       email: req.user.email,

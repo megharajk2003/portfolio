@@ -10,12 +10,23 @@ interface ProjectsAchievementsProps {
 }
 
 export default function ProjectsAchievements({ userId }: ProjectsAchievementsProps) {
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [], error: projectsError, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", userId],
   });
 
-  const { data: achievements = [] } = useQuery<Achievement[]>({
+  const { data: achievements = [], error: achievementsError, isLoading: achievementsLoading } = useQuery<Achievement[]>({
     queryKey: ["/api/achievements", userId],
+  });
+
+  // Debug logging
+  console.log("ProjectsAchievements Debug:", {
+    userId,
+    projects,
+    achievements,
+    projectsError,
+    achievementsError,
+    projectsLoading,
+    achievementsLoading
   });
 
   return (
