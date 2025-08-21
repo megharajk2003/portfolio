@@ -1796,13 +1796,30 @@ function ItemCard({
         );
 
       default:
+        // Map correct field names based on category type
+        const getItemTitle = () => {
+          if (item.roleOrPosition) return item.roleOrPosition; // Work Experience
+          if (item.role) return item.role; // Volunteer Experience
+          if (item.title) return item.title; // Publications
+          if (item.name) return item.name; // Organizations
+          return "Untitled";
+        };
+
+        const getItemDescription = () => {
+          if (item.organization) return item.organization; // Work Experience, Volunteer
+          if (item.journalOrPlatform) return item.journalOrPlatform; // Publications
+          if (item.description) return item.description; // All
+          if (item.contribution) return item.contribution; // Organizations
+          return "No description";
+        };
+
         return (
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white">
-              {item.title || item.name || "Untitled"}
+              {getItemTitle()}
             </h4>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              {item.description || item.organization || "No description"}
+              {getItemDescription()}
             </p>
           </div>
         );
