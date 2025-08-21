@@ -2,16 +2,28 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { TrendingUp, Code, Palette, Users } from "lucide-react";
-import type { Skill } from "@shared/schema";
+// Remove unused type import since skills come from API
 
 interface SkillRadarChartProps {
   userId: string;
 }
 
+interface SkillData {
+  id: string;
+  name: string;
+  level: number;
+  category: string;
+}
+
 export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
-  const { data: skills = [] } = useQuery<Skill[]>({
+  const { data: skills = [] } = useQuery<SkillData[]>({
     queryKey: ["/api/skills", userId],
   });
+
+  // Convert level (1-5) to percentage (0-100%)
+  const levelToPercentage = (level: number) => {
+    return Math.round((level / 5) * 100);
+  };
 
   // Calculate average skill levels by category
   const skillsByCategory = skills.reduce((acc, skill) => {
@@ -23,10 +35,11 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
   }, {} as Record<string, number[]>);
 
   const categoryAverages = Object.entries(skillsByCategory).map(([category, levels]) => {
-    const average = Math.round(levels.reduce((sum, level) => sum + level, 0) / levels.length);
+    const averageLevel = (levels as number[]).reduce((sum: number, level: number) => sum + level, 0) / levels.length;
+    const averagePercentage = levelToPercentage(averageLevel);
     return {
       category: category.charAt(0).toUpperCase() + category.slice(1),
-      value: average,
+      value: averagePercentage,
       fill: category === "technical" ? "#4F46E5" : category === "design" ? "#7C3AED" : "#059669"
     };
   });
@@ -50,7 +63,7 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
     .slice(0, 6)
     .map(skill => ({
       name: skill.name,
-      level: skill.level,
+      level: levelToPercentage(skill.level),
       category: skill.category || "technical"
     }));
 

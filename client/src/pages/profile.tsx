@@ -1778,18 +1778,23 @@ function ItemCard({
             <div className="mt-2">
               <div className="flex items-center space-x-2">
                 <Progress value={item.level * 20} className="flex-1" />
-                <span className="text-sm text-gray-600">
-                  {
-                    [
-                      "",
-                      "Beginner",
-                      "Basic",
-                      "Intermediate",
-                      "Advanced",
-                      "Expert",
-                    ][item.level]
-                  }
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-primary">
+                    {Math.round((item.level / 5) * 100)}%
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {
+                      [
+                        "",
+                        "Beginner",
+                        "Basic",
+                        "Intermediate",
+                        "Advanced",
+                        "Expert",
+                      ][item.level]
+                    }
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -3018,17 +3023,22 @@ export default function Profile() {
                               {categorySkills.map((skill, index) => (
                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                   <span className="text-gray-900 dark:text-white">{skill.name}</span>
-                                  <div className="flex items-center space-x-1">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star
-                                        key={i}
-                                        className={`w-4 h-4 ${
-                                          i < skill.level
-                                            ? "text-yellow-400 fill-current"
-                                            : "text-gray-300 dark:text-gray-600"
-                                        }`}
-                                      />
-                                    ))}
+                                  <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-1">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star
+                                          key={i}
+                                          className={`w-4 h-4 ${
+                                            i < skill.level
+                                              ? "text-yellow-400 fill-current"
+                                              : "text-gray-300 dark:text-gray-600"
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                      {Math.round((skill.level / 5) * 100)}%
+                                    </span>
                                   </div>
                                 </div>
                               ))}
