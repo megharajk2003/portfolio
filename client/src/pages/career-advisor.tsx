@@ -82,22 +82,25 @@ export default function CareerAdvisor() {
   const latestAdvice = advisoriesArray[0]; // Most recent advice
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <BrainCircuit className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Personal Career Advisor</h1>
+      <div className="text-center space-y-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+            <BrainCircuit className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Personal Career Advisor</h1>
         </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Get AI-powered career guidance tailored to your profile, skills, and goals. 
           Receive personalized recommendations for your professional growth.
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-5 gap-8">
         {/* Generate New Advice */}
-        <Card>
+        <div className="lg:col-span-2">
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-blue-600" />
@@ -165,9 +168,11 @@ export default function CareerAdvisor() {
             </form>
           </CardContent>
         </Card>
+        </div>
 
         {/* Latest Advice Display */}
-        <Card className={latestAdvice ? "border-green-200 bg-green-50/50" : ""}>
+        <div className="lg:col-span-3">
+        <Card className={`shadow-lg border-0 ${latestAdvice ? "bg-gradient-to-br from-green-50 to-emerald-100" : "bg-gradient-to-br from-gray-50 to-slate-100"}`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-green-600" />
@@ -184,7 +189,7 @@ export default function CareerAdvisor() {
                 <p className="text-muted-foreground mt-2">Loading advice...</p>
               </div>
             ) : latestAdvice ? (
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-none">
                 {/* Target Role & Level */}
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">
@@ -198,20 +203,30 @@ export default function CareerAdvisor() {
                 </div>
 
                 {/* Main Advice */}
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Career Guidance</h4>
-                  <p className="text-sm leading-relaxed">{latestAdvice.advice}</p>
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-green-200">
+                  <h4 className="font-semibold text-lg text-green-800 mb-4 flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5" />
+                    Career Guidance
+                  </h4>
+                  <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                    <p className="whitespace-pre-wrap text-base">{latestAdvice.advice}</p>
+                  </div>
                 </div>
 
                 {/* Recommendations */}
                 {latestAdvice.recommendations && latestAdvice.recommendations.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Key Recommendations</h4>
-                    <ul className="space-y-1">
+                  <div className="bg-white rounded-xl p-6 shadow-sm border border-blue-200">
+                    <h4 className="font-semibold text-lg text-blue-800 mb-4 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
+                      Key Recommendations
+                    </h4>
+                    <ul className="space-y-3">
                       {latestAdvice.recommendations.map((rec: string, index: number) => (
-                        <li key={index} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
-                          {rec}
+                        <li key={index} className="flex items-start gap-3 text-gray-700">
+                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          </div>
+                          <span className="text-base leading-relaxed">{rec}</span>
                         </li>
                       ))}
                     </ul>
@@ -261,6 +276,7 @@ export default function CareerAdvisor() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Previous Advice History */}

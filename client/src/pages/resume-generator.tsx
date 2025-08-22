@@ -115,14 +115,16 @@ export default function ResumeGenerator() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <FileText className="h-8 w-8 text-purple-600" />
-          <h1 className="text-3xl font-bold">AI Resume Generator</h1>
+      <div className="text-center space-y-6 bg-gradient-to-br from-purple-50 to-violet-100 rounded-2xl p-8">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-purple-600 rounded-xl shadow-lg">
+            <FileText className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">AI Resume Generator</h1>
         </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Create professional resumes tailored to specific roles using your profile data. 
           Choose from multiple templates and get AI-optimized content.
         </p>
@@ -265,7 +267,7 @@ export default function ResumeGenerator() {
 
         {/* Resume Preview */}
         <div className="lg:col-span-2">
-          <Card className="h-full">
+          <Card className="h-full shadow-lg border-0 bg-gradient-to-br from-white to-purple-50">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -298,7 +300,7 @@ export default function ResumeGenerator() {
                     </TabsList>
                     
                     <TabsContent value="content" className="mt-4">
-                      <div className="space-y-6 max-h-96 overflow-y-auto">
+                      <div className="space-y-6 max-h-[500px] overflow-y-auto pr-4">
                         {/* Personal Info */}
                         {selectedResume.content.personalInfo && (
                           <div>
@@ -306,7 +308,7 @@ export default function ResumeGenerator() {
                               <User className="h-4 w-4" />
                               Personal Information
                             </h3>
-                            <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-200">
                               <h4 className="font-medium text-lg">
                                 {selectedResume.content.personalInfo.name}
                               </h4>
@@ -347,7 +349,7 @@ export default function ResumeGenerator() {
                             </h3>
                             <div className="space-y-4">
                               {selectedResume.content.experience.map((exp: any, index: number) => (
-                                <div key={index} className="border-l-2 border-blue-200 pl-4">
+                                <div key={index} className="border-l-4 border-purple-300 pl-6 bg-white rounded-r-xl p-4 shadow-sm">
                                   <div className="flex justify-between items-start">
                                     <div>
                                       <h4 className="font-medium">{exp.position}</h4>
@@ -358,7 +360,7 @@ export default function ResumeGenerator() {
                                     </Badge>
                                   </div>
                                   {exp.responsibilities && exp.responsibilities.length > 0 && (
-                                    <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                                    <ul className="text-sm text-gray-600 mt-3 space-y-2">
                                       {exp.responsibilities.map((resp: string, rIndex: number) => (
                                         <li key={rIndex} className="flex items-start gap-2">
                                           <span className="text-xs mt-1.5">•</span>

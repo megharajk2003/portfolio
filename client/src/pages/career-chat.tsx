@@ -150,14 +150,16 @@ export default function CareerChat() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <MessageSquare className="h-8 w-8 text-orange-600" />
-          <h1 className="text-3xl font-bold">AI Career Chat</h1>
+      <div className="text-center space-y-6 bg-gradient-to-br from-orange-50 to-amber-100 rounded-2xl p-8">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-orange-600 rounded-xl shadow-lg">
+            <MessageSquare className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">AI Career Chat</h1>
         </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Have interactive conversations with your personal AI career counselor. 
           Get instant answers to career questions and personalized guidance.
         </p>
@@ -251,7 +253,7 @@ export default function CareerChat() {
 
         {/* Chat Interface */}
         <div className="lg:col-span-3">
-          <Card className="h-[600px] flex flex-col">
+          <Card className="h-[700px] flex flex-col shadow-lg border-0 bg-gradient-to-br from-white to-orange-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-orange-600" />
@@ -299,10 +301,10 @@ export default function CareerChat() {
                                   <Bot className="h-4 w-4 text-white" />
                                 )}
                               </div>
-                              <div className={`rounded-lg p-3 ${
+                              <div className={`rounded-xl p-4 shadow-sm ${
                                 msg.role === 'user' 
-                                  ? 'bg-blue-600 text-white' 
-                                  : 'bg-gray-100 text-gray-900'
+                                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' 
+                                  : 'bg-white border border-orange-200 text-gray-900'
                               }`}>
                                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                                 <p className={`text-xs mt-1 ${

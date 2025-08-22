@@ -28,12 +28,6 @@ export default function CareerTimeline() {
   const { data: timelines = [], isLoading: isLoadingTimelines } = useQuery({
     queryKey: ["/api/career-timeline", user?.id],
     enabled: !!user,
-    onSuccess: (data) => {
-      console.log('📊 [CLIENT] Fetched timelines:', data);
-    },
-    onError: (error) => {
-      console.error('❌ [CLIENT] Error fetching timelines:', error);
-    }
   });
 
   // Generate new timeline mutation
@@ -114,14 +108,16 @@ export default function CareerTimeline() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <TimelineIcon className="h-8 w-8 text-green-600" />
-          <h1 className="text-3xl font-bold">AI Career Timeline</h1>
+      <div className="text-center space-y-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-green-600 rounded-xl shadow-lg">
+            <TimelineIcon className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">AI Career Timeline</h1>
         </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Generate detailed career progression roadmaps with AI. Get phase-by-phase plans 
           with milestones and skills to develop for your target role.
         </p>
@@ -177,9 +173,9 @@ export default function CareerTimeline() {
           <p className="text-muted-foreground mt-2">Loading timelines...</p>
         </div>
       ) : (Array.isArray(timelines) && timelines.length > 0) ? (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {timelines.map((timeline: any) => (
-            <Card key={timeline.id} className="relative">
+            <Card key={timeline.id} className="relative shadow-lg border-0 bg-gradient-to-br from-white to-green-50">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -230,7 +226,7 @@ export default function CareerTimeline() {
                           </div>
                           
                           {/* Phase content */}
-                          <div className="flex-1 space-y-3">
+                          <div className="flex-1 space-y-4 bg-white rounded-xl p-6 shadow-sm border border-green-200 ml-4">
                             <div>
                               <h4 className="font-semibold text-lg">{phase.phase}</h4>
                               <Badge variant="secondary" className="mt-1">
@@ -239,17 +235,19 @@ export default function CareerTimeline() {
                               </Badge>
                             </div>
                             
-                            <p className="text-muted-foreground">{phase.description}</p>
+                            <p className="text-gray-700 leading-relaxed text-base">{phase.description}</p>
                             
                             {/* Milestones */}
                             {phase.milestones && phase.milestones.length > 0 && (
                               <div>
                                 <h5 className="font-medium text-sm text-muted-foreground mb-2">Key Milestones</h5>
-                                <ul className="space-y-1">
+                                <ul className="space-y-2">
                                   {phase.milestones.map((milestone: string, mIndex: number) => (
-                                    <li key={mIndex} className="flex items-start gap-2 text-sm">
-                                      <CheckCircle className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
-                                      {milestone}
+                                    <li key={mIndex} className="flex items-start gap-3 text-base">
+                                      <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
+                                        <CheckCircle className="h-3 w-3 text-green-600" />
+                                      </div>
+                                      <span className="text-gray-700">{milestone}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -260,9 +258,9 @@ export default function CareerTimeline() {
                             {phase.skills && phase.skills.length > 0 && (
                               <div>
                                 <h5 className="font-medium text-sm text-muted-foreground mb-2">Skills to Develop</h5>
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-2">
                                   {phase.skills.map((skill: string, sIndex: number) => (
-                                    <Badge key={sIndex} variant="outline" className="text-xs">
+                                    <Badge key={sIndex} className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1.5 text-sm font-medium border border-green-300">
                                       {skill}
                                     </Badge>
                                   ))}
