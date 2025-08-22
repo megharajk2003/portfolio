@@ -84,14 +84,11 @@ export default function Learning() {
   // Enrollment mutation
   const enrollMutation = useMutation({
     mutationFn: async (courseId: string) => {
-      return apiRequest(`/api/enrollments`, {
-        method: "POST",
-        body: {
-          userId: CURRENT_USER_ID,
-          courseId: courseId,
-          enrollmentDate: new Date().toISOString(),
-          status: "active"
-        }
+      return apiRequest("POST", `/api/enrollments`, {
+        userId: CURRENT_USER_ID,
+        courseId: courseId,
+        enrollmentDate: new Date().toISOString(),
+        status: "active"
       });
     },
     onSuccess: () => {
@@ -399,25 +396,12 @@ export default function Learning() {
                       </Badge>
                     </div>
 
-                    {isEnrolled(course.id) ? (
-                      <Link href={`/course/${course.id}/learn`}>
-                        <Button className="w-full" data-testid={`button-start-learning-${course.id}`}>
-                          Start Learning
-                          <Play className="ml-2 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    ) : (
-                      <Button 
-                        className="w-full" 
-                        variant={course.isFree ? "default" : "outline"}
-                        onClick={() => handleEnrollment(course.id)}
-                        disabled={enrollMutation.isPending}
-                        data-testid={`button-enroll-${course.id}`}
-                      >
-                        {enrollMutation.isPending ? "Enrolling..." : course.isFree ? "Enroll for Free" : `Enroll for $${course.price}`}
-                        {!enrollMutation.isPending && <ExternalLink className="ml-2 h-4 w-4" />}
+                    <Link href={`/course/${course.id}`}>
+                      <Button className="w-full" variant="outline" data-testid={`button-view-program-${course.id}`}>
+                        View Program
+                        <ExternalLink className="ml-2 h-4 w-4" />
                       </Button>
-                    )}
+                    </Link>
                   </CardContent>
                 </Card>
               ))}

@@ -1,5 +1,8 @@
 import { useRoute, Link } from "wouter";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +16,8 @@ import {
   ChevronLeft, ExternalLink, Languages, FileText,
   User, MessageCircle, ThumbsUp
 } from "lucide-react";
+
+const CURRENT_USER_ID = 1; // Changed to number to match database schema
 
 // Mock course data based on the images
 const courseDetails = {
@@ -145,6 +150,51 @@ export default function CourseDetail() {
   const courseId = params?.id || "1";
   const course = courseDetails[courseId as keyof typeof courseDetails] || courseDetails["1"];
 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Get user enrollments to check enrollment status
+  const { data: userEnrollments = [] } = useQuery<any[]>({
+    queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
+  });
+
+  // Enrollment mutation
+  const enrollMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      return apiRequest("POST", `/api/enrollments`, {
+        userId: CURRENT_USER_ID,
+        courseId: courseId,
+        enrollmentDate: new Date().toISOString(),
+        status: "active"
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Course Enrolled!",
+        description: "You have successfully enrolled in this course.",
+      });
+      // Invalidate enrollments to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"] });
+    },
+    onError: () => {
+      toast({
+        title: "Enrollment Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Check if user is enrolled in a course
+  const isEnrolled = (courseId: string) => {
+    return userEnrollments.some((enrollment: any) => enrollment.courseId === courseId);
+  };
+
+  // Handle enrollment
+  const handleEnrollment = (courseId: string) => {
+    enrollMutation.mutate(courseId);
+  };
+
   const renderStarRating = (rating: number) => {
     return (
       <div className="flex items-center">
@@ -217,10 +267,24 @@ export default function CourseDetail() {
               <div className="lg:col-span-1">
                 <Card>
                   <CardContent className="p-6">
-                    <Button className="w-full mb-4" size="lg">
-                      Enroll for free
-                      <Calendar className="ml-2 h-4 w-4" />
-                    </Button>
+                    {isEnrolled(courseId) ? (
+                      <Link href={`/course/${courseId}/learn`}>
+                        <Button className="w-full mb-4" size="lg">
+                          Start Learning
+                          <PlayCircle className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button 
+                        className="w-full mb-4" 
+                        size="lg"
+                        onClick={() => handleEnrollment(courseId)}
+                        disabled={enrollMutation.isPending}
+                      >
+                        {enrollMutation.isPending ? "Enrolling..." : "Enroll for free"}
+                        {!enrollMutation.isPending && <Calendar className="ml-2 h-4 w-4" />}
+                      </Button>
+                    )}
                     <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
                       Starts {course.startDate}
                     </p>
