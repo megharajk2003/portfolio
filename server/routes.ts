@@ -169,8 +169,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/work-experience", async (req, res) => {
     try {
-      const experienceData = insertWorkExperienceSchema.parse(req.body);
+      console.log('💼 POST /api/work-experience - Starting request with data:', req.body);
+      
+      // Handle both field name variations (company/position vs organization/roleOrPosition)
+      const normalizedBody = {
+        ...req.body,
+        company: req.body.company || req.body.organization,
+        position: req.body.position || req.body.roleOrPosition,
+      };
+      
+      console.log('💼 POST /api/work-experience - Normalized data:', normalizedBody);
+      const experienceData = insertWorkExperienceSchema.parse(normalizedBody);
+      console.log('💼 POST /api/work-experience - Parsed data:', experienceData);
       const experience = await storage.createWorkExperience(experienceData);
+      console.log('💼 POST /api/work-experience - Created record:', experience);
       res.json(experience);
     } catch (error) {
       console.error("Error creating work experience:", error);
