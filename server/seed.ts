@@ -157,104 +157,291 @@ async function seedDatabase() {
       portfolioViews: 1234,
     });
 
-    // Create sample learning modules
+    // Create real learning modules with comprehensive content
     const modulesData = [
       {
-        title: "JavaScript ES6+",
-        description: "Master modern JavaScript features and syntax",
-        category: "Programming",
-        xpReward: 150,
+        title: "Complete Frontend Development",
+        description: "Master modern frontend development from HTML/CSS basics to advanced React applications",
+        category: "Frontend",
+        xpReward: 250,
         lessons: [
           {
-            title: "Arrow Functions",
-            content: "Learn about arrow function syntax",
-            xp: 30,
+            title: "HTML5 Semantic Elements",
+            content: "Learn proper HTML structure, semantic elements, accessibility features, and modern HTML5 APIs for building well-structured web pages",
+            xp: 35,
           },
           {
-            title: "Destructuring",
-            content: "Master object and array destructuring",
-            xp: 30,
-          },
-          {
-            title: "Async/Await",
-            content: "Handle asynchronous operations",
+            title: "CSS Grid & Flexbox",
+            content: "Master modern CSS layout systems including Grid and Flexbox for responsive designs, with practical examples and browser compatibility",
             xp: 40,
           },
-          { title: "Modules", content: "Import and export modules", xp: 25 },
           {
-            title: "Classes",
-            content: "Object-oriented programming in JS",
-            xp: 25,
+            title: "JavaScript Fundamentals",
+            content: "Core JavaScript concepts: variables, functions, objects, arrays, DOM manipulation, event handling, and ES6+ features",
+            xp: 45,
+          },
+          {
+            title: "React Components & JSX",
+            content: "Build dynamic user interfaces with React components, understand JSX syntax, props, state management, and component lifecycle",
+            xp: 50,
+          },
+          {
+            title: "State Management & Hooks",
+            content: "Advanced React patterns: useEffect, useState, custom hooks, context API, and state management solutions like Redux Toolkit",
+            xp: 55,
+          },
+          {
+            title: "API Integration & Testing",
+            content: "Fetch data from APIs, handle loading states, error handling, and test React components using Jest and React Testing Library",
+            xp: 45,
           },
         ],
         isActive: true,
       },
       {
-        title: "React.js Advanced Patterns",
-        description:
-          "Learn advanced React patterns including hooks, context, and performance optimization",
-        category: "Frontend",
-        xpReward: 200,
+        title: "Backend Development with Node.js",
+        description: "Build scalable backend applications with Node.js, Express, databases, and modern deployment practices",
+        category: "Backend",
+        xpReward: 300,
         lessons: [
           {
-            title: "Custom Hooks",
-            content: "Create reusable custom hooks",
+            title: "Node.js Fundamentals",
+            content: "Understanding Node.js runtime, modules system, npm ecosystem, asynchronous programming with callbacks, promises, and async/await",
             xp: 40,
           },
           {
-            title: "Context API",
-            content: "State management with Context",
+            title: "Express.js Framework",
+            content: "Building REST APIs with Express.js: routing, middleware, request/response handling, error handling, and security best practices",
+            xp: 50,
+          },
+          {
+            title: "Database Design & Integration",
+            content: "Database fundamentals: SQL vs NoSQL, PostgreSQL/MongoDB integration, ORM/ODM usage, query optimization, and data modeling",
+            xp: 55,
+          },
+          {
+            title: "Authentication & Authorization",
+            content: "Implement secure authentication using JWT, OAuth 2.0, session management, password hashing, and role-based access control",
+            xp: 50,
+          },
+          {
+            title: "API Security & Validation",
+            content: "Input validation, rate limiting, CORS, helmet.js, data sanitization, and protection against common security vulnerabilities",
+            xp: 45,
+          },
+          {
+            title: "Testing & Documentation",
+            content: "Unit testing with Jest, integration testing, API documentation with Swagger, logging, monitoring, and debugging techniques",
+            xp: 40,
+          },
+        ],
+        isActive: true,
+      },
+      {
+        title: "Database Management & Design",
+        description: "Master database design, SQL optimization, and modern database technologies for scalable applications",
+        category: "Database",
+        xpReward: 200,
+        lessons: [
+          {
+            title: "Database Design Principles",
+            content: "Normalization, entity-relationship modeling, schema design patterns, and choosing between SQL and NoSQL databases",
+            xp: 40,
+          },
+          {
+            title: "Advanced SQL Queries",
+            content: "Complex joins, subqueries, window functions, stored procedures, triggers, and query optimization techniques for better performance",
+            xp: 45,
+          },
+          {
+            title: "PostgreSQL Advanced Features",
+            content: "JSONB data types, full-text search, indexing strategies, partitioning, and PostgreSQL-specific optimization techniques",
+            xp: 40,
+          },
+          {
+            title: "NoSQL with MongoDB",
+            content: "Document-based modeling, aggregation pipelines, indexing, sharding, and when to choose MongoDB over relational databases",
+            xp: 35,
+          },
+          {
+            title: "Database Performance Tuning",
+            content: "Query optimization, index design, connection pooling, caching strategies, and monitoring database performance metrics",
+            xp: 40,
+          },
+        ],
+        isActive: true,
+      },
+      {
+        title: "DevOps & Cloud Deployment",
+        description: "Learn modern deployment practices, containerization, CI/CD pipelines, and cloud infrastructure management",
+        category: "DevOps",
+        xpReward: 275,
+        lessons: [
+          {
+            title: "Git & Version Control",
+            content: "Advanced Git workflows, branching strategies, code reviews, merge conflicts resolution, and collaborative development practices",
+            xp: 35,
+          },
+          {
+            title: "Docker Containerization",
+            content: "Container concepts, Dockerfile creation, Docker Compose for multi-service applications, image optimization, and container best practices",
+            xp: 50,
+          },
+          {
+            title: "CI/CD Pipeline Setup",
+            content: "Automated testing and deployment with GitHub Actions, Jenkins, or GitLab CI, environment management, and deployment strategies",
+            xp: 55,
+          },
+          {
+            title: "Cloud Platform Deployment",
+            content: "Deploy applications on AWS, Google Cloud, or Azure: compute services, databases, storage, networking, and cost optimization",
+            xp: 60,
+          },
+          {
+            title: "Monitoring & Logging",
+            content: "Application monitoring with tools like New Relic or DataDog, log aggregation, error tracking, and performance optimization",
+            xp: 45,
+          },
+          {
+            title: "Infrastructure as Code",
+            content: "Terraform or CloudFormation for infrastructure management, configuration management, and automated environment provisioning",
+            xp: 50,
+          },
+        ],
+        isActive: true,
+      },
+      {
+        title: "Mobile Development with React Native",
+        description: "Build cross-platform mobile applications using React Native for iOS and Android platforms",
+        category: "Mobile",
+        xpReward: 225,
+        lessons: [
+          {
+            title: "React Native Fundamentals",
+            content: "Setting up development environment, understanding React Native architecture, navigation, and differences from web React",
+            xp: 40,
+          },
+          {
+            title: "Native Components & APIs",
+            content: "Using platform-specific components, accessing device features like camera, GPS, storage, and handling platform differences",
+            xp: 45,
+          },
+          {
+            title: "State Management & Navigation",
+            content: "Redux or Context API for state management, React Navigation for screen routing, and handling deep linking",
             xp: 40,
           },
           {
             title: "Performance Optimization",
-            content: "Memo, useMemo, useCallback",
-            xp: 50,
-          },
-          {
-            title: "Error Boundaries",
-            content: "Handle errors gracefully",
+            content: "Optimizing app performance, lazy loading, image optimization, memory management, and profiling mobile applications",
             xp: 35,
           },
           {
-            title: "Testing",
-            content: "Unit testing React components",
-            xp: 35,
+            title: "Testing & Deployment",
+            content: "Unit testing React Native apps, end-to-end testing with Detox, app store deployment process, and continuous deployment",
+            xp: 45,
           },
         ],
         isActive: true,
       },
       {
-        title: "Node.js & Express",
-        description:
-          "Build robust backend applications with Node.js and Express",
-        category: "Backend",
-        xpReward: 180,
+        title: "Data Science & Analytics",
+        description: "Learn data analysis, visualization, and machine learning fundamentals using Python and modern tools",
+        category: "Data Science",
+        xpReward: 250,
         lessons: [
           {
-            title: "Express Basics",
-            content: "Setting up Express server",
-            xp: 30,
-          },
-          {
-            title: "Middleware",
-            content: "Understanding middleware functions",
-            xp: 35,
-          },
-          {
-            title: "Authentication",
-            content: "JWT and session management",
+            title: "Python for Data Analysis",
+            content: "NumPy arrays, Pandas DataFrames, data cleaning, manipulation, and exploratory data analysis techniques",
             xp: 45,
           },
           {
-            title: "Database Integration",
-            content: "Connect to databases",
+            title: "Data Visualization",
+            content: "Creating charts and graphs with Matplotlib, Seaborn, and Plotly for effective data storytelling and insights",
             xp: 40,
           },
           {
-            title: "API Design",
-            content: "RESTful API best practices",
-            xp: 30,
+            title: "Statistical Analysis",
+            content: "Descriptive statistics, hypothesis testing, correlation analysis, and interpreting statistical significance in data",
+            xp: 45,
+          },
+          {
+            title: "Machine Learning Basics",
+            content: "Supervised and unsupervised learning, regression, classification, clustering with scikit-learn, and model evaluation",
+            xp: 55,
+          },
+          {
+            title: "Data Pipelines & APIs",
+            content: "Building data pipelines, working with APIs, data warehousing concepts, and automating data collection and processing",
+            xp: 40,
+          },
+        ],
+        isActive: true,
+      },
+      {
+        title: "Cybersecurity Fundamentals",
+        description: "Essential cybersecurity knowledge for developers: secure coding, threat assessment, and protection strategies",
+        category: "Security",
+        xpReward: 200,
+        lessons: [
+          {
+            title: "Secure Coding Practices",
+            content: "Input validation, output encoding, secure authentication, session management, and preventing common vulnerabilities",
+            xp: 45,
+          },
+          {
+            title: "Web Application Security",
+            content: "OWASP Top 10 vulnerabilities, XSS prevention, CSRF protection, SQL injection prevention, and security headers",
+            xp: 50,
+          },
+          {
+            title: "Cryptography Basics",
+            content: "Encryption algorithms, hashing, digital signatures, PKI, TLS/SSL implementation, and key management practices",
+            xp: 40,
+          },
+          {
+            title: "Network Security",
+            content: "Firewalls, VPNs, network monitoring, intrusion detection, and securing API endpoints and microservices",
+            xp: 35,
+          },
+          {
+            title: "Security Testing & Auditing",
+            content: "Penetration testing basics, vulnerability scanning, security code review, and compliance requirements",
+            xp: 40,
+          },
+        ],
+        isActive: true,
+      },
+      {
+        title: "AI & Machine Learning for Developers",
+        description: "Practical machine learning and AI integration for software developers building intelligent applications",
+        category: "AI/ML",
+        xpReward: 300,
+        lessons: [
+          {
+            title: "Machine Learning Fundamentals",
+            content: "Understanding ML algorithms, training vs inference, data preprocessing, feature engineering, and model selection",
+            xp: 50,
+          },
+          {
+            title: "Deep Learning with TensorFlow",
+            content: "Neural networks, TensorFlow/Keras basics, computer vision, natural language processing, and model deployment",
+            xp: 60,
+          },
+          {
+            title: "AI API Integration",
+            content: "Integrating AI services like OpenAI, Google AI, AWS AI services into applications, prompt engineering, and cost optimization",
+            xp: 45,
+          },
+          {
+            title: "MLOps & Model Deployment",
+            content: "Model versioning, CI/CD for ML, monitoring model performance, A/B testing ML models, and production considerations",
+            xp: 55,
+          },
+          {
+            title: "Ethical AI & Bias Detection",
+            content: "Understanding AI bias, fairness in ML models, ethical considerations, privacy-preserving ML, and responsible AI development",
+            xp: 40,
           },
         ],
         isActive: true,
