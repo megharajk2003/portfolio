@@ -1,0 +1,49 @@
+[{
+	"resource": "/d:/react project/SkillStream/server/seed.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 1 of 2, '(value: { email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; firstName?: string | SQL<unknown> | Placeholder<...> | null | undefined; lastName?: string | ... 3 more ... | undefined; profileImageUrl?: string | ... 3 more ... | undefined; createdAt?: Date | ... 2 more ... | undefined; updatedAt?: Date | ... 2 more ... | undefined; }): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'id' does not exist in type '{ email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; firstName?: string | SQL<unknown> | Placeholder<...> | null | undefined; lastName?: string | ... 3 more ... | undefined; profileImageUrl?: string | ... 3 more ... | undefined; createdAt?: Date | ......'.\n  Overload 2 of 2, '(values: { email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; firstName?: string | SQL<unknown> | Placeholder<...> | null | undefined; lastName?: string | ... 3 more ... | undefined; profileImageUrl?: string | ... 3 more ... | undefined; createdAt?: Date | ... 2 more ... | undefined; updatedAt?: Date | ... 2 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'id' does not exist in type '{ email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; firstName?: string | SQL<unknown> | Placeholder<...> | null | undefined; lastName?: string | ... 3 more ... | undefined; profileImageUrl?: string | ... 3 more ... | undefined; createdAt?: Date | ......'.",
+	"source": "ts",
+	"startLineNumber": 19,
+	"startColumn": 9,
+	"endLineNumber": 19,
+	"endColumn": 11,
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/seed.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 1 of 2, '(value: { userId: number | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<string, any> | undefined; createdAt?: Date | SQL<...> | Placeholder<...> | undefined; ... 5 more ...; isPublic?: boolean | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'name' does not exist in type '{ userId: number | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<string, any> | undefined; createdAt?: Date | SQL<...> | Placeholder<...> | undefined; ... 5 more ...; isPublic?: boolean | ... 3 more ... | undefined; }'.\n  Overload 2 of 2, '(values: { userId: number | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<string, any> | undefined; createdAt?: Date | SQL<...> | Placeholder<...> | undefined; ... 5 more ...; isPublic?: boolean | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'userId' does not exist in type '{ userId: number | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<string, any> | undefined; createdAt?: Date | SQL<...> | Placeholder<...> | undefined; ... 5 more ...; isPublic?: boolean | ... 3 more ... | undefined; }[]'.",
+	"source": "ts",
+	"startLineNumber": 30,
+	"startColumn": 31,
+	"endLineNumber": 30,
+	"endColumn": 37,
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/seed.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 1 of 2, '(value: { description: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; domain: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; isVisible?: boolean | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'technologies' does not exist in type '{ description: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; domain: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; isVisible?: boolean | ... 3 more ... | undefined; }'.\n  Overload 2 of 2, '(values: { description: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; domain: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; isVisible?: boolean | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'userId' does not exist in type '{ description: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; domain: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; isVisible?: boolean | ... 3 more ... | undefined; }[]'.",
+	"source": "ts",
+	"startLineNumber": 96,
+	"startColumn": 33,
+	"endLineNumber": 96,
+	"endColumn": 39,
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/seed.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 1 of 2, '(value: { startDate: string | SQL<unknown> | Placeholder<string, any>; userId: number | SQL<unknown> | Placeholder<string, any>; position: string | SQL<unknown> | Placeholder<...>; ... 7 more ...; isVisible?: boolean | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'title' does not exist in type '{ startDate: string | SQL<unknown> | Placeholder<string, any>; userId: number | SQL<unknown> | Placeholder<string, any>; position: string | SQL<unknown> | Placeholder<...>; ... 7 more ...; isVisible?: boolean | ... 3 more ... | undefined; }'.\n  Overload 2 of 2, '(values: { startDate: string | SQL<unknown> | Placeholder<string, any>; userId: number | SQL<unknown> | Placeholder<string, any>; position: string | SQL<unknown> | Placeholder<...>; ... 7 more ...; isVisible?: boolean | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.\n    Object literal may only specify known properties, and 'userId' does not exist in type '{ startDate: string | SQL<unknown> | Placeholder<string, any>; userId: number | SQL<unknown> | Placeholder<string, any>; position: string | SQL<unknown> | Placeholder<...>; ... 7 more ...; isVisible?: boolean | ... 3 more ... | undefined; }[]'.",
+	"source": "ts",
+	"startLineNumber": 139,
+	"startColumn": 37,
+	"endLineNumber": 139,
+	"endColumn": 43,
+	"origin": "extHost1"
+}]
