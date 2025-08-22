@@ -1,0 +1,111 @@
+[{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.OBJECT; }' is not assignable to type 'Schema'.\n  Property 'properties' is missing in type '{ type: SchemaType.OBJECT; }' but required in type 'ObjectSchema'.",
+	"source": "ts",
+	"startLineNumber": 286,
+	"startColumn": 17,
+	"endLineNumber": 286,
+	"endColumn": 22,
+	"relatedInformation": [
+		{
+			"startLineNumber": 1113,
+			"startColumn": 5,
+			"endLineNumber": 1113,
+			"endColumn": 15,
+			"message": "'properties' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.OBJECT; }' is not assignable to type 'Schema'.\n  Property 'properties' is missing in type '{ type: SchemaType.OBJECT; }' but required in type 'ObjectSchema'.",
+	"source": "ts",
+	"startLineNumber": 290,
+	"startColumn": 17,
+	"endLineNumber": 290,
+	"endColumn": 22,
+	"relatedInformation": [
+		{
+			"startLineNumber": 1113,
+			"startColumn": 5,
+			"endLineNumber": 1113,
+			"endColumn": 15,
+			"message": "'properties' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.OBJECT; }' is not assignable to type 'Schema'.\n  Property 'properties' is missing in type '{ type: SchemaType.OBJECT; }' but required in type 'ObjectSchema'.",
+	"source": "ts",
+	"startLineNumber": 294,
+	"startColumn": 17,
+	"endLineNumber": 294,
+	"endColumn": 22,
+	"relatedInformation": [
+		{
+			"startLineNumber": 1113,
+			"startColumn": 5,
+			"endLineNumber": 1113,
+			"endColumn": 15,
+			"message": "'properties' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.OBJECT; }' is not assignable to type 'Schema'.\n  Property 'properties' is missing in type '{ type: SchemaType.OBJECT; }' but required in type 'ObjectSchema'.",
+	"source": "ts",
+	"startLineNumber": 298,
+	"startColumn": 17,
+	"endLineNumber": 298,
+	"endColumn": 22,
+	"relatedInformation": [
+		{
+			"startLineNumber": 1113,
+			"startColumn": 5,
+			"endLineNumber": 1113,
+			"endColumn": 15,
+			"message": "'properties' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.OBJECT; }' is not assignable to type 'Schema'.\n  Property 'properties' is missing in type '{ type: SchemaType.OBJECT; }' but required in type 'ObjectSchema'.",
+	"source": "ts",
+	"startLineNumber": 302,
+	"startColumn": 17,
+	"endLineNumber": 302,
+	"endColumn": 22,
+	"relatedInformation": [
+		{
+			"startLineNumber": 1113,
+			"startColumn": 5,
+			"endLineNumber": 1113,
+			"endColumn": 15,
+			"message": "'properties' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+}]

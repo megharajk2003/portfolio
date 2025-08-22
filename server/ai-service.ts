@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Using Google AI (Gemini) instead of OpenAI
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -62,17 +62,6 @@ export class AICareerService {
         model: "gemini-1.5-pro",
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: SchemaType.OBJECT,
-            properties: {
-              advice: { type: SchemaType.STRING },
-              recommendations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-              skillGaps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-              nextSteps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-              currentLevel: { type: SchemaType.STRING },
-            },
-            required: ["advice", "recommendations", "skillGaps", "nextSteps", "currentLevel"],
-          },
         },
       });
 
@@ -141,28 +130,6 @@ export class AICareerService {
         model: "gemini-1.5-pro",
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: SchemaType.OBJECT,
-            properties: {
-              title: { type: SchemaType.STRING },
-              timeline: {
-                type: SchemaType.ARRAY,
-                items: {
-                  type: SchemaType.OBJECT,
-                  properties: {
-                    phase: { type: SchemaType.STRING },
-                    duration: { type: SchemaType.STRING },
-                    milestones: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                    skills: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                    description: { type: SchemaType.STRING },
-                  },
-                  required: ["phase", "duration", "milestones", "skills", "description"],
-                },
-              },
-              estimatedDuration: { type: SchemaType.STRING },
-            },
-            required: ["title", "timeline", "estimatedDuration"],
-          },
         },
       });
 
@@ -266,44 +233,6 @@ export class AICareerService {
         model: "gemini-1.5-pro",
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: SchemaType.OBJECT,
-            properties: {
-              personalInfo: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  name: { type: SchemaType.STRING },
-                  email: { type: SchemaType.STRING },
-                  phone: { type: SchemaType.STRING },
-                  location: { type: SchemaType.STRING },
-                  linkedin: { type: SchemaType.STRING },
-                  website: { type: SchemaType.STRING },
-                },
-              },
-              summary: { type: SchemaType.STRING },
-              experience: { 
-                type: SchemaType.ARRAY,
-                items: { type: SchemaType.OBJECT }
-              },
-              education: { 
-                type: SchemaType.ARRAY,
-                items: { type: SchemaType.OBJECT }
-              },
-              skills: { 
-                type: SchemaType.ARRAY,
-                items: { type: SchemaType.OBJECT }
-              },
-              projects: { 
-                type: SchemaType.ARRAY,
-                items: { type: SchemaType.OBJECT }
-              },
-              certifications: { 
-                type: SchemaType.ARRAY,
-                items: { type: SchemaType.OBJECT }
-              },
-            },
-            required: ["personalInfo", "summary", "experience", "education", "skills", "projects", "certifications"],
-          },
         },
       });
 
