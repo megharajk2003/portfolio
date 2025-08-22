@@ -2,25 +2,50 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "wouter";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  FileText, 
-  Download, 
-  Eye, 
+// NEW: Import Dialog components from shadcn/ui
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  FileText,
+  Download,
+  Eye,
   Trash2,
   Sparkles,
   User,
   Briefcase,
   GraduationCap,
   Award,
-  Code
+  Code,
 } from "lucide-react";
 
 export default function ResumeGenerator() {
@@ -31,6 +56,9 @@ export default function ResumeGenerator() {
   const [template, setTemplate] = useState("professional");
   const [selectedResume, setSelectedResume] = useState<any>(null);
 
+  // NEW: State to control the visibility of the Full View modal
+  const [isFullViewOpen, setIsFullViewOpen] = useState(false);
+
   // Fetch existing resumes
   const { data: resumes = [], isLoading: isLoadingResumes } = useQuery({
     queryKey: ["/api/resumes", user?.id],
@@ -40,7 +68,7 @@ export default function ResumeGenerator() {
   // Generate new resume mutation
   const generateResume = useMutation({
     mutationFn: async (data: any) => {
-      console.log('🎯 [FRONTEND] Generating resume with data:', data);
+      console.log("🎯 [FRONTEND] Generating resume with data:", data);
       return apiRequest("POST", `/api/resumes`, data);
     },
     onSuccess: () => {
@@ -65,7 +93,7 @@ export default function ResumeGenerator() {
   // Delete resume mutation
   const deleteResume = useMutation({
     mutationFn: async (resumeId: string) => {
-      console.log('🎯 [FRONTEND] Deleting resume:', resumeId);
+      console.log("🎯 [FRONTEND] Deleting resume:", resumeId);
       return apiRequest("DELETE", `/api/resumes/${resumeId}`);
     },
     onSuccess: () => {
@@ -105,7 +133,9 @@ export default function ResumeGenerator() {
   };
 
   const handleDelete = (resumeId: string) => {
-    if (confirm("Are you sure you want to delete this resume?")) {
+    // Note: confirm() can be blocked in some environments.
+    // Consider using a custom modal for confirmation in production.
+    if (window.confirm("Are you sure you want to delete this resume?")) {
       deleteResume.mutate(resumeId);
     }
   };
@@ -114,19 +144,47 @@ export default function ResumeGenerator() {
     return new Date(dateStr).toLocaleDateString();
   };
 
+  // MODIFIED: This function now opens the modal
+  const handleFullView = () => {
+    if (!selectedResume) return;
+    console.log("Opening full view for:", selectedResume);
+    setIsFullViewOpen(true);
+  };
+
+  // NEW: This function handles PDF download (placeholder logic)
+  const handleDownloadPdf = () => {
+    if (!selectedResume) return;
+    console.log("Downloading PDF for:", selectedResume);
+    // This is a placeholder. Implementing PDF generation requires a library
+    // like jsPDF and html2canvas.
+    toast({
+      title: "Coming Soon!",
+      description: "PDF download functionality is not yet implemented.",
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="flex space-x-4">
+        <Link href="/dashboard">
+          <Button variant="outline">Back to Dashboard</Button>
+        </Link>
+      </div>
       {/* Header */}
       <div className="text-center space-y-6 bg-gradient-to-br from-purple-50 to-violet-100 rounded-2xl p-8">
         <div className="flex items-center justify-center gap-3">
           <div className="p-3 bg-purple-600 rounded-xl shadow-lg">
             <FileText className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">AI Resume Generator</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">
+            AI Resume Generator
+          </h1>
         </div>
+
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Create professional resumes tailored to specific roles using your profile data. 
-          Choose from multiple templates and get AI-optimized content.
+          Create professional resumes tailored to specific roles using your
+          profile data. Choose from multiple templates and get AI-optimized
+          content.
         </p>
       </div>
 
@@ -182,9 +240,9 @@ export default function ResumeGenerator() {
                   </Select>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
+                <Button
+                  type="submit"
+                  className="w-full"
                   disabled={generateResume.isPending}
                   data-testid="button-generate-resume"
                 >
@@ -206,7 +264,8 @@ export default function ResumeGenerator() {
             <CardHeader>
               <CardTitle>Your Resumes</CardTitle>
               <CardDescription>
-                Generated resumes ({Array.isArray(resumes) ? resumes.length : 0})
+                Generated resumes ({Array.isArray(resumes) ? resumes.length : 0}
+                )
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -220,13 +279,17 @@ export default function ResumeGenerator() {
                     <div
                       key={resume.id}
                       className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        selectedResume?.id === resume.id ? 'border-purple-600 bg-purple-50' : 'hover:border-purple-300'
+                        selectedResume?.id === resume.id
+                          ? "border-purple-600 bg-purple-50"
+                          : "hover:border-purple-300"
                       }`}
                       onClick={() => setSelectedResume(resume)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm truncate">{resume.title}</h4>
+                          <h4 className="font-medium text-sm truncate">
+                            {resume.title}
+                          </h4>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="outline" className="text-xs">
                               {resume.template}
@@ -273,16 +336,27 @@ export default function ResumeGenerator() {
                 <div>
                   <CardTitle>Resume Preview</CardTitle>
                   <CardDescription>
-                    {selectedResume ? selectedResume.title : "Select a resume to preview"}
+                    {selectedResume
+                      ? selectedResume.title
+                      : "Select a resume to preview"}
                   </CardDescription>
                 </div>
                 {selectedResume && (
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    {/* MODIFIED: onClick handlers added */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFullView}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       Full View
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownloadPdf}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Download PDF
                     </Button>
@@ -298,7 +372,7 @@ export default function ResumeGenerator() {
                       <TabsTrigger value="content">Content</TabsTrigger>
                       <TabsTrigger value="sections">Sections</TabsTrigger>
                     </TabsList>
-                    
+
                     <TabsContent value="content" className="mt-4">
                       <div className="space-y-6 max-h-[500px] overflow-y-auto pr-4">
                         {/* Personal Info */}
@@ -314,16 +388,36 @@ export default function ResumeGenerator() {
                               </h4>
                               <div className="text-sm text-muted-foreground space-y-1 mt-2">
                                 {selectedResume.content.personalInfo.email && (
-                                  <p>Email: {selectedResume.content.personalInfo.email}</p>
+                                  <p>
+                                    Email:{" "}
+                                    {selectedResume.content.personalInfo.email}
+                                  </p>
                                 )}
                                 {selectedResume.content.personalInfo.phone && (
-                                  <p>Phone: {selectedResume.content.personalInfo.phone}</p>
+                                  <p>
+                                    Phone:{" "}
+                                    {selectedResume.content.personalInfo.phone}
+                                  </p>
                                 )}
-                                {selectedResume.content.personalInfo.location && (
-                                  <p>Location: {selectedResume.content.personalInfo.location}</p>
+                                {selectedResume.content.personalInfo
+                                  .location && (
+                                  <p>
+                                    Location:{" "}
+                                    {
+                                      selectedResume.content.personalInfo
+                                        .location
+                                    }
+                                  </p>
                                 )}
-                                {selectedResume.content.personalInfo.linkedin && (
-                                  <p>LinkedIn: {selectedResume.content.personalInfo.linkedin}</p>
+                                {selectedResume.content.personalInfo
+                                  .linkedin && (
+                                  <p>
+                                    LinkedIn:{" "}
+                                    {
+                                      selectedResume.content.personalInfo
+                                        .linkedin
+                                    }
+                                  </p>
                                 )}
                               </div>
                             </div>
@@ -333,7 +427,9 @@ export default function ResumeGenerator() {
                         {/* Summary */}
                         {selectedResume.content.summary && (
                           <div>
-                            <h3 className="font-semibold mb-3">Professional Summary</h3>
+                            <h3 className="font-semibold mb-3">
+                              Professional Summary
+                            </h3>
                             <p className="text-sm leading-relaxed text-muted-foreground">
                               {selectedResume.content.summary}
                             </p>
@@ -341,87 +437,130 @@ export default function ResumeGenerator() {
                         )}
 
                         {/* Experience */}
-                        {selectedResume.content.experience && selectedResume.content.experience.length > 0 && (
-                          <div>
-                            <h3 className="font-semibold flex items-center gap-2 mb-3">
-                              <Briefcase className="h-4 w-4" />
-                              Work Experience
-                            </h3>
-                            <div className="space-y-4">
-                              {selectedResume.content.experience.map((exp: any, index: number) => (
-                                <div key={index} className="border-l-4 border-purple-300 pl-6 bg-white rounded-r-xl p-4 shadow-sm">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <h4 className="font-medium">{exp.position}</h4>
-                                      <p className="text-sm text-muted-foreground">{exp.company}</p>
+                        {selectedResume.content.experience &&
+                          selectedResume.content.experience.length > 0 && (
+                            <div>
+                              <h3 className="font-semibold flex items-center gap-2 mb-3">
+                                <Briefcase className="h-4 w-4" />
+                                Work Experience
+                              </h3>
+                              <div className="space-y-4">
+                                {selectedResume.content.experience.map(
+                                  (exp: any, index: number) => (
+                                    <div
+                                      key={index}
+                                      className="border-l-4 border-purple-300 pl-6 bg-white rounded-r-xl p-4 shadow-sm"
+                                    >
+                                      <div className="flex justify-between items-start">
+                                        <div>
+                                          <h4 className="font-medium">
+                                            {exp.position}
+                                          </h4>
+                                          <p className="text-sm text-muted-foreground">
+                                            {exp.company}
+                                          </p>
+                                        </div>
+                                        <Badge
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {exp.duration}
+                                        </Badge>
+                                      </div>
+                                      {exp.responsibilities &&
+                                        exp.responsibilities.length > 0 && (
+                                          <ul className="text-sm text-gray-600 mt-3 space-y-2">
+                                            {exp.responsibilities.map(
+                                              (
+                                                resp: string,
+                                                rIndex: number
+                                              ) => (
+                                                <li
+                                                  key={rIndex}
+                                                  className="flex items-start gap-2"
+                                                >
+                                                  <span className="text-xs mt-1.5">
+                                                    •
+                                                  </span>
+                                                  <span>{resp}</span>
+                                                </li>
+                                              )
+                                            )}
+                                          </ul>
+                                        )}
                                     </div>
-                                    <Badge variant="outline" className="text-xs">
-                                      {exp.duration}
-                                    </Badge>
-                                  </div>
-                                  {exp.responsibilities && exp.responsibilities.length > 0 && (
-                                    <ul className="text-sm text-gray-600 mt-3 space-y-2">
-                                      {exp.responsibilities.map((resp: string, rIndex: number) => (
-                                        <li key={rIndex} className="flex items-start gap-2">
-                                          <span className="text-xs mt-1.5">•</span>
-                                          <span>{resp}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </div>
-                              ))}
+                                  )
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
                         {/* Skills */}
-                        {selectedResume.content.skills && selectedResume.content.skills.length > 0 && (
-                          <div>
-                            <h3 className="font-semibold flex items-center gap-2 mb-3">
-                              <Code className="h-4 w-4" />
-                              Skills
-                            </h3>
-                            <div className="space-y-3">
-                              {selectedResume.content.skills.map((skillGroup: any, index: number) => (
-                                <div key={index}>
-                                  <h4 className="font-medium text-sm mb-2">{skillGroup.category}</h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {skillGroup.items.map((skill: string, sIndex: number) => (
-                                      <Badge key={sIndex} variant="secondary" className="text-xs">
-                                        {skill}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
+                        {selectedResume.content.skills &&
+                          selectedResume.content.skills.length > 0 && (
+                            <div>
+                              <h3 className="font-semibold flex items-center gap-2 mb-3">
+                                <Code className="h-4 w-4" />
+                                Skills
+                              </h3>
+                              <div className="space-y-3">
+                                {selectedResume.content.skills.map(
+                                  (skillGroup: any, index: number) => (
+                                    <div key={index}>
+                                      <h4 className="font-medium text-sm mb-2">
+                                        {skillGroup.category}
+                                      </h4>
+                                      <div className="flex flex-wrap gap-1">
+                                        {skillGroup.items.map(
+                                          (skill: string, sIndex: number) => (
+                                            <Badge
+                                              key={sIndex}
+                                              variant="secondary"
+                                              className="text-xs"
+                                            >
+                                              {skill}
+                                            </Badge>
+                                          )
+                                        )}
+                                      </div>
+                                    </div>
+                                  )
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="sections" className="mt-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-4 border rounded-lg">
                           <User className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                           <p className="text-sm font-medium">Personal Info</p>
-                          <p className="text-xs text-muted-foreground">Contact details</p>
+                          <p className="text-xs text-muted-foreground">
+                            Contact details
+                          </p>
                         </div>
                         <div className="text-center p-4 border rounded-lg">
                           <Briefcase className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                           <p className="text-sm font-medium">Experience</p>
-                          <p className="text-xs text-muted-foreground">Work history</p>
+                          <p className="text-xs text-muted-foreground">
+                            Work history
+                          </p>
                         </div>
                         <div className="text-center p-4 border rounded-lg">
                           <GraduationCap className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                           <p className="text-sm font-medium">Education</p>
-                          <p className="text-xs text-muted-foreground">Academic background</p>
+                          <p className="text-xs text-muted-foreground">
+                            Academic background
+                          </p>
                         </div>
                         <div className="text-center p-4 border rounded-lg">
                           <Award className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                           <p className="text-sm font-medium">Skills</p>
-                          <p className="text-xs text-muted-foreground">Technical & soft skills</p>
+                          <p className="text-xs text-muted-foreground">
+                            Technical & soft skills
+                          </p>
                         </div>
                       </div>
                     </TabsContent>
@@ -439,6 +578,152 @@ export default function ResumeGenerator() {
           </Card>
         </div>
       </div>
+
+      {/* NEW: Full View Modal */}
+      <Dialog open={isFullViewOpen} onOpenChange={setIsFullViewOpen}>
+        <DialogContent className="max-w-4xl h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{selectedResume?.title || "Resume"}</DialogTitle>
+            <DialogDescription>
+              Full preview of your generated resume.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full pr-6">
+              {selectedResume && (
+                <div className="space-y-6">
+                  {/* Re-using the same preview logic inside the modal */}
+                  {selectedResume.content.personalInfo && (
+                    <div>
+                      <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
+                        <User className="h-5 w-5" />
+                        Personal Information
+                      </h3>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-xl">
+                          {selectedResume.content.personalInfo.name}
+                        </h4>
+                        <div className="text-base text-muted-foreground space-y-1 mt-2">
+                          <p>
+                            Email: {selectedResume.content.personalInfo.email}
+                          </p>
+                          <p>
+                            Phone: {selectedResume.content.personalInfo.phone}
+                          </p>
+                          <p>
+                            Location:{" "}
+                            {selectedResume.content.personalInfo.location}
+                          </p>
+                          <p>
+                            LinkedIn:{" "}
+                            {selectedResume.content.personalInfo.linkedin}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedResume.content.summary && (
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3">
+                        Professional Summary
+                      </h3>
+                      <p className="text-base leading-relaxed text-muted-foreground">
+                        {selectedResume.content.summary}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedResume.content.experience &&
+                    selectedResume.content.experience.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
+                          <Briefcase className="h-5 w-5" />
+                          Work Experience
+                        </h3>
+                        <div className="space-y-4">
+                          {selectedResume.content.experience.map(
+                            (exp: any, index: number) => (
+                              <div
+                                key={index}
+                                className="border-l-4 border-purple-300 pl-4"
+                              >
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <h4 className="font-medium text-base">
+                                      {exp.position}
+                                    </h4>
+                                    <p className="text-base text-muted-foreground">
+                                      {exp.company}
+                                    </p>
+                                  </div>
+                                  <Badge variant="outline" className="text-sm">
+                                    {exp.duration}
+                                  </Badge>
+                                </div>
+                                {exp.responsibilities &&
+                                  exp.responsibilities.length > 0 && (
+                                    <ul className="text-base text-gray-600 mt-2 space-y-1 list-disc list-inside">
+                                      {exp.responsibilities.map(
+                                        (resp: string, rIndex: number) => (
+                                          <li key={rIndex}>{resp}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  )}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {selectedResume.content.skills &&
+                    selectedResume.content.skills.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
+                          <Code className="h-5 w-5" />
+                          Skills
+                        </h3>
+                        <div className="space-y-3">
+                          {selectedResume.content.skills.map(
+                            (skillGroup: any, index: number) => (
+                              <div key={index}>
+                                <h4 className="font-medium text-base mb-2">
+                                  {skillGroup.category}
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {skillGroup.items.map(
+                                    (skill: string, sIndex: number) => (
+                                      <Badge
+                                        key={sIndex}
+                                        variant="secondary"
+                                        className="text-sm px-3 py-1"
+                                      >
+                                        {skill}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
