@@ -662,9 +662,13 @@ export const publicationWithUserSchema = z.object({
   userId: z.string().transform(Number),
   title: z.string(),
   type: z.string(),
-  journal: z.string(),
-  year: z.string(),
+  journal: z.string().optional(), // Made optional to handle field name variations
+  journalOrPlatform: z.string().optional(), // Support frontend field name
+  year: z.union([z.string(), z.number()]).transform(String), // Accept both string and number, convert to string
   url: z.string().optional(),
+}).refine((data) => data.journal || data.journalOrPlatform, {
+  message: "Either journal or journalOrPlatform is required",
+  path: ["journal"],
 });
 
 // Organization schema with userId for API operations

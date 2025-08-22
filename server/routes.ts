@@ -865,8 +865,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/publications", async (req, res) => {
     try {
-      const publicationData = insertPublicationSchema.parse(req.body);
+      console.log('📚 POST /api/publications - Starting request with data:', req.body);
+      
+      // Handle field name variations (journal vs journalOrPlatform)
+      const normalizedBody = {
+        ...req.body,
+        journal: req.body.journal || req.body.journalOrPlatform,
+        journalOrPlatform: req.body.journalOrPlatform || req.body.journal,
+      };
+      
+      console.log('📚 POST /api/publications - Normalized data:', normalizedBody);
+      const publicationData = insertPublicationSchema.parse(normalizedBody);
+      console.log('📚 POST /api/publications - Parsed data:', publicationData);
       const publication = await storage.createPublication(publicationData);
+      console.log('📚 POST /api/publications - Created record:', publication);
       res.json(publication);
     } catch (error) {
       console.error("Error creating publication:", error);
