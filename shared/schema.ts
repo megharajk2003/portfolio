@@ -262,6 +262,128 @@ export const userStats = pgTable("user_stats", {
   portfolioViews: integer("portfolio_views").default(0),
 });
 
+// New comprehensive learning platform schema
+export const instructors = pgTable("instructors", {
+  id: varchar("instructor_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .unique()
+    .references(() => users.id, { onDelete: "set null" }),
+  fullName: varchar("full_name", { length: 255 }).notNull(),
+  bio: text("bio"),
+  profilePictureUrl: text("profile_picture_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const categories = pgTable("categories", {
+  id: integer("category_id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).unique().notNull(),
+  parentCategoryId: integer("parent_category_id").references(() => categories.id, { onDelete: "set null" }),
+});
+
+export const courses = pgTable("courses", {
+  id: varchar("course_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: text("subtitle"),
+  description: text("description"),
+  language: varchar("language", { length: 50 }).default("English"),
+  level: varchar("level", { length: 50 }).$type<"Beginner" | "Intermediate" | "Advanced" | "All">(),
+  coverImageUrl: text("cover_image_url"),
+  promoVideoUrl: text("promo_video_url"),
+  isFree: boolean("is_free").default(false),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  durationMonths: integer("duration_months"),
+  scheduleInfo: text("schedule_info"),
+  whatYouWillLearn: jsonb("what_you_will_learn"),
+  skillsYouWillGain: jsonb("skills_you_will_gain"),
+  detailsToKnow: jsonb("details_to_know"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  instructorId: varchar("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+});
+
+export const courseCategories = pgTable("course_categories", {
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  categoryId: integer("category_id")
+    .notNull()
+    .references(() => categories.id, { onDelete: "cascade" }),
+}, (table) => ({
+  pk: { columns: [table.courseId, table.categoryId] },
+}));
+
+export const modules = pgTable("modules", {
+  id: varchar("module_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  moduleOrder: integer("module_order").notNull(),
+  durationHours: integer("duration_hours"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const lessons = pgTable("lessons", {
+  id: varchar("lesson_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  moduleId: varchar("module_id")
+    .notNull()
+    .references(() => modules.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content"),
+  videoUrl: text("video_url"),
+  lessonOrder: integer("lesson_order").notNull(),
+  durationMinutes: integer("duration_minutes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const enrollments = pgTable("enrollments", {
+  id: varchar("enrollment_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  enrollmentDate: timestamp("enrollment_date", { withTimezone: true }).defaultNow(),
+  progress: decimal("progress", { precision: 5, scale: 2 }).default("0.0"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}, (table) => ({
+  unique: { columns: [table.userId, table.courseId] },
+}));
+
+export const reviews = pgTable("reviews", {
+  id: varchar("review_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(),
+  reviewText: text("review_text"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  unique: { columns: [table.userId, table.courseId] },
+  checkRating: sql`CHECK (rating >= 1 AND rating <= 5)`,
+}));
+
 export const dailyActivity = pgTable("daily_activity", {
   id: varchar("id")
     .primaryKey()
@@ -445,6 +567,33 @@ export const organizations = pgTable("organizations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Types for new learning platform tables
+export type Instructor = typeof instructors.$inferSelect;
+export type InsertInstructor = typeof instructors.$inferInsert;
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = typeof categories.$inferInsert;
+export type Course = typeof courses.$inferSelect;
+export type InsertCourse = typeof courses.$inferInsert;
+export type CourseCategory = typeof courseCategories.$inferSelect;
+export type InsertCourseCategory = typeof courseCategories.$inferInsert;
+export type Module = typeof modules.$inferSelect;
+export type InsertModule = typeof modules.$inferInsert;
+export type Lesson = typeof lessons.$inferSelect;
+export type InsertLesson = typeof lessons.$inferInsert;
+export type Enrollment = typeof enrollments.$inferSelect;
+export type InsertEnrollment = typeof enrollments.$inferInsert;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = typeof reviews.$inferInsert;
+
+// Zod schemas for new learning platform
+export const insertCourseSchema = createInsertSchema(courses);
+export const insertCategorySchema = createInsertSchema(categories);
+export const insertInstructorSchema = createInsertSchema(instructors);
+export const insertModuleSchema = createInsertSchema(modules);
+export const insertLessonSchema = createInsertSchema(lessons);
+export const insertEnrollmentSchema = createInsertSchema(enrollments);
+export const insertReviewSchema = createInsertSchema(reviews);
 
 // Zod Schemas for Validation
 export const personalDetailsSchema = z.object({

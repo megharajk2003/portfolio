@@ -18,115 +18,31 @@ import {
 
 const CURRENT_USER_ID = "user-1";
 
-const categories = [
-  { name: "Popular Courses", icon: Trophy, color: "text-blue-600", count: 145 },
-  { name: "AI & Machine Learning", icon: Cpu, color: "text-purple-600", count: 89 },
-  { name: "Data Science & Analytics", icon: Database, color: "text-green-600", count: 76 },
-  { name: "Generative AI", icon: Zap, color: "text-yellow-600", count: 54 },
-  { name: "Management", icon: Users, color: "text-orange-600", count: 67 },
-  { name: "Software & Tech", icon: Code, color: "text-blue-500", count: 123 },
-  { name: "Doctorate", icon: Award, color: "text-red-600", count: 23 },
-  { name: "Microsoft Programs", icon: Globe, color: "text-cyan-600", count: 45 },
-  { name: "EV Design", icon: Palette, color: "text-pink-600", count: 12 },
-  { name: "Cloud Computing", icon: Globe, color: "text-indigo-600", count: 78 },
-  { name: "Design", icon: Palette, color: "text-rose-600", count: 34 }
-];
+const categoryIcons = {
+  "AI & Machine Learning": { icon: Cpu, color: "text-purple-600" },
+  "Data Science & Analytics": { icon: Database, color: "text-green-600" },
+  "Generative AI": { icon: Zap, color: "text-yellow-600" },
+  "Management": { icon: Users, color: "text-orange-600" },
+  "Software & Tech": { icon: Code, color: "text-blue-500" },
+  "Cloud Computing": { icon: Globe, color: "text-indigo-600" },
+  "Design": { icon: Palette, color: "text-rose-600" },
+  "Business": { icon: TrendingUp, color: "text-blue-600" },
+  "Marketing": { icon: TrendingUp, color: "text-pink-600" },
+  "Leadership": { icon: Award, color: "text-red-600" }
+};
 
 const levels = [
-  { name: "Beginner", count: 721 },
-  { name: "Intermediate", count: 300 },
-  { name: "Advanced", count: 28 },
-  { name: "Mixed", count: 126 }
+  { name: "Beginner", count: 0 },
+  { name: "Intermediate", count: 0 },
+  { name: "Advanced", count: 0 },
+  { name: "All", count: 0 }
 ];
 
 const durations = [
-  { name: "Less Than 2 Hours", count: 278 },
-  { name: "1-4 Weeks", count: 416 },
-  { name: "1-3 Months", count: 399 },
-  { name: "3-6 Months", count: 82 }
-];
-
-const skills = [
-  { name: "Data Analysis", count: 95 },
-  { name: "Generative AI", count: 84 },
-  { name: "Content Creation", count: 80 },
-  { name: "Marketing", count: 77 }
-];
-
-// Mock featured courses data
-const featuredCourses = [
-  {
-    id: "1",
-    title: "PG Program in Artificial Intelligence & Machine Learning",
-    provider: "MCCOMES SCHOOL OF BUSINESS AT THE",
-    duration: "12 Months",
-    format: "Online",
-    badge: "#1 RANKED AI PROGRAM",
-    image: "/api/placeholder/300/200",
-    rating: 4.8,
-    enrollments: 15420,
-    price: "Free Trial"
-  },
-  {
-    id: "2", 
-    title: "Post Graduate Program in Data Science with Generative AI",
-    provider: "MCCOMES SCHOOL OF BUSINESS AT THE",
-    duration: "12 months",
-    format: "Online", 
-    badge: "DEDICATED CAREER SUPPORT",
-    image: "/api/placeholder/300/200",
-    rating: 4.7,
-    enrollments: 8950,
-    price: "Free Trial"
-  },
-  {
-    id: "3",
-    title: "Post Graduate Diploma in Management (Online)",
-    provider: "GREAT LAKES INSTITUTE OF MANAGEMENT",
-    duration: "24 Months",
-    format: "Online",
-    badge: "ONLINE MBA EQUIVALENT", 
-    image: "/api/placeholder/300/200",
-    rating: 4.9,
-    enrollments: 12340,
-    price: "Free Trial"
-  },
-  {
-    id: "4",
-    title: "PGP in Data Science (with Specialization in Gen AI)",
-    provider: "GREAT LAKES EXECUTIVE LEARNING",
-    duration: "5 months",
-    format: "Classroom",
-    badge: "DEDICATED PLACEMENT ASSISTANCE",
-    image: "/api/placeholder/300/200", 
-    rating: 4.6,
-    enrollments: 6780,
-    price: "Preview"
-  },
-  {
-    id: "5",
-    title: "Generative AI for Business with Microsoft Azure OpenAI Program", 
-    provider: "MICROSOFT AZURE",
-    duration: "16 weeks",
-    format: "Online",
-    badge: "MICROSOFT CERTIFIED",
-    image: "/api/placeholder/300/200",
-    rating: 4.5,
-    enrollments: 9340,
-    price: "Free Trial"
-  },
-  {
-    id: "6",
-    title: "6-Postgraduate Diploma (ePGD) in Artificial Intelligence and Data Science",
-    provider: "IIT BOMBAY", 
-    duration: "18 months",
-    format: "Online",
-    badge: "IIT BOMBAY CERTIFIED",
-    image: "/api/placeholder/300/200",
-    rating: 4.8,
-    enrollments: 11200,
-    price: "Free Trial"
-  }
+  { name: "1-3 Months", count: 0 },
+  { name: "3-6 Months", count: 0 },
+  { name: "6-12 Months", count: 0 },
+  { name: "12+ Months", count: 0 }
 ];
 
 export default function Learning() {
@@ -136,6 +52,15 @@ export default function Learning() {
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
+
+  // Fetch real data from the API
+  const { data: courses = [] } = useQuery({
+    queryKey: ["/api/courses"],
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
+  });
 
   const { data: modules = [] } = useQuery({
     queryKey: ["/api/learning-modules"],
@@ -163,10 +88,25 @@ export default function Learning() {
     );
   };
 
-  const filteredCourses = featuredCourses.filter(course => {
+  // Filter courses based on search and filters
+  const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.provider.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+                         course.subtitle?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
+    return matchesSearch && matchesLevel;
+  });
+
+  // Update category counts dynamically
+  const categoriesWithCounts = categories.map(category => {
+    const courseCount = courses.filter(course => 
+      course.categories?.some(cat => cat.id === category.id)
+    ).length;
+    const iconData = categoryIcons[category.name] || { icon: BookOpen, color: "text-gray-600" };
+    return {
+      ...category,
+      count: courseCount,
+      ...iconData
+    };
   });
 
   return (
@@ -206,7 +146,7 @@ export default function Learning() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {categories.map((category) => {
+                {categoriesWithCounts.map((category) => {
                   const IconComponent = category.icon;
                   return (
                     <Button
@@ -312,7 +252,7 @@ export default function Learning() {
             {/* Sort and Results Count */}
             <div className="flex justify-between items-center">
               <p className="text-gray-600 dark:text-gray-400">
-                Showing {filteredCourses.length} of {featuredCourses.length} courses
+                Showing {filteredCourses.length} of {courses.length} courses
               </p>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-48">
@@ -335,28 +275,26 @@ export default function Learning() {
                     <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-600 rounded-t-lg flex items-center justify-center">
                       <div className="text-white text-center">
                         <BookOpen className="h-12 w-12 mx-auto mb-2 opacity-80" />
-                        <p className="text-xs opacity-60">{course.provider}</p>
+                        <p className="text-xs opacity-60">Learning Platform</p>
                       </div>
                     </div>
-                    {course.price && (
-                      <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
-                        {course.price}
-                      </Badge>
-                    )}
+                    <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
+                      {course.isFree ? "Free" : `$${course.price}`}
+                    </Badge>
                   </div>
                   
                   <CardHeader className="pb-2">
                     <div className="space-y-2">
                       <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                        {course.provider}
+                        {course.level} Level
                       </p>
                       <CardTitle className="text-lg leading-tight line-clamp-2">
                         {course.title}
                       </CardTitle>
-                      {course.badge && (
-                        <Badge variant="outline" className="text-xs">
-                          {course.badge}
-                        </Badge>
+                      {course.subtitle && (
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {course.subtitle}
+                        </p>
                       )}
                     </div>
                   </CardHeader>
@@ -365,39 +303,30 @@ export default function Learning() {
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {course.duration}
+                        {course.durationMonths} Months
                       </div>
                       <div className="flex items-center">
                         <Globe className="h-4 w-4 mr-1" />
-                        {course.format}
+                        Online
                       </div>
                     </div>
 
+                    <div className="text-sm text-gray-600">
+                      <p className="line-clamp-2">{course.description}</p>
+                    </div>
+
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < Math.floor(course.rating)
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm font-medium">{course.rating}</span>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Users className="h-4 w-4 mr-1" />
-                        {course.enrollments.toLocaleString()}
-                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {course.language}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {course.level}
+                      </Badge>
                     </div>
 
                     <Link href={`/course/${course.id}`}>
                       <Button className="w-full" variant="outline">
-                        View Program
+                        View Course
                         <ExternalLink className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>

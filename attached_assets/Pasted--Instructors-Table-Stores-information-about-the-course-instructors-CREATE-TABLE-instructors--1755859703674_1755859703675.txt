@@ -1,0 +1,95 @@
+
+-- Instructors Table: Stores information about the course instructors.
+CREATE TABLE instructors (
+    instructor_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID UNIQUE REFERENCES users(user_id) ON DELETE SET NULL, -- An instructor is also a user
+    full_name VARCHAR(255) NOT NULL,
+    bio TEXT,
+    profile_picture_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Categories Table: Stores course categories like 'AI & Machine Learning', 'Data Science & Analytics'.
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    parent_category_id INTEGER REFERENCES categories(category_id) ON DELETE SET NULL -- For sub-categories
+);
+
+-- Courses Table: The main table for all the courses available on the platform.
+CREATE TABLE courses (
+    course_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    subtitle TEXT,
+    description TEXT,
+    language VARCHAR(50) DEFAULT 'English',
+    level VARCHAR(50) CHECK (level IN ('Beginner', 'Intermediate', 'Advanced', 'All')),
+    cover_image_url TEXT,
+    promo_video_url TEXT,
+    is_free BOOLEAN DEFAULT FALSE,
+    price NUMERIC(10, 2),
+    duration_months INT, -- e.g., 12 Months, 24 Months
+    schedule_info TEXT, -- e.g., '3 weeks at 10 hours a week'
+    what_you_will_learn JSONB, -- Storing list of learning outcomes
+    skills_you_will_gain JSONB, -- Storing skills as an array of strings or objects
+    details_to_know JSONB, -- For 'Shareable certificate', 'Assessments', 'Taught in English'
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    instructor_id UUID REFERENCES instructors(instructor_id) ON DELETE SET NULL
+);
+
+-- Course_Categories Table: Maps courses to their respective categories (Many-to-Many).
+CREATE TABLE course_categories (
+    course_id UUID REFERENCES courses(course_id) ON DELETE CASCADE,
+    category_id INTEGER REFERENCES categories(category_id) ON DELETE CASCADE,
+    PRIMARY KEY (course_id, category_id)
+);
+
+-- Modules Table: Stores the modules for each course.
+CREATE TABLE modules (
+    module_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    course_id UUID REFERENCES courses(course_id) ON DELETE CASCADE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    module_order INT NOT NULL,
+    duration_hours INT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Lessons Table: Stores the lessons within each module.
+CREATE TABLE lessons (
+    lesson_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    module_id UUID REFERENCES modules(module_id) ON DELETE CASCADE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT, -- Could be markdown, html, or just text
+    video_url TEXT,
+    lesson_order INT NOT NULL,
+    duration_minutes INT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enrollments Table: Tracks which users are enrolled in which courses.
+CREATE TABLE enrollments (
+    enrollment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE NOT NULL,
+    course_id UUID REFERENCES courses(course_id) ON DELETE CASCADE NOT NULL,
+    enrollment_date TIMESTAMPTZ DEFAULT now(),
+    progress REAL DEFAULT 0.0, -- Percentage of course completion
+    completed_at TIMESTAMPTZ,
+    UNIQUE (user_id, course_id)
+);
+
+-- Reviews Table: Stores user reviews and ratings for courses.
+CREATE TABLE reviews (
+    review_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE NOT NULL,
+    course_id UUID REFERENCES courses(course_id) ON DELETE CASCADE NOT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (user_id, course_id) -- A user can only review a course once
+);

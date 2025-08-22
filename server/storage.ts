@@ -12,6 +12,20 @@ import {
   type InsertDailyActivity,
   type SectionSettings,
   type InsertSectionSettings,
+  type Course,
+  type InsertCourse,
+  type Category,
+  type InsertCategory,
+  type Instructor,
+  type InsertInstructor,
+  type Module,
+  type InsertModule,
+  type Lesson,
+  type InsertLesson,
+  type Enrollment,
+  type InsertEnrollment,
+  type Review,
+  type InsertReview,
   users,
   profiles,
   learningModules,
@@ -25,6 +39,14 @@ import {
   workExperience,
   certifications,
   achievements,
+  courses,
+  categories,
+  instructors,
+  modules,
+  lessons,
+  enrollments,
+  reviews,
+  courseCategories,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte } from "drizzle-orm";
@@ -129,6 +151,37 @@ export interface IStorage {
   createVolunteerExperience(data: any): Promise<any>;
   updateVolunteerExperience(id: string, data: any): Promise<any>;
   deleteVolunteerExperience(id: string): Promise<boolean>;
+
+  // New learning platform methods
+  getCourses(): Promise<Course[]>;
+  getCourse(id: string): Promise<Course | undefined>;
+  createCourse(course: InsertCourse): Promise<Course>;
+  updateCourse(id: string, course: Partial<InsertCourse>): Promise<Course | undefined>;
+  deleteCourse(id: string): Promise<boolean>;
+
+  getCategories(): Promise<Category[]>;
+  getCategory(id: number): Promise<Category | undefined>;
+  createCategory(category: InsertCategory): Promise<Category>;
+
+  getInstructors(): Promise<Instructor[]>;
+  getInstructor(id: string): Promise<Instructor | undefined>;
+  createInstructor(instructor: InsertInstructor): Promise<Instructor>;
+
+  getCourseModules(courseId: string): Promise<Module[]>;
+  getModule(id: string): Promise<Module | undefined>;
+  createModule(module: InsertModule): Promise<Module>;
+
+  getModuleLessons(moduleId: string): Promise<Lesson[]>;
+  getLesson(id: string): Promise<Lesson | undefined>;
+  createLesson(lesson: InsertLesson): Promise<Lesson>;
+
+  getUserEnrollments(userId: number): Promise<Enrollment[]>;
+  getCourseEnrollments(courseId: string): Promise<Enrollment[]>;
+  createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
+  updateEnrollment(id: string, enrollment: Partial<InsertEnrollment>): Promise<Enrollment | undefined>;
+
+  getCourseReviews(courseId: string): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
 }
 
 export class PgStorage implements IStorage {
@@ -1397,6 +1450,242 @@ export class PgStorage implements IStorage {
     }
 
     return false;
+  }
+
+  // New learning platform implementations
+  async getCourses(): Promise<Course[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get('courses') || [];
+    }
+    return await db.select().from(courses);
+  }
+
+  async getCourse(id: string): Promise<Course | undefined> {
+    if (!this.isDbConnected) {
+      const allCourses = this.fallbackData.get('courses') || [];
+      return allCourses.find((c: any) => c.id === id);
+    }
+    const result = await db.select().from(courses).where(eq(courses.id, id));
+    return result[0];
+  }
+
+  async createCourse(courseData: InsertCourse): Promise<Course> {
+    if (!this.isDbConnected) {
+      const course = { ...courseData, id: randomUUID() };
+      const allCourses = this.fallbackData.get('courses') || [];
+      allCourses.push(course);
+      this.fallbackData.set('courses', allCourses);
+      return course as Course;
+    }
+    const [course] = await db.insert(courses).values(courseData).returning();
+    return course;
+  }
+
+  async updateCourse(id: string, courseData: Partial<InsertCourse>): Promise<Course | undefined> {
+    if (!this.isDbConnected) {
+      const allCourses = this.fallbackData.get('courses') || [];
+      const index = allCourses.findIndex((c: any) => c.id === id);
+      if (index !== -1) {
+        allCourses[index] = { ...allCourses[index], ...courseData };
+        this.fallbackData.set('courses', allCourses);
+        return allCourses[index];
+      }
+      return undefined;
+    }
+    const [course] = await db.update(courses).set(courseData).where(eq(courses.id, id)).returning();
+    return course;
+  }
+
+  async deleteCourse(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      const allCourses = this.fallbackData.get('courses') || [];
+      const index = allCourses.findIndex((c: any) => c.id === id);
+      if (index !== -1) {
+        allCourses.splice(index, 1);
+        this.fallbackData.set('courses', allCourses);
+        return true;
+      }
+      return false;
+    }
+    const result = await db.delete(courses).where(eq(courses.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getCategories(): Promise<Category[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get('categories') || [];
+    }
+    return await db.select().from(categories);
+  }
+
+  async getCategory(id: number): Promise<Category | undefined> {
+    if (!this.isDbConnected) {
+      const allCategories = this.fallbackData.get('categories') || [];
+      return allCategories.find((c: any) => c.id === id);
+    }
+    const result = await db.select().from(categories).where(eq(categories.id, id));
+    return result[0];
+  }
+
+  async createCategory(categoryData: InsertCategory): Promise<Category> {
+    if (!this.isDbConnected) {
+      const category = { ...categoryData, id: Math.floor(Math.random() * 10000) };
+      const allCategories = this.fallbackData.get('categories') || [];
+      allCategories.push(category);
+      this.fallbackData.set('categories', allCategories);
+      return category as Category;
+    }
+    const [category] = await db.insert(categories).values(categoryData).returning();
+    return category;
+  }
+
+  async getInstructors(): Promise<Instructor[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get('instructors') || [];
+    }
+    return await db.select().from(instructors);
+  }
+
+  async getInstructor(id: string): Promise<Instructor | undefined> {
+    if (!this.isDbConnected) {
+      const allInstructors = this.fallbackData.get('instructors') || [];
+      return allInstructors.find((i: any) => i.id === id);
+    }
+    const result = await db.select().from(instructors).where(eq(instructors.id, id));
+    return result[0];
+  }
+
+  async createInstructor(instructorData: InsertInstructor): Promise<Instructor> {
+    if (!this.isDbConnected) {
+      const instructor = { ...instructorData, id: randomUUID() };
+      const allInstructors = this.fallbackData.get('instructors') || [];
+      allInstructors.push(instructor);
+      this.fallbackData.set('instructors', allInstructors);
+      return instructor as Instructor;
+    }
+    const [instructor] = await db.insert(instructors).values(instructorData).returning();
+    return instructor;
+  }
+
+  async getCourseModules(courseId: string): Promise<Module[]> {
+    if (!this.isDbConnected) {
+      const allModules = this.fallbackData.get('modules') || [];
+      return allModules.filter((m: any) => m.courseId === courseId);
+    }
+    return await db.select().from(modules).where(eq(modules.courseId, courseId));
+  }
+
+  async getModule(id: string): Promise<Module | undefined> {
+    if (!this.isDbConnected) {
+      const allModules = this.fallbackData.get('modules') || [];
+      return allModules.find((m: any) => m.id === id);
+    }
+    const result = await db.select().from(modules).where(eq(modules.id, id));
+    return result[0];
+  }
+
+  async createModule(moduleData: InsertModule): Promise<Module> {
+    if (!this.isDbConnected) {
+      const module = { ...moduleData, id: randomUUID() };
+      const allModules = this.fallbackData.get('modules') || [];
+      allModules.push(module);
+      this.fallbackData.set('modules', allModules);
+      return module as Module;
+    }
+    const [module] = await db.insert(modules).values(moduleData).returning();
+    return module;
+  }
+
+  async getModuleLessons(moduleId: string): Promise<Lesson[]> {
+    if (!this.isDbConnected) {
+      const allLessons = this.fallbackData.get('lessons') || [];
+      return allLessons.filter((l: any) => l.moduleId === moduleId);
+    }
+    return await db.select().from(lessons).where(eq(lessons.moduleId, moduleId));
+  }
+
+  async getLesson(id: string): Promise<Lesson | undefined> {
+    if (!this.isDbConnected) {
+      const allLessons = this.fallbackData.get('lessons') || [];
+      return allLessons.find((l: any) => l.id === id);
+    }
+    const result = await db.select().from(lessons).where(eq(lessons.id, id));
+    return result[0];
+  }
+
+  async createLesson(lessonData: InsertLesson): Promise<Lesson> {
+    if (!this.isDbConnected) {
+      const lesson = { ...lessonData, id: randomUUID() };
+      const allLessons = this.fallbackData.get('lessons') || [];
+      allLessons.push(lesson);
+      this.fallbackData.set('lessons', allLessons);
+      return lesson as Lesson;
+    }
+    const [lesson] = await db.insert(lessons).values(lessonData).returning();
+    return lesson;
+  }
+
+  async getUserEnrollments(userId: number): Promise<Enrollment[]> {
+    if (!this.isDbConnected) {
+      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      return allEnrollments.filter((e: any) => e.userId === userId);
+    }
+    return await db.select().from(enrollments).where(eq(enrollments.userId, userId));
+  }
+
+  async getCourseEnrollments(courseId: string): Promise<Enrollment[]> {
+    if (!this.isDbConnected) {
+      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      return allEnrollments.filter((e: any) => e.courseId === courseId);
+    }
+    return await db.select().from(enrollments).where(eq(enrollments.courseId, courseId));
+  }
+
+  async createEnrollment(enrollmentData: InsertEnrollment): Promise<Enrollment> {
+    if (!this.isDbConnected) {
+      const enrollment = { ...enrollmentData, id: randomUUID() };
+      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      allEnrollments.push(enrollment);
+      this.fallbackData.set('enrollments', allEnrollments);
+      return enrollment as Enrollment;
+    }
+    const [enrollment] = await db.insert(enrollments).values(enrollmentData).returning();
+    return enrollment;
+  }
+
+  async updateEnrollment(id: string, enrollmentData: Partial<InsertEnrollment>): Promise<Enrollment | undefined> {
+    if (!this.isDbConnected) {
+      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      const index = allEnrollments.findIndex((e: any) => e.id === id);
+      if (index !== -1) {
+        allEnrollments[index] = { ...allEnrollments[index], ...enrollmentData };
+        this.fallbackData.set('enrollments', allEnrollments);
+        return allEnrollments[index];
+      }
+      return undefined;
+    }
+    const [enrollment] = await db.update(enrollments).set(enrollmentData).where(eq(enrollments.id, id)).returning();
+    return enrollment;
+  }
+
+  async getCourseReviews(courseId: string): Promise<Review[]> {
+    if (!this.isDbConnected) {
+      const allReviews = this.fallbackData.get('reviews') || [];
+      return allReviews.filter((r: any) => r.courseId === courseId);
+    }
+    return await db.select().from(reviews).where(eq(reviews.courseId, courseId));
+  }
+
+  async createReview(reviewData: InsertReview): Promise<Review> {
+    if (!this.isDbConnected) {
+      const review = { ...reviewData, id: randomUUID() };
+      const allReviews = this.fallbackData.get('reviews') || [];
+      allReviews.push(review);
+      this.fallbackData.set('reviews', allReviews);
+      return review as Review;
+    }
+    const [review] = await db.insert(reviews).values(reviewData).returning();
+    return review;
   }
 }
 
