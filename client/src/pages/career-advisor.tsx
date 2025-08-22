@@ -37,7 +37,7 @@ export default function CareerAdvisor() {
   const generateAdvice = useMutation({
     mutationFn: async (data: any) => {
       console.log('🎯 [FRONTEND] Generating career advice with data:', data);
-      return apiRequest(`/api/career-advice`, "POST", data);
+      return apiRequest("POST", `/api/career-advice`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/career-advice", user?.id] });

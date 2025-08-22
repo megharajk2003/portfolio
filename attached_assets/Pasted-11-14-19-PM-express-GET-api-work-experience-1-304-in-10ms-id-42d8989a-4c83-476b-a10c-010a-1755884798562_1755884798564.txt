@@ -1,0 +1,43 @@
+11:14:19 PM [express] GET /api/work-experience/1 304 in 10ms :: [{"id":"42d8989a-4c83-476b-a10c-010a8…
+🔐 [AUTH-MIDDLEWARE] Checking authentication for: /api/resumes/1
+🔐 [AUTH-MIDDLEWARE] User authenticated: true
+🔐 [AUTH-MIDDLEWARE] User object: {
+  id: 1,
+  email: 'admin2@email.com',
+  password: 'c892e44621c871fc2a52f9fc95d627562b24f9b8a25c2ef1cd7e2975b7cfbd0fd47d903b71b26f1a0f18980b92055a9c13756cdb9993da0f62dd977761645f55.4a2c057e4a314a61eab0b3f8fac9c088',
+  firstName: 'akash',
+  lastName: 'k',
+  profileImageUrl: null,
+  createdAt: 2025-08-22T18:22:47.969Z,
+  updatedAt: 2025-08-22T18:22:47.969Z
+}
+✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding...
+11:14:22 PM [express] GET /api/resumes/1 304 in 12ms :: []
+🔐 [AUTH-MIDDLEWARE] Checking authentication for: /api/career-advice/1
+🔐 [AUTH-MIDDLEWARE] User authenticated: true
+🔐 [AUTH-MIDDLEWARE] User object: {
+  id: 1,
+  email: 'admin2@email.com',
+  password: 'c892e44621c871fc2a52f9fc95d627562b24f9b8a25c2ef1cd7e2975b7cfbd0fd47d903b71b26f1a0f18980b92055a9c13756cdb9993da0f62dd977761645f55.4a2c057e4a314a61eab0b3f8fac9c088',
+  firstName: 'akash',
+  lastName: 'k',
+  profileImageUrl: null,
+  createdAt: 2025-08-22T18:22:47.969Z,
+  updatedAt: 2025-08-22T18:22:47.969Z
+}
+✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding...
+11:15:41 PM [express] GET /api/career-advice/1 304 in 20ms :: []
+🔐 [AUTH-MIDDLEWARE] Checking authentication for: /api/chat-sessions/1
+🔐 [AUTH-MIDDLEWARE] User authenticated: true
+🔐 [AUTH-MIDDLEWARE] User object: {
+  id: 1,
+  email: 'admin2@email.com',
+  password: 'c892e44621c871fc2a52f9fc95d627562b24f9b8a25c2ef1cd7e2975b7cfbd0fd47d903b71b26f1a0f18980b92055a9c13756cdb9993da0f62dd977761645f55.4a2c057e4a314a61eab0b3f8fac9c088',
+  firstName: 'akash',
+  lastName: 'k',
+  profileImageUrl: null,
+  createdAt: 2025-08-22T18:22:47.969Z,
+  updatedAt: 2025-08-22T18:22:47.969Z
+}
+✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding...
+11:16:15 PM [express] GET /api/chat-sessions/1 304 in 23ms :: []

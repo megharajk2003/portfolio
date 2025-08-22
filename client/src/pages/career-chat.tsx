@@ -46,7 +46,7 @@ export default function CareerChat() {
   const createSession = useMutation({
     mutationFn: async (data: any) => {
       console.log('🎯 [FRONTEND] Creating chat session with data:', data);
-      return apiRequest(`/api/chat-sessions`, "POST", data);
+      return apiRequest("POST", `/api/chat-sessions`, data);
     },
     onSuccess: (newSession: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions", user?.id] });
@@ -71,7 +71,7 @@ export default function CareerChat() {
   const sendMessage = useMutation({
     mutationFn: async (data: any) => {
       console.log('🎯 [FRONTEND] Sending message:', data);
-      return apiRequest(`/api/chat-sessions/${data.sessionId}/message`, "POST", { message: data.message });
+      return apiRequest("POST", `/api/chat-sessions/${data.sessionId}/message`, { message: data.message });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions/session", selectedSessionId] });

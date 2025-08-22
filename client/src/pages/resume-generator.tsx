@@ -41,7 +41,7 @@ export default function ResumeGenerator() {
   const generateResume = useMutation({
     mutationFn: async (data: any) => {
       console.log('🎯 [FRONTEND] Generating resume with data:', data);
-      return apiRequest(`/api/resumes`, "POST", data);
+      return apiRequest("POST", `/api/resumes`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/resumes", user?.id] });
@@ -66,7 +66,7 @@ export default function ResumeGenerator() {
   const deleteResume = useMutation({
     mutationFn: async (resumeId: string) => {
       console.log('🎯 [FRONTEND] Deleting resume:', resumeId);
-      return apiRequest(`/api/resumes/${resumeId}`, "DELETE");
+      return apiRequest("DELETE", `/api/resumes/${resumeId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/resumes", user?.id] });
