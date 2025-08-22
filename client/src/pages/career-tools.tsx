@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,6 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Sidebar from "@/components/sidebar";
 import {
   BrainCircuit,
   Calendar as Timeline,
@@ -14,9 +18,11 @@ import {
   MessageSquare,
   Sparkles,
   ArrowRight,
+  Menu,
 } from "lucide-react";
 
 export default function CareerTools() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const tools = [
     {
       id: "career-advisor",
@@ -69,81 +75,116 @@ export default function CareerTools() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header */}
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <Sidebar />
+      </div>
 
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <Sparkles className="h-8 w-8 text-blue-600" />
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            AI Career Tools
-          </h1>
+      {/* Mobile Sidebar */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-64">
+          <Sidebar onClose={() => setSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-0">
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+          </Sheet>
+          <h1 className="text-lg font-semibold">AI Career Tools</h1>
+          <div className="w-10" /> {/* Spacer for centering */}
         </div>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Supercharge your career with AI-powered tools designed to guide your
-          professional growth and help you achieve your goals.
-        </p>
-      </div>
 
-      {/* Tools Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {tools.map((tool) => {
-          const IconComponent = tool.icon;
-          return (
-            <Link key={tool.id} href={tool.link}>
-              <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-2 hover:border-blue-200">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`${tool.color} p-3 rounded-lg text-white`}
-                      >
-                        <IconComponent className="h-6 w-6" />
+        <div className="max-w-6xl mx-auto p-6 space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="h-8 w-8 text-blue-600" />
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                AI Career Tools
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Supercharge your career with AI-powered tools designed to guide
+              your professional growth and help you achieve your goals.
+            </p>
+          </div>
+
+          {/* Tools Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {tools.map((tool) => {
+              const IconComponent = tool.icon;
+              return (
+                <Link key={tool.id} href={tool.link}>
+                  <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-2 hover:border-blue-200">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`${tool.color} p-3 rounded-lg text-white`}
+                          >
+                            <IconComponent className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">
+                              {tool.title}
+                            </CardTitle>
+                            <Badge variant="secondary" className="mt-1">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              {tool.status}
+                            </Badge>
+                          </div>
+                        </div>
+                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                       </div>
-                      <div>
-                        <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">
-                          {tool.title}
-                        </CardTitle>
-                        <Badge variant="secondary" className="mt-1">
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          {tool.status}
-                        </Badge>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription className="text-base mb-4 leading-relaxed">
+                        {tool.description}
+                      </CardDescription>
+
+                      <div className="flex flex-wrap gap-2">
+                        {tool.features.map((feature) => (
+                          <Badge
+                            key={feature}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {feature}
+                          </Badge>
+                        ))}
                       </div>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base mb-4 leading-relaxed">
-                    {tool.description}
-                  </CardDescription>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {tool.features.map((feature) => (
-                      <Badge
-                        key={feature}
-                        variant="outline"
-                        className="text-xs"
-                      >
-                        {feature}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Info Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 text-center">
-        <h3 className="text-lg font-semibold mb-2">Powered by Advanced AI</h3>
-        <p className="text-muted-foreground">
-          All our career tools use cutting-edge AI technology to provide
-          personalized, data-driven insights based on your unique profile and
-          career goals.
-        </p>
+          {/* Info Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 text-center">
+            <h3 className="text-lg font-semibold mb-2">
+              Powered by Advanced AI
+            </h3>
+            <p className="text-muted-foreground">
+              All our career tools use cutting-edge AI technology to provide
+              personalized, data-driven insights based on your unique profile
+              and career goals.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
