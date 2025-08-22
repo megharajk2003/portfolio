@@ -54,13 +54,23 @@ export default function Learning() {
   const [sortBy, setSortBy] = useState("relevance");
 
   // Fetch real data from the API
-  const { data: courses = [] } = useQuery<any[]>({
+  const { data: courses = [], isLoading: coursesLoading, error: coursesError } = useQuery<any[]>({
     queryKey: ["/api/courses"],
   });
 
-  const { data: categories = [] } = useQuery<any[]>({
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
+
+  // Debug logging
+  console.log("🔍 Frontend Debug:");
+  console.log("Courses loading:", coursesLoading);
+  console.log("Courses error:", coursesError);
+  console.log("Courses data:", courses);
+  console.log("Courses length:", courses.length);
+  console.log("Categories loading:", categoriesLoading);
+  console.log("Categories error:", categoriesError);
+  console.log("Categories data:", categories);
 
   const { data: modules = [] } = useQuery({
     queryKey: ["/api/learning-modules"],
@@ -95,6 +105,12 @@ export default function Learning() {
     const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
     return matchesSearch && matchesLevel;
   });
+
+  console.log("🔍 Filtering Debug:");
+  console.log("Raw courses:", courses);
+  console.log("Filtered courses:", filteredCourses);
+  console.log("Search query:", searchQuery);
+  console.log("Selected levels:", selectedLevels);
 
   // Update category counts dynamically
   const categoriesWithCounts = categories.map((category: any) => {
@@ -287,6 +303,12 @@ export default function Learning() {
 
             {/* Course Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {console.log("🔍 Rendering course grid. Filtered courses length:", filteredCourses.length)}
+              {filteredCourses.length === 0 && (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500">No courses found</p>
+                </div>
+              )}
               {filteredCourses.map((course: any) => (
                 <Card key={course.id} className="hover:shadow-lg transition-all duration-200 group">
                   <div className="relative">
