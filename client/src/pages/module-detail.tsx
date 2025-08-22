@@ -92,6 +92,7 @@ export default function ModuleDetail() {
   const [showFinalExam, setShowFinalExam] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: number }>({});
   const [quizResults, setQuizResults] = useState<any>(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -111,6 +112,34 @@ export default function ModuleDetail() {
   const { data: lessonProgressList = [] } = useQuery<LessonProgress[]>({
     queryKey: ["/api/lesson-progress", currentUser.id, moduleId],
     enabled: !!moduleId,
+  });
+
+  // Check if user is enrolled (has any progress or lesson progress)
+  useEffect(() => {
+    if (moduleProgress || lessonProgressList.length > 0) {
+      setIsEnrolled(true);
+    }
+  }, [moduleProgress, lessonProgressList]);
+
+  // Enroll in module mutation
+  const enrollMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/user-progress`, "POST", {
+        userId: currentUser.id,
+        moduleId,
+        currentLesson: 0,
+        isCompleted: false,
+        xpEarned: 0,
+      });
+    },
+    onSuccess: () => {
+      setIsEnrolled(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/user-progress"] });
+      toast({
+        title: "Enrolled Successfully!",
+        description: "You can now start learning. Good luck!",
+      });
+    },
   });
 
   // Complete lesson mutation
@@ -175,6 +204,10 @@ export default function ModuleDetail() {
     queryKey: ["/api/quiz-questions", moduleId, selectedLesson],
     enabled: !!moduleId && (showQuiz || showFinalExam) && selectedLesson !== null,
   });
+
+  const handleEnroll = () => {
+    enrollMutation.mutate();
+  };
 
   const handleLessonComplete = (lessonIndex: number) => {
     completeLessonMutation.mutate(lessonIndex);
@@ -303,29 +336,66 @@ export default function ModuleDetail() {
                 )}
               </div>
               
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Progress</span>
-                  <span className="text-sm text-muted-foreground" data-testid="text-progress-percentage">
-                    {Math.round(calculateProgress())}%
-                  </span>
+              {isEnrolled && (
+                <div className="mt-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Progress</span>
+                    <span className="text-sm text-muted-foreground" data-testid="text-progress-percentage">
+                      {Math.round(calculateProgress())}%
+                    </span>
+                  </div>
+                  <Progress value={calculateProgress()} className="h-2" data-testid="progress-module" />
                 </div>
-                <Progress value={calculateProgress()} className="h-2" data-testid="progress-module" />
-              </div>
+              )}
+              
+              {!isEnrolled && (
+                <div className="mt-6">
+                  <Button 
+                    onClick={handleEnroll}
+                    disabled={enrollMutation.isPending}
+                    className="w-full"
+                    size="lg"
+                    data-testid="button-enroll"
+                  >
+                    {enrollMutation.isPending ? "Enrolling..." : "Enroll for Free"}
+                  </Button>
+                </div>
+              )}
             </CardHeader>
           </Card>
         </div>
 
+        {/* Start Learning Button for enrolled users */}
+        {isEnrolled && !moduleProgress?.isCompleted && (
+          <div className="mb-6">
+            <Button 
+              onClick={() => {
+                const firstUnlockedLesson = lessons.findIndex((_, index) => isLessonUnlocked(index));
+                if (firstUnlockedLesson !== -1) {
+                  document.getElementById(`lesson-${firstUnlockedLesson}`)?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="w-full"
+              size="lg"
+              data-testid="button-start-learning"
+            >
+              <PlayCircle className="h-5 w-5 mr-2" />
+              Start Learning
+            </Button>
+          </div>
+        )}
+
         {/* Lessons */}
-        <div className="space-y-4 mb-6">
-          <h2 className="text-xl font-semibold">Lessons</h2>
+        {isEnrolled && (
+          <div className="space-y-4 mb-6">
+            <h2 className="text-xl font-semibold">Lessons</h2>
           {lessons.map((lesson: Lesson, index: number) => {
             const lessonProgress = getLessonProgress(index);
             const isUnlocked = isLessonUnlocked(index);
             const isCompleted = lessonProgress?.isCompleted && lessonProgress?.quizPassed;
 
             return (
-              <Card key={index} className={`transition-all ${!isUnlocked ? 'opacity-60' : ''}`}>
+              <Card key={index} id={`lesson-${index}`} className={`transition-all ${!isUnlocked ? 'opacity-60' : ''}`}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -388,10 +458,12 @@ export default function ModuleDetail() {
               </Card>
             );
           })}
-        </div>
+          </div>
+        )}
 
         {/* Final Exam */}
-        <Card>
+        {isEnrolled && (
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5" />
@@ -444,6 +516,7 @@ export default function ModuleDetail() {
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Quiz Dialog */}
         <Dialog open={showQuiz || showFinalExam} onOpenChange={(open) => {
