@@ -1,7 +1,7 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Using Google AI (Gemini) instead of OpenAI
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export interface UserProfileData {
   personalDetails?: any;
@@ -57,15 +57,32 @@ export class AICareerService {
         }
       `;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
+      console.log('🤖 [AI-SERVICE] Sending request to Google AI for career advice');
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              advice: { type: "string" },
+              recommendations: { type: "array", items: { type: "string" } },
+              skillGaps: { type: "array", items: { type: "string" } },
+              nextSteps: { type: "array", items: { type: "string" } },
+              currentLevel: { type: "string" },
+            },
+            required: ["advice", "recommendations", "skillGaps", "nextSteps", "currentLevel"],
+          },
+        },
+        contents: prompt,
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      console.log('🤖 [AI-SERVICE] Google AI response received:', response.text);
+      const result = JSON.parse(response.text || '{}');
+      console.log('✅ [AI-SERVICE] Career advice generated successfully:', result);
+      return result;
     } catch (error) {
-      console.error('Error generating career advice:', error);
+      console.error('❌ [AI-SERVICE] Error generating career advice:', error);
       throw new Error('Failed to generate career advice');
     }
   }
@@ -119,15 +136,39 @@ export class AICareerService {
         }
       `;
 
-      console.log('🤖 [AI-SERVICE] Sending timeline request to OpenAI');
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
+      console.log('🤖 [AI-SERVICE] Sending timeline request to Google AI');
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              timeline: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    phase: { type: "string" },
+                    duration: { type: "string" },
+                    milestones: { type: "array", items: { type: "string" } },
+                    skills: { type: "array", items: { type: "string" } },
+                    description: { type: "string" },
+                  },
+                  required: ["phase", "duration", "milestones", "skills", "description"],
+                },
+              },
+              estimatedDuration: { type: "string" },
+            },
+            required: ["title", "timeline", "estimatedDuration"],
+          },
+        },
+        contents: prompt,
       });
 
-      console.log('🤖 [AI-SERVICE] Timeline OpenAI response:', response.choices[0].message.content);
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      console.log('🤖 [AI-SERVICE] Timeline Google AI response:', response.text);
+      const result = JSON.parse(response.text || '{}');
       console.log('✅ [AI-SERVICE] Timeline generated successfully:', result);
       return result;
     } catch (error) {
@@ -220,15 +261,44 @@ export class AICareerService {
         }
       `;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
+      console.log('🤖 [AI-SERVICE] Sending resume request to Google AI');
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              personalInfo: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  email: { type: "string" },
+                  phone: { type: "string" },
+                  location: { type: "string" },
+                  linkedin: { type: "string" },
+                  website: { type: "string" },
+                },
+              },
+              summary: { type: "string" },
+              experience: { type: "array" },
+              education: { type: "array" },
+              skills: { type: "array" },
+              projects: { type: "array" },
+              certifications: { type: "array" },
+            },
+            required: ["personalInfo", "summary", "experience", "education", "skills", "projects", "certifications"],
+          },
+        },
+        contents: prompt,
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      console.log('🤖 [AI-SERVICE] Resume Google AI response:', response.text);
+      const result = JSON.parse(response.text || '{}');
+      console.log('✅ [AI-SERVICE] Resume generated successfully:', result);
+      return result;
     } catch (error) {
-      console.error('Error generating resume:', error);
+      console.error('❌ [AI-SERVICE] Error generating resume:', error);
       throw new Error('Failed to generate resume');
     }
   }
@@ -247,17 +317,24 @@ export class AICareerService {
       
       Provide helpful, actionable career advice. Be encouraging, professional, and specific when possible.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages.map(msg => ({ role: msg.role as "user" | "assistant", content: msg.content }))
-        ],
+      console.log('🤖 [AI-SERVICE] Sending chat request to Google AI');
+      const chatHistory = messages.map(msg => ({
+        role: msg.role,
+        parts: [{ text: msg.content }],
+      }));
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: {
+          systemInstruction: systemPrompt,
+        },
+        contents: chatHistory,
       });
 
-      return response.choices[0].message.content || 'I apologize, but I could not generate a response at this time.';
+      console.log('🤖 [AI-SERVICE] Chat Google AI response:', response.text);
+      return response.text || 'I apologize, but I could not generate a response at this time.';
     } catch (error) {
-      console.error('Error generating chat response:', error);
+      console.error('❌ [AI-SERVICE] Error generating chat response:', error);
       throw new Error('Failed to generate chat response');
     }
   }
