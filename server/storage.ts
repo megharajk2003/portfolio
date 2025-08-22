@@ -26,6 +26,8 @@ import {
   type InsertEnrollment,
   type Review,
   type InsertReview,
+  type LessonProgress,
+  type InsertLessonProgress,
   users,
   profiles,
   learningModules,
@@ -47,6 +49,7 @@ import {
   enrollments,
   reviews,
   courseCategories,
+  lessonProgress,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte } from "drizzle-orm";
@@ -182,6 +185,12 @@ export interface IStorage {
 
   getCourseReviews(courseId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Lesson Progress methods
+  getLessonProgress(userId: number, moduleId: string): Promise<LessonProgress[]>;
+  getLessonProgressByIndex(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress | undefined>;
+  createLessonProgress(progress: InsertLessonProgress): Promise<LessonProgress>;
+  completeLessonProgress(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress>;
 }
 
 export class PgStorage implements IStorage {
@@ -1686,6 +1695,104 @@ export class PgStorage implements IStorage {
     }
     const [review] = await db.insert(reviews).values(reviewData).returning();
     return review;
+  }
+
+  // Lesson Progress implementations
+  async getLessonProgress(userId: number, moduleId: string): Promise<LessonProgress[]> {
+    if (!this.isDbConnected) {
+      const key = `lessonProgress_${userId}_${moduleId}`;
+      return this.fallbackData.get(key) || [];
+    }
+    return await db
+      .select()
+      .from(lessonProgress)
+      .where(
+        and(
+          eq(lessonProgress.userId, userId),
+          eq(lessonProgress.moduleId, moduleId)
+        )
+      );
+  }
+
+  async getLessonProgressByIndex(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress | undefined> {
+    if (!this.isDbConnected) {
+      const key = `lessonProgress_${userId}_${moduleId}`;
+      const progressList = this.fallbackData.get(key) || [];
+      return progressList.find((p: any) => p.lessonIndex === lessonIndex);
+    }
+    const result = await db
+      .select()
+      .from(lessonProgress)
+      .where(
+        and(
+          eq(lessonProgress.userId, userId),
+          eq(lessonProgress.moduleId, moduleId),
+          eq(lessonProgress.lessonIndex, lessonIndex)
+        )
+      );
+    return result[0];
+  }
+
+  async createLessonProgress(progressData: InsertLessonProgress): Promise<LessonProgress> {
+    if (!this.isDbConnected) {
+      const progress = { 
+        ...progressData, 
+        id: randomUUID(),
+        completedAt: progressData.isCompleted ? new Date() : null
+      };
+      const key = `lessonProgress_${progressData.userId}_${progressData.moduleId}`;
+      const progressList = this.fallbackData.get(key) || [];
+      progressList.push(progress);
+      this.fallbackData.set(key, progressList);
+      return progress as LessonProgress;
+    }
+    const [progress] = await db
+      .insert(lessonProgress)
+      .values(progressData)
+      .returning();
+    return progress;
+  }
+
+  async completeLessonProgress(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress> {
+    const existing = await this.getLessonProgressByIndex(userId, moduleId, lessonIndex);
+    
+    if (existing) {
+      // Update existing progress
+      if (!this.isDbConnected) {
+        const key = `lessonProgress_${userId}_${moduleId}`;
+        const progressList = this.fallbackData.get(key) || [];
+        const updatedList = progressList.map((p: any) => 
+          p.lessonIndex === lessonIndex 
+            ? { ...p, isCompleted: true, completedAt: new Date() }
+            : p
+        );
+        this.fallbackData.set(key, updatedList);
+        return updatedList.find((p: any) => p.lessonIndex === lessonIndex);
+      }
+      const [updated] = await db
+        .update(lessonProgress)
+        .set({ 
+          isCompleted: true, 
+          completedAt: new Date() 
+        })
+        .where(eq(lessonProgress.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      // Create new progress record
+      const progressData: InsertLessonProgress = {
+        userId,
+        moduleId,
+        lessonIndex,
+        isCompleted: true,
+        quizPassed: false,
+        quizScore: null,
+        quizAttempts: 0,
+        xpEarned: 10, // Default XP for lesson completion
+        completedAt: new Date()
+      };
+      return await this.createLessonProgress(progressData);
+    }
   }
 }
 

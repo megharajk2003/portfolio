@@ -113,8 +113,15 @@ export default function CourseLearn() {
         lessonIndex,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/lesson-progress"] });
+    onSuccess: (data) => {
+      // Invalidate the specific lesson progress query for this user and module
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/lesson-progress", user?.id, selectedModuleId] 
+      });
+      // Also invalidate general lesson progress queries
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/lesson-progress"] 
+      });
       toast({
         title: "Lesson Completed!",
         description: "Great job! You've unlocked the next lesson.",

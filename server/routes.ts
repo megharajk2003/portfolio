@@ -1468,7 +1468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/lesson-progress/:userId/:moduleId", async (req, res) => {
     try {
       const { userId, moduleId } = req.params;
-      const progress = await storage.getLessonProgress?.(parseInt(userId), moduleId) || [];
+      const progress = await storage.getLessonProgress(parseInt(userId), moduleId);
       res.json(progress);
     } catch (error) {
       console.error("Error fetching lesson progress:", error);
@@ -1479,8 +1479,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/lesson-progress/complete", async (req, res) => {
     try {
       const { userId, moduleId, lessonIndex } = req.body;
-      const progress = await storage.completeLessonProgress?.(parseInt(userId), moduleId, lessonIndex);
-      res.json(progress || { success: true });
+      const progress = await storage.completeLessonProgress(parseInt(userId), moduleId, lessonIndex);
+      res.json(progress);
     } catch (error) {
       console.error("Error completing lesson:", error);
       res.status(500).json({ message: "Failed to complete lesson" });
