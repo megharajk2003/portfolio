@@ -204,7 +204,7 @@ export const lessonProgress = pgTable("lesson_progress", {
     .references(() => users.id, { onDelete: "cascade" }),
   moduleId: varchar("module_id")
     .notNull()
-    .references(() => learningModules.id, { onDelete: "cascade" }),
+    .references(() => modules.id, { onDelete: "cascade" }),
   lessonIndex: integer("lesson_index").notNull(),
   isCompleted: boolean("is_completed").default(false),
   quizPassed: boolean("quiz_passed").default(false),
