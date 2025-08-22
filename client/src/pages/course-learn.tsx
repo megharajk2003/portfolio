@@ -167,6 +167,21 @@ export default function CourseLearn() {
                   />
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Video Player */}
+                  {selectedLesson.videoUrl && (
+                    <div className="aspect-video">
+                      <iframe
+                        src={selectedLesson.videoUrl.replace('watch?v=', 'embed/')}
+                        title={selectedLesson.title}
+                        className="w-full h-full rounded-lg"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        data-testid="lesson-video"
+                      />
+                    </div>
+                  )}
+
                   {/* Lesson Content */}
                   <div className="prose dark:prose-invert max-w-none">
                     <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
