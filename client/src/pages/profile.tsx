@@ -76,7 +76,7 @@ const educationSchema = z.object({
 const certificationSchema = z.object({
   title: z.string().min(1, "Certification title is required"),
   organization: z.string().min(1, "Organization is required"),
-  year: z.number().min(1900, "Valid year required").optional(),
+  year: z.union([z.string(), z.number()]).transform((val) => Number(val)).refine((val) => val >= 1900, "Valid year required").optional(),
   url: z
     .string()
     .transform((val) => (val === "" ? undefined : val))
@@ -168,8 +168,8 @@ const contactDetailsSchema = z.object({
 const organizationSchema = z.object({
   name: z.string().min(1, "Organization name is required"),
   role: z.string().min(1, "Role is required"),
-  year: z.string().min(1, "Year is required"),
-  contribution: z.string().min(10, "Contribution description is required"),
+  year: z.union([z.string(), z.number()]).transform(String),
+  contribution: z.string().min(10, "Contribution is required"),
 });
 
 type EducationItem = z.infer<typeof educationSchema>;
@@ -1829,7 +1829,7 @@ function EditEntryForm({
 
   const renderFormFields = () => {
     const commonClasses = "space-y-4";
-    
+
     switch (category.id) {
       case "education":
         return (
@@ -3716,9 +3716,7 @@ export default function Profile() {
                     </div>
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Full Name
-                        </label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.fullName ||
                             `${user?.firstName || ""} ${
@@ -3728,43 +3726,32 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Role/Title
-                        </label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
                         <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.roleOrTitle ||
-                            "Not provided"}
+                          {profile?.personalDetails?.roleOrTitle || "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Date of Birth
-                        </label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.dob || "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Gender
-                        </label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.gender || "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Nationality
-                        </label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.nationality ||
                             "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Location
-                        </label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.personalDetails?.location
                             ? profile.personalDetails.location.city &&
@@ -3781,9 +3768,7 @@ export default function Profile() {
 
                   {profile?.personalDetails?.summary ? (
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Professional Summary
-                      </label>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
                       <p className="text-gray-700 dark:text-gray-300 mt-1">
                         {profile.personalDetails.summary}
                       </p>
@@ -3988,7 +3973,7 @@ export default function Profile() {
                       {["technical", "soft", "tools"].map((category) => {
                         const categorySkills = skillsData.filter(skill => skill.category === category);
                         if (categorySkills.length === 0) return null;
-                        
+
                         return (
                           <div key={category}>
                             <h4 className="font-medium text-gray-900 dark:text-white mb-2 capitalize">
