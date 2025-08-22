@@ -266,9 +266,9 @@ async function seedDatabase() {
         title: module.title,
         description: module.description,
         category: module.category,
-        xp_reward: module.xpReward, // Mapped camelCase to snake_case
+        xpReward: module.xpReward,
         lessons: module.lessons,
-        is_active: module.isActive, // Mapped camelCase to snake_case
+        isActive: module.isActive,
       });
     }
 
