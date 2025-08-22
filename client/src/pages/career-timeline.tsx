@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Timeline as TimelineIcon, 
+  Calendar as TimelineIcon, 
   Target, 
   Clock, 
   CheckCircle, 

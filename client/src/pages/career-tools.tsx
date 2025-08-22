@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { 
   BrainCircuit, 
-  Timeline, 
+  Calendar as Timeline, 
   FileText, 
   MessageSquare, 
   Sparkles,
