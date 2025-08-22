@@ -1,0 +1,151 @@
+[{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.ARRAY; }' is not assignable to type 'Schema'.\n  Property 'items' is missing in type '{ type: SchemaType.ARRAY; }' but required in type 'ArraySchema'.",
+	"source": "ts",
+	"startLineNumber": 284,
+	"startColumn": 15,
+	"endLineNumber": 284,
+	"endColumn": 25,
+	"relatedInformation": [
+		{
+			"startLineNumber": 9,
+			"startColumn": 5,
+			"endLineNumber": 9,
+			"endColumn": 10,
+			"message": "'items' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		},
+		{
+			"startLineNumber": 1114,
+			"startColumn": 9,
+			"endLineNumber": 1114,
+			"endColumn": 29,
+			"message": "The expected type comes from this index signature.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.ARRAY; }' is not assignable to type 'Schema'.\n  Property 'items' is missing in type '{ type: SchemaType.ARRAY; }' but required in type 'ArraySchema'.",
+	"source": "ts",
+	"startLineNumber": 285,
+	"startColumn": 15,
+	"endLineNumber": 285,
+	"endColumn": 24,
+	"relatedInformation": [
+		{
+			"startLineNumber": 9,
+			"startColumn": 5,
+			"endLineNumber": 9,
+			"endColumn": 10,
+			"message": "'items' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		},
+		{
+			"startLineNumber": 1114,
+			"startColumn": 9,
+			"endLineNumber": 1114,
+			"endColumn": 29,
+			"message": "The expected type comes from this index signature.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.ARRAY; }' is not assignable to type 'Schema'.\n  Property 'items' is missing in type '{ type: SchemaType.ARRAY; }' but required in type 'ArraySchema'.",
+	"source": "ts",
+	"startLineNumber": 286,
+	"startColumn": 15,
+	"endLineNumber": 286,
+	"endColumn": 21,
+	"relatedInformation": [
+		{
+			"startLineNumber": 9,
+			"startColumn": 5,
+			"endLineNumber": 9,
+			"endColumn": 10,
+			"message": "'items' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		},
+		{
+			"startLineNumber": 1114,
+			"startColumn": 9,
+			"endLineNumber": 1114,
+			"endColumn": 29,
+			"message": "The expected type comes from this index signature.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.ARRAY; }' is not assignable to type 'Schema'.\n  Property 'items' is missing in type '{ type: SchemaType.ARRAY; }' but required in type 'ArraySchema'.",
+	"source": "ts",
+	"startLineNumber": 287,
+	"startColumn": 15,
+	"endLineNumber": 287,
+	"endColumn": 23,
+	"relatedInformation": [
+		{
+			"startLineNumber": 9,
+			"startColumn": 5,
+			"endLineNumber": 9,
+			"endColumn": 10,
+			"message": "'items' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		},
+		{
+			"startLineNumber": 1114,
+			"startColumn": 9,
+			"endLineNumber": 1114,
+			"endColumn": 29,
+			"message": "The expected type comes from this index signature.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/d:/react project/SkillStream/server/ai-service.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ type: SchemaType.ARRAY; }' is not assignable to type 'Schema'.\n  Property 'items' is missing in type '{ type: SchemaType.ARRAY; }' but required in type 'ArraySchema'.",
+	"source": "ts",
+	"startLineNumber": 288,
+	"startColumn": 15,
+	"endLineNumber": 288,
+	"endColumn": 29,
+	"relatedInformation": [
+		{
+			"startLineNumber": 9,
+			"startColumn": 5,
+			"endLineNumber": 9,
+			"endColumn": 10,
+			"message": "'items' is declared here.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		},
+		{
+			"startLineNumber": 1114,
+			"startColumn": 9,
+			"endLineNumber": 1114,
+			"endColumn": 29,
+			"message": "The expected type comes from this index signature.",
+			"resource": "/d:/react project/SkillStream/node_modules/@google/generative-ai/dist/generative-ai.d.ts"
+		}
+	],
+	"origin": "extHost1"
+}]

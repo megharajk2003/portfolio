@@ -281,11 +281,26 @@ export class AICareerService {
                 },
               },
               summary: { type: SchemaType.STRING },
-              experience: { type: SchemaType.ARRAY },
-              education: { type: SchemaType.ARRAY },
-              skills: { type: SchemaType.ARRAY },
-              projects: { type: SchemaType.ARRAY },
-              certifications: { type: SchemaType.ARRAY },
+              experience: { 
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.OBJECT }
+              },
+              education: { 
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.OBJECT }
+              },
+              skills: { 
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.OBJECT }
+              },
+              projects: { 
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.OBJECT }
+              },
+              certifications: { 
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.OBJECT }
+              },
             },
             required: ["personalInfo", "summary", "experience", "education", "skills", "projects", "certifications"],
           },
