@@ -1572,6 +1572,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/career-advice", requireAuth, async (req, res) => {
     try {
+      console.log('🎯 [SERVER] POST /api/career-advice called');
+      console.log('🎯 [SERVER] Request body:', req.body);
       const { userId, targetRole, careerGoals, currentLevel } = req.body;
       
       // Fetch user's profile data for AI analysis
@@ -1591,8 +1593,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certifications,
       };
 
+      console.log('🎯 [SERVER] User data collected for AI:', userData);
+      console.log('🎯 [SERVER] Calling AI service for advice generation...');
       // Generate AI advice
       const aiAdvice = await AICareerService.generateCareerAdvice(userData, targetRole);
+      console.log('🎯 [SERVER] AI advice generated:', aiAdvice);
       
       // Save to database
       const advisoryData = {
@@ -1609,8 +1614,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const advisory = await storage.createCareerAdvisory(advisoryData);
       res.json(advisory);
     } catch (error) {
-      console.error("Error generating career advice:", error);
-      res.status(500).json({ message: "Failed to generate career advice" });
+      console.error("❌ [SERVER] Error generating career advice:", error);
+      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ message: "Failed to generate career advice", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -1711,6 +1717,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/resumes", requireAuth, async (req, res) => {
     try {
+      console.log('📄 [SERVER] POST /api/resumes called');
+      console.log('📄 [SERVER] Request body:', req.body);
       const { userId, title, targetRole, template } = req.body;
       
       // Fetch user data for AI analysis
@@ -1731,8 +1739,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certifications,
       };
 
+      console.log('📄 [SERVER] User data collected for AI:', userData);
+      console.log('📄 [SERVER] Calling AI service for resume generation...');
       // Generate AI resume
       const aiResume = await AICareerService.generateResume(userData, targetRole);
+      console.log('📄 [SERVER] AI resume generated:', aiResume);
       
       // Save to database
       const resumeData = {
@@ -1746,8 +1757,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const resume = await storage.createGeneratedResume(resumeData);
       res.json(resume);
     } catch (error) {
-      console.error("Error generating resume:", error);
-      res.status(500).json({ message: "Failed to generate resume" });
+      console.error("❌ [SERVER] Error generating resume:", error);
+      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ message: "Failed to generate resume", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -1822,6 +1834,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat-sessions/:sessionId/message", requireAuth, async (req, res) => {
     try {
+      console.log('💬 [SERVER] POST /api/chat-sessions/:sessionId/message called');
+      console.log('💬 [SERVER] Request body:', req.body);
+      console.log('💬 [SERVER] Session ID:', req.params.sessionId);
       const { message } = req.body;
       const sessionId = req.params.sessionId;
       
@@ -1858,11 +1873,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         learningProgress: userProgress,
       };
 
+      console.log('💬 [SERVER] User context for AI:', userContext);
+      console.log('💬 [SERVER] Messages for AI:', updatedMessages);
+      console.log('💬 [SERVER] Calling AI service for chat response...');
       // Generate AI response
       const aiResponse = await AICareerService.generateChatResponse(
         updatedMessages.map(m => ({ role: m.role, content: m.content })),
         userContext
       );
+      console.log('💬 [SERVER] AI response generated:', aiResponse);
 
       // Add AI response
       const finalMessages = [
