@@ -10,8 +10,6 @@ import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
 import { useToast } from "@/hooks/use-toast";
 
-import Skills from "@/pages/skills";
-import Projects from "@/pages/projects";
 import Portfolio from "@/pages/portfolio";
 import Learning from "@/pages/learning";
 import CourseDetail from "@/pages/course-detail";
@@ -40,8 +38,6 @@ function Router() {
     const protectedRoutes = [
       "/profile",
       "/dashboard",
-      "/skills",
-      "/projects",
       "/portfolio",
       "/learning",
       "/edit-portfolio",
@@ -90,9 +86,6 @@ function Router() {
         <>
           <Route path="/dashboard" component={Home} />
           <Route path="/profile" component={Profile} />
-
-          <Route path="/skills" component={Skills} />
-          <Route path="/projects" component={Projects} />
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/learning" component={Learning} />
           <Route path="/course/:id" component={CourseDetail} />

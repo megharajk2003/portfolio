@@ -18,9 +18,6 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Profile", href: "/profile", icon: User },
-
-  { name: "Skills", href: "/skills", icon: Cog },
-  { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Learning", href: "/learning", icon: BookOpen },
 ];
 

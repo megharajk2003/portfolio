@@ -16,14 +16,16 @@ import {
   Trash2,
   Eye,
 } from "lucide-react";
-
-const CURRENT_USER_ID = "user-1";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Projects() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
+  const userId = user?.id;
 
-  const { data: projects = [] } = useQuery<(typeof projects.$inferSelect)[]>({
-    queryKey: ["/api/projects", CURRENT_USER_ID],
+  const { data: projects = [] } = useQuery<any[]>({
+    queryKey: ["/api/projects", userId],
+    enabled: !!userId,
   });
 
   return (

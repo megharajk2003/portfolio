@@ -20,6 +20,7 @@ import {
   insertPublicationSchema,
   insertOrganizationSchema,
   insertVolunteerSchema,
+  insertWorkExperienceTableSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {

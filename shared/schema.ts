@@ -229,6 +229,98 @@ export const sectionSettings = pgTable("section_settings", {
   sortOrder: integer("sort_order").default(0),
 });
 
+// Dedicated Education Table
+export const education = pgTable("education", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  level: text("level").notNull(), // "School", "Undergraduate", "Postgraduate"
+  institution: text("institution").notNull(),
+  degree: text("degree"),
+  fieldOfStudy: text("field_of_study"),
+  yearOfPassing: integer("year_of_passing"),
+  gradeOrScore: text("grade_or_score"),
+  description: text("description"),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Dedicated Skills Table
+export const skills = pgTable("skills", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  category: text("category").notNull(), // "technical", "soft", "tools", "domainSpecific"
+  name: text("name").notNull(),
+  level: integer("level").default(5), // 1-10 scale
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Dedicated Projects Table
+export const projects = pgTable("projects", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  domain: text("domain").notNull(), // "Business", "Marketing", "Technology", etc.
+  toolsOrMethods: text("tools_or_methods").array(), // Array of strings
+  outcome: text("outcome"),
+  url: text("url"),
+  githubUrl: text("github_url"),
+  startDate: text("start_date"), // YYYY-MM format
+  endDate: text("end_date"), // YYYY-MM format
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Dedicated Certifications Table
+export const certifications = pgTable("certifications", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  organization: text("organization").notNull(),
+  year: integer("year"),
+  url: text("url"),
+  description: text("description"),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Dedicated Achievements Table
+export const achievements = pgTable("achievements", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  year: text("year"),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Portfolio Tables for Individual Items
 export const workExperience = pgTable("work_experience", {
   id: varchar("id")
@@ -346,7 +438,7 @@ export const educationItemSchema = z.object({
 
 // Education schema with userId for API operations
 export const educationWithUserSchema = z.object({
-  userId: z.string(),
+  userId: z.string().transform(Number),
   level: z.string(),
   institution: z.string(),
   degree: z.string().optional(),
@@ -354,6 +446,52 @@ export const educationWithUserSchema = z.object({
   gradeOrScore: z.string().optional(),
   fieldOfStudy: z.string().optional(),
   description: z.string().optional(),
+});
+
+// Create insert schemas for new dedicated tables
+export const insertEducationTableSchema = createInsertSchema(education).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSkillTableSchema = createInsertSchema(skills).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProjectTableSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCertificationTableSchema = createInsertSchema(
+  certifications
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWorkExperienceTableSchema = z.object({
+  userId: z.string().transform(Number),
+  company: z.string(),
+  position: z.string(),
+  location: z.string().optional(),
+  startDate: z.string(),
+  endDate: z.string().optional(),
+  description: z.string().optional(),
+  isVisible: z.boolean().default(true),
+});
+
+export const insertAchievementTableSchema = createInsertSchema(
+  achievements
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const workExperienceItemSchema = z.object({
@@ -368,10 +506,10 @@ export const workExperienceItemSchema = z.object({
 // Work experience schema with userId for API operations
 export const workExperienceWithUserSchema = z.object({
   userId: z.string().transform(Number),
-  company: z.string(),
-  position: z.string(),
+  company: z.string().min(1, "Company name is required"),
+  position: z.string().min(1, "Position is required"),
   location: z.string().optional(),
-  startDate: z.string(),
+  startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
   description: z.string().optional(),
 });
@@ -512,7 +650,10 @@ export const certificationWithUserSchema = z.object({
   title: z.string(),
   organization: z.string(),
   year: z.number().optional(),
-  url: z.preprocess((val) => val === "" ? undefined : val, z.string().url().optional()),
+  url: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.string().url().optional()
+  ),
   description: z.string().optional(), // Add missing field from form
 });
 
