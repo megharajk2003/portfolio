@@ -54,6 +54,39 @@ export default function CourseLearn() {
     enabled: !!user && !!selectedModuleId,
   });
 
+  // Fetch lesson count and progress for all modules
+  const { data: allModulesData = [] } = useQuery<any[]>({
+    queryKey: ["/api/all-modules-data", user?.id, courseId],
+    queryFn: async () => {
+      if (!user || !courseId) return [];
+      
+      const moduleDataPromises = modules.map(async (module: any) => {
+        // Fetch lessons count
+        const lessonsResponse = await fetch(`/api/modules/${module.id}/lessons`, {
+          credentials: "include",
+        });
+        const lessons = lessonsResponse.ok ? await lessonsResponse.json() : [];
+        
+        // Fetch progress
+        const progressResponse = await fetch(`/api/lesson-progress/${user.id}/${module.id}`, {
+          credentials: "include",
+        });
+        const progress = progressResponse.ok ? await progressResponse.json() : [];
+        
+        return { 
+          moduleId: module.id, 
+          lessons, 
+          progress,
+          totalLessons: lessons.length,
+          completedLessons: progress.filter((p: any) => p.isCompleted).length
+        };
+      });
+      
+      return Promise.all(moduleDataPromises);
+    },
+    enabled: !!user && !!courseId && modules.length > 0,
+  });
+
   // Auto-select first module and lesson
   React.useEffect(() => {
     if (modules.length > 0 && !selectedModuleId) {
@@ -72,13 +105,44 @@ export default function CourseLearn() {
     return lessonProgress.find((p: any) => p.lessonIndex === lessonIndex);
   };
 
-  const isLessonUnlocked = (lessonIndex: number) => {
-    // First lesson is always unlocked
-    if (lessonIndex === 0) return true;
+  const isModuleUnlocked = (moduleIndex: number) => {
+    // First module is always unlocked
+    if (moduleIndex === 0) return true;
     
-    // Other lessons unlock when previous lesson is completed
-    const previousProgress = getLessonProgress(lessonIndex - 1);
-    return previousProgress?.isCompleted || false;
+    // Other modules unlock when previous module is fully completed
+    const previousModule = modules[moduleIndex - 1];
+    if (!previousModule) return false;
+    
+    // Check if all lessons in previous module are completed
+    const previousModuleData = allModulesData.find(
+      (md: any) => md.moduleId === previousModule.id
+    );
+    
+    if (!previousModuleData) return false;
+    
+    // Module unlocks when all lessons in previous module are completed
+    return previousModuleData.totalLessons > 0 && 
+           previousModuleData.completedLessons >= previousModuleData.totalLessons;
+  };
+
+  const isLessonUnlocked = (lessonIndex: number, moduleIndex: number = 0) => {
+    // Find current module index
+    const currentModuleIndex = modules.findIndex((m: any) => m.id === selectedModuleId);
+    
+    // Check if this module is unlocked
+    if (!isModuleUnlocked(currentModuleIndex)) return false;
+    
+    // Within first module, first lesson is always unlocked
+    if (currentModuleIndex === 0 && lessonIndex === 0) return true;
+    
+    // Within any module, other lessons unlock when previous lesson is completed
+    if (lessonIndex > 0) {
+      const previousProgress = getLessonProgress(lessonIndex - 1);
+      return previousProgress?.isCompleted || false;
+    }
+    
+    // First lesson of non-first modules unlock when module is unlocked
+    return currentModuleIndex === 0;
   };
 
   const isLessonCompleted = (lessonIndex: number) => {
@@ -180,71 +244,95 @@ export default function CourseLearn() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {modules.map((module: any, moduleIndex: number) => (
-                  <div key={module.id} className="space-y-2">
-                    <Button
-                      variant={selectedModuleId === module.id ? "default" : "ghost"}
-                      className="w-full justify-start h-auto p-3"
-                      onClick={() => setSelectedModuleId(module.id)}
-                      data-testid={`module-${module.id}`}
-                    >
-                      <div className="text-left">
-                        <div className="font-medium text-sm">
-                          Module {moduleIndex + 1}: {module.title}
+                {modules.map((module: any, moduleIndex: number) => {
+                  const moduleUnlocked = isModuleUnlocked(moduleIndex);
+                  const moduleData = allModulesData.find((md: any) => md.moduleId === module.id);
+                  const completedCount = moduleData?.completedLessons || 0;
+                  const totalCount = moduleData?.totalLessons || 0;
+                  
+                  return (
+                    <div key={module.id} className="space-y-2">
+                      <Button
+                        variant={selectedModuleId === module.id ? "default" : "ghost"}
+                        className={`w-full justify-start h-auto p-3 ${
+                          !moduleUnlocked ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => moduleUnlocked && setSelectedModuleId(module.id)}
+                        disabled={!moduleUnlocked}
+                        data-testid={`module-${module.id}`}
+                      >
+                        <div className="flex items-center w-full">
+                          <div className="flex items-center mr-2 min-w-fit">
+                            {completedCount === totalCount && totalCount > 0 ? (
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            ) : moduleUnlocked ? (
+                              <Unlock className="h-4 w-4 text-blue-600" />
+                            ) : (
+                              <Lock className="h-4 w-4 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="text-left flex-1">
+                            <div className="font-medium text-sm">
+                              Module {moduleIndex + 1}: {module.title}
+                            </div>
+                            <div className="text-xs opacity-60 flex items-center justify-between">
+                              <span>{module.durationHours} hours</span>
+                              {totalCount > 0 && (
+                                <span>{completedCount}/{totalCount} lessons</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs opacity-60">
-                          {module.durationHours} hours
-                        </div>
-                      </div>
-                    </Button>
+                      </Button>
                     
-                    {selectedModuleId === module.id && (
-                      <div className="ml-4 space-y-1">
-                        {lessons.map((lesson: any, lessonIndex: number) => {
-                          const unlocked = isLessonUnlocked(lessonIndex);
-                          const completed = isLessonCompleted(lessonIndex);
-                          const isSelected = selectedLessonId === lesson.id;
-                          
-                          return (
-                            <Button
-                              key={lesson.id}
-                              variant={isSelected ? "secondary" : "ghost"}
-                              size="sm"
-                              className={`w-full justify-start text-xs h-auto py-2 px-3 ${
-                                !unlocked ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                              onClick={() => unlocked && setSelectedLessonId(lesson.id)}
-                              disabled={!unlocked}
-                              data-testid={`lesson-${lesson.id}`}
-                            >
-                              <div className="flex items-center w-full">
-                                <div className="flex items-center mr-2 min-w-fit">
-                                  {completed ? (
-                                    <CheckCircle className="h-3 w-3 text-green-600" />
-                                  ) : unlocked ? (
-                                    <Unlock className="h-3 w-3 text-blue-600" />
-                                  ) : (
-                                    <Lock className="h-3 w-3 text-gray-400" />
-                                  )}
-                                </div>
-                                <div className="flex-1 text-left min-w-0">
-                                  <div className="truncate">
-                                    {lessonIndex + 1}. {lesson.title}
+                      {selectedModuleId === module.id && moduleUnlocked && (
+                        <div className="ml-4 space-y-1">
+                          {lessons.map((lesson: any, lessonIndex: number) => {
+                            const unlocked = isLessonUnlocked(lessonIndex);
+                            const completed = isLessonCompleted(lessonIndex);
+                            const isSelected = selectedLessonId === lesson.id;
+                            
+                            return (
+                              <Button
+                                key={lesson.id}
+                                variant={isSelected ? "secondary" : "ghost"}
+                                size="sm"
+                                className={`w-full justify-start text-xs h-auto py-2 px-3 ${
+                                  !unlocked ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                                onClick={() => unlocked && setSelectedLessonId(lesson.id)}
+                                disabled={!unlocked}
+                                data-testid={`lesson-${lesson.id}`}
+                              >
+                                <div className="flex items-center w-full">
+                                  <div className="flex items-center mr-2 min-w-fit">
+                                    {completed ? (
+                                      <CheckCircle className="h-3 w-3 text-green-600" />
+                                    ) : unlocked ? (
+                                      <Unlock className="h-3 w-3 text-blue-600" />
+                                    ) : (
+                                      <Lock className="h-3 w-3 text-gray-400" />
+                                    )}
                                   </div>
-                                  {lesson.durationMinutes && (
-                                    <div className="text-xs opacity-60 mt-1">
-                                      {lesson.durationMinutes} min
+                                  <div className="flex-1 text-left min-w-0">
+                                    <div className="truncate">
+                                      {lessonIndex + 1}. {lesson.title}
                                     </div>
-                                  )}
+                                    {lesson.durationMinutes && (
+                                      <div className="text-xs opacity-60 mt-1">
+                                        {lesson.durationMinutes} min
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </CardContent>
             </Card>
           </div>
