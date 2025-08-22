@@ -145,9 +145,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Work Experience routes
   app.get("/api/work-experience/:userId", async (req, res) => {
     try {
+      console.log(`💼 GET /api/work-experience/${req.params.userId} - Starting request`);
       const userId = parseInt(req.params.userId);
       const experiences = await storage.getWorkExperience(userId.toString());
-      res.json(experiences);
+      
+      // Normalize field names to support both database (company/position) and frontend (organization/roleOrPosition) expectations
+      const normalizedExperiences = experiences.map((exp: any) => ({
+        ...exp,
+        // Add frontend-expected field names if they don't exist
+        organization: exp.organization || exp.company,
+        roleOrPosition: exp.roleOrPosition || exp.position,
+        // Keep original field names for backward compatibility
+        company: exp.company || exp.organization,
+        position: exp.position || exp.roleOrPosition,
+      }));
+      
+      console.log(`💼 GET /api/work-experience/${req.params.userId} - Retrieved ${normalizedExperiences.length} records`);
+      res.json(normalizedExperiences);
     } catch (error) {
       console.error("Error fetching work experience:", error);
 
