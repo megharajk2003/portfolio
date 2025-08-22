@@ -1146,10 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Courses
   app.get("/api/courses", async (req, res) => {
     try {
-      console.log("🔍 Backend Debug: GET /api/courses called");
       const courses = await storage.getCourses();
-      console.log("🔍 Backend Debug: Found", courses.length, "courses");
-      console.log("🔍 Backend Debug: First course:", courses[0]);
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -1183,10 +1180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {
-      console.log("🔍 Backend Debug: GET /api/categories called");
       const categories = await storage.getCategories();
-      console.log("🔍 Backend Debug: Found", categories.length, "categories");
-      console.log("🔍 Backend Debug: Categories:", categories);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);

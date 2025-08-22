@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
@@ -16,7 +18,7 @@ import {
   ChevronRight, Calendar, Award, ExternalLink
 } from "lucide-react";
 
-const CURRENT_USER_ID = "user-1";
+const CURRENT_USER_ID = 1; // Changed to number to match database schema
 
 const categoryIcons = {
   "AI & Machine Learning": { icon: Cpu, color: "text-purple-600" },
@@ -53,6 +55,9 @@ export default function Learning() {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   // Fetch real data from the API
   const { data: courses = [], isLoading: coursesLoading, error: coursesError } = useQuery<any[]>({
     queryKey: ["/api/courses"],
@@ -62,15 +67,6 @@ export default function Learning() {
     queryKey: ["/api/categories"],
   });
 
-  // Debug logging
-  console.log("🔍 Frontend Debug:");
-  console.log("Courses loading:", coursesLoading);
-  console.log("Courses error:", coursesError);
-  console.log("Courses data:", courses);
-  console.log("Courses length:", courses.length);
-  console.log("Categories loading:", categoriesLoading);
-  console.log("Categories error:", categoriesError);
-  console.log("Categories data:", categories);
 
   const { data: modules = [] } = useQuery({
     queryKey: ["/api/learning-modules"],
@@ -79,6 +75,51 @@ export default function Learning() {
   const { data: userProgress = [] } = useQuery({
     queryKey: ["/api/user-progress", CURRENT_USER_ID],
   });
+
+  // Get user enrollments to check enrollment status
+  const { data: userEnrollments = [] } = useQuery<any[]>({
+    queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
+  });
+
+  // Enrollment mutation
+  const enrollMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      return apiRequest(`/api/enrollments`, {
+        method: "POST",
+        body: {
+          userId: CURRENT_USER_ID,
+          courseId: courseId,
+          enrollmentDate: new Date().toISOString(),
+          status: "active"
+        }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Course Enrolled!",
+        description: "You have successfully enrolled in this course.",
+      });
+      // Invalidate enrollments to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"] });
+    },
+    onError: () => {
+      toast({
+        title: "Enrollment Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Check if user is enrolled in a course
+  const isEnrolled = (courseId: string) => {
+    return userEnrollments.some((enrollment: any) => enrollment.courseId === courseId);
+  };
+
+  // Handle enrollment
+  const handleEnrollment = (courseId: string) => {
+    enrollMutation.mutate(courseId);
+  };
 
   const handleLevelChange = (level: string, checked: boolean) => {
     setSelectedLevels(prev => 
@@ -106,11 +147,6 @@ export default function Learning() {
     return matchesSearch && matchesLevel;
   });
 
-  console.log("🔍 Filtering Debug:");
-  console.log("Raw courses:", courses);
-  console.log("Filtered courses:", filteredCourses);
-  console.log("Search query:", searchQuery);
-  console.log("Selected levels:", selectedLevels);
 
   // Update category counts dynamically
   const categoriesWithCounts = categories.map((category: any) => {
@@ -303,7 +339,6 @@ export default function Learning() {
 
             {/* Course Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {console.log("🔍 Rendering course grid. Filtered courses length:", filteredCourses.length)}
               {filteredCourses.length === 0 && (
                 <div className="col-span-full text-center py-8">
                   <p className="text-gray-500">No courses found</p>
@@ -364,12 +399,25 @@ export default function Learning() {
                       </Badge>
                     </div>
 
-                    <Link href={`/course/${course.id}`}>
-                      <Button className="w-full" variant="outline">
-                        View Course
-                        <ExternalLink className="ml-2 h-4 w-4" />
+                    {isEnrolled(course.id) ? (
+                      <Link href={`/course/${course.id}/learn`}>
+                        <Button className="w-full" data-testid={`button-start-learning-${course.id}`}>
+                          Start Learning
+                          <Play className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button 
+                        className="w-full" 
+                        variant={course.isFree ? "default" : "outline"}
+                        onClick={() => handleEnrollment(course.id)}
+                        disabled={enrollMutation.isPending}
+                        data-testid={`button-enroll-${course.id}`}
+                      >
+                        {enrollMutation.isPending ? "Enrolling..." : course.isFree ? "Enroll for Free" : `Enroll for $${course.price}`}
+                        {!enrollMutation.isPending && <ExternalLink className="ml-2 h-4 w-4" />}
                       </Button>
-                    </Link>
+                    )}
                   </CardContent>
                 </Card>
               ))}

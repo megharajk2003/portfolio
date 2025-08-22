@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import Portfolio from "@/pages/portfolio";
 import Learning from "@/pages/learning";
 import CourseDetail from "@/pages/course-detail";
+import CourseLearn from "@/pages/course-learn";
 import ModuleDetail from "@/pages/module-detail";
 import EditPortfolio from "@/pages/edit-portfolio";
 import PublicPortfolio from "@/pages/public-portfolio";
@@ -90,6 +91,7 @@ function Router() {
           <Route path="/profile" component={Profile} />
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/learning" component={Learning} />
+          <Route path="/course/:courseId/learn" component={CourseLearn} />
           <Route path="/course/:id" component={CourseDetail} />
           <Route path="/module/:id" component={ModuleDetail} />
           <Route path="/edit-portfolio" component={EditPortfolio} />
