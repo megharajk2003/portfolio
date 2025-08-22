@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { AICareerService } from "./ai-service";
 import {
   insertUserSchema,
   insertProfileSchema,
@@ -21,6 +22,10 @@ import {
   insertOrganizationSchema,
   insertVolunteerSchema,
   insertWorkExperienceTableSchema,
+  insertCareerAdvisorySchema,
+  insertCareerTimelineSchema,
+  insertGeneratedResumeSchema,
+  insertChatSessionSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1534,6 +1539,320 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(settings);
     } catch (error) {
       res.status(500).json({ message: "Failed to update section settings" });
+    }
+  });
+
+  // AI Career Features Routes
+  
+  // Personal Career Advisor
+  app.get("/api/career-advice/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const advisories = await storage.getCareerAdvisories(userId);
+      res.json(advisories);
+    } catch (error) {
+      console.error("Error fetching career advisories:", error);
+      res.status(500).json({ message: "Failed to fetch career advisories" });
+    }
+  });
+
+  app.post("/api/career-advice", async (req, res) => {
+    try {
+      const { userId, targetRole, careerGoals, currentLevel } = req.body;
+      
+      // Fetch user's profile data for AI analysis
+      const profile = await storage.getProfile(userId);
+      const workExperience = await storage.getWorkExperience(userId);
+      const education = await storage.getEducation(userId);
+      const skills = await storage.getSkills(userId);
+      const projects = await storage.getProjects(userId);
+      const certifications = await storage.getCertifications(userId);
+      
+      const userData = {
+        personalDetails: profile?.personalDetails,
+        workExperience,
+        education,
+        skills,
+        projects,
+        certifications,
+      };
+
+      // Generate AI advice
+      const aiAdvice = await AICareerService.generateCareerAdvice(userData, targetRole);
+      
+      // Save to database
+      const advisoryData = {
+        userId: parseInt(userId),
+        advice: aiAdvice.advice,
+        recommendations: aiAdvice.recommendations,
+        skillGaps: aiAdvice.skillGaps,
+        nextSteps: aiAdvice.nextSteps,
+        currentLevel: aiAdvice.currentLevel,
+        careerGoals,
+        targetRole,
+      };
+      
+      const advisory = await storage.createCareerAdvisory(advisoryData);
+      res.json(advisory);
+    } catch (error) {
+      console.error("Error generating career advice:", error);
+      res.status(500).json({ message: "Failed to generate career advice" });
+    }
+  });
+
+  // Career Timeline
+  app.get("/api/career-timeline/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const timelines = await storage.getCareerTimelines(userId);
+      res.json(timelines);
+    } catch (error) {
+      console.error("Error fetching career timelines:", error);
+      res.status(500).json({ message: "Failed to fetch career timelines" });
+    }
+  });
+
+  app.post("/api/career-timeline", async (req, res) => {
+    try {
+      const { userId, targetRole } = req.body;
+      
+      // Fetch user data for AI analysis
+      const profile = await storage.getProfile(userId);
+      const workExperience = await storage.getWorkExperience(userId);
+      const education = await storage.getEducation(userId);
+      const skills = await storage.getSkills(userId);
+      const projects = await storage.getProjects(userId);
+      const userProgress = await storage.getUserProgress(parseInt(userId));
+      
+      const userData = {
+        personalDetails: profile?.personalDetails,
+        workExperience,
+        education,
+        skills,
+        projects,
+        learningProgress: userProgress,
+      };
+
+      // Generate AI timeline
+      const aiTimeline = await AICareerService.generateCareerTimeline(userData, targetRole);
+      
+      // Save to database
+      const timelineData = {
+        userId: parseInt(userId),
+        title: aiTimeline.title,
+        timeline: aiTimeline.timeline,
+        targetRole,
+        estimatedDuration: aiTimeline.estimatedDuration,
+      };
+      
+      const timeline = await storage.createCareerTimeline(timelineData);
+      res.json(timeline);
+    } catch (error) {
+      console.error("Error generating career timeline:", error);
+      res.status(500).json({ message: "Failed to generate career timeline" });
+    }
+  });
+
+  app.delete("/api/career-timeline/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteCareerTimeline(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Career timeline not found" });
+      }
+      res.json({ message: "Career timeline deleted" });
+    } catch (error) {
+      console.error("Error deleting career timeline:", error);
+      res.status(500).json({ message: "Failed to delete career timeline" });
+    }
+  });
+
+  // Resume Generator
+  app.get("/api/resumes/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const resumes = await storage.getGeneratedResumes(userId);
+      res.json(resumes);
+    } catch (error) {
+      console.error("Error fetching resumes:", error);
+      res.status(500).json({ message: "Failed to fetch resumes" });
+    }
+  });
+
+  app.post("/api/resumes", async (req, res) => {
+    try {
+      const { userId, title, targetRole, template } = req.body;
+      
+      // Fetch user data for AI analysis
+      const profile = await storage.getProfile(userId);
+      const workExperience = await storage.getWorkExperience(userId);
+      const education = await storage.getEducation(userId);
+      const skills = await storage.getSkills(userId);
+      const projects = await storage.getProjects(userId);
+      const certifications = await storage.getCertifications(userId);
+      
+      const userData = {
+        personalDetails: profile?.personalDetails,
+        contactDetails: profile?.contactDetails,
+        workExperience,
+        education,
+        skills,
+        projects,
+        certifications,
+      };
+
+      // Generate AI resume
+      const aiResume = await AICareerService.generateResume(userData, targetRole);
+      
+      // Save to database
+      const resumeData = {
+        userId: parseInt(userId),
+        title,
+        content: aiResume,
+        targetRole,
+        template: template || 'professional',
+      };
+      
+      const resume = await storage.createGeneratedResume(resumeData);
+      res.json(resume);
+    } catch (error) {
+      console.error("Error generating resume:", error);
+      res.status(500).json({ message: "Failed to generate resume" });
+    }
+  });
+
+  app.patch("/api/resumes/:id", async (req, res) => {
+    try {
+      const resume = await storage.updateGeneratedResume(req.params.id, req.body);
+      if (!resume) {
+        return res.status(404).json({ message: "Resume not found" });
+      }
+      res.json(resume);
+    } catch (error) {
+      console.error("Error updating resume:", error);
+      res.status(500).json({ message: "Failed to update resume" });
+    }
+  });
+
+  app.delete("/api/resumes/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteGeneratedResume(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Resume not found" });
+      }
+      res.json({ message: "Resume deleted" });
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      res.status(500).json({ message: "Failed to delete resume" });
+    }
+  });
+
+  // AI Chat Assistant
+  app.get("/api/chat-sessions/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const sessions = await storage.getChatSessions(userId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+      res.status(500).json({ message: "Failed to fetch chat sessions" });
+    }
+  });
+
+  app.get("/api/chat-sessions/session/:sessionId", async (req, res) => {
+    try {
+      const session = await storage.getChatSession(req.params.sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Chat session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching chat session:", error);
+      res.status(500).json({ message: "Failed to fetch chat session" });
+    }
+  });
+
+  app.post("/api/chat-sessions", async (req, res) => {
+    try {
+      const { userId, title } = req.body;
+      const sessionData = {
+        userId: parseInt(userId),
+        title: title || 'New Career Chat',
+        messages: [],
+        isActive: true,
+      };
+      
+      const session = await storage.createChatSession(sessionData);
+      res.json(session);
+    } catch (error) {
+      console.error("Error creating chat session:", error);
+      res.status(500).json({ message: "Failed to create chat session" });
+    }
+  });
+
+  app.post("/api/chat-sessions/:sessionId/message", async (req, res) => {
+    try {
+      const { message } = req.body;
+      const sessionId = req.params.sessionId;
+      
+      // Get existing session
+      const session = await storage.getChatSession(sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Chat session not found" });
+      }
+
+      // Add user message
+      const updatedMessages = [
+        ...(session.messages || []),
+        {
+          role: 'user' as const,
+          content: message,
+          timestamp: new Date().toISOString(),
+        }
+      ];
+
+      // Get user context for AI
+      const profile = await storage.getProfile(session.userId.toString());
+      const workExperience = await storage.getWorkExperience(session.userId.toString());
+      const education = await storage.getEducation(session.userId.toString());
+      const skills = await storage.getSkills(session.userId.toString());
+      const projects = await storage.getProjects(session.userId.toString());
+      const userProgress = await storage.getUserProgress(session.userId);
+      
+      const userContext = {
+        personalDetails: profile?.personalDetails,
+        workExperience,
+        education,
+        skills,
+        projects,
+        learningProgress: userProgress,
+      };
+
+      // Generate AI response
+      const aiResponse = await AICareerService.generateChatResponse(
+        updatedMessages.map(m => ({ role: m.role, content: m.content })),
+        userContext
+      );
+
+      // Add AI response
+      const finalMessages = [
+        ...updatedMessages,
+        {
+          role: 'assistant' as const,
+          content: aiResponse,
+          timestamp: new Date().toISOString(),
+        }
+      ];
+
+      // Update session
+      const updatedSession = await storage.updateChatSession(sessionId, {
+        messages: finalMessages,
+        updatedAt: new Date(),
+      });
+
+      res.json(updatedSession);
+    } catch (error) {
+      console.error("Error processing chat message:", error);
+      res.status(500).json({ message: "Failed to process message" });
     }
   });
 

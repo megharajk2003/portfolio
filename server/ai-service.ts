@@ -1,0 +1,254 @@
+import OpenAI from "openai";
+
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export interface UserProfileData {
+  personalDetails?: any;
+  contactDetails?: any;
+  education?: any[];
+  workExperience?: any[];
+  skills?: any[];
+  projects?: any[];
+  certifications?: any[];
+  achievements?: any[];
+  learningProgress?: any;
+}
+
+export class AICareerService {
+  
+  static async generateCareerAdvice(userData: UserProfileData, targetRole?: string): Promise<{
+    advice: string;
+    recommendations: string[];
+    skillGaps: string[];
+    nextSteps: string[];
+    currentLevel: string;
+  }> {
+    try {
+      const prompt = `
+        Analyze this user's career profile and provide personalized career advice.
+        
+        User Profile:
+        - Personal Details: ${JSON.stringify(userData.personalDetails)}
+        - Work Experience: ${JSON.stringify(userData.workExperience)}
+        - Education: ${JSON.stringify(userData.education)}
+        - Skills: ${JSON.stringify(userData.skills)}
+        - Projects: ${JSON.stringify(userData.projects)}
+        - Certifications: ${JSON.stringify(userData.certifications)}
+        ${targetRole ? `- Target Role: ${targetRole}` : ''}
+        
+        Provide comprehensive career advice including:
+        1. Overall career advice (2-3 paragraphs)
+        2. Specific recommendations (3-5 items)
+        3. Skill gaps to address (if target role provided)
+        4. Next actionable steps (3-5 items)
+        5. Current career level assessment (entry/mid/senior/executive)
+        
+        Respond with JSON in this format:
+        {
+          "advice": "detailed career advice text",
+          "recommendations": ["recommendation 1", "recommendation 2"],
+          "skillGaps": ["skill gap 1", "skill gap 2"],
+          "nextSteps": ["next step 1", "next step 2"],
+          "currentLevel": "entry|mid|senior|executive"
+        }
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      });
+
+      return JSON.parse(response.choices[0].message.content || '{}');
+    } catch (error) {
+      console.error('Error generating career advice:', error);
+      throw new Error('Failed to generate career advice');
+    }
+  }
+
+  static async generateCareerTimeline(userData: UserProfileData, targetRole: string): Promise<{
+    title: string;
+    timeline: Array<{
+      phase: string;
+      duration: string;
+      milestones: string[];
+      skills: string[];
+      description: string;
+    }>;
+    estimatedDuration: string;
+  }> {
+    try {
+      const prompt = `
+        Create a detailed career progression timeline for this user to reach their target role.
+        
+        Current Profile:
+        - Work Experience: ${JSON.stringify(userData.workExperience)}
+        - Education: ${JSON.stringify(userData.education)}
+        - Skills: ${JSON.stringify(userData.skills)}
+        - Projects: ${JSON.stringify(userData.projects)}
+        - Learning Progress: ${JSON.stringify(userData.learningProgress)}
+        
+        Target Role: ${targetRole}
+        
+        Create a phased timeline with:
+        1. Timeline title
+        2. 3-5 career phases from current state to target role
+        3. Each phase should have: phase name, duration, key milestones, skills to develop, description
+        4. Total estimated duration
+        
+        Respond with JSON in this format:
+        {
+          "title": "Career Path to [Target Role]",
+          "timeline": [
+            {
+              "phase": "Phase 1: Foundation Building",
+              "duration": "6-12 months",
+              "milestones": ["milestone 1", "milestone 2"],
+              "skills": ["skill 1", "skill 2"],
+              "description": "detailed phase description"
+            }
+          ],
+          "estimatedDuration": "2-3 years"
+        }
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      });
+
+      return JSON.parse(response.choices[0].message.content || '{}');
+    } catch (error) {
+      console.error('Error generating career timeline:', error);
+      throw new Error('Failed to generate career timeline');
+    }
+  }
+
+  static async generateResume(userData: UserProfileData, targetRole?: string): Promise<{
+    personalInfo: any;
+    summary: string;
+    experience: any[];
+    education: any[];
+    skills: any[];
+    projects: any[];
+    certifications: any[];
+  }> {
+    try {
+      const prompt = `
+        Generate a professional resume based on this user's profile data.
+        
+        User Data:
+        - Personal Details: ${JSON.stringify(userData.personalDetails)}
+        - Contact Details: ${JSON.stringify(userData.contactDetails)}
+        - Work Experience: ${JSON.stringify(userData.workExperience)}
+        - Education: ${JSON.stringify(userData.education)}
+        - Skills: ${JSON.stringify(userData.skills)}
+        - Projects: ${JSON.stringify(userData.projects)}
+        - Certifications: ${JSON.stringify(userData.certifications)}
+        ${targetRole ? `- Target Role: ${targetRole}` : ''}
+        
+        Create a well-structured resume with:
+        1. Personal information section
+        2. Professional summary (2-3 sentences tailored to target role if provided)
+        3. Organized work experience with bullet points
+        4. Education section
+        5. Skills categorized properly
+        6. Notable projects with descriptions
+        7. Relevant certifications
+        
+        Respond with JSON in this format:
+        {
+          "personalInfo": {
+            "name": "Full Name",
+            "email": "email",
+            "phone": "phone",
+            "location": "location",
+            "linkedin": "linkedin",
+            "website": "website"
+          },
+          "summary": "Professional summary text",
+          "experience": [
+            {
+              "company": "Company Name",
+              "position": "Job Title",
+              "duration": "Start - End",
+              "location": "Location",
+              "responsibilities": ["responsibility 1", "responsibility 2"]
+            }
+          ],
+          "education": [
+            {
+              "institution": "School Name",
+              "degree": "Degree",
+              "year": "Year",
+              "grade": "Grade"
+            }
+          ],
+          "skills": [
+            {
+              "category": "Technical Skills",
+              "items": ["skill1", "skill2"]
+            }
+          ],
+          "projects": [
+            {
+              "title": "Project Name",
+              "description": "Project description",
+              "technologies": ["tech1", "tech2"],
+              "url": "project url if available"
+            }
+          ],
+          "certifications": [
+            {
+              "title": "Certification Name",
+              "organization": "Issuing Organization",
+              "year": "Year"
+            }
+          ]
+        }
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      });
+
+      return JSON.parse(response.choices[0].message.content || '{}');
+    } catch (error) {
+      console.error('Error generating resume:', error);
+      throw new Error('Failed to generate resume');
+    }
+  }
+
+  static async generateChatResponse(messages: Array<{ role: string; content: string }>, userContext?: UserProfileData): Promise<string> {
+    try {
+      const systemPrompt = `You are a professional career advisor AI assistant. Help users with career guidance, job search advice, skill development, and professional growth.
+      
+      ${userContext ? `User Context: 
+      - Work Experience: ${JSON.stringify(userContext.workExperience)}
+      - Education: ${JSON.stringify(userContext.education)}
+      - Skills: ${JSON.stringify(userContext.skills)}
+      - Projects: ${JSON.stringify(userContext.projects)}
+      - Learning Progress: ${JSON.stringify(userContext.learningProgress)}
+      ` : ''}
+      
+      Provide helpful, actionable career advice. Be encouraging, professional, and specific when possible.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages.map(msg => ({ role: msg.role as "user" | "assistant", content: msg.content }))
+        ],
+      });
+
+      return response.choices[0].message.content || 'I apologize, but I could not generate a response at this time.';
+    } catch (error) {
+      console.error('Error generating chat response:', error);
+      throw new Error('Failed to generate chat response');
+    }
+  }
+}

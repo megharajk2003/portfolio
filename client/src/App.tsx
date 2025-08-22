@@ -21,6 +21,11 @@ import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import Home from "./pages/dashboard";
+import CareerTools from "@/pages/career-tools";
+import CareerAdvisor from "@/pages/career-advisor";
+import CareerTimeline from "@/pages/career-timeline";
+import ResumeGenerator from "@/pages/resume-generator";
+import CareerChat from "@/pages/career-chat";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -45,6 +50,11 @@ function Router() {
       "/edit-portfolio",
       "/course",
       "/module",
+      "/career-tools",
+      "/career-advisor",
+      "/career-timeline",
+      "/resume-generator",
+      "/career-chat",
     ];
     const isProtectedRoute = protectedRoutes.some((route) =>
       location.startsWith(route)
@@ -96,6 +106,11 @@ function Router() {
           <Route path="/module/:id" component={ModuleDetail} />
           <Route path="/edit-portfolio" component={EditPortfolio} />
           <Route path="/portfolio/:username" component={PublicPortfolio} />
+          <Route path="/career-tools" component={CareerTools} />
+          <Route path="/career-advisor" component={CareerAdvisor} />
+          <Route path="/career-timeline" component={CareerTimeline} />
+          <Route path="/resume-generator" component={ResumeGenerator} />
+          <Route path="/career-chat" component={CareerChat} />
         </>
       ) : (
         <>

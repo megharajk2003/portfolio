@@ -13,12 +13,14 @@ import {
   ExternalLink,
   Flame,
   X,
+  Sparkles,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Learning", href: "/learning", icon: BookOpen },
+  { name: "Career Tools", href: "/career-tools", icon: Sparkles },
 ];
 
 interface SidebarProps {

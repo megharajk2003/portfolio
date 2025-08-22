@@ -568,6 +568,95 @@ export const organizations = pgTable("organizations", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// AI Career Features Tables
+export const careerAdvisories = pgTable("career_advisories", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  advice: text("advice").notNull(),
+  recommendations: jsonb("recommendations").$type<string[]>(),
+  careerGoals: text("career_goals"),
+  currentLevel: text("current_level"), // "entry", "mid", "senior", "executive"
+  targetRole: text("target_role"),
+  skillGaps: jsonb("skill_gaps").$type<string[]>(),
+  nextSteps: jsonb("next_steps").$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const careerTimelines = pgTable("career_timelines", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  timeline: jsonb("timeline").$type<{
+    phase: string;
+    duration: string;
+    milestones: string[];
+    skills: string[];
+    description: string;
+  }[]>(),
+  targetRole: text("target_role"),
+  estimatedDuration: text("estimated_duration"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const generatedResumes = pgTable("generated_resumes", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  content: jsonb("content").$type<{
+    personalInfo: any;
+    summary: string;
+    experience: any[];
+    education: any[];
+    skills: any[];
+    projects: any[];
+    certifications: any[];
+  }>(),
+  template: text("template").default("professional"),
+  targetRole: text("target_role"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const chatSessions = pgTable("chat_sessions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  messages: jsonb("messages").$type<{
+    role: "user" | "assistant";
+    content: string;
+    timestamp: string;
+  }[]>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Types for AI Career Features
+export type CareerAdvisory = typeof careerAdvisories.$inferSelect;
+export type InsertCareerAdvisory = typeof careerAdvisories.$inferInsert;
+export type CareerTimeline = typeof careerTimelines.$inferSelect;
+export type InsertCareerTimeline = typeof careerTimelines.$inferInsert;
+export type GeneratedResume = typeof generatedResumes.$inferSelect;
+export type InsertGeneratedResume = typeof generatedResumes.$inferInsert;
+export type ChatSession = typeof chatSessions.$inferSelect;
+export type InsertChatSession = typeof chatSessions.$inferInsert;
+
 // Types for new learning platform tables
 export type Instructor = typeof instructors.$inferSelect;
 export type InsertInstructor = typeof instructors.$inferInsert;
@@ -585,6 +674,12 @@ export type Enrollment = typeof enrollments.$inferSelect;
 export type InsertEnrollment = typeof enrollments.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = typeof reviews.$inferInsert;
+
+// Zod schemas for AI Career Features
+export const insertCareerAdvisorySchema = createInsertSchema(careerAdvisories);
+export const insertCareerTimelineSchema = createInsertSchema(careerTimelines);
+export const insertGeneratedResumeSchema = createInsertSchema(generatedResumes);
+export const insertChatSessionSchema = createInsertSchema(chatSessions);
 
 // Zod schemas for new learning platform
 export const insertCourseSchema = createInsertSchema(courses);

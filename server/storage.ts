@@ -28,6 +28,14 @@ import {
   type InsertReview,
   type LessonProgress,
   type InsertLessonProgress,
+  type CareerAdvisory,
+  type InsertCareerAdvisory,
+  type CareerTimeline,
+  type InsertCareerTimeline,
+  type GeneratedResume,
+  type InsertGeneratedResume,
+  type ChatSession,
+  type InsertChatSession,
   users,
   profiles,
   learningModules,
@@ -50,6 +58,10 @@ import {
   reviews,
   courseCategories,
   lessonProgress,
+  careerAdvisories,
+  careerTimelines,
+  generatedResumes,
+  chatSessions,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte } from "drizzle-orm";
@@ -154,6 +166,24 @@ export interface IStorage {
   createVolunteerExperience(data: any): Promise<any>;
   updateVolunteerExperience(id: string, data: any): Promise<any>;
   deleteVolunteerExperience(id: string): Promise<boolean>;
+
+  // AI Career Features
+  getCareerAdvisories(userId: number): Promise<CareerAdvisory[]>;
+  createCareerAdvisory(data: InsertCareerAdvisory): Promise<CareerAdvisory>;
+  
+  getCareerTimelines(userId: number): Promise<CareerTimeline[]>;
+  createCareerTimeline(data: InsertCareerTimeline): Promise<CareerTimeline>;
+  deleteCareerTimeline(id: string): Promise<boolean>;
+  
+  getGeneratedResumes(userId: number): Promise<GeneratedResume[]>;
+  createGeneratedResume(data: InsertGeneratedResume): Promise<GeneratedResume>;
+  updateGeneratedResume(id: string, data: Partial<InsertGeneratedResume>): Promise<GeneratedResume | undefined>;
+  deleteGeneratedResume(id: string): Promise<boolean>;
+  
+  getChatSessions(userId: number): Promise<ChatSession[]>;
+  getChatSession(id: string): Promise<ChatSession | undefined>;
+  createChatSession(data: InsertChatSession): Promise<ChatSession>;
+  updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession | undefined>;
 
   // New learning platform methods
   getCourses(): Promise<Course[]>;
@@ -1792,6 +1822,243 @@ export class PgStorage implements IStorage {
         completedAt: new Date()
       };
       return await this.createLessonProgress(progressData);
+    }
+  }
+
+  // AI Career Features Implementation
+  async getCareerAdvisories(userId: number): Promise<CareerAdvisory[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`careerAdvisories_${userId}`) || [];
+    }
+    try {
+      const result = await db.select().from(careerAdvisories).where(eq(careerAdvisories.userId, userId));
+      return result;
+    } catch (error) {
+      console.error("Error fetching career advisories:", error);
+      return this.fallbackData.get(`careerAdvisories_${userId}`) || [];
+    }
+  }
+
+  async createCareerAdvisory(data: InsertCareerAdvisory): Promise<CareerAdvisory> {
+    if (!this.isDbConnected) {
+      const id = randomUUID();
+      const advisory = { id, ...data, createdAt: new Date() };
+      const existing = this.fallbackData.get(`careerAdvisories_${data.userId}`) || [];
+      this.fallbackData.set(`careerAdvisories_${data.userId}`, [...existing, advisory]);
+      return advisory as CareerAdvisory;
+    }
+    try {
+      const result = await db.insert(careerAdvisories).values(data).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating career advisory:", error);
+      throw error;
+    }
+  }
+
+  async getCareerTimelines(userId: number): Promise<CareerTimeline[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`careerTimelines_${userId}`) || [];
+    }
+    try {
+      const result = await db.select().from(careerTimelines).where(eq(careerTimelines.userId, userId));
+      return result;
+    } catch (error) {
+      console.error("Error fetching career timelines:", error);
+      return this.fallbackData.get(`careerTimelines_${userId}`) || [];
+    }
+  }
+
+  async createCareerTimeline(data: InsertCareerTimeline): Promise<CareerTimeline> {
+    if (!this.isDbConnected) {
+      const id = randomUUID();
+      const timeline = { id, ...data, createdAt: new Date() };
+      const existing = this.fallbackData.get(`careerTimelines_${data.userId}`) || [];
+      this.fallbackData.set(`careerTimelines_${data.userId}`, [...existing, timeline]);
+      return timeline as CareerTimeline;
+    }
+    try {
+      const result = await db.insert(careerTimelines).values(data).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating career timeline:", error);
+      throw error;
+    }
+  }
+
+  async deleteCareerTimeline(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('careerTimelines_')) {
+          const timelines = this.fallbackData.get(key) || [];
+          const filtered = timelines.filter((t: any) => t.id !== id);
+          this.fallbackData.set(key, filtered);
+        }
+      }
+      return true;
+    }
+    try {
+      await db.delete(careerTimelines).where(eq(careerTimelines.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting career timeline:", error);
+      return false;
+    }
+  }
+
+  async getGeneratedResumes(userId: number): Promise<GeneratedResume[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`generatedResumes_${userId}`) || [];
+    }
+    try {
+      const result = await db.select().from(generatedResumes).where(eq(generatedResumes.userId, userId));
+      return result;
+    } catch (error) {
+      console.error("Error fetching generated resumes:", error);
+      return this.fallbackData.get(`generatedResumes_${userId}`) || [];
+    }
+  }
+
+  async createGeneratedResume(data: InsertGeneratedResume): Promise<GeneratedResume> {
+    if (!this.isDbConnected) {
+      const id = randomUUID();
+      const resume = { id, ...data, createdAt: new Date(), updatedAt: new Date() };
+      const existing = this.fallbackData.get(`generatedResumes_${data.userId}`) || [];
+      this.fallbackData.set(`generatedResumes_${data.userId}`, [...existing, resume]);
+      return resume as GeneratedResume;
+    }
+    try {
+      const result = await db.insert(generatedResumes).values(data).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating generated resume:", error);
+      throw error;
+    }
+  }
+
+  async updateGeneratedResume(id: string, data: Partial<InsertGeneratedResume>): Promise<GeneratedResume | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('generatedResumes_')) {
+          const resumes = this.fallbackData.get(key) || [];
+          const index = resumes.findIndex((r: any) => r.id === id);
+          if (index !== -1) {
+            resumes[index] = { ...resumes[index], ...data, updatedAt: new Date() };
+            this.fallbackData.set(key, resumes);
+            return resumes[index];
+          }
+        }
+      }
+      return undefined;
+    }
+    try {
+      const result = await db
+        .update(generatedResumes)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(generatedResumes.id, id))
+        .returning();
+      return result[0] || undefined;
+    } catch (error) {
+      console.error("Error updating generated resume:", error);
+      return undefined;
+    }
+  }
+
+  async deleteGeneratedResume(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('generatedResumes_')) {
+          const resumes = this.fallbackData.get(key) || [];
+          const filtered = resumes.filter((r: any) => r.id !== id);
+          this.fallbackData.set(key, filtered);
+        }
+      }
+      return true;
+    }
+    try {
+      await db.delete(generatedResumes).where(eq(generatedResumes.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting generated resume:", error);
+      return false;
+    }
+  }
+
+  async getChatSessions(userId: number): Promise<ChatSession[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`chatSessions_${userId}`) || [];
+    }
+    try {
+      const result = await db.select().from(chatSessions).where(eq(chatSessions.userId, userId));
+      return result;
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+      return this.fallbackData.get(`chatSessions_${userId}`) || [];
+    }
+  }
+
+  async getChatSession(id: string): Promise<ChatSession | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('chatSessions_')) {
+          const sessions = this.fallbackData.get(key) || [];
+          const session = sessions.find((s: any) => s.id === id);
+          if (session) return session;
+        }
+      }
+      return undefined;
+    }
+    try {
+      const result = await db.select().from(chatSessions).where(eq(chatSessions.id, id));
+      return result[0] || undefined;
+    } catch (error) {
+      console.error("Error fetching chat session:", error);
+      return undefined;
+    }
+  }
+
+  async createChatSession(data: InsertChatSession): Promise<ChatSession> {
+    if (!this.isDbConnected) {
+      const id = randomUUID();
+      const session = { id, ...data, createdAt: new Date(), updatedAt: new Date() };
+      const existing = this.fallbackData.get(`chatSessions_${data.userId}`) || [];
+      this.fallbackData.set(`chatSessions_${data.userId}`, [...existing, session]);
+      return session as ChatSession;
+    }
+    try {
+      const result = await db.insert(chatSessions).values(data).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating chat session:", error);
+      throw error;
+    }
+  }
+
+  async updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('chatSessions_')) {
+          const sessions = this.fallbackData.get(key) || [];
+          const index = sessions.findIndex((s: any) => s.id === id);
+          if (index !== -1) {
+            sessions[index] = { ...sessions[index], ...data, updatedAt: new Date() };
+            this.fallbackData.set(key, sessions);
+            return sessions[index];
+          }
+        }
+      }
+      return undefined;
+    }
+    try {
+      const result = await db
+        .update(chatSessions)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(chatSessions.id, id))
+        .returning();
+      return result[0] || undefined;
+    } catch (error) {
+      console.error("Error updating chat session:", error);
+      return undefined;
     }
   }
 }
