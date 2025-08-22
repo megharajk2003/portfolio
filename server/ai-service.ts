@@ -1,7 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 // Using Google AI (Gemini) instead of OpenAI
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export interface UserProfileData {
   personalDetails?: any;
@@ -58,27 +58,27 @@ export class AICareerService {
       `;
 
       console.log('🤖 [AI-SERVICE] Sending request to Google AI for career advice');
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
+      const model = ai.getGenerativeModel({ 
+        model: "gemini-1.5-pro",
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: "object",
+            type: SchemaType.OBJECT,
             properties: {
-              advice: { type: "string" },
-              recommendations: { type: "array", items: { type: "string" } },
-              skillGaps: { type: "array", items: { type: "string" } },
-              nextSteps: { type: "array", items: { type: "string" } },
-              currentLevel: { type: "string" },
+              advice: { type: SchemaType.STRING },
+              recommendations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              skillGaps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              nextSteps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              currentLevel: { type: SchemaType.STRING },
             },
             required: ["advice", "recommendations", "skillGaps", "nextSteps", "currentLevel"],
           },
         },
-        contents: prompt,
       });
 
-      console.log('🤖 [AI-SERVICE] Google AI response received:', response.text);
-      const result = JSON.parse(response.text || '{}');
+      const response = await model.generateContent(prompt);
+      console.log('🤖 [AI-SERVICE] Google AI response received:', response.response.text());
+      const result = JSON.parse(response.response.text() || '{}');
       console.log('✅ [AI-SERVICE] Career advice generated successfully:', result);
       return result;
     } catch (error) {
@@ -137,38 +137,38 @@ export class AICareerService {
       `;
 
       console.log('🤖 [AI-SERVICE] Sending timeline request to Google AI');
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
+      const model = ai.getGenerativeModel({ 
+        model: "gemini-1.5-pro",
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: "object",
+            type: SchemaType.OBJECT,
             properties: {
-              title: { type: "string" },
+              title: { type: SchemaType.STRING },
               timeline: {
-                type: "array",
+                type: SchemaType.ARRAY,
                 items: {
-                  type: "object",
+                  type: SchemaType.OBJECT,
                   properties: {
-                    phase: { type: "string" },
-                    duration: { type: "string" },
-                    milestones: { type: "array", items: { type: "string" } },
-                    skills: { type: "array", items: { type: "string" } },
-                    description: { type: "string" },
+                    phase: { type: SchemaType.STRING },
+                    duration: { type: SchemaType.STRING },
+                    milestones: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                    skills: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                    description: { type: SchemaType.STRING },
                   },
                   required: ["phase", "duration", "milestones", "skills", "description"],
                 },
               },
-              estimatedDuration: { type: "string" },
+              estimatedDuration: { type: SchemaType.STRING },
             },
             required: ["title", "timeline", "estimatedDuration"],
           },
         },
-        contents: prompt,
       });
 
-      console.log('🤖 [AI-SERVICE] Timeline Google AI response:', response.text);
-      const result = JSON.parse(response.text || '{}');
+      const response = await model.generateContent(prompt);
+      console.log('🤖 [AI-SERVICE] Timeline Google AI response:', response.response.text());
+      const result = JSON.parse(response.response.text() || '{}');
       console.log('✅ [AI-SERVICE] Timeline generated successfully:', result);
       return result;
     } catch (error) {
@@ -262,39 +262,39 @@ export class AICareerService {
       `;
 
       console.log('🤖 [AI-SERVICE] Sending resume request to Google AI');
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
+      const model = ai.getGenerativeModel({ 
+        model: "gemini-1.5-pro",
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: "object",
+            type: SchemaType.OBJECT,
             properties: {
               personalInfo: {
-                type: "object",
+                type: SchemaType.OBJECT,
                 properties: {
-                  name: { type: "string" },
-                  email: { type: "string" },
-                  phone: { type: "string" },
-                  location: { type: "string" },
-                  linkedin: { type: "string" },
-                  website: { type: "string" },
+                  name: { type: SchemaType.STRING },
+                  email: { type: SchemaType.STRING },
+                  phone: { type: SchemaType.STRING },
+                  location: { type: SchemaType.STRING },
+                  linkedin: { type: SchemaType.STRING },
+                  website: { type: SchemaType.STRING },
                 },
               },
-              summary: { type: "string" },
-              experience: { type: "array" },
-              education: { type: "array" },
-              skills: { type: "array" },
-              projects: { type: "array" },
-              certifications: { type: "array" },
+              summary: { type: SchemaType.STRING },
+              experience: { type: SchemaType.ARRAY },
+              education: { type: SchemaType.ARRAY },
+              skills: { type: SchemaType.ARRAY },
+              projects: { type: SchemaType.ARRAY },
+              certifications: { type: SchemaType.ARRAY },
             },
             required: ["personalInfo", "summary", "experience", "education", "skills", "projects", "certifications"],
           },
         },
-        contents: prompt,
       });
 
-      console.log('🤖 [AI-SERVICE] Resume Google AI response:', response.text);
-      const result = JSON.parse(response.text || '{}');
+      const response = await model.generateContent(prompt);
+      console.log('🤖 [AI-SERVICE] Resume Google AI response:', response.response.text());
+      const result = JSON.parse(response.response.text() || '{}');
       console.log('✅ [AI-SERVICE] Resume generated successfully:', result);
       return result;
     } catch (error) {
@@ -318,21 +318,15 @@ export class AICareerService {
       Provide helpful, actionable career advice. Be encouraging, professional, and specific when possible.`;
 
       console.log('🤖 [AI-SERVICE] Sending chat request to Google AI');
-      const chatHistory = messages.map(msg => ({
-        role: msg.role,
-        parts: [{ text: msg.content }],
-      }));
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        config: {
-          systemInstruction: systemPrompt,
-        },
-        contents: chatHistory,
+      const model = ai.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: systemPrompt,
       });
 
-      console.log('🤖 [AI-SERVICE] Chat Google AI response:', response.text);
-      return response.text || 'I apologize, but I could not generate a response at this time.';
+      const lastMessage = messages[messages.length - 1];
+      const response = await model.generateContent(lastMessage.content);
+      console.log('🤖 [AI-SERVICE] Chat Google AI response:', response.response.text());
+      return response.response.text() || 'I apologize, but I could not generate a response at this time.';
     } catch (error) {
       console.error('❌ [AI-SERVICE] Error generating chat response:', error);
       throw new Error('Failed to generate chat response');

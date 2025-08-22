@@ -1,0 +1,52 @@
+✅ [AI-SERVICE] Timeline generated successfully: {}
+🌐 [SERVER] AI timeline generated, saving to database
+Error creating career timeline: PostgresError: null value in column "title" of relation "career_timelines" violates not-null constraint
+    at ErrorResponse (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:480:6)
+    at Socket.data (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:315:9)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (ca9e31f6-1d9f-437e-8449-673e3b89daec, 1, null, null, senior product manager, null, 2025-08-22 22:37:43.480922).',
+  schema_name: 'public',
+  table_name: 'career_timelines',
+  column_name: 'title',
+  file: 'execMain.c',
+  line: '1988',
+  routine: 'ExecConstraints'
+}
+❌ [SERVER] Error generating career timeline: PostgresError: null value in column "title" of relation "career_timelines" violates not-null constraint
+    at ErrorResponse (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:480:6)
+    at Socket.data (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:315:9)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (ca9e31f6-1d9f-437e-8449-673e3b89daec, 1, null, null, senior product manager, null, 2025-08-22 22:37:43.480922).',
+  schema_name: 'public',
+  table_name: 'career_timelines',
+  column_name: 'title',
+  file: 'execMain.c',
+  line: '1988',
+  routine: 'ExecConstraints'
+}
+❌ [SERVER] Error stack: PostgresError: null value in column "title" of relation "career_timelines" violates not-null constraint        
+    at ErrorResponse (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:480:6)
+    at Socket.data (file:///D:/react%20project/SkillStream/node_modules/postgres/src/connection.js:315:9)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+10:37:43 PM [express] POST /api/career-timeline 500 in 3173ms :: {"message":"Failed to generate caree…
