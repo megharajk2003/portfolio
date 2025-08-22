@@ -1,19 +1,36 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   BookOpen, Play, Clock, ChevronLeft, ChevronRight, 
-  CheckCircle, Circle, ArrowLeft
+  CheckCircle, Circle, ArrowLeft, Lock, Unlock
 } from "lucide-react";
+
+// API request helper
+const apiRequest = async (url: string, method = "GET", body?: any) => {
+  const response = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    ...(body && { body: JSON.stringify(body) }),
+  });
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return response.json();
+};
 
 export default function CourseLearn() {
   const { courseId } = useParams();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch course data
   const { data: course } = useQuery<any>({
@@ -31,6 +48,12 @@ export default function CourseLearn() {
     enabled: !!selectedModuleId,
   });
 
+  // Fetch lesson progress for current user and module
+  const { data: lessonProgress = [] } = useQuery<any[]>({
+    queryKey: ["/api/lesson-progress", user?.id, selectedModuleId],
+    enabled: !!user && !!selectedModuleId,
+  });
+
   // Auto-select first module and lesson
   React.useEffect(() => {
     if (modules.length > 0 && !selectedModuleId) {
@@ -44,12 +67,34 @@ export default function CourseLearn() {
     }
   }, [lessons, selectedLessonId]);
 
+  // Helper functions for lesson progress and locking
+  const getLessonProgress = (lessonIndex: number) => {
+    return lessonProgress.find((p: any) => p.lessonIndex === lessonIndex);
+  };
+
+  const isLessonUnlocked = (lessonIndex: number) => {
+    // First lesson is always unlocked
+    if (lessonIndex === 0) return true;
+    
+    // Other lessons unlock when previous lesson is completed
+    const previousProgress = getLessonProgress(lessonIndex - 1);
+    return previousProgress?.isCompleted || false;
+  };
+
+  const isLessonCompleted = (lessonIndex: number) => {
+    const progress = getLessonProgress(lessonIndex);
+    return progress?.isCompleted || false;
+  };
+
   const selectedLesson = lessons.find((lesson: any) => lesson.id === selectedLessonId);
   const currentLessonIndex = lessons.findIndex((lesson: any) => lesson.id === selectedLessonId);
 
   const goToNextLesson = () => {
     if (currentLessonIndex < lessons.length - 1) {
-      setSelectedLessonId(lessons[currentLessonIndex + 1].id);
+      const nextIndex = currentLessonIndex + 1;
+      if (isLessonUnlocked(nextIndex)) {
+        setSelectedLessonId(lessons[nextIndex].id);
+      }
     }
   };
 
@@ -58,6 +103,31 @@ export default function CourseLearn() {
       setSelectedLessonId(lessons[currentLessonIndex - 1].id);
     }
   };
+
+  // Lesson completion mutation
+  const completeLessonMutation = useMutation({
+    mutationFn: async (lessonIndex: number) => {
+      return apiRequest(`/api/lesson-progress/complete`, "POST", {
+        userId: user?.id,
+        moduleId: selectedModuleId,
+        lessonIndex,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/lesson-progress"] });
+      toast({
+        title: "Lesson Completed!",
+        description: "Great job! You've unlocked the next lesson.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to mark lesson as complete. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   if (!course) {
     return <div className="p-6">Loading course...</div>;
@@ -123,19 +193,47 @@ export default function CourseLearn() {
                     
                     {selectedModuleId === module.id && (
                       <div className="ml-4 space-y-1">
-                        {lessons.map((lesson: any, lessonIndex: number) => (
-                          <Button
-                            key={lesson.id}
-                            variant={selectedLessonId === lesson.id ? "secondary" : "ghost"}
-                            size="sm"
-                            className="w-full justify-start text-xs"
-                            onClick={() => setSelectedLessonId(lesson.id)}
-                            data-testid={`lesson-${lesson.id}`}
-                          >
-                            <Circle className="mr-2 h-3 w-3" />
-                            {lessonIndex + 1}. {lesson.title}
-                          </Button>
-                        ))}
+                        {lessons.map((lesson: any, lessonIndex: number) => {
+                          const unlocked = isLessonUnlocked(lessonIndex);
+                          const completed = isLessonCompleted(lessonIndex);
+                          const isSelected = selectedLessonId === lesson.id;
+                          
+                          return (
+                            <Button
+                              key={lesson.id}
+                              variant={isSelected ? "secondary" : "ghost"}
+                              size="sm"
+                              className={`w-full justify-start text-xs h-auto py-2 px-3 ${
+                                !unlocked ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
+                              onClick={() => unlocked && setSelectedLessonId(lesson.id)}
+                              disabled={!unlocked}
+                              data-testid={`lesson-${lesson.id}`}
+                            >
+                              <div className="flex items-center w-full">
+                                <div className="flex items-center mr-2 min-w-fit">
+                                  {completed ? (
+                                    <CheckCircle className="h-3 w-3 text-green-600" />
+                                  ) : unlocked ? (
+                                    <Unlock className="h-3 w-3 text-blue-600" />
+                                  ) : (
+                                    <Lock className="h-3 w-3 text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="flex-1 text-left min-w-0">
+                                  <div className="truncate">
+                                    {lessonIndex + 1}. {lesson.title}
+                                  </div>
+                                  {lesson.durationMinutes && (
+                                    <div className="text-xs opacity-60 mt-1">
+                                      {lesson.durationMinutes} min
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </Button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -162,9 +260,18 @@ export default function CourseLearn() {
                     </Badge>
                   </div>
                   <Progress 
-                    value={(currentLessonIndex + 1) / lessons.length * 100} 
+                    value={lessonProgress.filter((p: any) => p.isCompleted).length / lessons.length * 100} 
                     className="mt-2"
                   />
+                  <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                    <span>Progress: {lessonProgress.filter((p: any) => p.isCompleted).length} of {lessons.length} lessons completed</span>
+                    {isLessonCompleted(currentLessonIndex) && (
+                      <Badge variant="secondary" className="text-green-700">
+                        <CheckCircle className="mr-1 h-3 w-3" />
+                        Completed
+                      </Badge>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Video Player */}
@@ -192,6 +299,21 @@ export default function CourseLearn() {
                     </div>
                   </div>
 
+                  {/* Lesson Completion */}
+                  {!isLessonCompleted(currentLessonIndex) && (
+                    <div className="flex justify-center pt-6 border-t">
+                      <Button
+                        onClick={() => completeLessonMutation.mutate(currentLessonIndex)}
+                        disabled={completeLessonMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        data-testid="button-complete-lesson"
+                      >
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        {completeLessonMutation.isPending ? "Marking Complete..." : "Mark as Complete"}
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Navigation */}
                   <div className="flex justify-between items-center pt-6 border-t">
                     <Button
@@ -210,7 +332,10 @@ export default function CourseLearn() {
                     
                     <Button
                       onClick={goToNextLesson}
-                      disabled={currentLessonIndex === lessons.length - 1}
+                      disabled={
+                        currentLessonIndex === lessons.length - 1 || 
+                        !isLessonUnlocked(currentLessonIndex + 1)
+                      }
                       data-testid="button-next-lesson"
                     >
                       Next
