@@ -7,9 +7,17 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { 
-  BookOpen, Play, Clock, ChevronLeft, ChevronRight, 
-  CheckCircle, Circle, ArrowLeft, Lock, Unlock
+import {
+  BookOpen,
+  Play,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  Circle,
+  ArrowLeft,
+  Lock,
+  Unlock,
 } from "lucide-react";
 
 // API request helper
@@ -59,29 +67,37 @@ export default function CourseLearn() {
     queryKey: ["/api/all-modules-data", user?.id, courseId],
     queryFn: async () => {
       if (!user || !courseId) return [];
-      
+
       const moduleDataPromises = modules.map(async (module: any) => {
         // Fetch lessons count
-        const lessonsResponse = await fetch(`/api/modules/${module.id}/lessons`, {
-          credentials: "include",
-        });
+        const lessonsResponse = await fetch(
+          `/api/modules/${module.id}/lessons`,
+          {
+            credentials: "include",
+          }
+        );
         const lessons = lessonsResponse.ok ? await lessonsResponse.json() : [];
-        
+
         // Fetch progress
-        const progressResponse = await fetch(`/api/lesson-progress/${user.id}/${module.id}`, {
-          credentials: "include",
-        });
-        const progress = progressResponse.ok ? await progressResponse.json() : [];
-        
-        return { 
-          moduleId: module.id, 
-          lessons, 
+        const progressResponse = await fetch(
+          `/api/lesson-progress/${user.id}/${module.id}`,
+          {
+            credentials: "include",
+          }
+        );
+        const progress = progressResponse.ok
+          ? await progressResponse.json()
+          : [];
+
+        return {
+          moduleId: module.id,
+          lessons,
           progress,
           totalLessons: lessons.length,
-          completedLessons: progress.filter((p: any) => p.isCompleted).length
+          completedLessons: progress.filter((p: any) => p.isCompleted).length,
         };
       });
-      
+
       return Promise.all(moduleDataPromises);
     },
     enabled: !!user && !!courseId && modules.length > 0,
@@ -108,39 +124,43 @@ export default function CourseLearn() {
   const isModuleUnlocked = (moduleIndex: number) => {
     // First module is always unlocked
     if (moduleIndex === 0) return true;
-    
+
     // Other modules unlock when previous module is fully completed
     const previousModule = modules[moduleIndex - 1];
     if (!previousModule) return false;
-    
+
     // Check if all lessons in previous module are completed
     const previousModuleData = allModulesData.find(
       (md: any) => md.moduleId === previousModule.id
     );
-    
+
     if (!previousModuleData) return false;
-    
+
     // Module unlocks when all lessons in previous module are completed
-    return previousModuleData.totalLessons > 0 && 
-           previousModuleData.completedLessons >= previousModuleData.totalLessons;
+    return (
+      previousModuleData.totalLessons > 0 &&
+      previousModuleData.completedLessons >= previousModuleData.totalLessons
+    );
   };
 
   const isLessonUnlocked = (lessonIndex: number, moduleIndex: number = 0) => {
     // Find current module index
-    const currentModuleIndex = modules.findIndex((m: any) => m.id === selectedModuleId);
-    
+    const currentModuleIndex = modules.findIndex(
+      (m: any) => m.id === selectedModuleId
+    );
+
     // Check if this module is unlocked
     if (!isModuleUnlocked(currentModuleIndex)) return false;
-    
+
     // Within first module, first lesson is always unlocked
     if (currentModuleIndex === 0 && lessonIndex === 0) return true;
-    
+
     // Within any module, other lessons unlock when previous lesson is completed
     if (lessonIndex > 0) {
       const previousProgress = getLessonProgress(lessonIndex - 1);
       return previousProgress?.isCompleted || false;
     }
-    
+
     // First lesson of non-first modules unlock when module is unlocked
     return currentModuleIndex === 0;
   };
@@ -150,8 +170,12 @@ export default function CourseLearn() {
     return progress?.isCompleted || false;
   };
 
-  const selectedLesson = lessons.find((lesson: any) => lesson.id === selectedLessonId);
-  const currentLessonIndex = lessons.findIndex((lesson: any) => lesson.id === selectedLessonId);
+  const selectedLesson = lessons.find(
+    (lesson: any) => lesson.id === selectedLessonId
+  );
+  const currentLessonIndex = lessons.findIndex(
+    (lesson: any) => lesson.id === selectedLessonId
+  );
 
   const goToNextLesson = () => {
     if (currentLessonIndex < lessons.length - 1) {
@@ -179,12 +203,12 @@ export default function CourseLearn() {
     },
     onSuccess: (data) => {
       // Invalidate the specific lesson progress query for this user and module
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/lesson-progress", user?.id, selectedModuleId] 
+      queryClient.invalidateQueries({
+        queryKey: ["/api/lesson-progress", user?.id, selectedModuleId],
       });
       // Also invalidate general lesson progress queries
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/lesson-progress"] 
+      queryClient.invalidateQueries({
+        queryKey: ["/api/lesson-progress"],
       });
       toast({
         title: "Lesson Completed!",
@@ -206,17 +230,21 @@ export default function CourseLearn() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-8xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6">
           <Link href="/learning">
-            <Button variant="ghost" className="mb-4" data-testid="button-back-to-courses">
+            <Button
+              variant="ghost"
+              className="mb-4"
+              data-testid="button-back-to-courses"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Courses
             </Button>
           </Link>
-          
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               {course.title}
             </h1>
@@ -233,7 +261,7 @@ export default function CourseLearn() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Sidebar - Course Structure */}
           <div className="lg:col-span-1">
             <Card>
@@ -246,18 +274,24 @@ export default function CourseLearn() {
               <CardContent className="space-y-4">
                 {modules.map((module: any, moduleIndex: number) => {
                   const moduleUnlocked = isModuleUnlocked(moduleIndex);
-                  const moduleData = allModulesData.find((md: any) => md.moduleId === module.id);
+                  const moduleData = allModulesData.find(
+                    (md: any) => md.moduleId === module.id
+                  );
                   const completedCount = moduleData?.completedLessons || 0;
                   const totalCount = moduleData?.totalLessons || 0;
-                  
+
                   return (
                     <div key={module.id} className="space-y-2">
                       <Button
-                        variant={selectedModuleId === module.id ? "default" : "ghost"}
+                        variant={
+                          selectedModuleId === module.id ? "default" : "ghost"
+                        }
                         className={`w-full justify-start h-auto p-3 ${
                           !moduleUnlocked ? "opacity-50 cursor-not-allowed" : ""
                         }`}
-                        onClick={() => moduleUnlocked && setSelectedModuleId(module.id)}
+                        onClick={() =>
+                          moduleUnlocked && setSelectedModuleId(module.id)
+                        }
                         disabled={!moduleUnlocked}
                         data-testid={`module-${module.id}`}
                       >
@@ -278,29 +312,35 @@ export default function CourseLearn() {
                             <div className="text-xs opacity-60 flex items-center justify-between">
                               <span>{module.durationHours} hours</span>
                               {totalCount > 0 && (
-                                <span>{completedCount}/{totalCount} lessons</span>
+                                <span>
+                                  {completedCount}/{totalCount} lessons
+                                </span>
                               )}
                             </div>
                           </div>
                         </div>
                       </Button>
-                    
+
                       {selectedModuleId === module.id && moduleUnlocked && (
-                        <div className="ml-4 space-y-1">
+                        <div className=" space-y-1">
                           {lessons.map((lesson: any, lessonIndex: number) => {
                             const unlocked = isLessonUnlocked(lessonIndex);
                             const completed = isLessonCompleted(lessonIndex);
                             const isSelected = selectedLessonId === lesson.id;
-                            
+
                             return (
                               <Button
                                 key={lesson.id}
                                 variant={isSelected ? "secondary" : "ghost"}
                                 size="sm"
                                 className={`w-full justify-start text-xs h-auto py-2 px-3 ${
-                                  !unlocked ? "opacity-50 cursor-not-allowed" : ""
+                                  !unlocked
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                 }`}
-                                onClick={() => unlocked && setSelectedLessonId(lesson.id)}
+                                onClick={() =>
+                                  unlocked && setSelectedLessonId(lesson.id)
+                                }
                                 disabled={!unlocked}
                                 data-testid={`lesson-${lesson.id}`}
                               >
@@ -338,7 +378,7 @@ export default function CourseLearn() {
           </div>
 
           {/* Main Content - Lesson */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             {selectedLesson ? (
               <Card>
                 <CardHeader>
@@ -354,12 +394,20 @@ export default function CourseLearn() {
                       {selectedLesson.durationMinutes} min
                     </Badge>
                   </div>
-                  <Progress 
-                    value={lessonProgress.filter((p: any) => p.isCompleted).length / lessons.length * 100} 
+                  <Progress
+                    value={
+                      (lessonProgress.filter((p: any) => p.isCompleted).length /
+                        lessons.length) *
+                      100
+                    }
                     className="mt-2"
                   />
                   <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                    <span>Progress: {lessonProgress.filter((p: any) => p.isCompleted).length} of {lessons.length} lessons completed</span>
+                    <span>
+                      Progress:{" "}
+                      {lessonProgress.filter((p: any) => p.isCompleted).length}{" "}
+                      of {lessons.length} lessons completed
+                    </span>
                     {isLessonCompleted(currentLessonIndex) && (
                       <Badge variant="secondary" className="text-green-700">
                         <CheckCircle className="mr-1 h-3 w-3" />
@@ -373,7 +421,10 @@ export default function CourseLearn() {
                   {selectedLesson.videoUrl && (
                     <div className="aspect-video">
                       <iframe
-                        src={selectedLesson.videoUrl.replace('watch?v=', 'embed/')}
+                        src={selectedLesson.videoUrl.replace(
+                          "watch?v=",
+                          "embed/"
+                        )}
                         title={selectedLesson.title}
                         className="w-full h-full rounded-lg"
                         frameBorder="0"
@@ -387,7 +438,9 @@ export default function CourseLearn() {
                   {/* Lesson Content */}
                   <div className="prose dark:prose-invert max-w-none">
                     <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-4">Lesson Content</h3>
+                      <h3 className="text-lg font-semibold mb-4">
+                        Lesson Content
+                      </h3>
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                         {selectedLesson.content}
                       </p>
@@ -398,13 +451,17 @@ export default function CourseLearn() {
                   {!isLessonCompleted(currentLessonIndex) && (
                     <div className="flex justify-center pt-6 border-t">
                       <Button
-                        onClick={() => completeLessonMutation.mutate(currentLessonIndex)}
+                        onClick={() =>
+                          completeLessonMutation.mutate(currentLessonIndex)
+                        }
                         disabled={completeLessonMutation.isPending}
                         className="bg-green-600 hover:bg-green-700 text-white"
                         data-testid="button-complete-lesson"
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        {completeLessonMutation.isPending ? "Marking Complete..." : "Mark as Complete"}
+                        {completeLessonMutation.isPending
+                          ? "Marking Complete..."
+                          : "Mark as Complete"}
                       </Button>
                     </div>
                   )}
@@ -420,15 +477,15 @@ export default function CourseLearn() {
                       <ChevronLeft className="mr-2 h-4 w-4" />
                       Previous
                     </Button>
-                    
+
                     <span className="text-sm text-gray-500">
                       {currentLessonIndex + 1} of {lessons.length} lessons
                     </span>
-                    
+
                     <Button
                       onClick={goToNextLesson}
                       disabled={
-                        currentLessonIndex === lessons.length - 1 || 
+                        currentLessonIndex === lessons.length - 1 ||
                         !isLessonUnlocked(currentLessonIndex + 1)
                       }
                       data-testid="button-next-lesson"
@@ -447,7 +504,8 @@ export default function CourseLearn() {
                     Select a Module to Start Learning
                   </h3>
                   <p className="text-gray-500">
-                    Choose a module from the sidebar to begin your learning journey.
+                    Choose a module from the sidebar to begin your learning
+                    journey.
                   </p>
                 </CardContent>
               </Card>
