@@ -32,14 +32,31 @@ export default function CareerChat() {
   // Fetch chat sessions
   const { data: sessions = [], isLoading: isLoadingSessions } = useQuery({
     queryKey: ["/api/chat-sessions", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      console.log('🔍 [FRONTEND] Fetching chat sessions for user:', user.id);
+      const response = await apiRequest("GET", `/api/chat-sessions/${user.id}`);
+      const sessionsData = await response.json();
+      console.log('📋 [FRONTEND] Sessions data received:', sessionsData);
+      return sessionsData;
+    },
     enabled: !!user,
+    refetchInterval: 5000, // Refetch every 5 seconds
   });
 
   // Fetch current session details
   const { data: currentSession, isLoading: isLoadingSession } = useQuery({
     queryKey: ["/api/chat-sessions/session", selectedSessionId],
-    queryFn: () => selectedSessionId ? apiRequest(`/api/chat-sessions/session/${selectedSessionId}`) : null,
+    queryFn: async () => {
+      if (!selectedSessionId) return null;
+      console.log('🔍 [FRONTEND] Fetching session details for:', selectedSessionId);
+      const response = await apiRequest("GET", `/api/chat-sessions/session/${selectedSessionId}`);
+      const sessionData = await response.json();
+      console.log('📋 [FRONTEND] Session data received:', sessionData);
+      return sessionData;
+    },
     enabled: !!selectedSessionId,
+    refetchInterval: 2000, // Refetch every 2 seconds when active
   });
 
   // Create new session mutation
@@ -74,7 +91,9 @@ export default function CareerChat() {
       return apiRequest("POST", `/api/chat-sessions/${data.sessionId}/message`, { message: data.message });
     },
     onSuccess: () => {
+      console.log('✅ [FRONTEND] Message sent successfully, invalidating queries...');
       queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions/session", selectedSessionId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions", user?.id] });
       setMessage("");
     },
     onError: () => {
