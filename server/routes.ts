@@ -1274,7 +1274,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/enrollments", async (req, res) => {
     try {
-      const enrollment = await storage.createEnrollment(req.body);
+      // Convert enrollmentDate string to Date object if provided
+      const enrollmentData = {
+        ...req.body,
+        enrollmentDate: req.body.enrollmentDate ? new Date(req.body.enrollmentDate) : new Date()
+      };
+      
+      const enrollment = await storage.createEnrollment(enrollmentData);
       res.json(enrollment);
     } catch (error) {
       console.error("Error creating enrollment:", error);

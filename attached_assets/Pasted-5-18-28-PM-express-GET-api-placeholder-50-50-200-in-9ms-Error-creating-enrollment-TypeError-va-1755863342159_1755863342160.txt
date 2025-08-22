@@ -1,0 +1,26 @@
+5:18:28 PM [express] GET /api/placeholder/50/50 200 in 9ms
+Error creating enrollment: TypeError: value.toISOString is not a function
+    at PgTimestamp.mapToDriverValue (D:\react project\SkillStream\node_modules\src\pg-core\columns\timestamp.ts:66:16)
+    at <anonymous> (D:\react project\SkillStream\node_modules\src\sql\sql.ts:223:69)
+    at Array.map (<anonymous>)
+    at SQL.buildQueryFromSourceParams (D:\react project\SkillStream\node_modules\src\sql\sql.ts:148:30)
+    at <anonymous> (D:\react project\SkillStream\node_modules\src\sql\sql.ts:170:17)
+    at Array.map (<anonymous>)
+    at SQL.buildQueryFromSourceParams (D:\react project\SkillStream\node_modules\src\sql\sql.ts:148:30)
+    at <anonymous> (D:\react project\SkillStream\node_modules\src\sql\sql.ts:174:17)
+    at Array.map (<anonymous>)
+    at SQL.buildQueryFromSourceParams (D:\react project\SkillStream\node_modules\src\sql\sql.ts:148:30)
+    at <anonymous> (D:\react project\SkillStream\node_modules\src\sql\sql.ts:124:23)
+    at Object.startActiveSpan (D:\react project\SkillStream\node_modules\src\tracing.ts:27:11)
+    at SQL.toQuery (D:\react project\SkillStream\node_modules\src\sql\sql.ts:123:17)
+    at PgDialect.sqlToQuery (D:\react project\SkillStream\node_modules\src\pg-core\dialect.ts:591:14)
+    at <anonymous> (D:\react project\SkillStream\node_modules\src\pg-core\query-builders\insert.ts:405:19)
+    at Object.startActiveSpan (D:\react project\SkillStream\node_modules\src\tracing.ts:27:11)
+    at QueryPromise._prepare (D:\react project\SkillStream\node_modules\src\pg-core\query-builders\insert.ts:400:17)
+    at <anonymous> (D:\react project\SkillStream\node_modules\src\pg-core\query-builders\insert.ts:422:16)
+    at Object.startActiveSpan (D:\react project\SkillStream\node_modules\src\tracing.ts:27:11)
+    at QueryPromise.execute (D:\react project\SkillStream\node_modules\src\pg-core\query-builders\insert.ts:421:17)
+    at QueryPromise.then (D:\react project\SkillStream\node_modules\src\query-promise.ts:31:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+5:18:33 PM [express] POST /api/enrollments 500 in 27ms :: {"message":"Failed to create enrollment"}
+

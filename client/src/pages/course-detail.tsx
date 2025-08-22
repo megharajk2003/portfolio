@@ -164,8 +164,7 @@ export default function CourseDetail() {
       return apiRequest("POST", `/api/enrollments`, {
         userId: CURRENT_USER_ID,
         courseId: courseId,
-        enrollmentDate: new Date().toISOString(),
-        status: "active"
+        enrollmentDate: new Date().toISOString()
       });
     },
     onSuccess: () => {
