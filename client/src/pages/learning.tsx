@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "wouter";
 import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
@@ -108,6 +108,24 @@ export default function Learning() {
       ...iconData
     };
   });
+
+  // Generate skills from course data
+  const skills = React.useMemo(() => {
+    const skillMap = new Map();
+    courses.forEach(course => {
+      if (course.skillsYouWillGain && Array.isArray(course.skillsYouWillGain)) {
+        course.skillsYouWillGain.forEach(skill => {
+          const count = skillMap.get(skill) || 0;
+          skillMap.set(skill, count + 1);
+        });
+      }
+    });
+    
+    return Array.from(skillMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10); // Show top 10 skills
+  }, [courses]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
