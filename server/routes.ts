@@ -250,7 +250,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Education routes
   app.get("/api/education/:userId", async (req, res) => {
     try {
+      console.log(`🎓 GET /api/education/${req.params.userId} - Starting request`);
       const education = await storage.getEducation(req.params.userId);
+      console.log(`🎓 GET /api/education/${req.params.userId} - Retrieved ${education.length} records`);
       res.json(education);
     } catch (error) {
       console.error("Error fetching education:", error);
@@ -273,8 +275,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/education", async (req, res) => {
     try {
+      console.log('🎓 POST /api/education - Starting request with data:', req.body);
       const educationData = insertEducationSchema.parse(req.body);
+      console.log('🎓 POST /api/education - Parsed data:', educationData);
       const education = await storage.createEducation(educationData);
+      console.log('🎓 POST /api/education - Created record:', education);
       res.json(education);
     } catch (error) {
       console.error("Error creating education:", error);
@@ -297,11 +302,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/education/:id", async (req, res) => {
     try {
+      console.log(`🎓 PATCH /api/education/${req.params.id} - Starting request with data:`, req.body);
       const updateData = { ...req.body, userId: req.body.userId };
+      console.log(`🎓 PATCH /api/education/${req.params.id} - Update data:`, updateData);
       const education = await storage.updateEducation(
         req.params.id,
         updateData
       );
+      console.log(`🎓 PATCH /api/education/${req.params.id} - Updated record:`, education);
       if (!education) {
         return res.status(404).json({ message: "Education not found" });
       }
@@ -327,7 +335,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/education/:id", async (req, res) => {
     try {
+      console.log(`🎓 DELETE /api/education/${req.params.id} - Starting request`);
       const deleted = await storage.deleteEducation(req.params.id);
+      console.log(`🎓 DELETE /api/education/${req.params.id} - Deleted:`, deleted);
       if (!deleted) {
         return res.status(404).json({ message: "Education not found" });
       }
@@ -354,7 +364,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Skills routes
   app.get("/api/skills/:userId", async (req, res) => {
     try {
+      console.log(`🎨 GET /api/skills/${req.params.userId} - Starting request`);
       const skills = await storage.getSkills(req.params.userId);
+      console.log(`🎨 GET /api/skills/${req.params.userId} - Retrieved ${skills.length} records`);
       res.json(skills);
     } catch (error) {
       console.error("Error fetching skills:", error);
@@ -377,8 +389,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/skills", async (req, res) => {
     try {
+      console.log('🎨 POST /api/skills - Starting request with data:', req.body);
       const skillData = insertSkillSchema.parse(req.body);
+      console.log('🎨 POST /api/skills - Parsed data:', skillData);
       const skill = await storage.createSkill(skillData);
+      console.log('🎨 POST /api/skills - Created record:', skill);
       res.json(skill);
     } catch (error) {
       console.error("Error creating skill:", error);

@@ -276,7 +276,7 @@ export const projects = pgTable("projects", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   domain: text("domain").notNull(), // "Business", "Marketing", "Technology", etc.
-  toolsOrMethods: text("tools_or_methods").array(), // Array of strings
+  toolsOrMethods: text("tools_or_methods"), // Stored as comma-separated string
   outcome: text("outcome"),
   url: text("url"),
   githubUrl: text("github_url"),
