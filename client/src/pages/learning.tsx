@@ -54,11 +54,11 @@ export default function Learning() {
   const [sortBy, setSortBy] = useState("relevance");
 
   // Fetch real data from the API
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<any[]>({
     queryKey: ["/api/courses"],
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -89,7 +89,7 @@ export default function Learning() {
   };
 
   // Filter courses based on search and filters
-  const filteredCourses = courses.filter(course => {
+  const filteredCourses = courses.filter((course: any) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          course.subtitle?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
@@ -97,11 +97,11 @@ export default function Learning() {
   });
 
   // Update category counts dynamically
-  const categoriesWithCounts = categories.map(category => {
-    const courseCount = courses.filter(course => 
-      course.categories?.some(cat => cat.id === category.id)
+  const categoriesWithCounts = categories.map((category: any) => {
+    const courseCount = courses.filter((course: any) => 
+      course.categories?.some((cat: any) => cat.id === category.id)
     ).length;
-    const iconData = categoryIcons[category.name] || { icon: BookOpen, color: "text-gray-600" };
+    const iconData = categoryIcons[category.name as keyof typeof categoryIcons] || { icon: BookOpen, color: "text-gray-600" };
     return {
       ...category,
       count: courseCount,
@@ -112,9 +112,9 @@ export default function Learning() {
   // Generate skills from course data
   const skills = React.useMemo(() => {
     const skillMap = new Map();
-    courses.forEach(course => {
+    courses.forEach((course: any) => {
       if (course.skillsYouWillGain && Array.isArray(course.skillsYouWillGain)) {
-        course.skillsYouWillGain.forEach(skill => {
+        course.skillsYouWillGain.forEach((skill: string) => {
           const count = skillMap.get(skill) || 0;
           skillMap.set(skill, count + 1);
         });
@@ -164,7 +164,7 @@ export default function Learning() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {categoriesWithCounts.map((category) => {
+                {categoriesWithCounts.map((category: any) => {
                   const IconComponent = category.icon;
                   return (
                     <Button
@@ -287,7 +287,7 @@ export default function Learning() {
 
             {/* Course Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCourses.map((course) => (
+              {filteredCourses.map((course: any) => (
                 <Card key={course.id} className="hover:shadow-lg transition-all duration-200 group">
                   <div className="relative">
                     <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-600 rounded-t-lg flex items-center justify-center">
