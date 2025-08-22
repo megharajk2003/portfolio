@@ -1286,6 +1286,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced lesson progress routes
+  app.get("/api/user-progress/:userId/:moduleId", async (req, res) => {
+    try {
+      const { userId, moduleId } = req.params;
+      const progress = await storage.getUserProgressForModule(parseInt(userId), moduleId);
+      res.json(progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 });
+    } catch (error) {
+      console.error("Error fetching module progress:", error);
+      res.status(500).json({ message: "Failed to fetch module progress" });
+    }
+  });
+
+  app.get("/api/lesson-progress/:userId/:moduleId", async (req, res) => {
+    try {
+      const { userId, moduleId } = req.params;
+      const progress = await storage.getLessonProgress?.(parseInt(userId), moduleId) || [];
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching lesson progress:", error);
+      res.status(500).json({ message: "Failed to fetch lesson progress" });
+    }
+  });
+
+  app.post("/api/lesson-progress/complete", async (req, res) => {
+    try {
+      const { userId, moduleId, lessonIndex } = req.body;
+      const progress = await storage.completeLessonProgress?.(parseInt(userId), moduleId, lessonIndex);
+      res.json(progress || { success: true });
+    } catch (error) {
+      console.error("Error completing lesson:", error);
+      res.status(500).json({ message: "Failed to complete lesson" });
+    }
+  });
+
+  // Quiz routes
+  app.get("/api/quiz-questions/:moduleId/:lessonIndex", async (req, res) => {
+    try {
+      const { moduleId, lessonIndex } = req.params;
+      const questions = await storage.getQuizQuestions?.(moduleId, parseInt(lessonIndex)) || [];
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching quiz questions:", error);
+      res.status(500).json({ message: "Failed to fetch quiz questions" });
+    }
+  });
+
+  app.post("/api/quiz/submit", async (req, res) => {
+    try {
+      const { userId, moduleId, lessonIndex, answers } = req.body;
+      const result = await storage.submitQuiz?.(parseInt(userId), moduleId, lessonIndex, answers) || 
+        { score: 0, totalQuestions: 0, passed: false };
+      res.json(result);
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      res.status(500).json({ message: "Failed to submit quiz" });
+    }
+  });
+
   // Section settings routes
   app.get("/api/section-settings/:userId/:sectionName", async (req, res) => {
     try {

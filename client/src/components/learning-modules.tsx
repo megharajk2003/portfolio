@@ -84,10 +84,12 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                   })()}%
                 </span>
               </div>
-              <Button size="sm">
-                <Play className="mr-1 h-3 w-3" />
-                Continue
-              </Button>
+              <Link href={`/module/${currentModule.id}`}>
+                <Button size="sm">
+                  <Play className="mr-1 h-3 w-3" />
+                  Continue
+                </Button>
+              </Link>
             </div>
           </div>
         )}
@@ -117,25 +119,24 @@ export default function LearningModules({ userId }: LearningModulesProps) {
             </div>
           ))}
 
-          {/* Locked Modules */}
+          {/* Available Modules */}
           {lockedModules.slice(0, 2).map((module) => (
-            <div
-              key={module.id}
-              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg opacity-60"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Lock className="h-5 w-5 text-gray-400" />
+            <Link key={module.id} href={`/module/${module.id}`}>
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Play className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900">{module.title}</h5>
+                    <p className="text-sm text-gray-500">
+                      Click to start learning
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">{module.title}</h5>
-                  <p className="text-sm text-gray-500">
-                    Locked • Complete previous modules first
-                  </p>
-                </div>
+                <Badge variant="outline">+{module.xpReward} XP</Badge>
               </div>
-              <Badge variant="outline">+{module.xpReward} XP</Badge>
-            </div>
+            </Link>
           ))}
         </div>
       </CardContent>

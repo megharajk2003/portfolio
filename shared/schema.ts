@@ -189,6 +189,63 @@ export const userProgress = pgTable("user_progress", {
   isCompleted: boolean("is_completed").default(false),
   xpEarned: integer("xp_earned").default(0),
   completedAt: timestamp("completed_at"),
+  finalExamPassed: boolean("final_exam_passed").default(false),
+  finalExamScore: integer("final_exam_score"),
+  finalExamAttempts: integer("final_exam_attempts").default(0),
+});
+
+// New table for tracking individual lesson completion
+export const lessonProgress = pgTable("lesson_progress", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  moduleId: varchar("module_id")
+    .notNull()
+    .references(() => learningModules.id, { onDelete: "cascade" }),
+  lessonIndex: integer("lesson_index").notNull(),
+  isCompleted: boolean("is_completed").default(false),
+  quizPassed: boolean("quiz_passed").default(false),
+  quizScore: integer("quiz_score"),
+  quizAttempts: integer("quiz_attempts").default(0),
+  xpEarned: integer("xp_earned").default(0),
+  completedAt: timestamp("completed_at"),
+});
+
+// Table for storing quiz questions and answers
+export const quizQuestions = pgTable("quiz_questions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  moduleId: varchar("module_id")
+    .notNull()
+    .references(() => learningModules.id, { onDelete: "cascade" }),
+  lessonIndex: integer("lesson_index").notNull(), // -1 for final exam
+  question: text("question").notNull(),
+  options: jsonb("options").$type<string[]>().notNull(),
+  correctAnswer: integer("correct_answer").notNull(), // Index of correct option
+  explanation: text("explanation"),
+});
+
+// Table for quiz attempts
+export const quizAttempts = pgTable("quiz_attempts", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  moduleId: varchar("module_id")
+    .notNull()
+    .references(() => learningModules.id, { onDelete: "cascade" }),
+  lessonIndex: integer("lesson_index").notNull(), // -1 for final exam
+  answers: jsonb("answers").$type<number[]>().notNull(), // Array of selected answer indices
+  score: integer("score").notNull(),
+  totalQuestions: integer("total_questions").notNull(),
+  passed: boolean("passed").notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
 });
 
 export const userStats = pgTable("user_stats", {
@@ -765,6 +822,14 @@ export type InsertUserProgress = z.infer<typeof insertUserProgressSchema>;
 export type UserProgress = typeof userProgress.$inferSelect;
 export type UserStats = typeof userStats.$inferSelect;
 export type DailyActivity = typeof dailyActivity.$inferSelect;
+
+// New types for enhanced learning system
+export type LessonProgress = typeof lessonProgress.$inferSelect;
+export type QuizQuestion = typeof quizQuestions.$inferSelect;
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+export type InsertLessonProgress = typeof lessonProgress.$inferInsert;
+export type InsertQuizQuestion = typeof quizQuestions.$inferInsert;
+export type InsertQuizAttempt = typeof quizAttempts.$inferInsert;
 export type InsertDailyActivity = z.infer<typeof insertDailyActivitySchema>;
 export type SectionSettings = typeof sectionSettings.$inferSelect;
 export type InsertSectionSettings = z.infer<typeof insertSectionSettingsSchema>;

@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import Portfolio from "@/pages/portfolio";
 import Learning from "@/pages/learning";
 import CourseDetail from "@/pages/course-detail";
+import ModuleDetail from "@/pages/module-detail";
 import EditPortfolio from "@/pages/edit-portfolio";
 import PublicPortfolio from "@/pages/public-portfolio";
 import Landing from "@/pages/landing";
@@ -42,6 +43,7 @@ function Router() {
       "/learning",
       "/edit-portfolio",
       "/course",
+      "/module",
     ];
     const isProtectedRoute = protectedRoutes.some((route) =>
       location.startsWith(route)
@@ -89,6 +91,7 @@ function Router() {
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/learning" component={Learning} />
           <Route path="/course/:id" component={CourseDetail} />
+          <Route path="/module/:id" component={ModuleDetail} />
           <Route path="/edit-portfolio" component={EditPortfolio} />
           <Route path="/portfolio/:username" component={PublicPortfolio} />
         </>
