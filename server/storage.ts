@@ -570,16 +570,30 @@ export class PgStorage implements IStorage {
     }
   }
 
-  // Education CRUD - using dedicated PostgreSQL table
+  // Education CRUD - using dedicated PostgreSQL table with fallback to profile JSONB
   async getEducation(userId: string): Promise<any[]> {
     try {
+      // First try to get from dedicated education table
       const educationRecords = await db
         .select()
         .from(education)
         .where(eq(education.userId, parseInt(userId)));
+      
       console.log(
-        `Retrieved ${educationRecords.length} education records from database`
+        `Retrieved ${educationRecords.length} education records from dedicated table`
       );
+      
+      // If no records in dedicated table, try to get from profile's otherDetails
+      if (educationRecords.length === 0) {
+        const profile = await this.getProfile(userId);
+        if (profile?.otherDetails?.education && Array.isArray(profile.otherDetails.education)) {
+          console.log(
+            `Retrieved ${profile.otherDetails.education.length} education records from profile JSONB`
+          );
+          return profile.otherDetails.education;
+        }
+      }
+      
       return educationRecords;
     } catch (error) {
       console.log("Database error, using fallback storage for getEducation");
