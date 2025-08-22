@@ -36,10 +36,8 @@ export default function CareerAdvisor() {
   // Generate new advice mutation
   const generateAdvice = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/career-advice`, {
-        method: "POST",
-        body: data,
-      });
+      console.log('🎯 [FRONTEND] Generating career advice with data:', data);
+      return apiRequest(`/api/career-advice`, "POST", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/career-advice", user?.id] });
@@ -80,7 +78,8 @@ export default function CareerAdvisor() {
     });
   };
 
-  const latestAdvice = advisories[0]; // Most recent advice
+  const advisoriesArray = Array.isArray(advisories) ? advisories : [];
+  const latestAdvice = advisoriesArray[0]; // Most recent advice
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -265,7 +264,7 @@ export default function CareerAdvisor() {
       </div>
 
       {/* Previous Advice History */}
-      {advisories.length > 1 && (
+      {advisoriesArray.length > 1 && (
         <Card>
           <CardHeader>
             <CardTitle>Previous Advice</CardTitle>
@@ -275,7 +274,7 @@ export default function CareerAdvisor() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {advisories.slice(1).map((advice: any) => (
+              {advisoriesArray.slice(1).map((advice: any) => (
                 <div key={advice.id} className="border rounded-lg p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">

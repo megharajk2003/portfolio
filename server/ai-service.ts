@@ -154,6 +154,9 @@ export class AICareerService {
     certifications: any[];
   }> {
     try {
+      console.log('🤖 [AI-SERVICE] Starting resume generation');
+      console.log('🤖 [AI-SERVICE] Resume user data:', JSON.stringify(userData, null, 2));
+      console.log('🤖 [AI-SERVICE] Resume target role:', targetRole);
       const prompt = `
         Generate a professional resume based on this user's profile data.
         

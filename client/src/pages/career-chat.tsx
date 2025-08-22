@@ -38,19 +38,17 @@ export default function CareerChat() {
   // Fetch current session details
   const { data: currentSession, isLoading: isLoadingSession } = useQuery({
     queryKey: ["/api/chat-sessions/session", selectedSessionId],
-    queryFn: () => apiRequest(`/api/chat-sessions/session/${selectedSessionId}`),
+    queryFn: () => selectedSessionId ? apiRequest(`/api/chat-sessions/session/${selectedSessionId}`) : null,
     enabled: !!selectedSessionId,
   });
 
   // Create new session mutation
   const createSession = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/chat-sessions`, {
-        method: "POST",
-        body: data,
-      });
+      console.log('🎯 [FRONTEND] Creating chat session with data:', data);
+      return apiRequest(`/api/chat-sessions`, "POST", data);
     },
-    onSuccess: (newSession) => {
+    onSuccess: (newSession: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions", user?.id] });
       setSelectedSessionId(newSession.id);
       setNewSessionTitle("");
@@ -72,10 +70,8 @@ export default function CareerChat() {
   // Send message mutation
   const sendMessage = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/chat-sessions/${data.sessionId}/message`, {
-        method: "POST",
-        body: { message: data.message },
-      });
+      console.log('🎯 [FRONTEND] Sending message:', data);
+      return apiRequest(`/api/chat-sessions/${data.sessionId}/message`, "POST", { message: data.message });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions/session", selectedSessionId] });
@@ -93,12 +89,13 @@ export default function CareerChat() {
   // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [currentSession?.messages]);
+  }, [(currentSession as any)?.messages]);
 
   // Auto-select first session if available
   useEffect(() => {
-    if (sessions.length > 0 && !selectedSessionId) {
-      setSelectedSessionId(sessions[0].id);
+    const sessionsArray = Array.isArray(sessions) ? sessions : [];
+    if (sessionsArray.length > 0 && !selectedSessionId) {
+      setSelectedSessionId((sessionsArray[0] as any).id);
     }
   }, [sessions, selectedSessionId]);
 
@@ -202,8 +199,8 @@ export default function CareerChat() {
                   <div className="text-center py-4">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600 mx-auto"></div>
                   </div>
-                ) : sessions.length > 0 ? (
-                  sessions.map((session: any) => (
+                ) : Array.isArray(sessions) && sessions.length > 0 ? (
+                  (sessions as any[]).map((session: any) => (
                     <div
                       key={session.id}
                       className={`p-3 rounded-lg border cursor-pointer transition-all ${
@@ -239,17 +236,17 @@ export default function CareerChat() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-orange-600" />
-                {currentSession ? currentSession.title : "Select a Chat Session"}
+                {currentSession ? (currentSession as any).title : "Select a Chat Session"}
               </CardTitle>
               <CardDescription>
                 {currentSession && (
                   <div className="flex items-center gap-4">
                     <Badge variant="outline">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(currentSession.createdAt).toLocaleDateString()}
+                      {new Date((currentSession as any).createdAt).toLocaleDateString()}
                     </Badge>
                     <Badge variant="outline">
-                      {currentSession.messages?.length || 0} messages
+                      {(currentSession as any).messages?.length || 0} messages
                     </Badge>
                   </div>
                 )}
@@ -266,9 +263,9 @@ export default function CareerChat() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
                         <p className="text-muted-foreground mt-2">Loading conversation...</p>
                       </div>
-                    ) : currentSession?.messages && currentSession.messages.length > 0 ? (
+                    ) : (currentSession as any)?.messages && (currentSession as any).messages.length > 0 ? (
                       <div className="space-y-4">
-                        {currentSession.messages.map((msg: any, index: number) => (
+                        {(currentSession as any).messages.map((msg: any, index: number) => (
                           <div
                             key={index}
                             className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}

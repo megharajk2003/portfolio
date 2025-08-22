@@ -40,10 +40,8 @@ export default function ResumeGenerator() {
   // Generate new resume mutation
   const generateResume = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/resumes`, {
-        method: "POST",
-        body: data,
-      });
+      console.log('🎯 [FRONTEND] Generating resume with data:', data);
+      return apiRequest(`/api/resumes`, "POST", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/resumes", user?.id] });
@@ -67,9 +65,8 @@ export default function ResumeGenerator() {
   // Delete resume mutation
   const deleteResume = useMutation({
     mutationFn: async (resumeId: string) => {
-      return apiRequest(`/api/resumes/${resumeId}`, {
-        method: "DELETE",
-      });
+      console.log('🎯 [FRONTEND] Deleting resume:', resumeId);
+      return apiRequest(`/api/resumes/${resumeId}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/resumes", user?.id] });
@@ -207,7 +204,7 @@ export default function ResumeGenerator() {
             <CardHeader>
               <CardTitle>Your Resumes</CardTitle>
               <CardDescription>
-                Generated resumes ({resumes.length})
+                Generated resumes ({Array.isArray(resumes) ? resumes.length : 0})
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -215,9 +212,9 @@ export default function ResumeGenerator() {
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
                 </div>
-              ) : resumes.length > 0 ? (
+              ) : Array.isArray(resumes) && resumes.length > 0 ? (
                 <div className="space-y-3">
-                  {resumes.map((resume: any) => (
+                  {(resumes as any[]).map((resume: any) => (
                     <div
                       key={resume.id}
                       className={`p-3 rounded-lg border cursor-pointer transition-all ${

@@ -1496,7 +1496,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/quiz-questions/:moduleId/:lessonIndex", async (req, res) => {
     try {
       const { moduleId, lessonIndex } = req.params;
-      const questions = await storage.getQuizQuestions?.(moduleId, parseInt(lessonIndex)) || [];
+      // TODO: Implement quiz questions functionality when needed
+      const questions: any[] = [];
       res.json(questions);
     } catch (error) {
       console.error("Error fetching quiz questions:", error);
@@ -1507,8 +1508,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/quiz/submit", async (req, res) => {
     try {
       const { userId, moduleId, lessonIndex, answers } = req.body;
-      const result = await storage.submitQuiz?.(parseInt(userId), moduleId, lessonIndex, answers) || 
-        { score: 0, totalQuestions: 0, passed: false };
+      // TODO: Implement quiz submission functionality when needed
+      const result = { score: 0, totalQuestions: 0, passed: false };
       res.json(result);
     } catch (error) {
       console.error("Error submitting quiz:", error);
@@ -1544,8 +1545,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AI Career Features Routes
   
+  // Authentication middleware for AI routes
+  const requireAuth = (req: any, res: any, next: any) => {
+    console.log('🔐 [AUTH-MIDDLEWARE] Checking authentication for:', req.path);
+    console.log('🔐 [AUTH-MIDDLEWARE] User authenticated:', req.isAuthenticated());
+    console.log('🔐 [AUTH-MIDDLEWARE] User object:', req.user);
+    if (!req.isAuthenticated()) {
+      console.log('❌ [AUTH-MIDDLEWARE] Authentication failed - returning 401');
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    console.log('✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding...');
+    next();
+  };
+
   // Personal Career Advisor
-  app.get("/api/career-advice/:userId", async (req, res) => {
+  app.get("/api/career-advice/:userId", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const advisories = await storage.getCareerAdvisories(userId);
@@ -1556,7 +1570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/career-advice", async (req, res) => {
+  app.post("/api/career-advice", requireAuth, async (req, res) => {
     try {
       const { userId, targetRole, careerGoals, currentLevel } = req.body;
       
@@ -1601,7 +1615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Career Timeline
-  app.get("/api/career-timeline/:userId", async (req, res) => {
+  app.get("/api/career-timeline/:userId", requireAuth, async (req, res) => {
     try {
       console.log('🌐 [SERVER] GET /api/career-timeline called');
       console.log('🌐 [SERVER] Requested userId:', req.params.userId);
@@ -1618,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/career-timeline", async (req, res) => {
+  app.post("/api/career-timeline", requireAuth, async (req, res) => {
     try {
       console.log('🌐 [SERVER] POST /api/career-timeline called');
       console.log('🌐 [SERVER] Request body:', req.body);
@@ -1665,7 +1679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/career-timeline/:id", async (req, res) => {
+  app.delete("/api/career-timeline/:id", requireAuth, async (req, res) => {
     try {
       console.log('🌐 [SERVER] DELETE /api/career-timeline called');
       console.log('🌐 [SERVER] Timeline ID to delete:', req.params.id);
@@ -1684,7 +1698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Resume Generator
-  app.get("/api/resumes/:userId", async (req, res) => {
+  app.get("/api/resumes/:userId", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const resumes = await storage.getGeneratedResumes(userId);
@@ -1695,7 +1709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/resumes", async (req, res) => {
+  app.post("/api/resumes", requireAuth, async (req, res) => {
     try {
       const { userId, title, targetRole, template } = req.body;
       
@@ -1737,7 +1751,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/resumes/:id", async (req, res) => {
+  app.patch("/api/resumes/:id", requireAuth, async (req, res) => {
     try {
       const resume = await storage.updateGeneratedResume(req.params.id, req.body);
       if (!resume) {
@@ -1750,7 +1764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/resumes/:id", async (req, res) => {
+  app.delete("/api/resumes/:id", requireAuth, async (req, res) => {
     try {
       const deleted = await storage.deleteGeneratedResume(req.params.id);
       if (!deleted) {
@@ -1764,7 +1778,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat Assistant
-  app.get("/api/chat-sessions/:userId", async (req, res) => {
+  app.get("/api/chat-sessions/:userId", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const sessions = await storage.getChatSessions(userId);
@@ -1775,7 +1789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/chat-sessions/session/:sessionId", async (req, res) => {
+  app.get("/api/chat-sessions/session/:sessionId", requireAuth, async (req, res) => {
     try {
       const session = await storage.getChatSession(req.params.sessionId);
       if (!session) {
@@ -1788,7 +1802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat-sessions", async (req, res) => {
+  app.post("/api/chat-sessions", requireAuth, async (req, res) => {
     try {
       const { userId, title } = req.body;
       const sessionData = {
@@ -1806,7 +1820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat-sessions/:sessionId/message", async (req, res) => {
+  app.post("/api/chat-sessions/:sessionId/message", requireAuth, async (req, res) => {
     try {
       const { message } = req.body;
       const sessionId = req.params.sessionId;
