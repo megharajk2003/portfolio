@@ -171,13 +171,14 @@ export default function ModuleDetail() {
       lessonIndex: number;
       answers: number[];
       isFinalExam?: boolean;
-    }) => {
-      return apiRequest(`/api/quiz/submit`, "POST", {
+    }): Promise<QuizResult> => {
+      const response = await apiRequest(`/api/quiz/submit`, "POST", {
         userId: currentUser.id,
         moduleId,
         lessonIndex: isFinalExam ? -1 : lessonIndex,
         answers,
       });
+      return response.json();
     },
     onSuccess: (result: QuizResult) => {
       setQuizResults(result);
