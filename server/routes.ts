@@ -1603,17 +1603,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Career Timeline
   app.get("/api/career-timeline/:userId", async (req, res) => {
     try {
+      console.log('🌐 [SERVER] GET /api/career-timeline called');
+      console.log('🌐 [SERVER] Requested userId:', req.params.userId);
+      console.log('🌐 [SERVER] Request user (auth):', req.user);
       const userId = parseInt(req.params.userId);
+      console.log('🌐 [SERVER] Fetching timelines for userId:', userId);
       const timelines = await storage.getCareerTimelines(userId);
+      console.log('✅ [SERVER] Timelines fetched:', timelines);
       res.json(timelines);
     } catch (error) {
-      console.error("Error fetching career timelines:", error);
+      console.error("❌ [SERVER] Error fetching career timelines:", error);
+      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ message: "Failed to fetch career timelines" });
     }
   });
 
   app.post("/api/career-timeline", async (req, res) => {
     try {
+      console.log('🌐 [SERVER] POST /api/career-timeline called');
+      console.log('🌐 [SERVER] Request body:', req.body);
       const { userId, targetRole } = req.body;
       
       // Fetch user data for AI analysis
@@ -1633,9 +1641,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         learningProgress: userProgress,
       };
 
+      console.log('🌐 [SERVER] Calling AI service for timeline generation');
       // Generate AI timeline
       const aiTimeline = await AICareerService.generateCareerTimeline(userData, targetRole);
       
+      console.log('🌐 [SERVER] AI timeline generated, saving to database');
       // Save to database
       const timelineData = {
         userId: parseInt(userId),
@@ -1646,22 +1656,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const timeline = await storage.createCareerTimeline(timelineData);
+      console.log('✅ [SERVER] Timeline saved successfully:', timeline);
       res.json(timeline);
     } catch (error) {
-      console.error("Error generating career timeline:", error);
+      console.error("❌ [SERVER] Error generating career timeline:", error);
+      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ message: "Failed to generate career timeline" });
     }
   });
 
   app.delete("/api/career-timeline/:id", async (req, res) => {
     try {
+      console.log('🌐 [SERVER] DELETE /api/career-timeline called');
+      console.log('🌐 [SERVER] Timeline ID to delete:', req.params.id);
       const deleted = await storage.deleteCareerTimeline(req.params.id);
       if (!deleted) {
+        console.log('❌ [SERVER] Timeline not found:', req.params.id);
         return res.status(404).json({ message: "Career timeline not found" });
       }
+      console.log('✅ [SERVER] Timeline deleted successfully');
       res.json({ message: "Career timeline deleted" });
     } catch (error) {
-      console.error("Error deleting career timeline:", error);
+      console.error("❌ [SERVER] Error deleting career timeline:", error);
+      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ message: "Failed to delete career timeline" });
     }
   });

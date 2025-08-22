@@ -28,15 +28,23 @@ export default function CareerTimeline() {
   const { data: timelines = [], isLoading: isLoadingTimelines } = useQuery({
     queryKey: ["/api/career-timeline", user?.id],
     enabled: !!user,
+    onSuccess: (data) => {
+      console.log('📊 [CLIENT] Fetched timelines:', data);
+    },
+    onError: (error) => {
+      console.error('❌ [CLIENT] Error fetching timelines:', error);
+    }
   });
 
   // Generate new timeline mutation
   const generateTimeline = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/career-timeline`, {
-        method: "POST",
-        body: data,
-      });
+      console.log('🚀 [CLIENT] Generating timeline with data:', data);
+      console.log('🚀 [CLIENT] User ID:', user?.id);
+      const response = await apiRequest("POST", "/api/career-timeline", data);
+      const result = await response.json();
+      console.log('✅ [CLIENT] Timeline generation response:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/career-timeline", user?.id] });
@@ -46,7 +54,8 @@ export default function CareerTimeline() {
       });
       setTargetRole("");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('❌ [CLIENT] Error generating timeline:', error);
       toast({
         title: "Error",
         description: "Failed to generate career timeline. Please try again.",
@@ -58,9 +67,11 @@ export default function CareerTimeline() {
   // Delete timeline mutation
   const deleteTimeline = useMutation({
     mutationFn: async (timelineId: string) => {
-      return apiRequest(`/api/career-timeline/${timelineId}`, {
-        method: "DELETE",
-      });
+      console.log('🗑️ [CLIENT] Deleting timeline:', timelineId);
+      const response = await apiRequest("DELETE", `/api/career-timeline/${timelineId}`);
+      const result = await response.json();
+      console.log('✅ [CLIENT] Timeline deletion response:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/career-timeline", user?.id] });
@@ -69,7 +80,8 @@ export default function CareerTimeline() {
         description: "Career timeline has been removed.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('❌ [CLIENT] Error deleting timeline:', error);
       toast({
         title: "Error",
         description: "Failed to delete timeline. Please try again.",
@@ -164,7 +176,7 @@ export default function CareerTimeline() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
           <p className="text-muted-foreground mt-2">Loading timelines...</p>
         </div>
-      ) : timelines.length > 0 ? (
+      ) : (Array.isArray(timelines) && timelines.length > 0) ? (
         <div className="space-y-6">
           {timelines.map((timeline: any) => (
             <Card key={timeline.id} className="relative">

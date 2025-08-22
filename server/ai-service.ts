@@ -25,6 +25,9 @@ export class AICareerService {
     currentLevel: string;
   }> {
     try {
+      console.log('🤖 [AI-SERVICE] Starting career advice generation');
+      console.log('🤖 [AI-SERVICE] User data received:', JSON.stringify(userData, null, 2));
+      console.log('🤖 [AI-SERVICE] Target role:', targetRole);
       const prompt = `
         Analyze this user's career profile and provide personalized career advice.
         
@@ -79,6 +82,9 @@ export class AICareerService {
     estimatedDuration: string;
   }> {
     try {
+      console.log('🤖 [AI-SERVICE] Starting career timeline generation');
+      console.log('🤖 [AI-SERVICE] Timeline user data:', JSON.stringify(userData, null, 2));
+      console.log('🤖 [AI-SERVICE] Timeline target role:', targetRole);
       const prompt = `
         Create a detailed career progression timeline for this user to reach their target role.
         
@@ -113,15 +119,19 @@ export class AICareerService {
         }
       `;
 
+      console.log('🤖 [AI-SERVICE] Sending timeline request to OpenAI');
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      console.log('🤖 [AI-SERVICE] Timeline OpenAI response:', response.choices[0].message.content);
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      console.log('✅ [AI-SERVICE] Timeline generated successfully:', result);
+      return result;
     } catch (error) {
-      console.error('Error generating career timeline:', error);
+      console.error('❌ [AI-SERVICE] Error generating career timeline:', error);
       throw new Error('Failed to generate career timeline');
     }
   }
