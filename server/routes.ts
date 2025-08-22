@@ -219,15 +219,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/work-experience/:id", async (req, res) => {
     try {
-      const updateData = { ...req.body, userId: req.body.userId };
+      console.log(`💼 PATCH /api/work-experience/${req.params.id} - Starting request with data:`, req.body);
+      
+      // Handle both field name variations (company/position vs organization/roleOrPosition)
+      const normalizedBody = {
+        ...req.body,
+        company: req.body.company || req.body.organization,
+        position: req.body.position || req.body.roleOrPosition,
+        userId: req.body.userId,
+      };
+      
+      console.log(`💼 PATCH /api/work-experience/${req.params.id} - Normalized data:`, normalizedBody);
       const experience = await storage.updateWorkExperience(
         req.params.id,
-        updateData
+        normalizedBody
       );
       if (!experience) {
         return res.status(404).json({ message: "Work experience not found" });
       }
-      res.json(experience);
+      
+      // Also normalize the response for frontend compatibility
+      const normalizedResponse = {
+        ...experience,
+        organization: experience.organization || experience.company,
+        roleOrPosition: experience.roleOrPosition || experience.position,
+        company: experience.company || experience.organization,
+        position: experience.position || experience.roleOrPosition,
+      };
+      
+      console.log(`💼 PATCH /api/work-experience/${req.params.id} - Updated record:`, normalizedResponse);
+      res.json(normalizedResponse);
     } catch (error) {
       console.error("Error updating work experience:", error);
 

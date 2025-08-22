@@ -495,6 +495,9 @@ export class PgStorage implements IStorage {
     const { userId, ...updateData } = data;
 
     try {
+      console.log(`💼 STORAGE updateWorkExperience - Received data for ID ${id}:`, data);
+      console.log(`💼 STORAGE updateWorkExperience - UpdateData after removing userId:`, updateData);
+      
       const [updatedExperience] = await db
         .update(workExperience)
         .set({ ...updateData, updatedAt: new Date() })
@@ -506,7 +509,7 @@ export class PgStorage implements IStorage {
       }
 
       console.log(
-        "Updated work experience record in database:",
+        "💼 STORAGE updateWorkExperience - Updated work experience record in database:",
         updatedExperience
       );
       return updatedExperience;
