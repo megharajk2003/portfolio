@@ -240,10 +240,12 @@ export default function ModuleDetail() {
   };
 
   const isLessonUnlocked = (lessonIndex: number): boolean => {
-    if (lessonIndex === 0) return true; // First lesson is always unlocked
+    // First lesson is always unlocked if user is enrolled
+    if (lessonIndex === 0) return isEnrolled;
     
+    // Subsequent lessons unlock when the previous lesson is completed
     const previousLessonProgress = getLessonProgress(lessonIndex - 1);
-    return !!(previousLessonProgress?.isCompleted && previousLessonProgress?.quizPassed);
+    return !!(previousLessonProgress?.isCompleted);
   };
 
   const canTakeFinalExam = (): boolean => {
@@ -251,7 +253,7 @@ export default function ModuleDetail() {
     
     return module.lessons.every((_, index) => {
       const progress = getLessonProgress(index);
-      return !!(progress?.isCompleted && progress?.quizPassed);
+      return !!(progress?.isCompleted);
     });
   };
 
@@ -260,7 +262,7 @@ export default function ModuleDetail() {
     
     const completedLessons = module.lessons.filter((_, index) => {
       const progress = getLessonProgress(index);
-      return !!(progress?.isCompleted && progress?.quizPassed);
+      return !!(progress?.isCompleted);
     }).length;
     
     return (completedLessons / module.lessons.length) * 100;
@@ -393,7 +395,7 @@ export default function ModuleDetail() {
           {lessons.map((lesson: Lesson, index: number) => {
             const lessonProgress = getLessonProgress(index);
             const isUnlocked = isLessonUnlocked(index);
-            const isCompleted = lessonProgress?.isCompleted && lessonProgress?.quizPassed;
+            const isCompleted = lessonProgress?.isCompleted;
 
             return (
               <Card key={index} id={`lesson-${index}`} className={`transition-all ${!isUnlocked ? 'opacity-60' : ''}`}>
