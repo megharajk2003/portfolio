@@ -160,15 +160,15 @@ export default function Home() {
           <ProfileCompletionNotification />
 
           {/* Hero Section */}
-          <div className="flex items-center gap-6 justify-between">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
             {/* Learning Heat Map */}
             <GoalHeatMap />
             <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 border border-gray-200 dark:border-gray-700 flex items-center justify-between ">
                 <div className="flex items-center space-x-4">
-                  <div className="relative">
+                  <div className="relative ">
                     <img
-                      className="w-64 h-64 rounded-xl object-cover"
+                      className="w-32 h-32 rounded-xl object-cover"
                       src={
                         profile?.personalDetails?.photo ||
                         "https://img.freepik.com/premium-photo/avatar-icon_665280-58322.jpg"
@@ -197,16 +197,6 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-                <Link href="/profile">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center space-x-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>Edit Profile</span>
-                  </Button>
-                </Link>
               </div>
             </section>
           </div>
