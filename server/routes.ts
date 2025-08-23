@@ -153,10 +153,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Work Experience routes
   app.get("/api/work-experience/:userId", async (req, res) => {
     try {
-      console.log(`💼 GET /api/work-experience/${req.params.userId} - Starting request`);
+      console.log(
+        `💼 GET /api/work-experience/${req.params.userId} - Starting request`
+      );
       const userId = parseInt(req.params.userId);
       const experiences = await storage.getWorkExperience(userId.toString());
-      
+
       // Normalize field names to support both database (company/position) and frontend (organization/roleOrPosition) expectations
       const normalizedExperiences = experiences.map((exp: any) => ({
         ...exp,
@@ -167,8 +169,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: exp.company || exp.organization,
         position: exp.position || exp.roleOrPosition,
       }));
-      
-      console.log(`💼 GET /api/work-experience/${req.params.userId} - Retrieved ${normalizedExperiences.length} records`);
+
+      console.log(
+        `💼 GET /api/work-experience/${req.params.userId} - Retrieved ${normalizedExperiences.length} records`
+      );
       res.json(normalizedExperiences);
     } catch (error) {
       console.error("Error fetching work experience:", error);
@@ -191,20 +195,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/work-experience", async (req, res) => {
     try {
-      console.log('💼 POST /api/work-experience - Starting request with data:', req.body);
-      
+      console.log(
+        "💼 POST /api/work-experience - Starting request with data:",
+        req.body
+      );
+
       // Handle both field name variations (company/position vs organization/roleOrPosition)
       const normalizedBody = {
         ...req.body,
         company: req.body.company || req.body.organization,
         position: req.body.position || req.body.roleOrPosition,
       };
-      
-      console.log('💼 POST /api/work-experience - Normalized data:', normalizedBody);
+
+      console.log(
+        "💼 POST /api/work-experience - Normalized data:",
+        normalizedBody
+      );
       const experienceData = insertWorkExperienceSchema.parse(normalizedBody);
-      console.log('💼 POST /api/work-experience - Parsed data:', experienceData);
+      console.log(
+        "💼 POST /api/work-experience - Parsed data:",
+        experienceData
+      );
       const experience = await storage.createWorkExperience(experienceData);
-      console.log('💼 POST /api/work-experience - Created record:', experience);
+      console.log("💼 POST /api/work-experience - Created record:", experience);
       res.json(experience);
     } catch (error) {
       console.error("Error creating work experience:", error);
@@ -227,8 +240,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/work-experience/:id", async (req, res) => {
     try {
-      console.log(`💼 PATCH /api/work-experience/${req.params.id} - Starting request with data:`, req.body);
-      
+      console.log(
+        `💼 PATCH /api/work-experience/${req.params.id} - Starting request with data:`,
+        req.body
+      );
+
       // Handle both field name variations (company/position vs organization/roleOrPosition)
       const normalizedBody = {
         ...req.body,
@@ -236,8 +252,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         position: req.body.position || req.body.roleOrPosition,
         userId: req.body.userId,
       };
-      
-      console.log(`💼 PATCH /api/work-experience/${req.params.id} - Normalized data:`, normalizedBody);
+
+      console.log(
+        `💼 PATCH /api/work-experience/${req.params.id} - Normalized data:`,
+        normalizedBody
+      );
       const experience = await storage.updateWorkExperience(
         req.params.id,
         normalizedBody
@@ -245,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!experience) {
         return res.status(404).json({ message: "Work experience not found" });
       }
-      
+
       // Also normalize the response for frontend compatibility
       const normalizedResponse = {
         ...experience,
@@ -254,8 +273,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: experience.company || experience.organization,
         position: experience.position || experience.roleOrPosition,
       };
-      
-      console.log(`💼 PATCH /api/work-experience/${req.params.id} - Updated record:`, normalizedResponse);
+
+      console.log(
+        `💼 PATCH /api/work-experience/${req.params.id} - Updated record:`,
+        normalizedResponse
+      );
       res.json(normalizedResponse);
     } catch (error) {
       console.error("Error updating work experience:", error);
@@ -305,9 +327,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Education routes
   app.get("/api/education/:userId", async (req, res) => {
     try {
-      console.log(`🎓 GET /api/education/${req.params.userId} - Starting request`);
+      console.log(
+        `🎓 GET /api/education/${req.params.userId} - Starting request`
+      );
       const education = await storage.getEducation(req.params.userId);
-      console.log(`🎓 GET /api/education/${req.params.userId} - Retrieved ${education.length} records`);
+      console.log(
+        `🎓 GET /api/education/${req.params.userId} - Retrieved ${education.length} records`
+      );
       res.json(education);
     } catch (error) {
       console.error("Error fetching education:", error);
@@ -330,11 +356,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/education", async (req, res) => {
     try {
-      console.log('🎓 POST /api/education - Starting request with data:', req.body);
+      console.log(
+        "🎓 POST /api/education - Starting request with data:",
+        req.body
+      );
       const educationData = insertEducationSchema.parse(req.body);
-      console.log('🎓 POST /api/education - Parsed data:', educationData);
+      console.log("🎓 POST /api/education - Parsed data:", educationData);
       const education = await storage.createEducation(educationData);
-      console.log('🎓 POST /api/education - Created record:', education);
+      console.log("🎓 POST /api/education - Created record:", education);
       res.json(education);
     } catch (error) {
       console.error("Error creating education:", error);
@@ -357,14 +386,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/education/:id", async (req, res) => {
     try {
-      console.log(`🎓 PATCH /api/education/${req.params.id} - Starting request with data:`, req.body);
+      console.log(
+        `🎓 PATCH /api/education/${req.params.id} - Starting request with data:`,
+        req.body
+      );
       const updateData = { ...req.body, userId: req.body.userId };
-      console.log(`🎓 PATCH /api/education/${req.params.id} - Update data:`, updateData);
+      console.log(
+        `🎓 PATCH /api/education/${req.params.id} - Update data:`,
+        updateData
+      );
       const education = await storage.updateEducation(
         req.params.id,
         updateData
       );
-      console.log(`🎓 PATCH /api/education/${req.params.id} - Updated record:`, education);
+      console.log(
+        `🎓 PATCH /api/education/${req.params.id} - Updated record:`,
+        education
+      );
       if (!education) {
         return res.status(404).json({ message: "Education not found" });
       }
@@ -390,9 +428,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/education/:id", async (req, res) => {
     try {
-      console.log(`🎓 DELETE /api/education/${req.params.id} - Starting request`);
+      console.log(
+        `🎓 DELETE /api/education/${req.params.id} - Starting request`
+      );
       const deleted = await storage.deleteEducation(req.params.id);
-      console.log(`🎓 DELETE /api/education/${req.params.id} - Deleted:`, deleted);
+      console.log(
+        `🎓 DELETE /api/education/${req.params.id} - Deleted:`,
+        deleted
+      );
       if (!deleted) {
         return res.status(404).json({ message: "Education not found" });
       }
@@ -421,7 +464,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(`🎨 GET /api/skills/${req.params.userId} - Starting request`);
       const skills = await storage.getSkills(req.params.userId);
-      console.log(`🎨 GET /api/skills/${req.params.userId} - Retrieved ${skills.length} records`);
+      console.log(
+        `🎨 GET /api/skills/${req.params.userId} - Retrieved ${skills.length} records`
+      );
       res.json(skills);
     } catch (error) {
       console.error("Error fetching skills:", error);
@@ -444,11 +489,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/skills", async (req, res) => {
     try {
-      console.log('🎨 POST /api/skills - Starting request with data:', req.body);
+      console.log(
+        "🎨 POST /api/skills - Starting request with data:",
+        req.body
+      );
       const skillData = insertSkillSchema.parse(req.body);
-      console.log('🎨 POST /api/skills - Parsed data:', skillData);
+      console.log("🎨 POST /api/skills - Parsed data:", skillData);
       const skill = await storage.createSkill(skillData);
-      console.log('🎨 POST /api/skills - Created record:', skill);
+      console.log("🎨 POST /api/skills - Created record:", skill);
       res.json(skill);
     } catch (error) {
       console.error("Error creating skill:", error);
@@ -873,20 +921,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/publications", async (req, res) => {
     try {
-      console.log('📚 POST /api/publications - Starting request with data:', req.body);
-      
+      console.log(
+        "📚 POST /api/publications - Starting request with data:",
+        req.body
+      );
+
       // Handle field name variations (journal vs journalOrPlatform)
       const normalizedBody = {
         ...req.body,
         journal: req.body.journal || req.body.journalOrPlatform,
         journalOrPlatform: req.body.journalOrPlatform || req.body.journal,
       };
-      
-      console.log('📚 POST /api/publications - Normalized data:', normalizedBody);
+
+      console.log(
+        "📚 POST /api/publications - Normalized data:",
+        normalizedBody
+      );
       const publicationData = insertPublicationSchema.parse(normalizedBody);
-      console.log('📚 POST /api/publications - Parsed data:', publicationData);
+      console.log("📚 POST /api/publications - Parsed data:", publicationData);
       const publication = await storage.createPublication(publicationData);
-      console.log('📚 POST /api/publications - Created record:', publication);
+      console.log("📚 POST /api/publications - Created record:", publication);
       res.json(publication);
     } catch (error) {
       console.error("Error creating publication:", error);
@@ -1272,7 +1326,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enrollments
   app.get("/api/users/:userId/enrollments", async (req, res) => {
     try {
-      const enrollments = await storage.getUserEnrollments(parseInt(req.params.userId));
+      const enrollments = await storage.getUserEnrollments(
+        parseInt(req.params.userId)
+      );
       res.json(enrollments);
     } catch (error) {
       console.error("Error fetching user enrollments:", error);
@@ -1285,9 +1341,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert enrollmentDate string to Date object if provided
       const enrollmentData = {
         ...req.body,
-        enrollmentDate: req.body.enrollmentDate ? new Date(req.body.enrollmentDate) : new Date()
+        enrollmentDate: req.body.enrollmentDate
+          ? new Date(req.body.enrollmentDate)
+          : new Date(),
       };
-      
+
       const enrollment = await storage.createEnrollment(enrollmentData);
       res.json(enrollment);
     } catch (error) {
@@ -1465,8 +1523,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user-progress/:userId/:moduleId", async (req, res) => {
     try {
       const { userId, moduleId } = req.params;
-      const progress = await storage.getUserProgressForModule(parseInt(userId), moduleId);
-      res.json(progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 });
+      const progress = await storage.getUserProgressForModule(
+        parseInt(userId),
+        moduleId
+      );
+      res.json(
+        progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 }
+      );
     } catch (error) {
       console.error("Error fetching module progress:", error);
       res.status(500).json({ message: "Failed to fetch module progress" });
@@ -1476,7 +1539,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/lesson-progress/:userId/:moduleId", async (req, res) => {
     try {
       const { userId, moduleId } = req.params;
-      const progress = await storage.getLessonProgress(parseInt(userId), moduleId);
+      const progress = await storage.getLessonProgress(
+        parseInt(userId),
+        moduleId
+      );
       res.json(progress);
     } catch (error) {
       console.error("Error fetching lesson progress:", error);
@@ -1487,7 +1553,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/lesson-progress/complete", async (req, res) => {
     try {
       const { userId, moduleId, lessonIndex } = req.body;
-      const progress = await storage.completeLessonProgress(parseInt(userId), moduleId, lessonIndex);
+      const progress = await storage.completeLessonProgress(
+        parseInt(userId),
+        moduleId,
+        lessonIndex
+      );
       res.json(progress);
     } catch (error) {
       console.error("Error completing lesson:", error);
@@ -1547,17 +1617,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Career Features Routes
-  
+
   // Authentication middleware for AI routes
   const requireAuth = (req: any, res: any, next: any) => {
-    console.log('🔐 [AUTH-MIDDLEWARE] Checking authentication for:', req.path);
-    console.log('🔐 [AUTH-MIDDLEWARE] User authenticated:', req.isAuthenticated());
-    console.log('🔐 [AUTH-MIDDLEWARE] User object:', req.user);
+    console.log("🔐 [AUTH-MIDDLEWARE] Checking authentication for:", req.path);
+    console.log(
+      "🔐 [AUTH-MIDDLEWARE] User authenticated:",
+      req.isAuthenticated()
+    );
+    console.log("🔐 [AUTH-MIDDLEWARE] User object:", req.user);
     if (!req.isAuthenticated()) {
-      console.log('❌ [AUTH-MIDDLEWARE] Authentication failed - returning 401');
-      return res.status(401).json({ message: 'Authentication required' });
+      console.log("❌ [AUTH-MIDDLEWARE] Authentication failed - returning 401");
+      return res.status(401).json({ message: "Authentication required" });
     }
-    console.log('✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding...');
+    console.log(
+      "✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding..."
+    );
     next();
   };
 
@@ -1575,10 +1650,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/career-advice", requireAuth, async (req, res) => {
     try {
-      console.log('🎯 [SERVER] POST /api/career-advice called');
-      console.log('🎯 [SERVER] Request body:', req.body);
+      console.log("🎯 [SERVER] POST /api/career-advice called");
+      console.log("🎯 [SERVER] Request body:", req.body);
       const { userId, targetRole, careerGoals, currentLevel } = req.body;
-      
+
       // Fetch user's profile data for AI analysis
       const profile = await storage.getProfile(userId);
       const workExperience = await storage.getWorkExperience(userId);
@@ -1586,7 +1661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const skills = await storage.getSkills(userId);
       const projects = await storage.getProjects(userId);
       const certifications = await storage.getCertifications(userId);
-      
+
       const userData = {
         personalDetails: profile?.personalDetails,
         workExperience,
@@ -1596,12 +1671,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certifications,
       };
 
-      console.log('🎯 [SERVER] User data collected for AI:', userData);
-      console.log('🎯 [SERVER] Calling AI service for advice generation...');
+      console.log("🎯 [SERVER] User data collected for AI:", userData);
+      console.log("🎯 [SERVER] Calling AI service for advice generation...");
       // Generate AI advice
-      const aiAdvice = await AICareerService.generateCareerAdvice(userData, targetRole);
-      console.log('🎯 [SERVER] AI advice generated:', aiAdvice);
-      
+      const aiAdvice = await AICareerService.generateCareerAdvice(
+        userData,
+        targetRole
+      );
+      console.log("🎯 [SERVER] AI advice generated:", aiAdvice);
+
       // Save to database
       const advisoryData = {
         userId: parseInt(userId),
@@ -1613,40 +1691,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         careerGoals,
         targetRole,
       };
-      
+
       const advisory = await storage.createCareerAdvisory(advisoryData);
       res.json(advisory);
     } catch (error) {
       console.error("❌ [SERVER] Error generating career advice:", error);
-      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ message: "Failed to generate career advice", error: error instanceof Error ? error.message : 'Unknown error' });
+      console.error(
+        "❌ [SERVER] Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      res
+        .status(500)
+        .json({
+          message: "Failed to generate career advice",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
   // Career Timeline
   app.get("/api/career-timeline/:userId", requireAuth, async (req, res) => {
     try {
-      console.log('🌐 [SERVER] GET /api/career-timeline called');
-      console.log('🌐 [SERVER] Requested userId:', req.params.userId);
-      console.log('🌐 [SERVER] Request user (auth):', req.user);
+      console.log("🌐 [SERVER] GET /api/career-timeline called");
+      console.log("🌐 [SERVER] Requested userId:", req.params.userId);
+      console.log("🌐 [SERVER] Request user (auth):", req.user);
       const userId = parseInt(req.params.userId);
-      console.log('🌐 [SERVER] Fetching timelines for userId:', userId);
+      console.log("🌐 [SERVER] Fetching timelines for userId:", userId);
       const timelines = await storage.getCareerTimelines(userId);
-      console.log('✅ [SERVER] Timelines fetched:', timelines);
+      console.log("✅ [SERVER] Timelines fetched:", timelines);
       res.json(timelines);
     } catch (error) {
       console.error("❌ [SERVER] Error fetching career timelines:", error);
-      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      console.error(
+        "❌ [SERVER] Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
       res.status(500).json({ message: "Failed to fetch career timelines" });
     }
   });
 
   app.post("/api/career-timeline", requireAuth, async (req, res) => {
     try {
-      console.log('🌐 [SERVER] POST /api/career-timeline called');
-      console.log('🌐 [SERVER] Request body:', req.body);
+      console.log("🌐 [SERVER] POST /api/career-timeline called");
+      console.log("🌐 [SERVER] Request body:", req.body);
       const { userId, targetRole } = req.body;
-      
+
       // Fetch user data for AI analysis
       const profile = await storage.getProfile(userId);
       const workExperience = await storage.getWorkExperience(userId);
@@ -1654,7 +1743,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const skills = await storage.getSkills(userId);
       const projects = await storage.getProjects(userId);
       const userProgress = await storage.getUserProgress(parseInt(userId));
-      
+
       const userData = {
         personalDetails: profile?.personalDetails,
         workExperience,
@@ -1664,11 +1753,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         learningProgress: userProgress,
       };
 
-      console.log('🌐 [SERVER] Calling AI service for timeline generation');
+      console.log("🌐 [SERVER] Calling AI service for timeline generation");
       // Generate AI timeline
-      const aiTimeline = await AICareerService.generateCareerTimeline(userData, targetRole);
-      
-      console.log('🌐 [SERVER] AI timeline generated, saving to database');
+      const aiTimeline = await AICareerService.generateCareerTimeline(
+        userData,
+        targetRole
+      );
+
+      console.log("🌐 [SERVER] AI timeline generated, saving to database");
       // Save to database
       const timelineData = {
         userId: parseInt(userId),
@@ -1677,31 +1769,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetRole,
         estimatedDuration: aiTimeline.estimatedDuration,
       };
-      
+
       const timeline = await storage.createCareerTimeline(timelineData);
-      console.log('✅ [SERVER] Timeline saved successfully:', timeline);
+      console.log("✅ [SERVER] Timeline saved successfully:", timeline);
       res.json(timeline);
     } catch (error) {
       console.error("❌ [SERVER] Error generating career timeline:", error);
-      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      console.error(
+        "❌ [SERVER] Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
       res.status(500).json({ message: "Failed to generate career timeline" });
     }
   });
 
   app.delete("/api/career-timeline/:id", requireAuth, async (req, res) => {
     try {
-      console.log('🌐 [SERVER] DELETE /api/career-timeline called');
-      console.log('🌐 [SERVER] Timeline ID to delete:', req.params.id);
+      console.log("🌐 [SERVER] DELETE /api/career-timeline called");
+      console.log("🌐 [SERVER] Timeline ID to delete:", req.params.id);
       const deleted = await storage.deleteCareerTimeline(req.params.id);
       if (!deleted) {
-        console.log('❌ [SERVER] Timeline not found:', req.params.id);
+        console.log("❌ [SERVER] Timeline not found:", req.params.id);
         return res.status(404).json({ message: "Career timeline not found" });
       }
-      console.log('✅ [SERVER] Timeline deleted successfully');
+      console.log("✅ [SERVER] Timeline deleted successfully");
       res.json({ message: "Career timeline deleted" });
     } catch (error) {
       console.error("❌ [SERVER] Error deleting career timeline:", error);
-      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      console.error(
+        "❌ [SERVER] Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
       res.status(500).json({ message: "Failed to delete career timeline" });
     }
   });
@@ -1720,10 +1818,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/resumes", requireAuth, async (req, res) => {
     try {
-      console.log('📄 [SERVER] POST /api/resumes called');
-      console.log('📄 [SERVER] Request body:', req.body);
+      console.log("📄 [SERVER] POST /api/resumes called");
+      console.log("📄 [SERVER] Request body:", req.body);
       const { userId, title, targetRole, template } = req.body;
-      
+
       // Fetch user data for AI analysis
       const profile = await storage.getProfile(userId);
       const workExperience = await storage.getWorkExperience(userId);
@@ -1731,7 +1829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const skills = await storage.getSkills(userId);
       const projects = await storage.getProjects(userId);
       const certifications = await storage.getCertifications(userId);
-      
+
       const userData = {
         personalDetails: profile?.personalDetails,
         contactDetails: profile?.contactDetails,
@@ -1742,33 +1840,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certifications,
       };
 
-      console.log('📄 [SERVER] User data collected for AI:', userData);
-      console.log('📄 [SERVER] Calling AI service for resume generation...');
+      console.log("📄 [SERVER] User data collected for AI:", userData);
+      console.log("📄 [SERVER] Calling AI service for resume generation...");
       // Generate AI resume
-      const aiResume = await AICareerService.generateResume(userData, targetRole);
-      console.log('📄 [SERVER] AI resume generated:', aiResume);
-      
+      const aiResume = await AICareerService.generateResume(
+        userData,
+        targetRole
+      );
+      console.log("📄 [SERVER] AI resume generated:", aiResume);
+
       // Save to database
       const resumeData = {
         userId: parseInt(userId),
         title,
         content: aiResume,
         targetRole,
-        template: template || 'professional',
+        template: template || "professional",
       };
-      
+
       const resume = await storage.createGeneratedResume(resumeData);
       res.json(resume);
     } catch (error) {
       console.error("❌ [SERVER] Error generating resume:", error);
-      console.error("❌ [SERVER] Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ message: "Failed to generate resume", error: error instanceof Error ? error.message : 'Unknown error' });
+      console.error(
+        "❌ [SERVER] Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      res
+        .status(500)
+        .json({
+          message: "Failed to generate resume",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
   app.patch("/api/resumes/:id", requireAuth, async (req, res) => {
     try {
-      const resume = await storage.updateGeneratedResume(req.params.id, req.body);
+      const resume = await storage.updateGeneratedResume(
+        req.params.id,
+        req.body
+      );
       if (!resume) {
         return res.status(404).json({ message: "Resume not found" });
       }
@@ -1804,29 +1916,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/chat-sessions/session/:sessionId", requireAuth, async (req, res) => {
-    try {
-      const session = await storage.getChatSession(req.params.sessionId);
-      if (!session) {
-        return res.status(404).json({ message: "Chat session not found" });
+  app.get(
+    "/api/chat-sessions/session/:sessionId",
+    requireAuth,
+    async (req, res) => {
+      try {
+        const session = await storage.getChatSession(req.params.sessionId);
+        if (!session) {
+          return res.status(404).json({ message: "Chat session not found" });
+        }
+        res.json(session);
+      } catch (error) {
+        console.error("Error fetching chat session:", error);
+        res.status(500).json({ message: "Failed to fetch chat session" });
       }
-      res.json(session);
-    } catch (error) {
-      console.error("Error fetching chat session:", error);
-      res.status(500).json({ message: "Failed to fetch chat session" });
     }
-  });
+  );
 
   app.post("/api/chat-sessions", requireAuth, async (req, res) => {
     try {
       const { userId, title } = req.body;
       const sessionData = {
         userId: parseInt(userId),
-        title: title || 'New Career Chat',
+        title: title || "New Career Chat",
         messages: [],
         isActive: true,
       };
-      
+
       const session = await storage.createChatSession(sessionData);
       res.json(session);
     } catch (error) {
@@ -1835,79 +1951,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat-sessions/:sessionId/message", requireAuth, async (req, res) => {
-    try {
-      console.log('💬 [SERVER] POST /api/chat-sessions/:sessionId/message called');
-      console.log('💬 [SERVER] Request body:', req.body);
-      console.log('💬 [SERVER] Session ID:', req.params.sessionId);
-      const { message } = req.body;
-      const sessionId = req.params.sessionId;
-      
-      // Get existing session
-      const session = await storage.getChatSession(sessionId);
-      if (!session) {
-        return res.status(404).json({ message: "Chat session not found" });
+  app.post(
+    "/api/chat-sessions/:sessionId/message",
+    requireAuth,
+    async (req, res) => {
+      try {
+        console.log(
+          "💬 [SERVER] POST /api/chat-sessions/:sessionId/message called"
+        );
+        console.log("💬 [SERVER] Request body:", req.body);
+        console.log("💬 [SERVER] Session ID:", req.params.sessionId);
+        const { message } = req.body;
+        const sessionId = req.params.sessionId;
+
+        // Get existing session
+        const session = await storage.getChatSession(sessionId);
+        if (!session) {
+          return res.status(404).json({ message: "Chat session not found" });
+        }
+
+        // Add user message
+        const updatedMessages = [
+          ...(session.messages || []),
+          {
+            role: "user" as const,
+            content: message,
+            timestamp: new Date().toISOString(),
+          },
+        ];
+
+        // Get user context for AI
+        const profile = await storage.getProfile(session.userId.toString());
+        const workExperience = await storage.getWorkExperience(
+          session.userId.toString()
+        );
+        const education = await storage.getEducation(session.userId.toString());
+        const skills = await storage.getSkills(session.userId.toString());
+        const projects = await storage.getProjects(session.userId.toString());
+        const userProgress = await storage.getUserProgress(session.userId);
+
+        const userContext = {
+          personalDetails: profile?.personalDetails,
+          workExperience,
+          education,
+          skills,
+          projects,
+          learningProgress: userProgress,
+        };
+
+        console.log("💬 [SERVER] User context for AI:", userContext);
+        console.log("💬 [SERVER] Messages for AI:", updatedMessages);
+        console.log("💬 [SERVER] Calling AI service for chat response...");
+        // Generate AI response
+        const aiResponse = await AICareerService.generateChatResponse(
+          updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+          userContext
+        );
+        console.log("💬 [SERVER] AI response generated:", aiResponse);
+
+        // Add AI response
+        const finalMessages = [
+          ...updatedMessages,
+          {
+            role: "assistant" as const,
+            content: aiResponse,
+            timestamp: new Date().toISOString(),
+          },
+        ];
+
+        // Update session
+        const updatedSession = await storage.updateChatSession(sessionId, {
+          messages: finalMessages,
+          updatedAt: new Date(),
+        });
+
+        res.json(updatedSession);
+      } catch (error) {
+        console.error("Error processing chat message:", error);
+        res.status(500).json({ message: "Failed to process message" });
       }
-
-      // Add user message
-      const updatedMessages = [
-        ...(session.messages || []),
-        {
-          role: 'user' as const,
-          content: message,
-          timestamp: new Date().toISOString(),
-        }
-      ];
-
-      // Get user context for AI
-      const profile = await storage.getProfile(session.userId.toString());
-      const workExperience = await storage.getWorkExperience(session.userId.toString());
-      const education = await storage.getEducation(session.userId.toString());
-      const skills = await storage.getSkills(session.userId.toString());
-      const projects = await storage.getProjects(session.userId.toString());
-      const userProgress = await storage.getUserProgress(session.userId);
-      
-      const userContext = {
-        personalDetails: profile?.personalDetails,
-        workExperience,
-        education,
-        skills,
-        projects,
-        learningProgress: userProgress,
-      };
-
-      console.log('💬 [SERVER] User context for AI:', userContext);
-      console.log('💬 [SERVER] Messages for AI:', updatedMessages);
-      console.log('💬 [SERVER] Calling AI service for chat response...');
-      // Generate AI response
-      const aiResponse = await AICareerService.generateChatResponse(
-        updatedMessages.map(m => ({ role: m.role, content: m.content })),
-        userContext
-      );
-      console.log('💬 [SERVER] AI response generated:', aiResponse);
-
-      // Add AI response
-      const finalMessages = [
-        ...updatedMessages,
-        {
-          role: 'assistant' as const,
-          content: aiResponse,
-          timestamp: new Date().toISOString(),
-        }
-      ];
-
-      // Update session
-      const updatedSession = await storage.updateChatSession(sessionId, {
-        messages: finalMessages,
-        updatedAt: new Date(),
-      });
-
-      res.json(updatedSession);
-    } catch (error) {
-      console.error("Error processing chat message:", error);
-      res.status(500).json({ message: "Failed to process message" });
     }
-  });
+  );
 
   // Forum Routes
   app.get("/api/forum/posts", async (req, res) => {
@@ -1954,19 +2078,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/forum/posts/:postId/replies", requireAuth, async (req, res) => {
-    try {
-      const replyData = insertForumReplySchema.parse({
-        ...req.body,
-        postId: req.params.postId,
-      });
-      const reply = await storage.createForumReply(replyData);
-      res.json(reply);
-    } catch (error) {
-      console.error("Error creating forum reply:", error);
-      res.status(500).json({ message: "Failed to create forum reply" });
+  app.post(
+    "/api/forum/posts/:postId/replies",
+    requireAuth,
+    async (req, res) => {
+      try {
+        const replyData = insertForumReplySchema.parse({
+          ...req.body,
+          postId: req.params.postId,
+        });
+        const reply = await storage.createForumReply(replyData);
+        res.json(reply);
+      } catch (error) {
+        console.error("Error creating forum reply:", error);
+        res.status(500).json({ message: "Failed to create forum reply" });
+      }
     }
-  });
+  );
 
   app.post("/api/forum/like", requireAuth, async (req, res) => {
     try {

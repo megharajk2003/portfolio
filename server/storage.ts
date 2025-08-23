@@ -195,7 +195,7 @@ export interface IStorage {
   updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession | undefined>;
 
   // Forum methods
-  getForumPosts(): Promise<(ForumPost & { user: User })[]>;
+  getForumPosts(): Promise<(ForumPost & { user: User; repliesCount: number })[]>;
   getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined>;
   createForumPost(data: InsertForumPost): Promise<ForumPost>;
   updateForumPost(id: string, data: Partial<InsertForumPost>): Promise<ForumPost | undefined>;
@@ -2087,21 +2087,38 @@ export class PgStorage implements IStorage {
   }
 
   // Forum methods implementation
-  async getForumPosts(): Promise<(ForumPost & { user: User })[]> {
+  async getForumPosts(): Promise<(ForumPost & { user: User; repliesCount: number })[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get('forumPosts') || [];
     }
     try {
+      // Subquery to count replies for each post
+      const repliesCountSubquery = db
+        .select({
+          postId: forumReplies.postId,
+          count: sql<number>`count(*)::int`.as('replies_count'),
+        })
+        .from(forumReplies)
+        .where(eq(forumReplies.isActive, true))
+        .groupBy(forumReplies.postId)
+        .as('replies_count_sq');
+
       const result = await db
-        .select()
+        .select({
+          post: forumPosts,
+          user: users,
+          repliesCount: sql<number>`coalesce(${repliesCountSubquery.count}, 0)::int`,
+        })
         .from(forumPosts)
         .innerJoin(users, eq(forumPosts.userId, users.id))
+        .leftJoin(repliesCountSubquery, eq(forumPosts.id, repliesCountSubquery.postId))
         .where(eq(forumPosts.isActive, true))
-        .orderBy(forumPosts.createdAt);
-      
+        .orderBy(desc(forumPosts.createdAt));
+
       return result.map(row => ({
-        ...row.forum_posts,
-        user: row.users
+        ...row.post,
+        user: row.user,
+        repliesCount: row.repliesCount,
       }));
     } catch (error) {
       console.error("Error fetching forum posts:", error);
