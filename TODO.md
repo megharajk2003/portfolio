@@ -1,15 +1,17 @@
-# Forum Page Sidebar Implementation
+# Toast Positioning Modification
 
-## Steps to Complete:
+## Goal: Make all toast notifications appear at the top of the screen
 
-1. [ ] Update forum.tsx to add sidebar state and mobile toggle functionality
-2. [ ] Add mobile overlay for sidebar
-3. [ ] Integrate Sidebar component from @/components/sidebar
-4. [ ] Adjust main content layout for sidebar
-5. [ ] Add mobile menu button
-6. [ ] Test responsive behavior
+### Steps:
 
-## Current Progress:
+- [x] Analyze current toast implementation
+- [x] Identify ToastViewport component in toast.tsx
+- [x] Understand current responsive positioning (top on mobile, bottom-right on desktop)
+- [ ] Modify ToastViewport className to always position toasts at the top
+- [ ] Remove responsive behavior that moves toasts to bottom-right
+- [ ] Adjust flex direction for proper top positioning
+- [ ] Verify changes work correctly
 
-- Plan approved by user
-- Starting implementation
+### Files to modify:
+
+- client/src/components/ui/toast.tsx (ToastViewport component)
