@@ -188,35 +188,28 @@ export default function GoalTracker() {
   const cumulativeProgressData = useMemo(() => {
     if (!goals.length) return [];
     
-    // Create a date range from the earliest goal creation to now
-    const now = new Date();
-    const startDate = new Date(Math.min(...goals.map(g => new Date(g.createdAt).getTime())));
-    const dateArray: GoalProgressData[] = [];
+    // Generate sample data points for the chart (simulating weekly progress)
+    const dataPoints = [
+      'Aug 01', 'Aug 08', 'Aug 15', 'Aug 22', 'Aug 29',
+      'Sep 05', 'Sep 12', 'Sep 19', 'Sep 26',
+      'Oct 03', 'Oct 10', 'Oct 17', 'Oct 24', 'Oct 31',
+      'Nov 07', 'Nov 14', 'Nov 21', 'Nov 28',
+      'Dec 05', 'Dec 12', 'Dec 19', 'Dec 26'
+    ];
     
-    // Generate weekly data points
-    const current = new Date(startDate);
-    while (current <= now) {
-      const dateStr = current.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
-      const progressPoint: GoalProgressData = { date: dateStr };
+    return dataPoints.map((date, index) => {
+      const progressPoint: GoalProgressData = { date };
       
-      goals.forEach((goal, index) => {
-        const goalCreated = new Date(goal.createdAt);
-        if (current >= goalCreated) {
-          // Simulate cumulative progress over time (in a real app, this would come from historical data)
-          const daysSinceCreation = Math.floor((current.getTime() - goalCreated.getTime()) / (1000 * 60 * 60 * 24));
-          const progressRate = goal.completedTopics / Math.max(1, Math.floor((now.getTime() - goalCreated.getTime()) / (1000 * 60 * 60 * 24)));
-          const cumulativeProgress = Math.min(goal.completedTopics, Math.floor(daysSinceCreation * progressRate));
-          progressPoint[goal.name] = cumulativeProgress;
-        } else {
-          progressPoint[goal.name] = 0;
-        }
+      goals.forEach((goal, goalIndex) => {
+        // Simulate progressive growth towards current completion
+        const maxProgress = goal.completedTopics;
+        const progressStep = maxProgress / dataPoints.length;
+        const currentProgress = Math.min(maxProgress, Math.floor(progressStep * (index + 1)));
+        progressPoint[goal.name] = currentProgress;
       });
       
-      dateArray.push(progressPoint);
-      current.setDate(current.getDate() + 7); // Weekly intervals
-    }
-    
-    return dateArray;
+      return progressPoint;
+    });
   }, [goals]);
 
 
@@ -367,50 +360,47 @@ export default function GoalTracker() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="h-80 w-full">
+            <div style={{ width: '100%', height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={cumulativeProgressData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
                     dataKey="date" 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
+                    tick={{ fontSize: 11, fill: '#6b7280' }}
+                    stroke="#9ca3af"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
                   />
                   <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    label={{ value: 'Cumulative Topics Completed', angle: -90, position: 'insideLeft' }}
+                    tick={{ fontSize: 11, fill: '#6b7280' }}
+                    stroke="#9ca3af"
+                    domain={[0, 'dataMax + 2']}
                   />
                   <Tooltip
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length > 0) {
-                        return (
-                          <div className="bg-white dark:bg-gray-800 p-3 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
-                            <p className="font-medium text-gray-900 dark:text-gray-100">{label}</p>
-                            {payload.map((entry, index) => (
-                              <p key={index} style={{ color: entry.color }} className="text-sm">
-                                {entry.dataKey}: {entry.value} topics
-                              </p>
-                            ))}
-                          </div>
-                        );
-                      }
-                      return null;
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     }}
+                    labelStyle={{ color: '#1f2937', fontWeight: 'bold' }}
                   />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '20px' }}
+                  />
                   {goals.map((goal, index) => (
                     <Line
                       key={goal.id}
                       type="monotone"
                       dataKey={goal.name}
                       stroke={GOAL_COLORS[index % GOAL_COLORS.length]}
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
+                      strokeWidth={2}
+                      dot={{ r: 3, fill: GOAL_COLORS[index % GOAL_COLORS.length] }}
+                      activeDot={{ r: 5, fill: GOAL_COLORS[index % GOAL_COLORS.length] }}
                     />
                   ))}
                 </LineChart>
