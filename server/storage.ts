@@ -2087,38 +2087,21 @@ export class PgStorage implements IStorage {
   }
 
   // Forum methods implementation
-  async getForumPosts(): Promise<(ForumPost & { user: User; repliesCount: number })[]> {
+  async getForumPosts(): Promise<(ForumPost & { user: User })[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get('forumPosts') || [];
     }
     try {
-      // Subquery to count replies for each post
-      const repliesCountSubquery = db
-        .select({
-          postId: forumReplies.postId,
-          count: sql<number>`count(*)::int`.as('replies_count'),
-        })
-        .from(forumReplies)
-        .where(eq(forumReplies.isActive, true))
-        .groupBy(forumReplies.postId)
-        .as('replies_count_sq');
-
       const result = await db
-        .select({
-          post: forumPosts,
-          user: users,
-          repliesCount: sql<number>`coalesce(${repliesCountSubquery.count}, 0)::int`,
-        })
+        .select()
         .from(forumPosts)
         .innerJoin(users, eq(forumPosts.userId, users.id))
-        .leftJoin(repliesCountSubquery, eq(forumPosts.id, repliesCountSubquery.postId))
         .where(eq(forumPosts.isActive, true))
         .orderBy(desc(forumPosts.createdAt));
-
+      
       return result.map(row => ({
-        ...row.post,
-        user: row.user,
-        repliesCount: row.repliesCount,
+        ...row.forum_posts,
+        user: row.users
       }));
     } catch (error) {
       console.error("Error fetching forum posts:", error);
@@ -2276,10 +2259,13 @@ export class PgStorage implements IStorage {
         .values(data)
         .returning();
       
-      // Update reply count
+      // Update reply count in the post
       await db
         .update(forumPosts)
-        .set({ repliesCount: sql`${forumPosts.repliesCount} + 1` })
+        .set({ 
+          repliesCount: sql`COALESCE(${forumPosts.repliesCount}, 0) + 1`,
+          updatedAt: new Date()
+        })
         .where(eq(forumPosts.id, data.postId));
       
       return result[0];
