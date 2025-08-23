@@ -1898,18 +1898,22 @@ export class PgStorage implements IStorage {
   // Helper method to check if all lessons are completed and mark module as completed
   private async checkAndCompleteModule(userId: number, moduleId: string): Promise<void> {
     try {
-      // Get the module to know how many lessons it has
-      const module = await this.getLearningModule(moduleId);
-      if (!module || !Array.isArray(module.lessons)) return;
+      // Get lessons for this module from the courses/modules endpoint
+      const lessons = await this.getModuleLessons(moduleId);
+      if (!lessons || lessons.length === 0) return;
 
-      const totalLessons = module.lessons.length;
+      const totalLessons = lessons.length;
 
       // Get all lesson progress for this module
       const allProgress = await this.getLessonProgress(userId, moduleId);
       const completedLessons = allProgress.filter(p => p.isCompleted).length;
 
+      console.log(`Checking module completion: ${completedLessons}/${totalLessons} lessons completed`);
+
       // If all lessons are completed, mark the module as completed
       if (completedLessons >= totalLessons) {
+        console.log(`All lessons completed, marking module ${moduleId} as completed for user ${userId}`);
+        
         // Get or create module progress
         let moduleProgress = await this.getUserProgressForModule(userId, moduleId);
         
@@ -1920,21 +1924,24 @@ export class PgStorage implements IStorage {
             const progressList = this.fallbackData.get(key) || [];
             const updatedList = progressList.map((p: any) => 
               p.moduleId === moduleId 
-                ? { ...p, isCompleted: true, completedAt: new Date() }
+                ? { ...p, isCompleted: true, completedAt: new Date(), currentLesson: totalLessons }
                 : p
             );
             this.fallbackData.set(key, updatedList);
+            console.log(`Updated module progress in fallback storage`);
           } else {
             await db
               .update(userProgress)
               .set({ 
                 isCompleted: true, 
-                completedAt: new Date() 
+                completedAt: new Date(),
+                currentLesson: totalLessons
               })
               .where(and(
                 eq(userProgress.userId, userId),
                 eq(userProgress.moduleId, moduleId)
               ));
+            console.log(`Updated module progress in database`);
           }
         } else {
           // Create new module progress record as completed
@@ -1943,10 +1950,11 @@ export class PgStorage implements IStorage {
             moduleId,
             currentLesson: totalLessons,
             isCompleted: true,
-            xpEarned: module.xpReward || 0,
+            xpEarned: 0, // Will be set based on module data if available
             completedAt: new Date()
           };
           await this.createUserProgress(progressData);
+          console.log(`Created new completed module progress`);
         }
       }
     } catch (error) {

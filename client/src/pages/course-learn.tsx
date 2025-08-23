@@ -95,18 +95,24 @@ export default function CourseLearn() {
           ? await progressResponse.json()
           : [];
 
+        const completedLessons = progress.filter((p: any) => p.isCompleted).length;
+        const totalLessons = lessons.length;
+
         return {
           moduleId: module.id,
           lessons,
           progress,
-          totalLessons: lessons.length,
-          completedLessons: progress.filter((p: any) => p.isCompleted).length,
+          totalLessons,
+          completedLessons,
+          isFullyCompleted: totalLessons > 0 && completedLessons >= totalLessons,
         };
       });
 
       return Promise.all(moduleDataPromises);
     },
     enabled: !!user && !!courseId && modules.length > 0,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refetch to ensure fresh data
   });
 
   // Auto-select first module and lesson
@@ -131,22 +137,24 @@ export default function CourseLearn() {
     // First module is always unlocked
     if (moduleIndex === 0) return true;
 
-    // Other modules unlock when previous module is fully completed
-    const previousModule = modules[moduleIndex - 1];
-    if (!previousModule) return false;
+    // Check if ALL previous modules are fully completed
+    for (let i = 0; i < moduleIndex; i++) {
+      const previousModule = modules[i];
+      if (!previousModule) return false;
 
-    // Check if all lessons in previous module are completed
-    const previousModuleData = allModulesData.find(
-      (md: any) => md.moduleId === previousModule.id
-    );
+      const previousModuleData = allModulesData.find(
+        (md: any) => md.moduleId === previousModule.id
+      );
 
-    if (!previousModuleData) return false;
+      if (!previousModuleData) return false;
 
-    // Module unlocks when all lessons in previous module are completed
-    return (
-      previousModuleData.totalLessons > 0 &&
-      previousModuleData.completedLessons >= previousModuleData.totalLessons
-    );
+      // Each previous module must be fully completed
+      if (!previousModuleData.isFullyCompleted) {
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const isLessonUnlocked = (lessonIndex: number, moduleIndex: number = 0) => {
@@ -220,18 +228,33 @@ export default function CourseLearn() {
       });
     },
     onSuccess: (data) => {
-      // Invalidate the specific lesson progress query for this user and module
+      // Invalidate all related queries to ensure fresh data
       queryClient.invalidateQueries({
         queryKey: ["/api/lesson-progress", user?.id, selectedModuleId],
       });
-      // Also invalidate general lesson progress queries
       queryClient.invalidateQueries({
         queryKey: ["/api/lesson-progress"],
       });
-      toast({
-        title: "Lesson Completed!",
-        description: "Great job! You've unlocked the next lesson.",
+      queryClient.invalidateQueries({
+        queryKey: ["/api/all-modules-data", user?.id, courseId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/user-progress", user?.id],
+      });
+      
+      // Check if this was the last lesson in the module
+      const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+      if (currentLessonIndex === lessons.length - 1) {
+        toast({
+          title: "Module Completed!",
+          description: "Congratulations! You've completed this module and unlocked the next one.",
+        });
+      } else {
+        toast({
+          title: "Lesson Completed!",
+          description: "Great job! You've unlocked the next lesson.",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -318,7 +341,7 @@ export default function CourseLearn() {
                       >
                         <div className="flex items-center w-full">
                           <div className="flex items-center mr-2 min-w-fit">
-                            {completedCount === totalCount && totalCount > 0 ? (
+                            {moduleData?.isFullyCompleted ? (
                               <CheckCircle className="h-4 w-4 text-green-600" />
                             ) : moduleUnlocked ? (
                               <Unlock className="h-4 w-4 text-blue-600" />
@@ -338,6 +361,11 @@ export default function CourseLearn() {
                                 </span>
                               )}
                             </div>
+                            {!moduleUnlocked && moduleIndex > 0 && (
+                              <div className="text-xs text-amber-600 mt-1">
+                                Complete previous modules to unlock
+                              </div>
+                            )}
                           </div>
                         </div>
                       </Button>
