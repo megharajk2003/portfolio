@@ -35,6 +35,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
 
+  // Username resolution endpoint for public portfolios
+  app.get("/api/user-by-username/:username", async (req, res) => {
+    try {
+      const username = req.params.username;
+      
+      // Try to find user by email (if username is the full email)
+      let user = await storage.getUserByEmail(username);
+      
+      // If not found, try to find by email prefix (username before @)
+      if (!user) {
+        // This is a simplified approach - in production, you'd want a proper username field
+        // For now, we'll assume the username is the first part of the email
+        const users = await storage.getAllUsers(); // We'll need to implement this
+        user = users.find(u => u.email.split('@')[0] === username);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return basic user info (not sensitive data)
+      res.json({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email, // Only return email for public portfolio context
+      });
+    } catch (error) {
+      console.error("Error resolving username:", error);
+      res.status(500).json({ message: "Failed to resolve username" });
+    }
+  });
+
   // Profile routes
   app.get("/api/profile/:userId", async (req, res) => {
     try {

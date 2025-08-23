@@ -82,6 +82,7 @@ export interface IStorage {
   // User management for JWT Auth
   getUserById(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
 
@@ -285,6 +286,11 @@ export class PgStorage implements IStorage {
       .from(users)
       .where(eq(users.email, email.toLowerCase()));
     return result[0];
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const result = await db.select().from(users);
+    return result;
   }
 
   async createUser(userData: InsertUser): Promise<User> {

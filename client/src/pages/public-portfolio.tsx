@@ -23,35 +23,47 @@ export default function PublicPortfolio() {
   const username = params?.username;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Mock user ID mapping - in real app this would be resolved from username  
-  const CURRENT_USER_ID = "1";
+  // Resolve username to user ID
+  const { data: userData } = useQuery<{id: number, firstName?: string, lastName?: string, email: string}>({
+    queryKey: ["/api/user-by-username", username],
+    enabled: !!username,
+  });
+
+  const userId = userData?.id?.toString();
 
   const { data: profile } = useQuery<Profile>({
-    queryKey: ["/api/profile", CURRENT_USER_ID],
+    queryKey: ["/api/profile", userId],
+    enabled: !!userId,
   });
 
   const { data: workExperience = [] } = useQuery<any[]>({
-    queryKey: ["/api/work-experience", CURRENT_USER_ID],
+    queryKey: ["/api/work-experience", userId],
+    enabled: !!userId,
   });
 
   const { data: education = [] } = useQuery<any[]>({
-    queryKey: ["/api/education", CURRENT_USER_ID],
+    queryKey: ["/api/education", userId],
+    enabled: !!userId,
   });
 
   const { data: skills = [] } = useQuery<any[]>({
-    queryKey: ["/api/skills", CURRENT_USER_ID],
+    queryKey: ["/api/skills", userId],
+    enabled: !!userId,
   });
 
   const { data: projects = [] } = useQuery<any[]>({
-    queryKey: ["/api/projects", CURRENT_USER_ID],
+    queryKey: ["/api/projects", userId],
+    enabled: !!userId,
   });
 
   const { data: certifications = [] } = useQuery<any[]>({
-    queryKey: ["/api/certifications", CURRENT_USER_ID],
+    queryKey: ["/api/certifications", userId],
+    enabled: !!userId,
   });
 
   const { data: achievements = [] } = useQuery<any[]>({
-    queryKey: ["/api/achievements", CURRENT_USER_ID],
+    queryKey: ["/api/achievements", userId],
+    enabled: !!userId,
   });
 
   // Mock additional data for comprehensive portfolio
@@ -96,12 +108,37 @@ export default function PublicPortfolio() {
     { icon: Globe, href: "https://website.com", label: "Website" }
   ];
 
-  if (!profile) {
+  // Show loading while resolving username
+  if (!userData && username) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading Portfolio...</h1>
+            <p className="text-gray-600 dark:text-gray-400">Please wait while we load the portfolio.</p>
+          </div>
+      </div>
+    );
+  }
+
+  // Show error if username resolution failed
+  if (userData === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Portfolio Not Found</h1>
             <p className="text-gray-600 dark:text-gray-400">The portfolio for "{username}" could not be found.</p>
+          </div>
+      </div>
+    );
+  }
+
+  // Show loading while fetching profile data
+  if (!profile && userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading Portfolio...</h1>
+            <p className="text-gray-600 dark:text-gray-400">Loading portfolio data for "{userData?.firstName || username}"...</p>
           </div>
       </div>
     );
