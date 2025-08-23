@@ -26,6 +26,7 @@ import CareerAdvisor from "@/pages/career-advisor";
 import CareerTimeline from "@/pages/career-timeline";
 import ResumeGenerator from "@/pages/resume-generator";
 import CareerChat from "@/pages/career-chat";
+import Forum from "@/pages/forum";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -47,6 +48,7 @@ function Router() {
       "/dashboard",
       "/portfolio",
       "/learning",
+      "/forum",
       "/edit-portfolio",
       "/course",
       "/module",
@@ -101,11 +103,13 @@ function Router() {
           <Route path="/profile" component={Profile} />
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/learning" component={Learning} />
+          <Route path="/forum" component={Forum} />
           <Route path="/course/:courseId/learn" component={CourseLearn} />
           <Route path="/course/:id" component={CourseDetail} />
           <Route path="/module/:id" component={ModuleDetail} />
           <Route path="/edit-portfolio" component={EditPortfolio} />
           <Route path="/portfolio/:username" component={PublicPortfolio} />
+          <Route path="/public-portfolio/:username" component={PublicPortfolio} />
           <Route path="/career-tools" component={CareerTools} />
           <Route path="/career-advisor" component={CareerAdvisor} />
           <Route path="/career-timeline" component={CareerTimeline} />

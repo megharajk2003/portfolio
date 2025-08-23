@@ -26,6 +26,9 @@ import {
   insertCareerTimelineSchema,
   insertGeneratedResumeSchema,
   insertChatSessionSchema,
+  insertForumPostSchema,
+  insertForumReplySchema,
+  insertForumLikeSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1903,6 +1906,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing chat message:", error);
       res.status(500).json({ message: "Failed to process message" });
+    }
+  });
+
+  // Forum Routes
+  app.get("/api/forum/posts", async (req, res) => {
+    try {
+      const posts = await storage.getForumPosts();
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching forum posts:", error);
+      res.status(500).json({ message: "Failed to fetch forum posts" });
+    }
+  });
+
+  app.get("/api/forum/posts/:postId", async (req, res) => {
+    try {
+      const post = await storage.getForumPost(req.params.postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching forum post:", error);
+      res.status(500).json({ message: "Failed to fetch forum post" });
+    }
+  });
+
+  app.post("/api/forum/posts", requireAuth, async (req, res) => {
+    try {
+      const postData = insertForumPostSchema.parse(req.body);
+      const post = await storage.createForumPost(postData);
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating forum post:", error);
+      res.status(500).json({ message: "Failed to create forum post" });
+    }
+  });
+
+  app.get("/api/forum/posts/:postId/replies", async (req, res) => {
+    try {
+      const replies = await storage.getForumReplies(req.params.postId);
+      res.json(replies);
+    } catch (error) {
+      console.error("Error fetching forum replies:", error);
+      res.status(500).json({ message: "Failed to fetch forum replies" });
+    }
+  });
+
+  app.post("/api/forum/posts/:postId/replies", requireAuth, async (req, res) => {
+    try {
+      const replyData = insertForumReplySchema.parse({
+        ...req.body,
+        postId: req.params.postId,
+      });
+      const reply = await storage.createForumReply(replyData);
+      res.json(reply);
+    } catch (error) {
+      console.error("Error creating forum reply:", error);
+      res.status(500).json({ message: "Failed to create forum reply" });
+    }
+  });
+
+  app.post("/api/forum/like", requireAuth, async (req, res) => {
+    try {
+      const likeData = insertForumLikeSchema.parse(req.body);
+      const result = await storage.toggleForumLike(likeData);
+      res.json(result);
+    } catch (error) {
+      console.error("Error toggling forum like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
+    }
+  });
+
+  app.get("/api/forum/like/:userId", requireAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { postId, replyId } = req.query;
+      const like = await storage.getForumLike(
+        parseInt(userId),
+        postId as string,
+        replyId as string
+      );
+      res.json({ liked: !!like });
+    } catch (error) {
+      console.error("Error fetching forum like:", error);
+      res.status(500).json({ message: "Failed to fetch like status" });
     }
   });
 

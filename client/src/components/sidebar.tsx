@@ -14,12 +14,14 @@ import {
   Flame,
   X,
   Sparkles,
+  MessageCircle,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Learning", href: "/learning", icon: BookOpen },
+  { name: "Forum", href: "/forum", icon: MessageCircle },
   { name: "Career Tools", href: "/career-tools", icon: Sparkles },
 ];
 

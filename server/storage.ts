@@ -36,6 +36,12 @@ import {
   type InsertGeneratedResume,
   type ChatSession,
   type InsertChatSession,
+  type ForumPost,
+  type InsertForumPost,
+  type ForumReply,
+  type InsertForumReply,
+  type ForumLike,
+  type InsertForumLike,
   users,
   profiles,
   learningModules,
@@ -62,6 +68,9 @@ import {
   careerTimelines,
   generatedResumes,
   chatSessions,
+  forumPosts,
+  forumReplies,
+  forumLikes,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte } from "drizzle-orm";
@@ -184,6 +193,21 @@ export interface IStorage {
   getChatSession(id: string): Promise<ChatSession | undefined>;
   createChatSession(data: InsertChatSession): Promise<ChatSession>;
   updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession | undefined>;
+
+  // Forum methods
+  getForumPosts(): Promise<(ForumPost & { user: User })[]>;
+  getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined>;
+  createForumPost(data: InsertForumPost): Promise<ForumPost>;
+  updateForumPost(id: string, data: Partial<InsertForumPost>): Promise<ForumPost | undefined>;
+  deleteForumPost(id: string): Promise<boolean>;
+  
+  getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
+  createForumReply(data: InsertForumReply): Promise<ForumReply>;
+  updateForumReply(id: string, data: Partial<InsertForumReply>): Promise<ForumReply | undefined>;
+  deleteForumReply(id: string): Promise<boolean>;
+  
+  toggleForumLike(data: InsertForumLike): Promise<{ liked: boolean; likesCount: number }>;
+  getForumLike(userId: number, postId?: string, replyId?: string): Promise<ForumLike | undefined>;
 
   // New learning platform methods
   getCourses(): Promise<Course[]>;
@@ -2058,6 +2082,382 @@ export class PgStorage implements IStorage {
       return result[0] || undefined;
     } catch (error) {
       console.error("Error updating chat session:", error);
+      return undefined;
+    }
+  }
+
+  // Forum methods implementation
+  async getForumPosts(): Promise<(ForumPost & { user: User })[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get('forumPosts') || [];
+    }
+    try {
+      const result = await db
+        .select()
+        .from(forumPosts)
+        .innerJoin(users, eq(forumPosts.userId, users.id))
+        .where(eq(forumPosts.isActive, true))
+        .orderBy(forumPosts.createdAt);
+      
+      return result.map(row => ({
+        ...row.forum_posts,
+        user: row.users
+      }));
+    } catch (error) {
+      console.error("Error fetching forum posts:", error);
+      return this.fallbackData.get('forumPosts') || [];
+    }
+  }
+
+  async getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined> {
+    if (!this.isDbConnected) {
+      const posts = this.fallbackData.get('forumPosts') || [];
+      return posts.find((p: any) => p.id === id);
+    }
+    try {
+      const result = await db
+        .select()
+        .from(forumPosts)
+        .innerJoin(users, eq(forumPosts.userId, users.id))
+        .where(and(eq(forumPosts.id, id), eq(forumPosts.isActive, true)));
+      
+      if (result.length === 0) return undefined;
+      return {
+        ...result[0].forum_posts,
+        user: result[0].users
+      };
+    } catch (error) {
+      console.error("Error fetching forum post:", error);
+      return undefined;
+    }
+  }
+
+  async createForumPost(data: InsertForumPost): Promise<ForumPost> {
+    if (!this.isDbConnected) {
+      const newPost = {
+        id: randomUUID(),
+        ...data,
+        likesCount: 0,
+        repliesCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const posts = this.fallbackData.get('forumPosts') || [];
+      posts.push(newPost);
+      this.fallbackData.set('forumPosts', posts);
+      return newPost;
+    }
+    try {
+      const result = await db
+        .insert(forumPosts)
+        .values(data)
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating forum post:", error);
+      throw error;
+    }
+  }
+
+  async updateForumPost(id: string, data: Partial<InsertForumPost>): Promise<ForumPost | undefined> {
+    if (!this.isDbConnected) {
+      const posts = this.fallbackData.get('forumPosts') || [];
+      const index = posts.findIndex((p: any) => p.id === id);
+      if (index !== -1) {
+        posts[index] = { ...posts[index], ...data, updatedAt: new Date() };
+        this.fallbackData.set('forumPosts', posts);
+        return posts[index];
+      }
+      return undefined;
+    }
+    try {
+      const result = await db
+        .update(forumPosts)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(forumPosts.id, id))
+        .returning();
+      return result[0] || undefined;
+    } catch (error) {
+      console.error("Error updating forum post:", error);
+      return undefined;
+    }
+  }
+
+  async deleteForumPost(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      const posts = this.fallbackData.get('forumPosts') || [];
+      const index = posts.findIndex((p: any) => p.id === id);
+      if (index !== -1) {
+        posts[index] = { ...posts[index], isActive: false };
+        this.fallbackData.set('forumPosts', posts);
+        return true;
+      }
+      return false;
+    }
+    try {
+      await db
+        .update(forumPosts)
+        .set({ isActive: false })
+        .where(eq(forumPosts.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting forum post:", error);
+      return false;
+    }
+  }
+
+  async getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`forumReplies_${postId}`) || [];
+    }
+    try {
+      const result = await db
+        .select()
+        .from(forumReplies)
+        .innerJoin(users, eq(forumReplies.userId, users.id))
+        .where(and(eq(forumReplies.postId, postId), eq(forumReplies.isActive, true)))
+        .orderBy(forumReplies.createdAt);
+      
+      return result.map(row => ({
+        ...row.forum_replies,
+        user: row.users
+      }));
+    } catch (error) {
+      console.error("Error fetching forum replies:", error);
+      return this.fallbackData.get(`forumReplies_${postId}`) || [];
+    }
+  }
+
+  async createForumReply(data: InsertForumReply): Promise<ForumReply> {
+    if (!this.isDbConnected) {
+      const newReply = {
+        id: randomUUID(),
+        ...data,
+        likesCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const replies = this.fallbackData.get(`forumReplies_${data.postId}`) || [];
+      replies.push(newReply);
+      this.fallbackData.set(`forumReplies_${data.postId}`, replies);
+      
+      // Update reply count
+      const posts = this.fallbackData.get('forumPosts') || [];
+      const postIndex = posts.findIndex((p: any) => p.id === data.postId);
+      if (postIndex !== -1) {
+        posts[postIndex].repliesCount = (posts[postIndex].repliesCount || 0) + 1;
+        this.fallbackData.set('forumPosts', posts);
+      }
+      
+      return newReply;
+    }
+    try {
+      const result = await db
+        .insert(forumReplies)
+        .values(data)
+        .returning();
+      
+      // Update reply count
+      await db
+        .update(forumPosts)
+        .set({ repliesCount: sql`${forumPosts.repliesCount} + 1` })
+        .where(eq(forumPosts.id, data.postId));
+      
+      return result[0];
+    } catch (error) {
+      console.error("Error creating forum reply:", error);
+      throw error;
+    }
+  }
+
+  async updateForumReply(id: string, data: Partial<InsertForumReply>): Promise<ForumReply | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('forumReplies_')) {
+          const replies = this.fallbackData.get(key) || [];
+          const index = replies.findIndex((r: any) => r.id === id);
+          if (index !== -1) {
+            replies[index] = { ...replies[index], ...data, updatedAt: new Date() };
+            this.fallbackData.set(key, replies);
+            return replies[index];
+          }
+        }
+      }
+      return undefined;
+    }
+    try {
+      const result = await db
+        .update(forumReplies)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(forumReplies.id, id))
+        .returning();
+      return result[0] || undefined;
+    } catch (error) {
+      console.error("Error updating forum reply:", error);
+      return undefined;
+    }
+  }
+
+  async deleteForumReply(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('forumReplies_')) {
+          const replies = this.fallbackData.get(key) || [];
+          const index = replies.findIndex((r: any) => r.id === id);
+          if (index !== -1) {
+            const reply = replies[index];
+            replies[index] = { ...reply, isActive: false };
+            this.fallbackData.set(key, replies);
+            
+            // Update reply count
+            const posts = this.fallbackData.get('forumPosts') || [];
+            const postIndex = posts.findIndex((p: any) => p.id === reply.postId);
+            if (postIndex !== -1) {
+              posts[postIndex].repliesCount = Math.max(0, (posts[postIndex].repliesCount || 0) - 1);
+              this.fallbackData.set('forumPosts', posts);
+            }
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    try {
+      const reply = await db
+        .select()
+        .from(forumReplies)
+        .where(eq(forumReplies.id, id))
+        .limit(1);
+      
+      if (reply.length === 0) return false;
+      
+      await db
+        .update(forumReplies)
+        .set({ isActive: false })
+        .where(eq(forumReplies.id, id));
+      
+      // Update reply count
+      await db
+        .update(forumPosts)
+        .set({ repliesCount: sql`${forumPosts.repliesCount} - 1` })
+        .where(eq(forumPosts.id, reply[0].postId));
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting forum reply:", error);
+      return false;
+    }
+  }
+
+  async toggleForumLike(data: InsertForumLike): Promise<{ liked: boolean; likesCount: number }> {
+    if (!this.isDbConnected) {
+      // Simplified in-memory implementation
+      return { liked: true, likesCount: 1 };
+    }
+    try {
+      const existingLike = await db
+        .select()
+        .from(forumLikes)
+        .where(
+          and(
+            eq(forumLikes.userId, data.userId),
+            data.postId ? eq(forumLikes.postId, data.postId) : sql`${forumLikes.postId} IS NULL`,
+            data.replyId ? eq(forumLikes.replyId, data.replyId) : sql`${forumLikes.replyId} IS NULL`
+          )
+        );
+
+      if (existingLike.length > 0) {
+        // Remove like
+        await db
+          .delete(forumLikes)
+          .where(eq(forumLikes.id, existingLike[0].id));
+        
+        // Update count
+        if (data.postId) {
+          await db
+            .update(forumPosts)
+            .set({ likesCount: sql`${forumPosts.likesCount} - 1` })
+            .where(eq(forumPosts.id, data.postId));
+          
+          const updatedPost = await db
+            .select({ likesCount: forumPosts.likesCount })
+            .from(forumPosts)
+            .where(eq(forumPosts.id, data.postId));
+          
+          return { liked: false, likesCount: updatedPost[0]?.likesCount || 0 };
+        } else if (data.replyId) {
+          await db
+            .update(forumReplies)
+            .set({ likesCount: sql`${forumReplies.likesCount} - 1` })
+            .where(eq(forumReplies.id, data.replyId));
+          
+          const updatedReply = await db
+            .select({ likesCount: forumReplies.likesCount })
+            .from(forumReplies)
+            .where(eq(forumReplies.id, data.replyId));
+          
+          return { liked: false, likesCount: updatedReply[0]?.likesCount || 0 };
+        }
+      } else {
+        // Add like
+        await db
+          .insert(forumLikes)
+          .values(data);
+        
+        // Update count
+        if (data.postId) {
+          await db
+            .update(forumPosts)
+            .set({ likesCount: sql`${forumPosts.likesCount} + 1` })
+            .where(eq(forumPosts.id, data.postId));
+          
+          const updatedPost = await db
+            .select({ likesCount: forumPosts.likesCount })
+            .from(forumPosts)
+            .where(eq(forumPosts.id, data.postId));
+          
+          return { liked: true, likesCount: updatedPost[0]?.likesCount || 1 };
+        } else if (data.replyId) {
+          await db
+            .update(forumReplies)
+            .set({ likesCount: sql`${forumReplies.likesCount} + 1` })
+            .where(eq(forumReplies.id, data.replyId));
+          
+          const updatedReply = await db
+            .select({ likesCount: forumReplies.likesCount })
+            .from(forumReplies)
+            .where(eq(forumReplies.id, data.replyId));
+          
+          return { liked: true, likesCount: updatedReply[0]?.likesCount || 1 };
+        }
+      }
+      
+      return { liked: false, likesCount: 0 };
+    } catch (error) {
+      console.error("Error toggling forum like:", error);
+      return { liked: false, likesCount: 0 };
+    }
+  }
+
+  async getForumLike(userId: number, postId?: string, replyId?: string): Promise<ForumLike | undefined> {
+    if (!this.isDbConnected) {
+      return undefined;
+    }
+    try {
+      const result = await db
+        .select()
+        .from(forumLikes)
+        .where(
+          and(
+            eq(forumLikes.userId, userId),
+            postId ? eq(forumLikes.postId, postId) : sql`${forumLikes.postId} IS NULL`,
+            replyId ? eq(forumLikes.replyId, replyId) : sql`${forumLikes.replyId} IS NULL`
+          )
+        );
+      
+      return result[0] || undefined;
+    } catch (error) {
+      console.error("Error fetching forum like:", error);
       return undefined;
     }
   }

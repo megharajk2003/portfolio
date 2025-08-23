@@ -647,6 +647,53 @@ export const chatSessions = pgTable("chat_sessions", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Forum Tables
+export const forumPosts = pgTable("forum_posts", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  likesCount: integer("likes_count").default(0),
+  repliesCount: integer("replies_count").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const forumReplies = pgTable("forum_replies", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  postId: varchar("post_id")
+    .notNull()
+    .references(() => forumPosts.id, { onDelete: "cascade" }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  likesCount: integer("likes_count").default(0),
+  parentReplyId: varchar("parent_reply_id"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const forumLikes = pgTable("forum_likes", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  postId: varchar("post_id").references(() => forumPosts.id, { onDelete: "cascade" }),
+  replyId: varchar("reply_id").references(() => forumReplies.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Types for AI Career Features
 export type CareerAdvisory = typeof careerAdvisories.$inferSelect;
 export type InsertCareerAdvisory = typeof careerAdvisories.$inferInsert;
@@ -656,6 +703,14 @@ export type GeneratedResume = typeof generatedResumes.$inferSelect;
 export type InsertGeneratedResume = typeof generatedResumes.$inferInsert;
 export type ChatSession = typeof chatSessions.$inferSelect;
 export type InsertChatSession = typeof chatSessions.$inferInsert;
+
+// Forum types
+export type ForumPost = typeof forumPosts.$inferSelect;
+export type InsertForumPost = typeof forumPosts.$inferInsert;
+export type ForumReply = typeof forumReplies.$inferSelect;
+export type InsertForumReply = typeof forumReplies.$inferInsert;
+export type ForumLike = typeof forumLikes.$inferSelect;
+export type InsertForumLike = typeof forumLikes.$inferInsert;
 
 // Types for new learning platform tables
 export type Instructor = typeof instructors.$inferSelect;
@@ -680,6 +735,27 @@ export const insertCareerAdvisorySchema = createInsertSchema(careerAdvisories);
 export const insertCareerTimelineSchema = createInsertSchema(careerTimelines);
 export const insertGeneratedResumeSchema = createInsertSchema(generatedResumes);
 export const insertChatSessionSchema = createInsertSchema(chatSessions);
+
+// Forum validation schemas
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  likesCount: true,
+  repliesCount: true,
+});
+
+export const insertForumReplySchema = createInsertSchema(forumReplies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  likesCount: true,
+});
+
+export const insertForumLikeSchema = createInsertSchema(forumLikes).omit({
+  id: true,
+  createdAt: true,
+});
 
 // Zod schemas for new learning platform
 export const insertCourseSchema = createInsertSchema(courses);
