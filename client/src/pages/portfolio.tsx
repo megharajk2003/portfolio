@@ -3,8 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import Sidebar from "@/components/sidebar";
+import { useQuery } from "@tanstack/react-query";
+import type { User } from "@shared/schema";
 
 export default function Portfolio() {
+  // Get current user to extract email prefix for portfolio URL
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/user"],
+  });
+
+  // Extract username from email (part before @)
+  const username = user?.email?.split('@')[0] || 'user';
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
@@ -47,11 +57,11 @@ export default function Portfolio() {
                   <p className="text-sm text-gray-600">
                     Your portfolio is live at: <br />
                     <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                      /portfolio/megharaj
+                      /portfolio/{username}
                     </span>
                   </p>
                   <Button className="w-full" asChild>
-                    <Link href="/portfolio/megharaj">
+                    <Link href={`/portfolio/${username}`}>
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View Public Portfolio
                     </Link>
