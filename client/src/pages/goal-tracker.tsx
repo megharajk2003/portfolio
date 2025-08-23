@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
@@ -19,9 +19,21 @@ import {
 import { 
   Upload,
   Target,
-  FileSpreadsheet
+  FileSpreadsheet,
+  TrendingUp
 } from "lucide-react";
 import { useLocation } from "wouter";
+import Sidebar from "@/components/sidebar";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from "recharts";
 
 interface Goal {
   id: string;
@@ -33,6 +45,22 @@ interface Goal {
   createdAt: string;
   updatedAt: string;
 }
+
+interface GoalProgressData {
+  date: string;
+  [goalName: string]: number | string;
+}
+
+const GOAL_COLORS = [
+  '#3b82f6', // blue
+  '#10b981', // green  
+  '#f59e0b', // yellow
+  '#ef4444', // red
+  '#8b5cf6', // purple
+  '#f97316', // orange
+  '#06b6d4', // cyan
+  '#84cc16', // lime
+];
 
 
 export default function GoalTracker() {
@@ -156,9 +184,47 @@ export default function GoalTracker() {
     }
   };
 
+  // Generate cumulative progress data for the line chart
+  const cumulativeProgressData = useMemo(() => {
+    if (!goals.length) return [];
+    
+    // Create a date range from the earliest goal creation to now
+    const now = new Date();
+    const startDate = new Date(Math.min(...goals.map(g => new Date(g.createdAt).getTime())));
+    const dateArray: GoalProgressData[] = [];
+    
+    // Generate weekly data points
+    const current = new Date(startDate);
+    while (current <= now) {
+      const dateStr = current.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      const progressPoint: GoalProgressData = { date: dateStr };
+      
+      goals.forEach((goal, index) => {
+        const goalCreated = new Date(goal.createdAt);
+        if (current >= goalCreated) {
+          // Simulate cumulative progress over time (in a real app, this would come from historical data)
+          const daysSinceCreation = Math.floor((current.getTime() - goalCreated.getTime()) / (1000 * 60 * 60 * 24));
+          const progressRate = goal.completedTopics / Math.max(1, Math.floor((now.getTime() - goalCreated.getTime()) / (1000 * 60 * 60 * 24)));
+          const cumulativeProgress = Math.min(goal.completedTopics, Math.floor(daysSinceCreation * progressRate));
+          progressPoint[goal.name] = cumulativeProgress;
+        } else {
+          progressPoint[goal.name] = 0;
+        }
+      });
+      
+      dateArray.push(progressPoint);
+      current.setDate(current.getDate() + 7); // Weekly intervals
+    }
+    
+    return dateArray;
+  }, [goals]);
+
 
   return (
-    <div className="container mx-auto p-6 space-y-6" data-testid="goal-tracker-page">
+    <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto p-6 space-y-6" data-testid="goal-tracker-page">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100" data-testid="page-title">
@@ -288,6 +354,74 @@ export default function GoalTracker() {
         </div>
       )}
 
+      {/* Study Performance Chart */}
+      {goals.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-blue-500" />
+              Study Performance
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              This chart shows the cumulative number of topics you've completed for each goal.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={cumulativeProgressData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                    label={{ value: 'Cumulative Topics Completed', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length > 0) {
+                        return (
+                          <div className="bg-white dark:bg-gray-800 p-3 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700">
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{label}</p>
+                            {payload.map((entry, index) => (
+                              <p key={index} style={{ color: entry.color }} className="text-sm">
+                                {entry.dataKey}: {entry.value} topics
+                              </p>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend />
+                  {goals.map((goal, index) => (
+                    <Line
+                      key={goal.id}
+                      type="monotone"
+                      dataKey={goal.name}
+                      stroke={GOAL_COLORS[index % GOAL_COLORS.length]}
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+        </div>
+      </div>
     </div>
   );
 }
