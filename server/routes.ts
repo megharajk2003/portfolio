@@ -31,6 +31,9 @@ import {
   insertForumLikeSchema,
   insertBadgeSchema,
   insertUserBadgeSchema,
+  insertGoalSchema,
+  insertGoalCategorySchema,
+  insertGoalTopicSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2204,6 +2207,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching forum like:", error);
       res.status(500).json({ message: "Failed to fetch like status" });
+    }
+  });
+
+  // Goal Tracking API Routes
+  
+  // Get user's goals
+  app.get("/api/goals", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const goals = await storage.getUserGoals(req.user.id);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get specific goal with categories and topics
+  app.get("/api/goals/:id", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const goalId = req.params.id;
+      const goal = await storage.getGoalWithCategories(goalId);
+      
+      if (!goal) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      
+      // Ensure the goal belongs to the current user
+      if (goal.userId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json(goal);
+    } catch (error) {
+      console.error("Error fetching goal:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Create a new goal
+  app.post("/api/goals", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const goalData = insertGoalSchema.parse({
+        ...req.body,
+        userId: req.user.id
+      });
+      
+      const goal = await storage.createGoal(goalData);
+      res.status(201).json(goal);
+    } catch (error) {
+      console.error("Error creating goal:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Create goal from CSV upload
+  app.post("/api/goals/from-csv", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { goalName, csvData } = req.body;
+      
+      if (!goalName || !Array.isArray(csvData) || csvData.length === 0) {
+        return res.status(400).json({ 
+          message: "Goal name and CSV data are required" 
+        });
+      }
+      
+      // Validate CSV data structure
+      const requiredFields = ['category', 'topic', 'status'];
+      const hasValidStructure = csvData.every(row => 
+        requiredFields.some(field => 
+          row[field] || row[field.charAt(0).toUpperCase() + field.slice(1)]
+        )
+      );
+      
+      if (!hasValidStructure) {
+        return res.status(400).json({ 
+          message: "CSV must contain Category, Topic, and Status columns" 
+        });
+      }
+      
+      const goal = await storage.createGoalFromCSV(req.user.id, goalName, csvData);
+      res.status(201).json(goal);
+    } catch (error) {
+      console.error("Error creating goal from CSV:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update goal
+  app.put("/api/goals/:id", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const goalId = req.params.id;
+      const goalData = req.body;
+      
+      // Verify goal ownership
+      const existingGoal = await storage.getGoal(goalId);
+      if (!existingGoal || existingGoal.userId !== req.user.id) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      
+      const updatedGoal = await storage.updateGoal(goalId, goalData);
+      res.json(updatedGoal);
+    } catch (error) {
+      console.error("Error updating goal:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Delete goal
+  app.delete("/api/goals/:id", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const goalId = req.params.id;
+      
+      // Verify goal ownership
+      const existingGoal = await storage.getGoal(goalId);
+      if (!existingGoal || existingGoal.userId !== req.user.id) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      
+      const deleted = await storage.deleteGoal(goalId);
+      res.json({ success: deleted });
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update topic status
+  app.put("/api/topics/:id/status", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const topicId = req.params.id;
+      const { status, notes } = req.body;
+      
+      // Validate status
+      const validStatuses = ['pending', 'in_progress', 'completed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          message: "Invalid status. Must be pending, in_progress, or completed" 
+        });
+      }
+      
+      const updatedTopic = await storage.updateTopicStatus(
+        topicId, 
+        status as "pending" | "in_progress" | "completed",
+        notes
+      );
+      
+      if (!updatedTopic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+      
+      res.json(updatedTopic);
+    } catch (error) {
+      console.error("Error updating topic status:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

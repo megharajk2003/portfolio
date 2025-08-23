@@ -1216,3 +1216,79 @@ export type InsertUserBadge = typeof userBadges.$inferInsert;
 // Badge schemas
 export const insertBadgeSchema = createInsertSchema(badges);
 export const insertUserBadgeSchema = createInsertSchema(userBadges);
+
+// Goal Tracking System
+export const goals = pgTable("goals", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  csvData: jsonb("csv_data"), // Store original CSV data
+  totalTopics: integer("total_topics").default(0),
+  completedTopics: integer("completed_topics").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const goalCategories = pgTable("goal_categories", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  goalId: varchar("goal_id")
+    .notNull()
+    .references(() => goals.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  totalTopics: integer("total_topics").default(0),
+  completedTopics: integer("completed_topics").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const goalTopics = pgTable("goal_topics", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id")
+    .notNull()
+    .references(() => goalCategories.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  status: varchar("status", { length: 20 })
+    .$type<"pending" | "in_progress" | "completed">()
+    .default("pending")
+    .notNull(),
+  notes: text("notes"),
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Goal tracking insert schemas and types
+export const insertGoalSchema = createInsertSchema(goals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertGoalCategorySchema = createInsertSchema(goalCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGoalTopicSchema = createInsertSchema(goalTopics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  completedAt: true,
+});
+
+export type InsertGoal = z.infer<typeof insertGoalSchema>;
+export type Goal = typeof goals.$inferSelect;
+export type InsertGoalCategory = z.infer<typeof insertGoalCategorySchema>;
+export type GoalCategory = typeof goalCategories.$inferSelect;
+export type InsertGoalTopic = z.infer<typeof insertGoalTopicSchema>;
+export type GoalTopic = typeof goalTopics.$inferSelect;

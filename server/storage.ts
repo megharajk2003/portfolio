@@ -46,6 +46,12 @@ import {
   type InsertBadge,
   type UserBadge,
   type InsertUserBadge,
+  type Goal,
+  type InsertGoal,
+  type GoalCategory,
+  type InsertGoalCategory,
+  type GoalTopic,
+  type InsertGoalTopic,
   users,
   profiles,
   learningModules,
@@ -77,6 +83,9 @@ import {
   forumLikes,
   badges,
   userBadges,
+  goals,
+  goalCategories,
+  goalTopics,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, sql, desc, ne, or, isNull } from "drizzle-orm";
@@ -259,6 +268,16 @@ export interface IStorage {
   getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]>;
   awardBadge(userBadge: InsertUserBadge): Promise<UserBadge>;
   checkAndAwardBadges(userId: number, type: string, relatedId?: string): Promise<UserBadge[]>;
+  
+  // Goal tracking methods
+  createGoal(goalData: InsertGoal): Promise<Goal>;
+  getUserGoals(userId: number): Promise<Goal[]>;
+  getGoal(id: string): Promise<Goal | undefined>;
+  updateGoal(id: string, goalData: Partial<InsertGoal>): Promise<Goal | undefined>;
+  deleteGoal(id: string): Promise<boolean>;
+  createGoalFromCSV(userId: number, goalName: string, csvData: any[]): Promise<Goal>;
+  getGoalWithCategories(goalId: string): Promise<Goal & { categories: (GoalCategory & { topics: GoalTopic[] })[] } | undefined>;
+  updateTopicStatus(topicId: string, status: "pending" | "in_progress" | "completed", notes?: string): Promise<GoalTopic | undefined>;
 }
 
 export class PgStorage implements IStorage {
@@ -2690,6 +2709,367 @@ export class PgStorage implements IStorage {
       console.error("Error checking badge requirement:", error);
       return false;
     }
+  }
+
+  // Goal tracking system implementation
+  async createGoal(goalData: InsertGoal): Promise<Goal> {
+    if (!this.isDbConnected) {
+      const newGoal = {
+        ...goalData,
+        id: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        totalTopics: 0,
+        completedTopics: 0
+      };
+      const userGoals = this.fallbackData.get(`goals_${goalData.userId}`) || [];
+      userGoals.push(newGoal);
+      this.fallbackData.set(`goals_${goalData.userId}`, userGoals);
+      return newGoal as Goal;
+    }
+    
+    try {
+      const [goal] = await db.insert(goals).values(goalData).returning();
+      return goal;
+    } catch (error) {
+      console.error("Error creating goal:", error);
+      throw error;
+    }
+  }
+
+  async getUserGoals(userId: number): Promise<Goal[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`goals_${userId}`) || [];
+    }
+    
+    try {
+      return await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
+    } catch (error) {
+      console.error("Error fetching user goals:", error);
+      return this.fallbackData.get(`goals_${userId}`) || [];
+    }
+  }
+
+  async getGoal(id: string): Promise<Goal | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('goals_')) {
+          const goals = this.fallbackData.get(key) || [];
+          const goal = goals.find((g: any) => g.id === id);
+          if (goal) return goal;
+        }
+      }
+      return undefined;
+    }
+    
+    try {
+      const result = await db.select().from(goals).where(eq(goals.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Error fetching goal:", error);
+      return undefined;
+    }
+  }
+
+  async updateGoal(id: string, goalData: Partial<InsertGoal>): Promise<Goal | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('goals_')) {
+          const goals = this.fallbackData.get(key) || [];
+          const index = goals.findIndex((g: any) => g.id === id);
+          if (index !== -1) {
+            goals[index] = { ...goals[index], ...goalData, updatedAt: new Date() };
+            this.fallbackData.set(key, goals);
+            return goals[index];
+          }
+        }
+      }
+      return undefined;
+    }
+    
+    try {
+      const [goal] = await db
+        .update(goals)
+        .set({ ...goalData, updatedAt: new Date() })
+        .where(eq(goals.id, id))
+        .returning();
+      return goal;
+    } catch (error) {
+      console.error("Error updating goal:", error);
+      return undefined;
+    }
+  }
+
+  async deleteGoal(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('goals_')) {
+          const goals = this.fallbackData.get(key) || [];
+          const index = goals.findIndex((g: any) => g.id === id);
+          if (index !== -1) {
+            goals.splice(index, 1);
+            this.fallbackData.set(key, goals);
+            // Clean up related categories and topics
+            this.fallbackData.delete(`categories_${id}`);
+            this.fallbackData.delete(`topics_${id}`);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    
+    try {
+      const result = await db.delete(goals).where(eq(goals.id, id));
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+      return false;
+    }
+  }
+
+  async createGoalFromCSV(userId: number, goalName: string, csvData: any[]): Promise<Goal> {
+    try {
+      // Create the main goal
+      const goalData: InsertGoal = {
+        userId,
+        name: goalName,
+        description: `Goal created from CSV with ${csvData.length} items`,
+        csvData,
+        totalTopics: csvData.length,
+        completedTopics: 0
+      };
+      
+      const goal = await this.createGoal(goalData);
+      
+      // Process CSV data and create categories and topics
+      const categoryMap = new Map<string, string>();
+      
+      for (const row of csvData) {
+        const categoryName = row.category || row.Category || 'General';
+        const topicName = row.topic || row.Topic || 'Unnamed Topic';
+        const status = (row.status || row.Status || 'pending').toLowerCase();
+        
+        // Create or get category
+        let categoryId = categoryMap.get(categoryName);
+        if (!categoryId) {
+          const categoryData: InsertGoalCategory = {
+            goalId: goal.id,
+            name: categoryName,
+            totalTopics: 0,
+            completedTopics: 0
+          };
+          
+          const category = await this.createGoalCategory(categoryData);
+          categoryId = category.id;
+          categoryMap.set(categoryName, categoryId);
+        }
+        
+        // Create topic
+        const topicData: InsertGoalTopic = {
+          categoryId,
+          name: topicName,
+          status: ['pending', 'in_progress', 'completed'].includes(status) 
+            ? status as "pending" | "in_progress" | "completed" 
+            : 'pending'
+        };
+        
+        await this.createGoalTopic(topicData);
+      }
+      
+      // Update category topic counts
+      for (const [categoryName, categoryId] of categoryMap) {
+        const topics = await this.getCategoryTopics(categoryId);
+        const completedTopics = topics.filter(t => t.status === 'completed').length;
+        await this.updateGoalCategory(categoryId, {
+          totalTopics: topics.length,
+          completedTopics
+        });
+      }
+      
+      // Update goal topic counts
+      const allCategories = await this.getGoalCategories(goal.id);
+      const totalTopics = allCategories.reduce((sum, cat) => sum + (cat.totalTopics || 0), 0);
+      const completedTopics = allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0);
+      
+      await this.updateGoal(goal.id, { totalTopics, completedTopics });
+      
+      return goal;
+    } catch (error) {
+      console.error("Error creating goal from CSV:", error);
+      throw error;
+    }
+  }
+
+  async getGoalWithCategories(goalId: string): Promise<Goal & { categories: (GoalCategory & { topics: GoalTopic[] })[] } | undefined> {
+    const goal = await this.getGoal(goalId);
+    if (!goal) return undefined;
+    
+    const categories = await this.getGoalCategories(goalId);
+    const categoriesWithTopics = await Promise.all(
+      categories.map(async (category) => {
+        const topics = await this.getCategoryTopics(category.id);
+        return { ...category, topics };
+      })
+    );
+    
+    return { ...goal, categories: categoriesWithTopics };
+  }
+
+  async updateTopicStatus(topicId: string, status: "pending" | "in_progress" | "completed", notes?: string): Promise<GoalTopic | undefined> {
+    const updateData = {
+      status,
+      notes,
+      ...(status === 'completed' && { completedAt: new Date() })
+    };
+    
+    if (!this.isDbConnected) {
+      // Update in fallback storage
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith('topics_')) {
+          const topics = this.fallbackData.get(key) || [];
+          const index = topics.findIndex((t: any) => t.id === topicId);
+          if (index !== -1) {
+            topics[index] = { ...topics[index], ...updateData, updatedAt: new Date() };
+            this.fallbackData.set(key, topics);
+            return topics[index];
+          }
+        }
+      }
+      return undefined;
+    }
+    
+    try {
+      const [topic] = await db
+        .update(goalTopics)
+        .set({
+          status: status as "pending" | "in_progress" | "completed",
+          notes,
+          ...(status === 'completed' && { completedAt: new Date() }),
+          updatedAt: new Date()
+        })
+        .where(eq(goalTopics.id, topicId))
+        .returning();
+      
+      if (topic) {
+        // Update category and goal counters
+        await this.updateProgressCounters(topic.categoryId);
+      }
+      
+      return topic;
+    } catch (error) {
+      console.error("Error updating topic status:", error);
+      return undefined;
+    }
+  }
+
+  // Helper methods for goal management
+  private async createGoalCategory(categoryData: InsertGoalCategory): Promise<GoalCategory> {
+    if (!this.isDbConnected) {
+      const newCategory = {
+        ...categoryData,
+        id: randomUUID(),
+        createdAt: new Date()
+      };
+      const categories = this.fallbackData.get(`categories_${categoryData.goalId}`) || [];
+      categories.push(newCategory);
+      this.fallbackData.set(`categories_${categoryData.goalId}`, categories);
+      return newCategory as GoalCategory;
+    }
+    
+    const [category] = await db.insert(goalCategories).values(categoryData).returning();
+    return category;
+  }
+
+  private async getGoalCategories(goalId: string): Promise<GoalCategory[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`categories_${goalId}`) || [];
+    }
+    
+    return await db.select().from(goalCategories).where(eq(goalCategories.goalId, goalId));
+  }
+
+  private async updateGoalCategory(id: string, data: Partial<InsertGoalCategory>): Promise<GoalCategory | undefined> {
+    if (!this.isDbConnected) {
+      // Implementation for fallback storage
+      return undefined;
+    }
+    
+    const [category] = await db
+      .update(goalCategories)
+      .set(data)
+      .where(eq(goalCategories.id, id))
+      .returning();
+    
+    return category;
+  }
+
+  private async createGoalTopic(topicData: InsertGoalTopic): Promise<GoalTopic> {
+    if (!this.isDbConnected) {
+      const newTopic = {
+        ...topicData,
+        id: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const topics = this.fallbackData.get(`topics_${topicData.categoryId}`) || [];
+      topics.push(newTopic);
+      this.fallbackData.set(`topics_${topicData.categoryId}`, topics);
+      return newTopic as GoalTopic;
+    }
+    
+    const [topic] = await db.insert(goalTopics).values({
+      ...topicData,
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    return topic;
+  }
+
+  private async getCategoryTopics(categoryId: string): Promise<GoalTopic[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`topics_${categoryId}`) || [];
+    }
+    
+    return await db.select().from(goalTopics).where(eq(goalTopics.categoryId, categoryId));
+  }
+
+  private async updateProgressCounters(categoryId: string): Promise<void> {
+    try {
+      const topics = await this.getCategoryTopics(categoryId);
+      const completedTopics = topics.filter(t => t.status === 'completed').length;
+      
+      // Update category counters
+      await this.updateGoalCategory(categoryId, {
+        totalTopics: topics.length,
+        completedTopics
+      });
+      
+      // Get category to find goal ID and update goal counters
+      const category = await this.getGoalCategory(categoryId);
+      if (category) {
+        const allCategories = await this.getGoalCategories(category.goalId);
+        const totalTopics = allCategories.reduce((sum, cat) => sum + (cat.totalTopics || 0), 0);
+        const completedTopicsTotal = allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0);
+        
+        await this.updateGoal(category.goalId, {
+          totalTopics,
+          completedTopics: completedTopicsTotal
+        });
+      }
+    } catch (error) {
+      console.error("Error updating progress counters:", error);
+    }
+  }
+
+  private async getGoalCategory(id: string): Promise<GoalCategory | undefined> {
+    if (!this.isDbConnected) {
+      return undefined;
+    }
+    
+    const result = await db.select().from(goalCategories).where(eq(goalCategories.id, id));
+    return result[0];
   }
 }
 

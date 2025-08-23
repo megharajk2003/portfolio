@@ -16,6 +16,7 @@ import {
   X,
   Sparkles,
   MessageCircle,
+  Target,
 } from "lucide-react";
 
 const navigation = [
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Profile", href: "/profile", icon: User },
   { name: "Learning", href: "/learning", icon: BookOpen },
   { name: "Forum", href: "/forum", icon: MessageCircle },
+  { name: "Goal Tracker", href: "/goal-tracker", icon: Target },
   { name: "Career Tools", href: "/career-tools", icon: Sparkles },
 ];
 

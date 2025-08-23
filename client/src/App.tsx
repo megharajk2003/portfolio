@@ -27,6 +27,7 @@ import CareerTimeline from "@/pages/career-timeline";
 import ResumeGenerator from "@/pages/resume-generator";
 import CareerChat from "@/pages/career-chat";
 import Forum from "@/pages/forum";
+import GoalTracker from "@/pages/goal-tracker";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -57,6 +58,7 @@ function Router() {
       "/career-timeline",
       "/resume-generator",
       "/career-chat",
+      "/goal-tracker",
     ];
     const isProtectedRoute = protectedRoutes.some((route) =>
       location.startsWith(route)
@@ -104,6 +106,7 @@ function Router() {
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/learning" component={Learning} />
           <Route path="/forum" component={Forum} />
+        <Route path="/goal-tracker" component={GoalTracker} />
           <Route path="/course/:courseId/learn" component={CourseLearn} />
           <Route path="/course/:id" component={CourseDetail} />
           <Route path="/module/:id" component={ModuleDetail} />
