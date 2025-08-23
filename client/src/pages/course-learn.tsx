@@ -117,7 +117,7 @@ export default function CourseLearn() {
   }, [modules, selectedModuleId]);
 
   React.useEffect(() => {
-    if (lessons.length > 0 && !selectedLessonId) {
+    if (lessons.length > 0 && (!selectedLessonId || !lessons.find(l => l.id === selectedLessonId))) {
       setSelectedLessonId(lessons[0].id);
     }
   }, [lessons, selectedLessonId]);
@@ -158,17 +158,16 @@ export default function CourseLearn() {
     // Check if this module is unlocked
     if (!isModuleUnlocked(currentModuleIndex)) return false;
 
-    // Within first module, first lesson is always unlocked
-    if (currentModuleIndex === 0 && lessonIndex === 0) return true;
+    // First lesson of any unlocked module is always unlocked
+    if (lessonIndex === 0) return true;
 
-    // Within any module, other lessons unlock when previous lesson is completed
+    // Other lessons unlock when previous lesson is completed
     if (lessonIndex > 0) {
       const previousProgress = getLessonProgress(lessonIndex - 1);
       return previousProgress?.isCompleted || false;
     }
 
-    // First lesson of non-first modules unlock when module is unlocked
-    return currentModuleIndex === 0;
+    return false;
   };
 
   const isLessonCompleted = (lessonIndex: number) => {
@@ -199,9 +198,7 @@ export default function CourseLearn() {
         if (isModuleUnlocked(currentModuleIndex + 1)) {
           // Navigate to first lesson of next module
           setSelectedModuleId(nextModule.id);
-          if (nextModule.lessons && nextModule.lessons.length > 0) {
-            setSelectedLessonId(nextModule.lessons[0].id);
-          }
+          // Don't set lesson ID here, let the useEffect handle it
         }
       }
     }
