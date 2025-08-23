@@ -160,53 +160,56 @@ export default function Home() {
           <ProfileCompletionNotification />
 
           {/* Hero Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <img
-                    className="w-64 h-64 rounded-xl object-cover"
-                    src={
-                      profile?.personalDetails?.photo ||
-                      "https://img.freepik.com/premium-photo/avatar-icon_665280-58322.jpg"
-                    }
-                    alt={
-                      profile?.personalDetails?.fullName || "Profile picture"
-                    }
-                  />
+          <div className="flex items-center gap-6 justify-between">
+            {/* Learning Heat Map */}
+            <GoalHeatMap />
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <img
+                      className="w-64 h-64 rounded-xl object-cover"
+                      src={
+                        profile?.personalDetails?.photo ||
+                        "https://img.freepik.com/premium-photo/avatar-icon_665280-58322.jpg"
+                      }
+                      alt={
+                        profile?.personalDetails?.fullName || "Profile picture"
+                      }
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {profile?.personalDetails?.fullName ||
+                        `${user?.firstName || ""} ${
+                          user?.lastName || ""
+                        }`.trim() ||
+                        "User Name"}
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">
+                      {profile?.personalDetails?.roleOrTitle ||
+                        "Professional Role"}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {profile?.contactDetails?.email ||
+                        user?.email ||
+                        "email@example.com"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {profile?.personalDetails?.fullName ||
-                      `${user?.firstName || ""} ${
-                        user?.lastName || ""
-                      }`.trim() ||
-                      "User Name"}
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400 font-medium">
-                    {profile?.personalDetails?.roleOrTitle ||
-                      "Professional Role"}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {profile?.contactDetails?.email ||
-                      user?.email ||
-                      "email@example.com"}
-                  </p>
-                </div>
+                <Link href="/profile">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    <span>Edit Profile</span>
+                  </Button>
+                </Link>
               </div>
-              <Link href="/profile">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span>Edit Profile</span>
-                </Button>
-              </Link>
-            </div>
-          </section>
-
+            </section>
+          </div>
           {/* Stats Cards */}
           <StatsGrid userId={userId} />
 
@@ -224,9 +227,6 @@ export default function Home() {
               }
             />
           </div>
-
-          {/* Learning Heat Map */}
-          <GoalHeatMap />
 
           {/* Learning Activity - Now before Learning Modules */}
           <section>
@@ -261,8 +261,12 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="text-center">
-                      <h4 className="text-sm font-semibold text-purple-800 mb-1">AI Pioneer</h4>
-                      <p className="text-xs text-gray-600 mb-2">Completed AI course</p>
+                      <h4 className="text-sm font-semibold text-purple-800 mb-1">
+                        AI Pioneer
+                      </h4>
+                      <p className="text-xs text-gray-600 mb-2">
+                        Completed AI course
+                      </p>
                       <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
                         <TrendingUp className="h-3 w-3 mr-1" />
                         +100 XP
@@ -276,7 +280,9 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="text-center">
-                      <h4 className="text-sm font-semibold text-yellow-800 mb-1">Perfect Score</h4>
+                      <h4 className="text-sm font-semibold text-yellow-800 mb-1">
+                        Perfect Score
+                      </h4>
                       <p className="text-xs text-gray-600 mb-2">100% on exam</p>
                       <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
                         <TrendingUp className="h-3 w-3 mr-1" />
@@ -291,7 +297,9 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="text-center">
-                      <h4 className="text-sm font-semibold text-emerald-800 mb-1">Streak Master</h4>
+                      <h4 className="text-sm font-semibold text-emerald-800 mb-1">
+                        Streak Master
+                      </h4>
                       <p className="text-xs text-gray-600 mb-2">7-day streak</p>
                       <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
                         <TrendingUp className="h-3 w-3 mr-1" />
@@ -306,8 +314,12 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="text-center">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-1">Knowledge Seeker</h4>
-                      <p className="text-xs text-gray-600 mb-2">Completed 5 courses</p>
+                      <h4 className="text-sm font-semibold text-blue-800 mb-1">
+                        Knowledge Seeker
+                      </h4>
+                      <p className="text-xs text-gray-600 mb-2">
+                        Completed 5 courses
+                      </p>
                       <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
                         <TrendingUp className="h-3 w-3 mr-1" />
                         +200 XP
@@ -316,7 +328,9 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-4 text-center">
-                  <p className="text-sm text-gray-600">Complete more courses and activities to unlock more badges!</p>
+                  <p className="text-sm text-gray-600">
+                    Complete more courses and activities to unlock more badges!
+                  </p>
                 </div>
               </CardContent>
             </Card>

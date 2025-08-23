@@ -77,7 +77,11 @@ const educationSchema = z.object({
 const certificationSchema = z.object({
   title: z.string().min(1, "Certification title is required"),
   organization: z.string().min(1, "Organization is required"),
-  year: z.union([z.string(), z.number()]).transform((val) => Number(val)).refine((val) => val >= 1900, "Valid year required").optional(),
+  year: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .refine((val) => val >= 1900, "Valid year required")
+    .optional(),
   url: z
     .string()
     .transform((val) => (val === "" ? undefined : val))
@@ -147,11 +151,13 @@ const personalDetailsSchema = z.object({
   dob: z.string().optional(),
   gender: z.string().optional(),
   nationality: z.string().optional(),
-  location: z.object({
-    city: z.string().optional(),
-    state: z.string().optional(),
-    country: z.string().optional(),
-  }).optional(),
+  location: z
+    .object({
+      city: z.string().optional(),
+      state: z.string().optional(),
+      country: z.string().optional(),
+    })
+    .optional(),
   summary: z.string().optional(),
   languagesKnown: z.array(z.string()).optional(),
   photo: z.string().optional(),
@@ -160,10 +166,22 @@ const personalDetailsSchema = z.object({
 const contactDetailsSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   phone: z.string().optional(),
-  website: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
-  linkedin: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
-  githubOrPortfolio: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
-  twitter: z.string().transform(val => val === "" ? undefined : val).pipe(z.string().url().optional()),
+  website: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
+  linkedin: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
+  githubOrPortfolio: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
+  twitter: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
 });
 
 const organizationSchema = z.object({
@@ -341,7 +359,10 @@ function PersonalDetailsEditForm({
   const form = useForm({
     resolver: zodResolver(personalDetailsSchema),
     defaultValues: {
-      fullName: profile?.personalDetails?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "",
+      fullName:
+        profile?.personalDetails?.fullName ||
+        `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+        "",
       roleOrTitle: profile?.personalDetails?.roleOrTitle || "",
       dob: profile?.personalDetails?.dob || "",
       gender: profile?.personalDetails?.gender || "",
@@ -358,11 +379,14 @@ function PersonalDetailsEditForm({
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await fetch(`/api/profile/${user?.id || "user_sample_1"}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personalDetails: data }),
-      });
+      const response = await fetch(
+        `/api/profile/${user?.id || "user_sample_1"}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ personalDetails: data }),
+        }
+      );
 
       if (response.ok) {
         toast({ title: "Personal details updated successfully!" });
@@ -371,7 +395,10 @@ function PersonalDetailsEditForm({
         throw new Error("Failed to update personal details");
       }
     } catch (error) {
-      toast({ title: "Error updating personal details", variant: "destructive" });
+      toast({
+        title: "Error updating personal details",
+        variant: "destructive",
+      });
     }
   };
 
@@ -438,7 +465,10 @@ function PersonalDetailsEditForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gender</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select gender" />
@@ -448,7 +478,9 @@ function PersonalDetailsEditForm({
                         <SelectItem value="Male">Male</SelectItem>
                         <SelectItem value="Female">Female</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
-                        <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                        <SelectItem value="Prefer not to say">
+                          Prefer not to say
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -515,8 +547,8 @@ function PersonalDetailsEditForm({
                 <FormItem>
                   <FormLabel>Professional Summary</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
+                    <Textarea
+                      {...field}
                       placeholder="Write a brief professional summary..."
                       className="min-h-[100px]"
                     />
@@ -568,11 +600,14 @@ function ContactDetailsEditForm({
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await fetch(`/api/profile/${user?.id || "user_sample_1"}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactDetails: data }),
-      });
+      const response = await fetch(
+        `/api/profile/${user?.id || "user_sample_1"}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contactDetails: data }),
+        }
+      );
 
       if (response.ok) {
         toast({ title: "Contact details updated successfully!" });
@@ -581,7 +616,10 @@ function ContactDetailsEditForm({
         throw new Error("Failed to update contact details");
       }
     } catch (error) {
-      toast({ title: "Error updating contact details", variant: "destructive" });
+      toast({
+        title: "Error updating contact details",
+        variant: "destructive",
+      });
     }
   };
 
@@ -610,7 +648,11 @@ function ContactDetailsEditForm({
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" placeholder="your.email@example.com" />
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="your.email@example.com"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -649,7 +691,10 @@ function ContactDetailsEditForm({
                   <FormItem>
                     <FormLabel>LinkedIn</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://linkedin.com/in/yourprofile" />
+                      <Input
+                        {...field}
+                        placeholder="https://linkedin.com/in/yourprofile"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -662,7 +707,10 @@ function ContactDetailsEditForm({
                   <FormItem>
                     <FormLabel>GitHub/Portfolio</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://github.com/yourusername" />
+                      <Input
+                        {...field}
+                        placeholder="https://github.com/yourusername"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -675,7 +723,10 @@ function ContactDetailsEditForm({
                   <FormItem>
                     <FormLabel>Twitter</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://twitter.com/yourusername" />
+                      <Input
+                        {...field}
+                        placeholder="https://twitter.com/yourusername"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1699,7 +1750,7 @@ function AddEntryForm({
   );
 }
 
-// Edit entry form component  
+// Edit entry form component
 function EditEntryForm({
   category,
   item,
@@ -1919,7 +1970,11 @@ function EditEntryForm({
                     <Input
                       type="number"
                       {...field}
-                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
                       placeholder="2024"
                     />
                   </FormControl>
@@ -1995,7 +2050,11 @@ function EditEntryForm({
                     <Input
                       type="number"
                       {...field}
-                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
                       placeholder="2024"
                     />
                   </FormControl>
@@ -2010,7 +2069,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>Certificate URL (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="https://certificate-url.com" />
+                    <Input
+                      {...field}
+                      placeholder="https://certificate-url.com"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2115,7 +2177,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} placeholder="Describe your project..." />
+                    <Textarea
+                      {...field}
+                      placeholder="Describe your project..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2191,7 +2256,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>GitHub URL (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="https://github.com/user/repo" />
+                    <Input
+                      {...field}
+                      placeholder="https://github.com/user/repo"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2292,7 +2360,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>Responsibilities (optional)</FormLabel>
                   <FormControl>
-                    <Textarea {...field} placeholder="Key responsibilities..." />
+                    <Textarea
+                      {...field}
+                      placeholder="Key responsibilities..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2363,7 +2434,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} placeholder="Describe your volunteer work..." />
+                    <Textarea
+                      {...field}
+                      placeholder="Describe your volunteer work..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2414,8 +2488,12 @@ function EditEntryForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Research Paper">Research Paper</SelectItem>
-                      <SelectItem value="Portfolio Work">Portfolio Work</SelectItem>
+                      <SelectItem value="Research Paper">
+                        Research Paper
+                      </SelectItem>
+                      <SelectItem value="Portfolio Work">
+                        Portfolio Work
+                      </SelectItem>
                       <SelectItem value="Article">Article</SelectItem>
                       <SelectItem value="Book">Book</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>
@@ -2462,7 +2540,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>URL (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="https://publication-url.com" />
+                    <Input
+                      {...field}
+                      placeholder="https://publication-url.com"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2494,7 +2575,10 @@ function EditEntryForm({
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Member, Board Member, etc." />
+                    <Input
+                      {...field}
+                      placeholder="Member, Board Member, etc."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -2846,7 +2930,10 @@ export default function Profile() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingContact, setEditingContact] = useState(false);
-  const [editingItem, setEditingItem] = useState<{ categoryId: string; item: any } | null>(null);
+  const [editingItem, setEditingItem] = useState<{
+    categoryId: string;
+    item: any;
+  } | null>(null);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -3052,7 +3139,14 @@ export default function Profile() {
   // Update existing entry
   const updateEntry = async (categoryId: string, itemId: string, data: any) => {
     try {
-      console.log("📝 Starting updateEntry for:", categoryId, "item:", itemId, "with data:", data);
+      console.log(
+        "📝 Starting updateEntry for:",
+        categoryId,
+        "item:",
+        itemId,
+        "with data:",
+        data
+      );
       setIsSubmitting(true);
 
       // Prepare data for API
@@ -3338,50 +3432,64 @@ export default function Profile() {
                       </div>
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Full Name
+                          </label>
                           <p className="text-lg text-gray-900 dark:text-white">
                             {profile?.personalDetails?.fullName ||
-                              `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+                              `${user?.firstName || ""} ${
+                                user?.lastName || ""
+                              }`.trim() ||
                               "Not provided"}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Role/Title
+                          </label>
                           <p className="text-lg text-gray-900 dark:text-white">
-                            {profile?.personalDetails?.roleOrTitle || "Not provided"}
+                            {profile?.personalDetails?.roleOrTitle ||
+                              "Not provided"}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Date of Birth
+                          </label>
                           <p className="text-lg text-gray-900 dark:text-white">
                             {profile?.personalDetails?.dob || "Not provided"}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Gender
+                          </label>
                           <p className="text-lg text-gray-900 dark:text-white">
                             {profile?.personalDetails?.gender || "Not provided"}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Nationality
+                          </label>
                           <p className="text-lg text-gray-900 dark:text-white">
-                            {profile?.personalDetails?.nationality || "Not provided"}
+                            {profile?.personalDetails?.nationality ||
+                              "Not provided"}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Location
+                          </label>
                           <p className="text-lg text-gray-900 dark:text-white">
-                            {profile?.personalDetails?.location ? (
-                              profile.personalDetails.location.city &&
-                              profile.personalDetails.location.state
+                            {profile?.personalDetails?.location
+                              ? profile.personalDetails.location.city &&
+                                profile.personalDetails.location.state
                                 ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
                                 : profile.personalDetails.location.city ||
                                   profile.personalDetails.location.state ||
                                   profile.personalDetails.location.country
-                            ) : (
-                              "Not provided"
-                            )}
+                              : "Not provided"}
                           </p>
                         </div>
                       </div>
@@ -3389,7 +3497,9 @@ export default function Profile() {
 
                     {profile?.personalDetails?.summary ? (
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Professional Summary
+                        </label>
                         <p className="text-gray-700 dark:text-gray-300 mt-1">
                           {profile.personalDetails.summary}
                         </p>
@@ -3398,31 +3508,41 @@ export default function Profile() {
                       <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
                         <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                          Add a professional summary to highlight your experience and goals.
+                          Add a professional summary to highlight your
+                          experience and goals.
                         </p>
                       </div>
                     )}
 
-                    {profile?.personalDetails?.languagesKnown && profile.personalDetails.languagesKnown.length > 0 && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Languages Known</label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {profile.personalDetails.languagesKnown.map((lang, index) => (
-                            <Badge key={index} variant="secondary">{lang}</Badge>
-                          ))}
+                    {profile?.personalDetails?.languagesKnown &&
+                      profile.personalDetails.languagesKnown.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Languages Known
+                          </label>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {profile.personalDetails.languagesKnown.map(
+                              (lang, index) => (
+                                <Badge key={index} variant="secondary">
+                                  {lang}
+                                </Badge>
+                              )
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </CardContent>
                 </Card>
               ) : (
-                <PersonalDetailsEditForm 
-                  profile={profile} 
+                <PersonalDetailsEditForm
+                  profile={profile}
                   user={user}
                   onCancel={() => setEditingPersonal(false)}
                   onSave={() => {
                     setEditingPersonal(false);
-                    queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+                    queryClient.invalidateQueries({
+                      queryKey: ["/api/profile"],
+                    });
                   }}
                 />
               )}
@@ -3450,22 +3570,35 @@ export default function Profile() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Email Address
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.contactDetails?.email || user?.email || "Not provided"}
+                          {profile?.contactDetails?.email ||
+                            user?.email ||
+                            "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Phone Number
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.contactDetails?.phone || "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Website
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.contactDetails?.website ? (
-                            <a href={profile.contactDetails.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <a
+                              href={profile.contactDetails.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
                               {profile.contactDetails.website}
                             </a>
                           ) : (
@@ -3474,10 +3607,17 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          LinkedIn
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.contactDetails?.linkedin ? (
-                            <a href={profile.contactDetails.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <a
+                              href={profile.contactDetails.linkedin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
                               {profile.contactDetails.linkedin}
                             </a>
                           ) : (
@@ -3486,10 +3626,17 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub/Portfolio</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          GitHub/Portfolio
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.contactDetails?.githubOrPortfolio ? (
-                            <a href={profile.contactDetails.githubOrPortfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <a
+                              href={profile.contactDetails.githubOrPortfolio}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
                               {profile.contactDetails.githubOrPortfolio}
                             </a>
                           ) : (
@@ -3498,10 +3645,17 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Twitter</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Twitter
+                        </label>
                         <p className="text-lg text-gray-900 dark:text-white">
                           {profile?.contactDetails?.twitter ? (
-                            <a href={profile.contactDetails.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <a
+                              href={profile.contactDetails.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
                               {profile.contactDetails.twitter}
                             </a>
                           ) : (
@@ -3513,13 +3667,15 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               ) : (
-                <ContactDetailsEditForm 
-                  profile={profile} 
+                <ContactDetailsEditForm
+                  profile={profile}
                   user={user}
                   onCancel={() => setEditingContact(false)}
                   onSave={() => {
                     setEditingContact(false);
-                    queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+                    queryClient.invalidateQueries({
+                      queryKey: ["/api/profile"],
+                    });
                   }}
                 />
               )}
@@ -3581,7 +3737,10 @@ export default function Profile() {
                                 item={item}
                                 categoryId={category.id}
                                 onEdit={() => {
-                                  setEditingItem({ categoryId: category.id, item });
+                                  setEditingItem({
+                                    categoryId: category.id,
+                                    item,
+                                  });
                                 }}
                                 onDelete={() =>
                                   deleteEntry(category.id, item.id)
@@ -3645,31 +3804,36 @@ export default function Profile() {
                         )}
 
                         {/* Edit Entry Form */}
-                        {editingItem && editingItem.categoryId === category.id && (
-                          <>
-                            {console.log(
-                              "✏️ Rendering edit form for category:",
-                              category.id,
-                              "item:",
-                              editingItem.item
-                            )}
-                            <EditEntryForm
-                              category={category}
-                              item={editingItem.item}
-                              onUpdate={(data) => {
-                                console.log(
-                                  "📝 Edit form submitted with data:",
-                                  data
-                                );
-                                updateEntry(category.id, editingItem.item.id, data);
-                              }}
-                              onCancel={() => {
-                                console.log("❌ Edit form cancelled");
-                                setEditingItem(null);
-                              }}
-                            />
-                          </>
-                        )}
+                        {editingItem &&
+                          editingItem.categoryId === category.id && (
+                            <>
+                              {console.log(
+                                "✏️ Rendering edit form for category:",
+                                category.id,
+                                "item:",
+                                editingItem.item
+                              )}
+                              <EditEntryForm
+                                category={category}
+                                item={editingItem.item}
+                                onUpdate={(data) => {
+                                  console.log(
+                                    "📝 Edit form submitted with data:",
+                                    data
+                                  );
+                                  updateEntry(
+                                    category.id,
+                                    editingItem.item.id,
+                                    data
+                                  );
+                                }}
+                                onCancel={() => {
+                                  console.log("❌ Edit form cancelled");
+                                  setEditingItem(null);
+                                }}
+                              />
+                            </>
+                          )}
                       </CardContent>
                     )}
                   </Card>
@@ -3679,140 +3843,152 @@ export default function Profile() {
 
             <TabsContent value="view" className="space-y-6">
               {/* Hero Section with Personal Details and Heat Map */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1  gap-6">
                 {/* Personal Details Card */}
                 <Card className="relative">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>Personal Details</span>
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setActiveTab("basic")}
-                      data-testid="button-edit-personal"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-6">
-                    <div className="relative">
-                      <Avatar className="w-20 h-20">
-                        <AvatarImage
-                          src={profile?.personalDetails?.photo || ""}
-                          alt={profile?.personalDetails?.fullName || ""}
-                        />
-                        <AvatarFallback className="text-xl">
-                          {profile?.personalDetails?.fullName
-                            ?.split(" ")
-                            .map((n: string) => n[0])
-                            .join("") ||
-                            user?.firstName?.[0] ||
-                            "U"}
-                        </AvatarFallback>
-                      </Avatar>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center space-x-2">
+                        <User className="h-5 w-5" />
+                        <span>Personal Details</span>
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("basic")}
+                        data-testid="button-edit-personal"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
                     </div>
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.fullName ||
-                            `${user?.firstName || ""} ${
-                              user?.lastName || ""
-                            }`.trim() ||
-                            "Not provided"}
-                        </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-6">
+                      <div className="relative">
+                        <Avatar className="w-20 h-20">
+                          <AvatarImage
+                            src={profile?.personalDetails?.photo || ""}
+                            alt={profile?.personalDetails?.fullName || ""}
+                          />
+                          <AvatarFallback className="text-xl">
+                            {profile?.personalDetails?.fullName
+                              ?.split(" ")
+                              .map((n: string) => n[0])
+                              .join("") ||
+                              user?.firstName?.[0] ||
+                              "U"}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role/Title</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.roleOrTitle || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.dob || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.gender || "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.nationality ||
-                            "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
-                        <p className="text-lg text-gray-900 dark:text-white">
-                          {profile?.personalDetails?.location
-                            ? profile.personalDetails.location.city &&
-                              profile.personalDetails.location.state
-                              ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
-                              : profile.personalDetails.location.city ||
-                                profile.personalDetails.location.state ||
-                                profile.personalDetails.location.country
-                            : "Not provided"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {profile?.personalDetails?.summary ? (
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Professional Summary</label>
-                      <p className="text-gray-700 dark:text-gray-300 mt-1">
-                        {profile.personalDetails.summary}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
-                      <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Add a professional summary to highlight your experience
-                        and goals.
-                      </p>
-                    </div>
-                  )}
-
-                  {profile?.personalDetails?.languagesKnown &&
-                    profile.personalDetails.languagesKnown.length > 0 && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Languages Known
-                        </label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {profile.personalDetails.languagesKnown.map(
-                            (lang, index) => (
-                              <Badge key={index} variant="secondary">
-                                {lang}
-                              </Badge>
-                            )
-                          )}
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Full Name
+                          </label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.fullName ||
+                              `${user?.firstName || ""} ${
+                                user?.lastName || ""
+                              }`.trim() ||
+                              "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Role/Title
+                          </label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.roleOrTitle ||
+                              "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Date of Birth
+                          </label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.dob || "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Gender
+                          </label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.gender || "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Nationality
+                          </label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.nationality ||
+                              "Not provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Location
+                          </label>
+                          <p className="text-lg text-gray-900 dark:text-white">
+                            {profile?.personalDetails?.location
+                              ? profile.personalDetails.location.city &&
+                                profile.personalDetails.location.state
+                                ? `${profile.personalDetails.location.city}, ${profile.personalDetails.location.state}, ${profile.personalDetails.location.country}`
+                                : profile.personalDetails.location.city ||
+                                  profile.personalDetails.location.state ||
+                                  profile.personalDetails.location.country
+                              : "Not provided"}
+                          </p>
                         </div>
                       </div>
+                    </div>
+
+                    {profile?.personalDetails?.summary ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Professional Summary
+                        </label>
+                        <p className="text-gray-700 dark:text-gray-300 mt-1">
+                          {profile.personalDetails.summary}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+                        <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          Add a professional summary to highlight your
+                          experience and goals.
+                        </p>
+                      </div>
                     )}
-                </CardContent>
-              </Card>
 
-              {/* Learning Activity Heat Map */}
-              <div className="lg:sticky lg:top-6">
-                <GoalHeatMap />
+                    {profile?.personalDetails?.languagesKnown &&
+                      profile.personalDetails.languagesKnown.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Languages Known
+                          </label>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {profile.personalDetails.languagesKnown.map(
+                              (lang, index) => (
+                                <Badge key={index} variant="secondary">
+                                  {lang}
+                                </Badge>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </CardContent>
+                </Card>
+
+                {/* Learning Activity Heat Map */}
               </div>
-            </div>
 
-            {/* Contact Details Card */}
+              {/* Contact Details Card */}
               <Card className="relative">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
@@ -3943,22 +4119,32 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {educationData.map((edu, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
-                              {edu.degree || "Degree"} in {edu.fieldOfStudy || "Field of Study"}
+                              {edu.degree || "Degree"} in{" "}
+                              {edu.fieldOfStudy || "Field of Study"}
                             </h3>
                             <p className="text-blue-600 dark:text-blue-400 font-medium">
                               {edu.institution}
                             </p>
                             <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
                               <span>{edu.level}</span>
-                              {edu.yearOfPassing && <span>Graduated: {edu.yearOfPassing}</span>}
-                              {edu.gradeOrScore && <span>Grade: {edu.gradeOrScore}</span>}
+                              {edu.yearOfPassing && (
+                                <span>Graduated: {edu.yearOfPassing}</span>
+                              )}
+                              {edu.gradeOrScore && (
+                                <span>Grade: {edu.gradeOrScore}</span>
+                              )}
                             </div>
                             {edu.description && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-2">{edu.description}</p>
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                                {edu.description}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -3980,7 +4166,9 @@ export default function Profile() {
                   <CardContent>
                     <div className="space-y-4">
                       {["technical", "soft", "tools"].map((category) => {
-                        const categorySkills = skillsData.filter(skill => skill.category === category);
+                        const categorySkills = skillsData.filter(
+                          (skill) => skill.category === category
+                        );
                         if (categorySkills.length === 0) return null;
 
                         return (
@@ -3990,8 +4178,13 @@ export default function Profile() {
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                               {categorySkills.map((skill, index) => (
-                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                  <span className="text-gray-900 dark:text-white">{skill.name}</span>
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                >
+                                  <span className="text-gray-900 dark:text-white">
+                                    {skill.name}
+                                  </span>
                                   <div className="flex items-center space-x-2">
                                     <div className="flex items-center space-x-1">
                                       {[...Array(5)].map((_, i) => (
@@ -4031,7 +4224,10 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {workExperienceData.map((work, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
@@ -4041,21 +4237,32 @@ export default function Profile() {
                               {work.organization}
                             </p>
                             <div className="text-sm text-gray-500 mt-1">
-                              {work.startDate} {work.endDate ? `- ${work.endDate}` : "- Present"}
+                              {work.startDate}{" "}
+                              {work.endDate ? `- ${work.endDate}` : "- Present"}
                             </div>
                             {work.description && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-2">{work.description}</p>
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                                {work.description}
+                              </p>
                             )}
                             {work.responsibilities && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Key Responsibilities:</p>
-                                <p className="text-gray-700 dark:text-gray-300">{work.responsibilities}</p>
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                  Key Responsibilities:
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  {work.responsibilities}
+                                </p>
                               </div>
                             )}
                             {work.skillsOrToolsUsed && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Skills & Tools:</p>
-                                <p className="text-gray-700 dark:text-gray-300">{work.skillsOrToolsUsed}</p>
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                  Skills & Tools:
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  {work.skillsOrToolsUsed}
+                                </p>
                               </div>
                             )}
                           </div>
@@ -4077,7 +4284,10 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {projectsData.map((project, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
@@ -4088,20 +4298,31 @@ export default function Profile() {
                             </p>
                             {(project.startDate || project.endDate) && (
                               <div className="text-sm text-gray-500 mt-1">
-                                {project.startDate} {project.endDate ? `- ${project.endDate}` : ""}
+                                {project.startDate}{" "}
+                                {project.endDate ? `- ${project.endDate}` : ""}
                               </div>
                             )}
-                            <p className="text-gray-700 dark:text-gray-300 mt-2">{project.description}</p>
+                            <p className="text-gray-700 dark:text-gray-300 mt-2">
+                              {project.description}
+                            </p>
                             {project.toolsOrMethods && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tools & Methods:</p>
-                                <p className="text-gray-700 dark:text-gray-300">{project.toolsOrMethods}</p>
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                  Tools & Methods:
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  {project.toolsOrMethods}
+                                </p>
                               </div>
                             )}
                             {project.outcome && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Outcome:</p>
-                                <p className="text-gray-700 dark:text-gray-300">{project.outcome}</p>
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                  Outcome:
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  {project.outcome}
+                                </p>
                               </div>
                             )}
                             <div className="flex space-x-3 mt-3">
@@ -4145,7 +4366,10 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {certificationsData.map((cert, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
@@ -4160,7 +4384,9 @@ export default function Profile() {
                               </div>
                             )}
                             {cert.description && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-2">{cert.description}</p>
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                                {cert.description}
+                              </p>
                             )}
                             {cert.url && (
                               <a
@@ -4191,7 +4417,10 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {publicationsData.map((pub, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
@@ -4233,7 +4462,10 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {volunteerData.map((vol, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
@@ -4245,7 +4477,9 @@ export default function Profile() {
                             <div className="text-sm text-gray-500 mt-1">
                               {vol.year}
                             </div>
-                            <p className="text-gray-700 dark:text-gray-300 mt-2">{vol.description}</p>
+                            <p className="text-gray-700 dark:text-gray-300 mt-2">
+                              {vol.description}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -4267,7 +4501,9 @@ export default function Profile() {
                     {achievementsData.map((achievement: any, index: number) => (
                       <div key={index} className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                        <p className="text-gray-700 dark:text-gray-300">{achievement.title || achievement}</p>
+                        <p className="text-gray-700 dark:text-gray-300">
+                          {achievement.title || achievement}
+                        </p>
                       </div>
                     ))}
                   </CardContent>

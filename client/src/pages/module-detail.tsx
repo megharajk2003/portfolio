@@ -103,10 +103,11 @@ export default function ModuleDetail() {
   });
 
   // Fetch user progress for this module
-  const { data: moduleProgress, isLoading: progressLoading } = useQuery<ModuleProgress>({
-    queryKey: ["/api/user-progress", currentUser.id, moduleId],
-    enabled: !!moduleId,
-  });
+  const { data: moduleProgress, isLoading: progressLoading } =
+    useQuery<ModuleProgress>({
+      queryKey: ["/api/user-progress", currentUser.id, moduleId],
+      enabled: !!moduleId,
+    });
 
   // Fetch individual lesson progress
   const { data: lessonProgressList = [] } = useQuery<LessonProgress[]>({
@@ -114,9 +115,13 @@ export default function ModuleDetail() {
     enabled: !!moduleId,
   });
 
-  // Check if user is enrolled (has any progress or lesson progress)
   useEffect(() => {
-    if (moduleProgress || lessonProgressList.length > 0) {
+    console.log("Module progress:", moduleProgress);
+    console.log("Lesson progress list:", lessonProgressList);
+    if (
+      moduleProgress ||
+      (lessonProgressList && lessonProgressList.length > 0)
+    ) {
       setIsEnrolled(true);
     }
   }, [moduleProgress, lessonProgressList]);
@@ -184,10 +189,11 @@ export default function ModuleDetail() {
       setQuizResults(result);
       queryClient.invalidateQueries({ queryKey: ["/api/lesson-progress"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user-progress"] });
-      
+
       if (result.passed) {
         toast({
-          title: result.lessonIndex === -1 ? "Final Exam Passed!" : "Quiz Passed!",
+          title:
+            result.lessonIndex === -1 ? "Final Exam Passed!" : "Quiz Passed!",
           description: `Congratulations! You scored ${result.score}/${result.totalQuestions}`,
         });
       } else {
@@ -203,7 +209,8 @@ export default function ModuleDetail() {
   // Fetch quiz questions
   const { data: quizQuestions = [] } = useQuery<QuizQuestion[]>({
     queryKey: ["/api/quiz-questions", moduleId, selectedLesson],
-    enabled: !!moduleId && (showQuiz || showFinalExam) && selectedLesson !== null,
+    enabled:
+      !!moduleId && (showQuiz || showFinalExam) && selectedLesson !== null,
   });
 
   const handleEnroll = () => {
@@ -217,8 +224,8 @@ export default function ModuleDetail() {
   const handleQuizSubmit = () => {
     const answers = Object.keys(quizAnswers)
       .sort((a, b) => parseInt(a) - parseInt(b))
-      .map(key => quizAnswers[key]);
-    
+      .map((key) => quizAnswers[key]);
+
     if (answers.length !== quizQuestions.length) {
       toast({
         title: "Incomplete Quiz",
@@ -236,35 +243,39 @@ export default function ModuleDetail() {
   };
 
   const getLessonProgress = (lessonIndex: number): LessonProgress | null => {
-    return lessonProgressList.find((lp) => lp.lessonIndex === lessonIndex) || null;
+    return (
+      lessonProgressList.find((lp) => lp.lessonIndex === lessonIndex) || null
+    );
   };
 
   const isLessonUnlocked = (lessonIndex: number): boolean => {
+    console.log("Checking lesson unlock status for lesson index:", lessonIndex);
     // First lesson is always unlocked if user is enrolled
     if (lessonIndex === 0) return isEnrolled;
-    
+
     // Subsequent lessons unlock when the previous lesson is completed
     const previousLessonProgress = getLessonProgress(lessonIndex - 1);
-    return !!(previousLessonProgress?.isCompleted);
+    console.log("Previous lesson progress:", previousLessonProgress);
+    return !!previousLessonProgress?.isCompleted;
   };
 
   const canTakeFinalExam = (): boolean => {
     if (!module?.lessons || !Array.isArray(module.lessons)) return false;
-    
+
     return module.lessons.every((_, index) => {
       const progress = getLessonProgress(index);
-      return !!(progress?.isCompleted);
+      return !!progress?.isCompleted;
     });
   };
 
   const calculateProgress = (): number => {
     if (!module?.lessons || !Array.isArray(module.lessons)) return 0;
-    
+
     const completedLessons = module.lessons.filter((_, index) => {
       const progress = getLessonProgress(index);
-      return !!(progress?.isCompleted);
+      return !!progress?.isCompleted;
     }).length;
-    
+
     return (completedLessons / module.lessons.length) * 100;
   };
 
@@ -305,12 +316,15 @@ export default function ModuleDetail() {
               Back to Learning
             </Button>
           </Link>
-          
+
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl mb-2" data-testid="text-module-title">
+                  <CardTitle
+                    className="text-2xl mb-2"
+                    data-testid="text-module-title"
+                  >
                     {module.title}
                   </CardTitle>
                   <CardDescription data-testid="text-module-description">
@@ -322,7 +336,10 @@ export default function ModuleDetail() {
                     </Badge>
                     <div className="flex items-center gap-1">
                       <Award className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium" data-testid="text-xp-reward">
+                      <span
+                        className="text-sm font-medium"
+                        data-testid="text-xp-reward"
+                      >
                         {module.xpReward} XP
                       </span>
                     </div>
@@ -335,32 +352,44 @@ export default function ModuleDetail() {
                   </div>
                 </div>
                 {moduleProgress?.isCompleted && (
-                  <Trophy className="h-8 w-8 text-yellow-500" data-testid="icon-completed" />
+                  <Trophy
+                    className="h-8 w-8 text-yellow-500"
+                    data-testid="icon-completed"
+                  />
                 )}
               </div>
-              
+
               {isEnrolled && (
                 <div className="mt-6">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Progress</span>
-                    <span className="text-sm text-muted-foreground" data-testid="text-progress-percentage">
+                    <span
+                      className="text-sm text-muted-foreground"
+                      data-testid="text-progress-percentage"
+                    >
                       {Math.round(calculateProgress())}%
                     </span>
                   </div>
-                  <Progress value={calculateProgress()} className="h-2" data-testid="progress-module" />
+                  <Progress
+                    value={calculateProgress()}
+                    className="h-2"
+                    data-testid="progress-module"
+                  />
                 </div>
               )}
-              
+
               {!isEnrolled && (
                 <div className="mt-6">
-                  <Button 
+                  <Button
                     onClick={handleEnroll}
                     disabled={enrollMutation.isPending}
                     className="w-full"
                     size="lg"
                     data-testid="button-enroll"
                   >
-                    {enrollMutation.isPending ? "Enrolling..." : "Enroll for Free"}
+                    {enrollMutation.isPending
+                      ? "Enrolling..."
+                      : "Enroll for Free"}
                   </Button>
                 </div>
               )}
@@ -371,11 +400,15 @@ export default function ModuleDetail() {
         {/* Start Learning Button for enrolled users */}
         {isEnrolled && !moduleProgress?.isCompleted && (
           <div className="mb-6">
-            <Button 
+            <Button
               onClick={() => {
-                const firstUnlockedLesson = lessons.findIndex((_, index) => isLessonUnlocked(index));
+                const firstUnlockedLesson = lessons.findIndex((_, index) =>
+                  isLessonUnlocked(index)
+                );
                 if (firstUnlockedLesson !== -1) {
-                  document.getElementById(`lesson-${firstUnlockedLesson}`)?.scrollIntoView({ behavior: 'smooth' });
+                  document
+                    .getElementById(`lesson-${firstUnlockedLesson}`)
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }
               }}
               className="w-full"
@@ -392,161 +425,200 @@ export default function ModuleDetail() {
         {isEnrolled && (
           <div className="space-y-4 mb-6">
             <h2 className="text-xl font-semibold">Lessons</h2>
-          {lessons.map((lesson: Lesson, index: number) => {
-            const lessonProgress = getLessonProgress(index);
-            const isUnlocked = isLessonUnlocked(index);
-            const isCompleted = lessonProgress?.isCompleted;
+            {lessons.map((lesson: Lesson, index: number) => {
+              const lessonProgress = getLessonProgress(index);
+              const isUnlocked = isLessonUnlocked(index);
+              const isCompleted = lessonProgress?.isCompleted;
 
-            return (
-              <Card key={index} id={`lesson-${index}`} className={`transition-all ${!isUnlocked ? 'opacity-60' : ''}`}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {isCompleted ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" data-testid={`icon-completed-${index}`} />
-                      ) : !isUnlocked ? (
-                        <Lock className="h-5 w-5 text-gray-400" data-testid={`icon-locked-${index}`} />
-                      ) : (
-                        <PlayCircle className="h-5 w-5 text-primary" data-testid={`icon-play-${index}`} />
-                      )}
-                      <div>
-                        <CardTitle className="text-lg" data-testid={`text-lesson-title-${index}`}>
-                          {lesson.title}
-                        </CardTitle>
-                        <CardDescription data-testid={`text-lesson-content-${index}`}>
-                          {lesson.content}
-                        </CardDescription>
+              return (
+                <Card
+                  key={index}
+                  id={`lesson-${index}`}
+                  className={`transition-all ${
+                    !isUnlocked ? "opacity-60" : ""
+                  }`}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {isCompleted ? (
+                          <CheckCircle
+                            className="h-5 w-5 text-green-500"
+                            data-testid={`icon-completed-${index}`}
+                          />
+                        ) : !isUnlocked ? (
+                          <Lock
+                            className="h-5 w-5 text-gray-400"
+                            data-testid={`icon-locked-${index}`}
+                          />
+                        ) : (
+                          <PlayCircle
+                            className="h-5 w-5 text-primary"
+                            data-testid={`icon-play-${index}`}
+                          />
+                        )}
+                        <div>
+                          <CardTitle
+                            className="text-lg"
+                            data-testid={`text-lesson-title-${index}`}
+                          >
+                            {lesson.title}
+                          </CardTitle>
+                          <CardDescription
+                            data-testid={`text-lesson-content-${index}`}
+                          >
+                            {lesson.content}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          data-testid={`badge-xp-${index}`}
+                        >
+                          {lesson.xp} XP
+                        </Badge>
+                        {isUnlocked && !isCompleted && (
+                          <div className="flex gap-2">
+                            {!lessonProgress?.isCompleted && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleLessonComplete(index)}
+                                disabled={completeLessonMutation.isPending}
+                                data-testid={`button-complete-lesson-${index}`}
+                              >
+                                Mark Complete
+                              </Button>
+                            )}
+                            {lessonProgress?.isCompleted &&
+                              !lessonProgress?.quizPassed && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedLesson(index);
+                                    setShowQuiz(true);
+                                    setQuizAnswers({});
+                                    setQuizResults(null);
+                                  }}
+                                  data-testid={`button-take-quiz-${index}`}
+                                >
+                                  Take Quiz
+                                </Button>
+                              )}
+                          </div>
+                        )}
+                        {lessonProgress && lessonProgress.quizAttempts > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            {lessonProgress.quizAttempts} attempt
+                            {lessonProgress.quizAttempts > 1 ? "s" : ""}
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" data-testid={`badge-xp-${index}`}>
-                        {lesson.xp} XP
-                      </Badge>
-                      {isUnlocked && !isCompleted && (
-                        <div className="flex gap-2">
-                          {!lessonProgress?.isCompleted && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleLessonComplete(index)}
-                              disabled={completeLessonMutation.isPending}
-                              data-testid={`button-complete-lesson-${index}`}
-                            >
-                              Mark Complete
-                            </Button>
-                          )}
-                          {lessonProgress?.isCompleted && !lessonProgress?.quizPassed && (
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setSelectedLesson(index);
-                                setShowQuiz(true);
-                                setQuizAnswers({});
-                                setQuizResults(null);
-                              }}
-                              data-testid={`button-take-quiz-${index}`}
-                            >
-                              Take Quiz
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                      {lessonProgress && lessonProgress.quizAttempts > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          {lessonProgress.quizAttempts} attempt{lessonProgress.quizAttempts > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            );
-          })}
+                  </CardHeader>
+                </Card>
+              );
+            })}
           </div>
         )}
 
         {/* Final Exam */}
         {isEnrolled && (
           <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5" />
-              Final Exam
-            </CardTitle>
-            <CardDescription>
-              Complete all lessons to unlock the final exam and earn your certificate.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div>
-                {moduleProgress?.finalExamPassed ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="font-medium text-green-700 dark:text-green-400">
-                      Passed with {moduleProgress.finalExamScore}/10
-                    </span>
-                  </div>
-                ) : canTakeFinalExam() ? (
-                  <div className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-yellow-500" />
-                    <span>Ready to take final exam</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                    <span className="text-muted-foreground">Complete all lessons first</span>
-                  </div>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5" />
+                Final Exam
+              </CardTitle>
+              <CardDescription>
+                Complete all lessons to unlock the final exam and earn your
+                certificate.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center">
+                <div>
+                  {moduleProgress?.finalExamPassed ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <span className="font-medium text-green-700 dark:text-green-400">
+                        Passed with {moduleProgress.finalExamScore}/10
+                      </span>
+                    </div>
+                  ) : canTakeFinalExam() ? (
+                    <div className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-yellow-500" />
+                      <span>Ready to take final exam</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                      <span className="text-muted-foreground">
+                        Complete all lessons first
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {canTakeFinalExam() && !moduleProgress?.finalExamPassed && (
+                  <Button
+                    onClick={() => {
+                      setSelectedLesson(-1);
+                      setShowFinalExam(true);
+                      setQuizAnswers({});
+                      setQuizResults(null);
+                    }}
+                    data-testid="button-final-exam"
+                  >
+                    Take Final Exam
+                  </Button>
+                )}
+                {moduleProgress && moduleProgress.finalExamAttempts > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    {moduleProgress.finalExamAttempts} attempt
+                    {moduleProgress.finalExamAttempts > 1 ? "s" : ""}
+                  </span>
                 )}
               </div>
-              {canTakeFinalExam() && !moduleProgress?.finalExamPassed && (
-                <Button
-                  onClick={() => {
-                    setSelectedLesson(-1);
-                    setShowFinalExam(true);
-                    setQuizAnswers({});
-                    setQuizResults(null);
-                  }}
-                  data-testid="button-final-exam"
-                >
-                  Take Final Exam
-                </Button>
-              )}
-              {moduleProgress && moduleProgress.finalExamAttempts > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  {moduleProgress.finalExamAttempts} attempt{moduleProgress.finalExamAttempts > 1 ? 's' : ''}
-                </span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         )}
 
         {/* Quiz Dialog */}
-        <Dialog open={showQuiz || showFinalExam} onOpenChange={(open) => {
-          if (!open) {
-            setShowQuiz(false);
-            setShowFinalExam(false);
-            setSelectedLesson(null);
-            setQuizAnswers({});
-            setQuizResults(null);
-          }
-        }}>
+        <Dialog
+          open={showQuiz || showFinalExam}
+          onOpenChange={(open) => {
+            if (!open) {
+              setShowQuiz(false);
+              setShowFinalExam(false);
+              setSelectedLesson(null);
+              setQuizAnswers({});
+              setQuizResults(null);
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {showFinalExam ? "Final Exam" : `Lesson ${(selectedLesson || 0) + 1} Quiz`}
+                {showFinalExam
+                  ? "Final Exam"
+                  : `Lesson ${(selectedLesson || 0) + 1} Quiz`}
               </DialogTitle>
               <DialogDescription>
-                {showFinalExam 
+                {showFinalExam
                   ? "Answer all questions correctly to complete the module and earn your certificate."
-                  : "Answer all questions correctly to unlock the next lesson."
-                }
+                  : "Answer all questions correctly to unlock the next lesson."}
               </DialogDescription>
             </DialogHeader>
 
             {quizResults ? (
               <div className="space-y-4">
-                <div className={`p-4 rounded-lg ${quizResults.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border`}>
+                <div
+                  className={`p-4 rounded-lg ${
+                    quizResults.passed
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                  } border`}
+                >
                   <div className="flex items-center gap-2 mb-2">
                     {quizResults.passed ? (
                       <CheckCircle className="h-5 w-5 text-green-500" />
@@ -554,19 +626,23 @@ export default function ModuleDetail() {
                       <div className="h-5 w-5 rounded-full border-2 border-red-500" />
                     )}
                     <span className="font-semibold">
-                      {quizResults.passed ? 'Congratulations!' : 'Keep Learning!'}
+                      {quizResults.passed
+                        ? "Congratulations!"
+                        : "Keep Learning!"}
                     </span>
                   </div>
                   <p>
-                    You scored {quizResults.score} out of {quizResults.totalQuestions} questions correctly.
+                    You scored {quizResults.score} out of{" "}
+                    {quizResults.totalQuestions} questions correctly.
                   </p>
                   {!quizResults.passed && (
                     <p className="text-sm mt-2">
-                      You need at least 70% to pass. Review the lesson content and try again.
+                      You need at least 70% to pass. Review the lesson content
+                      and try again.
                     </p>
                   )}
                 </div>
-                
+
                 <DialogFooter>
                   <Button
                     onClick={() => {
@@ -598,12 +674,18 @@ export default function ModuleDetail() {
                       }
                     >
                       {question.options.map((option, oIndex: number) => (
-                        <div key={oIndex} className="flex items-center space-x-2">
+                        <div
+                          key={oIndex}
+                          className="flex items-center space-x-2"
+                        >
                           <RadioGroupItem
                             value={oIndex.toString()}
                             id={`q${qIndex}-o${oIndex}`}
                           />
-                          <Label htmlFor={`q${qIndex}-o${oIndex}`} className="cursor-pointer">
+                          <Label
+                            htmlFor={`q${qIndex}-o${oIndex}`}
+                            className="cursor-pointer"
+                          >
                             {option}
                           </Label>
                         </div>
@@ -611,14 +693,16 @@ export default function ModuleDetail() {
                     </RadioGroup>
                   </div>
                 ))}
-                
+
                 <DialogFooter>
                   <Button
                     onClick={handleQuizSubmit}
                     disabled={submitQuizMutation.isPending}
                     data-testid="button-submit-quiz"
                   >
-                    {submitQuizMutation.isPending ? "Submitting..." : "Submit Quiz"}
+                    {submitQuizMutation.isPending
+                      ? "Submitting..."
+                      : "Submit Quiz"}
                   </Button>
                 </DialogFooter>
               </div>
