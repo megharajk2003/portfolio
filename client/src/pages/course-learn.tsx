@@ -232,39 +232,42 @@ export default function CourseLearn() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-8xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6 shadow-sm">
+          {/* Left Side Content */}
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-2">
+              {course.title}
+            </h1>
+            <p className="text-white/80 mb-4">{course.subtitle}</p>
+            <div className="flex items-center space-x-4">
+              <Badge className="bg-purple-600 text-white border-0">
+                {course.level}
+              </Badge>
+              <Badge className="bg-white/25 text-white border-0">
+                {course.language}
+              </Badge>
+              <span className="text-sm text-white/80">
+                {course.durationMonths} months • {modules.length} modules
+              </span>
+            </div>
+          </div>
+
+          {/* Right Side Button */}
           <Link href="/learning">
             <Button
-              variant="ghost"
-              className="mb-4"
+              className="bg-white text-slate-900 border-0 hover:bg-slate-100"
               data-testid="button-back-to-courses"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Courses
             </Button>
           </Link>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {course.title}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {course.subtitle}
-            </p>
-            <div className="flex items-center space-x-4">
-              <Badge variant="secondary">{course.level}</Badge>
-              <Badge variant="outline">{course.language}</Badge>
-              <span className="text-sm text-gray-500">
-                {course.durationMonths} months • {modules.length} modules
-              </span>
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Sidebar - Course Structure */}
-          <div className="lg:col-span-1">
-            <Card>
+          <div className="p-[2px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+            <Card className="bg-gradient-to-br from-blue-100 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BookOpen className="mr-2 h-5 w-5" />
@@ -378,7 +381,7 @@ export default function CourseLearn() {
           </div>
 
           {/* Main Content - Lesson */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 p-[2px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
             {selectedLesson ? (
               <Card>
                 <CardHeader>

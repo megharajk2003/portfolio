@@ -102,46 +102,61 @@ export default function CareerAdvisor() {
   const latestAdvice = advisoriesArray[0]; // Most recent advice
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile Sidebar */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-64">
-          <Sidebar onClose={() => setSidebarOpen(false)} />
-        </SheetContent>
-      </Sheet>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar />
+      {/* Unified Sidebar (Fixed) */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+          bg-white dark:bg-gray-800 border-r dark:border-gray-700
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      <main className="flex-1 p-4 lg:p-6">
+      {/* Main Content (Scrolling) */}
+      <main className="lg:ml-64 px-10 pt-2 h-screen overflow-y-auto">
         {/* Header */}
-        <div className="flex space-x-4 mb-6">
-          <Link href="/career-tools">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Career Tools
-            </Button>
-          </Link>
-        </div>
-        <div className="text-center space-y-6  bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-4">
-          <div className="flex items-center justify-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-xl shadow-lg">
-              <BrainCircuit className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Personal Career Advisor
-            </h2>
-          </div>
-          <p className="text-m text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Get AI-powered career guidance tailored to your profile, skills, and
-            goals. Receive personalized recommendations for your professional
-            growth.
-          </p>
-        </div>
+        <Card className="mb-2 bg-gradient-to-r from-blue-600 via-white-600 to-green-600 text-white border-0 shadow-2xl">
+          <CardContent className="p-8">
+            <div className="flex justify-between items-center">
+              <div className="space-y-2">
+                <div className="flex gap-2 items-center">
+                  <BrainCircuit className="h-8 w-8 text-white rounded-xl shadow-lg" />
 
-        <div className="grid lg:grid-cols-5 gap-10 mt-8">
+                  <h1 className="text-4xl font-bold text-white drop-shadow-lg">
+                    Personal Career Advisor
+                  </h1>
+                </div>
+
+                <p className="text-blue-100 text-lg">
+                  Get AI-powered career guidance tailored to your profile,
+                  skills, and goals. Receive personalized recommendations for
+                  your professional growth.
+                </p>
+              </div>
+              <Link href="/career-tools">
+                <Button
+                  variant="secondary"
+                  className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6 py-3 shadow-lg"
+                >
+                  ← Back to Career Tools
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid lg:grid-cols-5 gap-10 mt-4">
           {/* Generate New Advice */}
           <div className="lg:col-span-2">
             <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">

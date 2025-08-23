@@ -163,18 +163,16 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage
-                      src={profile?.personalDetails?.photo || ""}
-                      alt={profile?.personalDetails?.fullName || ""}
-                    />
-                    <AvatarFallback className="text-xl">
-                      {profile?.personalDetails?.fullName
-                        ?.split(" ")
-                        .map((n: string) => n[0])
-                        .join("") || "U"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <img
+                    className="w-64 h-64 rounded-xl object-cover"
+                    src={
+                      profile?.personalDetails?.photo ||
+                      "https://img.freepik.com/premium-photo/avatar-icon_665280-58322.jpg"
+                    }
+                    alt={
+                      profile?.personalDetails?.fullName || "Profile picture"
+                    }
+                  />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">

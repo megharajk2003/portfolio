@@ -60,7 +60,9 @@ export default function StatsGrid({ userId }: StatsGridProps) {
       profile?.personalDetails?.fullName,
       profile?.personalDetails?.roleOrTitle,
       profile?.contactDetails?.phone,
-      profile?.personalDetails?.location?.city || profile?.personalDetails?.location?.state || profile?.personalDetails?.location?.country,
+      profile?.personalDetails?.location?.city ||
+        profile?.personalDetails?.location?.state ||
+        profile?.personalDetails?.location?.country,
       profile?.personalDetails?.summary,
     ];
 
@@ -120,26 +122,30 @@ export default function StatsGrid({ userId }: StatsGridProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {stats.map((stat, index) => {
         const IconComponent = stat.icon;
-        
+
         return (
           <Card key={index}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {stat.value}
+                  </p>
                 </div>
-                <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
+                <div
+                  className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}
+                >
                   <IconComponent className={`h-6 w-6 ${stat.color}`} />
                 </div>
               </div>
-              
+
               {stat.progress && (
                 <div className="mt-4 w-full">
                   <Progress value={stat.progress} className="h-2" />
                 </div>
               )}
-              
+
               {stat.subtitle && (
                 <p className={`text-sm mt-2 ${stat.subtitleColor}`}>
                   {stat.subtitle}

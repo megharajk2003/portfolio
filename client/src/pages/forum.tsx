@@ -182,7 +182,10 @@ function PostCard({ post }: { post: ForumPost }) {
   };
 
   return (
-    <Card className="mb-6" data-testid={`card-forum-post-${post.id}`}>
+    <Card
+      className="mb-6 card-with-gradient-outline"
+      data-testid={`card-forum-post-${post.id}`}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start space-x-4">
           <UserAvatar user={post.user} />
@@ -361,7 +364,7 @@ function CreatePostDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="mb-6" data-testid="button-create-post">
+        <Button className="mb-2" data-testid="button-create-post">
           <Plus className="h-4 w-4 mr-2" />
           Create New Post
         </Button>

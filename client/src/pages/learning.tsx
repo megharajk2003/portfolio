@@ -10,12 +10,35 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { 
-  BookOpen, Trophy, Play, Clock, Users, Star, Search, Filter,
-  Code, Database, Cpu, Zap, Globe, Smartphone, Palette, TrendingUp,
-  ChevronRight, Calendar, Award, ExternalLink
+import {
+  BookOpen,
+  Trophy,
+  Play,
+  Clock,
+  Users,
+  Star,
+  Search,
+  Filter,
+  Code,
+  Database,
+  Cpu,
+  Zap,
+  Globe,
+  Smartphone,
+  Palette,
+  TrendingUp,
+  ChevronRight,
+  Calendar,
+  Award,
+  ExternalLink,
 } from "lucide-react";
 
 const CURRENT_USER_ID = 1; // Changed to number to match database schema
@@ -24,27 +47,27 @@ const categoryIcons = {
   "AI & Machine Learning": { icon: Cpu, color: "text-purple-600" },
   "Data Science & Analytics": { icon: Database, color: "text-green-600" },
   "Generative AI": { icon: Zap, color: "text-yellow-600" },
-  "Management": { icon: Users, color: "text-orange-600" },
+  Management: { icon: Users, color: "text-orange-600" },
   "Software & Tech": { icon: Code, color: "text-blue-500" },
   "Cloud Computing": { icon: Globe, color: "text-indigo-600" },
-  "Design": { icon: Palette, color: "text-rose-600" },
-  "Business": { icon: TrendingUp, color: "text-blue-600" },
-  "Marketing": { icon: TrendingUp, color: "text-pink-600" },
-  "Leadership": { icon: Award, color: "text-red-600" }
+  Design: { icon: Palette, color: "text-rose-600" },
+  Business: { icon: TrendingUp, color: "text-blue-600" },
+  Marketing: { icon: TrendingUp, color: "text-pink-600" },
+  Leadership: { icon: Award, color: "text-red-600" },
 };
 
 const levels = [
   { name: "Beginner", count: 0 },
   { name: "Intermediate", count: 0 },
   { name: "Advanced", count: 0 },
-  { name: "All", count: 0 }
+  { name: "All", count: 0 },
 ];
 
 const durations = [
   { name: "1-3 Months", count: 0 },
   { name: "3-6 Months", count: 0 },
   { name: "6-12 Months", count: 0 },
-  { name: "12+ Months", count: 0 }
+  { name: "12+ Months", count: 0 },
 ];
 
 export default function Learning() {
@@ -59,14 +82,21 @@ export default function Learning() {
   const queryClient = useQueryClient();
 
   // Fetch real data from the API
-  const { data: courses = [], isLoading: coursesLoading, error: coursesError } = useQuery<any[]>({
+  const {
+    data: courses = [],
+    isLoading: coursesLoading,
+    error: coursesError,
+  } = useQuery<any[]>({
     queryKey: ["/api/courses"],
   });
 
-  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery<any[]>({
+  const {
+    data: categories = [],
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
-
 
   const { data: modules = [] } = useQuery({
     queryKey: ["/api/learning-modules"],
@@ -87,7 +117,7 @@ export default function Learning() {
       return apiRequest("POST", `/api/enrollments`, {
         userId: CURRENT_USER_ID,
         courseId: courseId,
-        enrollmentDate: new Date().toISOString()
+        enrollmentDate: new Date().toISOString(),
       });
     },
     onSuccess: () => {
@@ -96,20 +126,24 @@ export default function Learning() {
         description: "You have successfully enrolled in this course.",
       });
       // Invalidate enrollments to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
+      });
     },
     onError: () => {
       toast({
         title: "Enrollment Failed",
         description: "Something went wrong. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Check if user is enrolled in a course
   const isEnrolled = (courseId: string) => {
-    return userEnrollments.some((enrollment: any) => enrollment.courseId === courseId);
+    return userEnrollments.some(
+      (enrollment: any) => enrollment.courseId === courseId
+    );
   };
 
   // Handle enrollment
@@ -118,50 +152,53 @@ export default function Learning() {
   };
 
   const handleLevelChange = (level: string, checked: boolean) => {
-    setSelectedLevels(prev => 
-      checked ? [...prev, level] : prev.filter(l => l !== level)
+    setSelectedLevels((prev) =>
+      checked ? [...prev, level] : prev.filter((l) => l !== level)
     );
   };
 
   const handleDurationChange = (duration: string, checked: boolean) => {
-    setSelectedDurations(prev => 
-      checked ? [...prev, duration] : prev.filter(d => d !== duration)
+    setSelectedDurations((prev) =>
+      checked ? [...prev, duration] : prev.filter((d) => d !== duration)
     );
   };
 
   const handleSkillChange = (skill: string, checked: boolean) => {
-    setSelectedSkills(prev => 
-      checked ? [...prev, skill] : prev.filter(s => s !== skill)
+    setSelectedSkills((prev) =>
+      checked ? [...prev, skill] : prev.filter((s) => s !== skill)
     );
   };
 
   // Filter courses based on search and filters
   const filteredCourses = courses.filter((course: any) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.subtitle?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
+    const matchesSearch =
+      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.subtitle?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLevel =
+      selectedLevels.length === 0 || selectedLevels.includes(course.level);
     return matchesSearch && matchesLevel;
   });
 
-
   // Fallback categories if API returns empty
-  const fallbackCategories = Object.keys(categoryIcons).map(name => ({
-    id: name.toLowerCase().replace(/\s+/g, '-'),
+  const fallbackCategories = Object.keys(categoryIcons).map((name) => ({
+    id: name.toLowerCase().replace(/\s+/g, "-"),
     name,
-    count: 0
+    count: 0,
   }));
 
   // Update category counts dynamically
   const allCategories = categories.length > 0 ? categories : fallbackCategories;
   const categoriesWithCounts = allCategories.map((category: any) => {
-    const courseCount = courses.filter((course: any) => 
+    const courseCount = courses.filter((course: any) =>
       course.categories?.some((cat: any) => cat.id === category.id)
     ).length;
-    const iconData = categoryIcons[category.name as keyof typeof categoryIcons] || { icon: BookOpen, color: "text-gray-600" };
+    const iconData = categoryIcons[
+      category.name as keyof typeof categoryIcons
+    ] || { icon: BookOpen, color: "text-gray-600" };
     return {
       ...category,
       count: courseCount,
-      ...iconData
+      ...iconData,
     };
   });
 
@@ -176,7 +213,7 @@ export default function Learning() {
         });
       }
     });
-    
+
     return Array.from(skillMap.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
@@ -185,27 +222,38 @@ export default function Learning() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="max-w-7xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-8xl mx-auto p-6 animate-fade-in">
         {/* Header */}
         <Card className="mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white border-0 shadow-2xl">
           <CardContent className="p-8">
             <div className="flex justify-between items-center">
               <div className="space-y-2">
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg">🎓 Learning Hub</h1>
-                <p className="text-blue-100 text-lg">Explore courses and advance your skills</p>
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg">
+                  🎓 Learning Hub
+                </h1>
+                <p className="text-blue-100 text-lg">
+                  Explore courses and advance your skills
+                </p>
                 <div className="flex items-center space-x-4 mt-4">
                   <div className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full">
                     <BookOpen className="h-5 w-5" />
-                    <span className="text-sm font-medium">{courses.length} Courses Available</span>
+                    <span className="text-sm font-medium">
+                      {courses.length} Courses Available
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full">
                     <Trophy className="h-5 w-5" />
-                    <span className="text-sm font-medium">Earn XP & Badges</span>
+                    <span className="text-sm font-medium">
+                      Earn XP & Badges
+                    </span>
                   </div>
                 </div>
               </div>
               <Link href="/dashboard">
-                <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6 py-3 shadow-lg">
+                <Button
+                  variant="secondary"
+                  className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6 py-3 shadow-lg"
+                >
                   ← Back to Dashboard
                 </Button>
               </Link>
@@ -247,21 +295,39 @@ export default function Learning() {
                     return (
                       <Button
                         key={category.name}
-                        variant={selectedCategory === category.name ? "default" : "ghost"}
+                        variant={
+                          selectedCategory === category.name
+                            ? "default"
+                            : "ghost"
+                        }
                         className={`w-full justify-start h-auto p-3 rounded-lg transition-all duration-200 hover:scale-105 ${
-                          selectedCategory === category.name 
-                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg' 
-                            : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600'
+                          selectedCategory === category.name
+                            ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg"
+                            : "hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600"
                         }`}
                         onClick={() => setSelectedCategory(category.name)}
                       >
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center">
-                            <IconComponent className={`mr-3 h-5 w-5 ${selectedCategory === category.name ? 'text-white' : category.color}`} />
-                            <span className="text-sm font-medium">{category.name}</span>
+                            <IconComponent
+                              className={`mr-3 h-5 w-5 ${
+                                selectedCategory === category.name
+                                  ? "text-white"
+                                  : category.color
+                              }`}
+                            />
+                            <span className="text-sm font-medium">
+                              {category.name}
+                            </span>
                           </div>
                           <div className="flex items-center">
-                            <span className={`text-xs px-2 py-1 rounded-full ${selectedCategory === category.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${
+                                selectedCategory === category.name
+                                  ? "bg-white/20 text-white"
+                                  : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                              }`}
+                            >
                               {category.count}
                             </span>
                             <ChevronRight className="ml-2 h-3 w-3" />
@@ -285,16 +351,26 @@ export default function Learning() {
               <CardContent className="space-y-6">
                 {/* Level Filter */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Level</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                    Level
+                  </h4>
                   <div className="space-y-2">
                     {levels.map((level) => (
-                      <div key={level.name} className="flex items-center space-x-2">
+                      <div
+                        key={level.name}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={level.name}
                           checked={selectedLevels.includes(level.name)}
-                          onCheckedChange={(checked) => handleLevelChange(level.name, checked as boolean)}
+                          onCheckedChange={(checked) =>
+                            handleLevelChange(level.name, checked as boolean)
+                          }
                         />
-                        <label htmlFor={level.name} className="text-sm cursor-pointer flex-1">
+                        <label
+                          htmlFor={level.name}
+                          className="text-sm cursor-pointer flex-1"
+                        >
                           {level.name} ({level.count})
                         </label>
                       </div>
@@ -306,16 +382,29 @@ export default function Learning() {
 
                 {/* Duration Filter */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Duration</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                    Duration
+                  </h4>
                   <div className="space-y-2">
                     {durations.map((duration) => (
-                      <div key={duration.name} className="flex items-center space-x-2">
+                      <div
+                        key={duration.name}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={duration.name}
                           checked={selectedDurations.includes(duration.name)}
-                          onCheckedChange={(checked) => handleDurationChange(duration.name, checked as boolean)}
+                          onCheckedChange={(checked) =>
+                            handleDurationChange(
+                              duration.name,
+                              checked as boolean
+                            )
+                          }
                         />
-                        <label htmlFor={duration.name} className="text-sm cursor-pointer flex-1">
+                        <label
+                          htmlFor={duration.name}
+                          className="text-sm cursor-pointer flex-1"
+                        >
                           {duration.name} ({duration.count})
                         </label>
                       </div>
@@ -327,16 +416,26 @@ export default function Learning() {
 
                 {/* Skills Filter */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Skills</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                    Skills
+                  </h4>
                   <div className="space-y-2">
                     {skills.map((skill) => (
-                      <div key={skill.name} className="flex items-center space-x-2">
+                      <div
+                        key={skill.name}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={skill.name}
                           checked={selectedSkills.includes(skill.name)}
-                          onCheckedChange={(checked) => handleSkillChange(skill.name, checked as boolean)}
+                          onCheckedChange={(checked) =>
+                            handleSkillChange(skill.name, checked as boolean)
+                          }
                         />
-                        <label htmlFor={skill.name} className="text-sm cursor-pointer flex-1">
+                        <label
+                          htmlFor={skill.name}
+                          className="text-sm cursor-pointer flex-1"
+                        >
                           {skill.name} ({skill.count})
                         </label>
                       </div>
@@ -378,7 +477,10 @@ export default function Learning() {
                 </div>
               )}
               {filteredCourses.map((course: any) => (
-                <Card key={course.id} className="hover:shadow-lg transition-all duration-200 group">
+                <Card
+                  key={course.id}
+                  className="hover:shadow-lg transition-all duration-200 group"
+                >
                   <div className="relative">
                     <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-600 rounded-t-lg flex items-center justify-center">
                       <div className="text-white text-center">
@@ -390,7 +492,7 @@ export default function Learning() {
                       {course.isFree ? "Free" : `$${course.price}`}
                     </Badge>
                   </div>
-                  
+
                   <CardHeader className="pb-2">
                     <div className="space-y-2">
                       <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -406,7 +508,7 @@ export default function Learning() {
                       )}
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center">
@@ -433,7 +535,11 @@ export default function Learning() {
                     </div>
 
                     <Link href={`/course/${course.id}`}>
-                      <Button className="w-full" variant="outline" data-testid={`button-view-program-${course.id}`}>
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        data-testid={`button-view-program-${course.id}`}
+                      >
                         View Program
                         <ExternalLink className="ml-2 h-4 w-4" />
                       </Button>
@@ -451,7 +557,7 @@ export default function Learning() {
             </div>
           </div>
         </div>
-        
+
         {/* Footer */}
         <Footer />
       </div>

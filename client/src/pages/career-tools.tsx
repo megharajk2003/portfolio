@@ -172,18 +172,6 @@ export default function CareerTools() {
               );
             })}
           </div>
-
-          {/* Info Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 text-center">
-            <h3 className="text-lg font-semibold mb-2">
-              Powered by Advanced AI
-            </h3>
-            <p className="text-muted-foreground">
-              All our career tools use cutting-edge AI technology to provide
-              personalized, data-driven insights based on your unique profile
-              and career goals.
-            </p>
-          </div>
         </div>
       </div>
     </div>

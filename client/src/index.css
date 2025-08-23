@@ -68,7 +68,12 @@
   --chart-4: hsl(120, 60%, 50%);
   --chart-5: hsl(340, 75%, 55%);
 }
-
+.card-with-gradient-outline {
+ border: 2px solid transparent; /* Make the original border transparent */
+ border-image: linear-gradient(45deg, #ff0040, #0000ff, #ff00ff) 1; /* Define the gradient and slice */
+ border-image-slice: 1; /* Ensure the entire border uses the image */
+ /* Add other existing styles for the card */
+}
 @layer base {
   * {
     @apply border-border;

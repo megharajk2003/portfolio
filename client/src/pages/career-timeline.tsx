@@ -127,30 +127,59 @@ export default function CareerTimeline() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Unified Sidebar (Fixed) */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+          bg-white dark:bg-gray-800 border-r dark:border-gray-700
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Mobile Sidebar */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-64">
-          <Sidebar onClose={() => setSidebarOpen(false)} />
-        </SheetContent>
-      </Sheet>
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6 space-y-4">
+      <main className="lg:ml-64 px-10 pt-2 h-screen overflow-y-auto">
         {/* Mobile Header */}
-        <div className="flex space-x-4">
-          <Link href="/career-tools">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Career Tools
-            </Button>
-          </Link>
-        </div>
+        <Card className="mb-2 bg-gradient-to-r from-green-600 via-white-600 to-purple-400 text-white border-0 shadow-2xl">
+          <CardContent className="p-8">
+            <div className="flex justify-between items-center">
+              <div className="space-y-2">
+                <div className="flex gap-2 items-center">
+                  <TimelineIcon className="h-8 w-8 text-white" />
+                  <h1 className="text-4xl font-bold text-white drop-shadow-lg">
+                    AI Career Timeline
+                  </h1>
+                </div>
+
+                <p className="text-blue-100 text-lg">
+                  Generate detailed career progression roadmaps with AI. Get
+                  phase-by-phase plans with milestones and skills to develop for
+                  your target role.
+                </p>
+              </div>
+              <Link href="/career-tools">
+                <Button
+                  variant="outline"
+                  className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6 py-3 shadow-lg"
+                >
+                  ← Back to Career Tools
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b">
           <Sheet>
             <SheetTrigger asChild>
@@ -169,21 +198,6 @@ export default function CareerTimeline() {
 
         <div className="max-w-7xl mx-auto p-4 space-y-8">
           {/* Header */}
-          <div className="text-center space-y-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-4">
-            <div className="flex items-center justify-center gap-3">
-              <div className="p-3 bg-green-600 rounded-xl shadow-lg">
-                <TimelineIcon className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                AI Career Timeline
-              </h2>
-            </div>
-            <p className="text-m text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Generate detailed career progression roadmaps with AI. Get
-              phase-by-phase plans with milestones and skills to develop for
-              your target role.
-            </p>
-          </div>
 
           {/* Generate Timeline Form */}
           <Card>
@@ -382,7 +396,7 @@ export default function CareerTimeline() {
             </Card>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
