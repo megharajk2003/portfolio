@@ -38,17 +38,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Username resolution endpoint for public portfolios
   app.get("/api/user-by-username/:username", async (req, res) => {
     try {
-      const username = req.params.username;
+      const username = req.params.username.toLowerCase();
       
       // Try to find user by email (if username is the full email)
       let user = await storage.getUserByEmail(username);
       
-      // If not found, try to find by email prefix (username before @)
+      // If not found, try to find by various username patterns
       if (!user) {
-        // This is a simplified approach - in production, you'd want a proper username field
-        // For now, we'll assume the username is the first part of the email
-        const users = await storage.getAllUsers(); // We'll need to implement this
-        user = users.find(u => u.email.split('@')[0] === username);
+        const users = await storage.getAllUsers();
+        user = users.find(u => {
+          // Check email prefix (part before @)
+          const emailPrefix = u.email.split('@')[0].toLowerCase();
+          if (emailPrefix === username) return true;
+          
+          // Check firstName (case insensitive)
+          if (u.firstName && u.firstName.toLowerCase() === username) return true;
+          
+          // Check lastName (case insensitive)
+          if (u.lastName && u.lastName.toLowerCase() === username) return true;
+          
+          // Check full name combination (firstName + lastName)
+          if (u.firstName && u.lastName) {
+            const fullName = (u.firstName + u.lastName).toLowerCase().replace(/\s+/g, '');
+            if (fullName === username) return true;
+          }
+          
+          return false;
+        });
       }
       
       if (!user) {
