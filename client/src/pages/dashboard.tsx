@@ -38,6 +38,7 @@ import ProfileCompletionNotification from "@/components/profile-completion-notif
 import ActivityCalendar from "@/components/activity-calendar";
 import ProjectsAchievements from "@/components/projects-achievements";
 import QuickActions from "@/components/quick-actions";
+import GoalHeatMap from "@/components/goal-heat-map";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 
 // FIX: Infer the type for a single profile row from the Drizzle schema.
@@ -223,6 +224,9 @@ export default function Home() {
               }
             />
           </div>
+
+          {/* Learning Heat Map */}
+          <GoalHeatMap />
 
           {/* Learning Activity - Now before Learning Modules */}
           <section>

@@ -28,6 +28,7 @@ import ResumeGenerator from "@/pages/resume-generator";
 import CareerChat from "@/pages/career-chat";
 import Forum from "@/pages/forum";
 import GoalTracker from "@/pages/goal-tracker";
+import GoalDetails from "@/pages/goal-details";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -107,6 +108,7 @@ function Router() {
           <Route path="/learning" component={Learning} />
           <Route path="/forum" component={Forum} />
         <Route path="/goal-tracker" component={GoalTracker} />
+        <Route path="/goal-tracker/:id" component={GoalDetails} />
           <Route path="/course/:courseId/learn" component={CourseLearn} />
           <Route path="/course/:id" component={CourseDetail} />
           <Route path="/module/:id" component={ModuleDetail} />

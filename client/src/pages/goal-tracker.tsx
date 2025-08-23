@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   Dialog, 
   DialogContent, 
@@ -18,19 +16,12 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   Upload,
   Target,
-  TrendingUp,
-  CheckCircle,
-  Circle,
-  Clock,
-  ChevronDown,
-  ChevronRight,
-  Plus,
   FileSpreadsheet
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface Goal {
   id: string;
@@ -43,30 +34,6 @@ interface Goal {
   updatedAt: string;
 }
 
-interface GoalTopic {
-  id: string;
-  categoryId: string;
-  name: string;
-  status: "pending" | "in_progress" | "completed";
-  notes?: string;
-  dueDate?: string;
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface GoalCategory {
-  id: string;
-  goalId: string;
-  name: string;
-  totalTopics: number;
-  completedTopics: number;
-  topics: GoalTopic[];
-}
-
-interface GoalWithCategories extends Goal {
-  categories: GoalCategory[];
-}
 
 export default function GoalTracker() {
   const { user } = useAuth();
@@ -74,19 +41,12 @@ export default function GoalTracker() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [goalName, setGoalName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [, navigate] = useLocation();
 
   // Fetch user's goals
   const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
     queryKey: ["/api/goals"],
     enabled: !!user
-  });
-
-  // Fetch specific goal with categories and topics
-  const { data: goalDetails } = useQuery<GoalWithCategories>({
-    queryKey: ["/api/goals", selectedGoal],
-    enabled: !!selectedGoal
   });
 
   // CSV upload mutation
@@ -122,37 +82,6 @@ export default function GoalTracker() {
     }
   });
 
-  // Topic status update mutation
-  const updateTopicStatusMutation = useMutation({
-    mutationFn: async (data: { topicId: string; status: string; notes?: string }) => {
-      const response = await fetch(`/api/topics/${data.topicId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ status: data.status, notes: data.notes })
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update topic");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/goals", selectedGoal] });
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
-      toast({
-        title: "Status updated",
-        description: "Topic status has been updated successfully"
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message || "Failed to update topic status",
-        variant: "destructive"
-      });
-    }
-  });
 
   const parseCSV = (file: File): Promise<any[]> => {
     return new Promise((resolve, reject) => {
@@ -216,45 +145,6 @@ export default function GoalTracker() {
     }
   };
 
-  const handleTopicStatusChange = (topicId: string, newStatus: string, notes?: string) => {
-    updateTopicStatusMutation.mutate({
-      topicId,
-      status: newStatus,
-      notes
-    });
-  };
-
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in_progress':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      default:
-        return <Circle className="h-4 w-4 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-    }
-  };
 
   return (
     <div className="container mx-auto p-6 space-y-6" data-testid="goal-tracker-page">
@@ -342,10 +232,8 @@ export default function GoalTracker() {
           {goals.map((goal) => (
             <Card
               key={goal.id}
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                selectedGoal === goal.id ? 'ring-2 ring-blue-500' : ''
-              }`}
-              onClick={() => setSelectedGoal(goal.id)}
+              className="cursor-pointer transition-all hover:shadow-lg"
+              onClick={() => navigate(`/goal-tracker/${goal.id}`)}
               data-testid={`card-goal-${goal.id}`}
             >
               <CardHeader>
@@ -389,115 +277,6 @@ export default function GoalTracker() {
         </div>
       )}
 
-      {/* Goal Details */}
-      {selectedGoal && goalDetails && (
-        <Card data-testid="goal-details">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-500" />
-              {goalDetails.name} - Detailed Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {/* Overall Progress */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold">Overall Progress</h4>
-                  <span className="text-lg font-bold">
-                    {Math.round((goalDetails.completedTopics / goalDetails.totalTopics) * 100)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={(goalDetails.completedTopics / goalDetails.totalTopics) * 100} 
-                  className="h-3"
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  {goalDetails.completedTopics} of {goalDetails.totalTopics} topics completed
-                </p>
-              </div>
-
-              {/* Categories */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-lg">Categories</h4>
-                {goalDetails.categories.map((category) => (
-                  <div key={category.id} className="border rounded-lg">
-                    <Collapsible
-                      open={expandedCategories.has(category.id)}
-                      onOpenChange={() => toggleCategory(category.id)}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <div className="flex items-center gap-3">
-                            {expandedCategories.has(category.id) ? 
-                              <ChevronDown className="h-4 w-4" /> : 
-                              <ChevronRight className="h-4 w-4" />
-                            }
-                            <h5 className="font-medium">{category.name}</h5>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600">
-                              {category.completedTopics} / {category.totalTopics}
-                            </span>
-                            <div className="w-20">
-                              <Progress 
-                                value={(category.completedTopics / category.totalTopics) * 100} 
-                                className="h-2"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <div className="px-4 pb-4">
-                          <div className="space-y-3">
-                            {category.topics.map((topic) => (
-                              <div key={topic.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <Checkbox
-                                  checked={topic.status === 'completed'}
-                                  onCheckedChange={(checked) => {
-                                    handleTopicStatusChange(
-                                      topic.id,
-                                      checked ? 'completed' : 'pending'
-                                    );
-                                  }}
-                                  data-testid={`checkbox-topic-${topic.id}`}
-                                />
-                                
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    {getStatusIcon(topic.status)}
-                                    <span className={`font-medium ${
-                                      topic.status === 'completed' ? 'line-through text-gray-500' : ''
-                                    }`}>
-                                      {topic.name}
-                                    </span>
-                                  </div>
-                                  
-                                  {topic.notes && (
-                                    <p className="text-sm text-gray-600 mt-1">
-                                      {topic.notes}
-                                    </p>
-                                  )}
-                                </div>
-                                
-                                <Badge className={getStatusColor(topic.status)}>
-                                  {topic.status.replace('_', ' ')}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
