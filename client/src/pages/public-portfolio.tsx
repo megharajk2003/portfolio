@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Profile } from "@shared/schema";
+import Sidebar from "@/components/sidebar";
 import { 
   Mail, Phone, MapPin, ExternalLink, Github, Calendar, Building, 
   GraduationCap, Award, Download, Star, Users, Code, Palette,
@@ -21,6 +22,7 @@ export default function PublicPortfolio() {
   const [, params] = useRoute("/portfolio/:username");
   const [activeTab, setActiveTab] = useState("about");
   const username = params?.username;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Mock user ID mapping - in real app this would be resolved from username  
   const CURRENT_USER_ID = "1";
@@ -97,10 +99,13 @@ export default function PublicPortfolio() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Portfolio Not Found</h1>
-          <p className="text-gray-600 dark:text-gray-400">The portfolio for "{username}" could not be found.</p>
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Portfolio Not Found</h1>
+            <p className="text-gray-600 dark:text-gray-400">The portfolio for "{username}" could not be found.</p>
+          </div>
         </div>
       </div>
     );
@@ -112,7 +117,9 @@ export default function PublicPortfolio() {
   const visibleEducation = education; // All education is visible by default
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="flex h-screen bg-white dark:bg-gray-900">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 py-20 px-6">
         <div className="max-w-6xl mx-auto">
@@ -827,6 +834,7 @@ export default function PublicPortfolio() {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

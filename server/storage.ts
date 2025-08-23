@@ -73,7 +73,7 @@ import {
   forumLikes,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, sql, desc, ne, or, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -2137,6 +2137,7 @@ export class PgStorage implements IStorage {
       const newPost = {
         id: randomUUID(),
         ...data,
+        isActive: true,
         likesCount: 0,
         repliesCount: 0,
         createdAt: new Date(),
@@ -2233,6 +2234,7 @@ export class PgStorage implements IStorage {
       const newReply = {
         id: randomUUID(),
         ...data,
+        isActive: true,
         likesCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
