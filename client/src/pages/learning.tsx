@@ -144,8 +144,16 @@ export default function Learning() {
   });
 
 
+  // Fallback categories if API returns empty
+  const fallbackCategories = Object.keys(categoryIcons).map(name => ({
+    id: name.toLowerCase().replace(/\s+/g, '-'),
+    name,
+    count: 0
+  }));
+
   // Update category counts dynamically
-  const categoriesWithCounts = categories.map((category: any) => {
+  const allCategories = categories.length > 0 ? categories : fallbackCategories;
+  const categoriesWithCounts = allCategories.map((category: any) => {
     const courseCount = courses.filter((course: any) => 
       course.categories?.some((cat: any) => cat.id === category.id)
     ).length;
@@ -179,15 +187,31 @@ export default function Learning() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       <div className="max-w-7xl mx-auto p-6 animate-fade-in">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8 animate-slide-up">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Learning Hub</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Explore courses and advance your skills</p>
-          </div>
-          <Link href="/dashboard">
-            <Button variant="outline">Back to Dashboard</Button>
-          </Link>
-        </div>
+        <Card className="mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white border-0 shadow-2xl">
+          <CardContent className="p-8">
+            <div className="flex justify-between items-center">
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg">🎓 Learning Hub</h1>
+                <p className="text-blue-100 text-lg">Explore courses and advance your skills</p>
+                <div className="flex items-center space-x-4 mt-4">
+                  <div className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full">
+                    <BookOpen className="h-5 w-5" />
+                    <span className="text-sm font-medium">{courses.length} Courses Available</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full">
+                    <Trophy className="h-5 w-5" />
+                    <span className="text-sm font-medium">Earn XP & Badges</span>
+                  </div>
+                </div>
+              </div>
+              <Link href="/dashboard">
+                <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6 py-3 shadow-lg">
+                  ← Back to Dashboard
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="flex gap-8">
           {/* Sidebar with Categories and Filters */}
@@ -204,36 +228,49 @@ export default function Learning() {
             </div>
 
             {/* Categories */}
-            <Card>
-              <CardHeader className="pb-3">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+              <CardHeader className="pb-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-lg">
                 <CardTitle className="text-lg flex items-center">
                   <BookOpen className="mr-2 h-5 w-5" />
                   Categories
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {categoriesWithCounts.map((category: any) => {
-                  const IconComponent = category.icon;
-                  return (
-                    <Button
-                      key={category.name}
-                      variant={selectedCategory === category.name ? "default" : "ghost"}
-                      className="w-full justify-start h-auto p-3"
-                      onClick={() => setSelectedCategory(category.name)}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center">
-                          <IconComponent className={`mr-2 h-4 w-4 ${category.color}`} />
-                          <span className="text-sm">{category.name}</span>
+              <CardContent className="space-y-2 p-4">
+                {categoriesWithCounts.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">
+                    <BookOpen className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                    <p className="text-sm">No categories available</p>
+                  </div>
+                ) : (
+                  categoriesWithCounts.map((category: any) => {
+                    const IconComponent = category.icon;
+                    return (
+                      <Button
+                        key={category.name}
+                        variant={selectedCategory === category.name ? "default" : "ghost"}
+                        className={`w-full justify-start h-auto p-3 rounded-lg transition-all duration-200 hover:scale-105 ${
+                          selectedCategory === category.name 
+                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg' 
+                            : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600'
+                        }`}
+                        onClick={() => setSelectedCategory(category.name)}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center">
+                            <IconComponent className={`mr-3 h-5 w-5 ${selectedCategory === category.name ? 'text-white' : category.color}`} />
+                            <span className="text-sm font-medium">{category.name}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className={`text-xs px-2 py-1 rounded-full ${selectedCategory === category.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}>
+                              {category.count}
+                            </span>
+                            <ChevronRight className="ml-2 h-3 w-3" />
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <span className="text-xs text-gray-500 mr-1">({category.count})</span>
-                          <ChevronRight className="h-3 w-3" />
-                        </div>
-                      </div>
-                    </Button>
-                  );
-                })}
+                      </Button>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
 
