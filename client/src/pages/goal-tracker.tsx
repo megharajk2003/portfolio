@@ -16,11 +16,19 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Upload,
   Target,
   FileSpreadsheet,
-  TrendingUp
+  TrendingUp,
+  Filter
 } from "lucide-react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
@@ -70,6 +78,27 @@ export default function GoalTracker() {
   const [goalName, setGoalName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [, navigate] = useLocation();
+  
+  // Filter states
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  
+  const months = [
+    { value: 'all', label: 'All Months' },
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' }
+  ];
 
   // Fetch user's goals
   const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
@@ -184,33 +213,79 @@ export default function GoalTracker() {
     }
   };
 
-  // Generate cumulative progress data for the line chart
+  // Generate cumulative progress data for the line chart based on real dates
   const cumulativeProgressData = useMemo(() => {
     if (!goals.length) return [];
     
-    // Generate sample data points for the chart (simulating weekly progress)
-    const dataPoints = [
-      'Aug 01', 'Aug 08', 'Aug 15', 'Aug 22', 'Aug 29',
-      'Sep 05', 'Sep 12', 'Sep 19', 'Sep 26',
-      'Oct 03', 'Oct 10', 'Oct 17', 'Oct 24', 'Oct 31',
-      'Nov 07', 'Nov 14', 'Nov 21', 'Nov 28',
-      'Dec 05', 'Dec 12', 'Dec 19', 'Dec 26'
-    ];
-    
-    return dataPoints.map((date, index) => {
-      const progressPoint: GoalProgressData = { date };
+    // Filter goals based on selected year and month
+    const filteredGoals = goals.filter(goal => {
+      const goalDate = new Date(goal.createdAt);
+      const goalYear = goalDate.getFullYear();
+      const goalMonth = String(goalDate.getMonth() + 1).padStart(2, '0');
       
-      goals.forEach((goal, goalIndex) => {
-        // Simulate progressive growth towards current completion
-        const maxProgress = goal.completedTopics;
-        const progressStep = maxProgress / dataPoints.length;
-        const currentProgress = Math.min(maxProgress, Math.floor(progressStep * (index + 1)));
-        progressPoint[goal.name] = currentProgress;
+      const yearMatch = goalYear <= selectedYear;
+      const monthMatch = selectedMonth === 'all' || goalMonth === selectedMonth;
+      
+      return yearMatch && (selectedMonth === 'all' || goalYear === selectedYear) && monthMatch;
+    });
+    
+    if (!filteredGoals.length) return [];
+    
+    // Generate date range based on selected filters
+    let startDate: Date;
+    let endDate: Date;
+    
+    if (selectedMonth === 'all') {
+      // Show full year
+      startDate = new Date(selectedYear, 0, 1);
+      endDate = new Date(selectedYear, 11, 31);
+    } else {
+      // Show specific month
+      const monthIndex = parseInt(selectedMonth) - 1;
+      startDate = new Date(selectedYear, monthIndex, 1);
+      endDate = new Date(selectedYear, monthIndex + 1, 0);
+    }
+    
+    const dataPoints: GoalProgressData[] = [];
+    const current = new Date(startDate);
+    
+    // Generate weekly data points for the selected timeframe
+    while (current <= endDate) {
+      const dateStr = current.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: '2-digit' 
+      });
+      const progressPoint: GoalProgressData = { date: dateStr };
+      
+      filteredGoals.forEach((goal) => {
+        const goalCreated = new Date(goal.createdAt);
+        const goalUpdated = new Date(goal.updatedAt);
+        
+        if (current >= goalCreated) {
+          // Calculate actual progress based on time elapsed
+          const totalTimespan = goalUpdated.getTime() - goalCreated.getTime();
+          const currentTimespan = current.getTime() - goalCreated.getTime();
+          
+          let cumulativeProgress = 0;
+          if (totalTimespan > 0) {
+            const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
+            cumulativeProgress = Math.floor(goal.completedTopics * progressRatio);
+          } else if (current >= goalUpdated) {
+            cumulativeProgress = goal.completedTopics;
+          }
+          
+          progressPoint[goal.name] = Math.max(0, cumulativeProgress);
+        } else {
+          progressPoint[goal.name] = 0;
+        }
       });
       
-      return progressPoint;
-    });
-  }, [goals]);
+      dataPoints.push(progressPoint);
+      current.setDate(current.getDate() + 7); // Weekly intervals
+    }
+    
+    return dataPoints;
+  }, [goals, selectedYear, selectedMonth]);
 
 
   return (
@@ -228,13 +303,14 @@ export default function GoalTracker() {
           </p>
         </div>
         
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button data-testid="button-upload-csv">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload CSV
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-3">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button data-testid="button-upload-csv">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload CSV
+              </Button>
+            </DialogTrigger>
           <DialogContent data-testid="dialog-upload-csv">
             <DialogHeader>
               <DialogTitle>Upload Goal from CSV</DialogTitle>
@@ -276,8 +352,56 @@ export default function GoalTracker() {
               </Button>
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
+      
+      {/* Filters */}
+      {goals.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-blue-500" />
+              Chart Filters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="year-select">Year:</Label>
+                <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+                  <SelectTrigger className="w-32" id="year-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 5 }, (_, i) => currentYear - i).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Label htmlFor="month-select">Month:</Label>
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                  <SelectTrigger className="w-40" id="month-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map((month) => (
+                      <SelectItem key={month.value} value={month.value}>
+                        {month.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Goals Overview */}
       {goalsLoading ? (
@@ -356,7 +480,7 @@ export default function GoalTracker() {
               Study Performance
             </CardTitle>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              This chart shows the cumulative number of topics you've completed for each goal.
+              This chart shows the cumulative number of topics you've completed for each goal {selectedMonth !== 'all' ? `in ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}` : `in ${selectedYear}`}.
             </p>
           </CardHeader>
           <CardContent>
