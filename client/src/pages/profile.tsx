@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Sidebar from "@/components/sidebar";
 import SimpleComprehensiveForm from "@/components/comprehensive-profile-form";
-import CompactGoalHeatMap from "@/components/compact-goal-heat-map";
+import GoalHeatMap from "@/components/goal-heat-map";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -3678,8 +3678,10 @@ export default function Profile() {
             </TabsContent>
 
             <TabsContent value="view" className="space-y-6">
-              {/* Personal Details Card */}
-              <Card className="relative">
+              {/* Hero Section with Personal Details and Heat Map */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Personal Details Card */}
+                <Card className="relative">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center space-x-2">
@@ -3698,7 +3700,7 @@ export default function Profile() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-start space-x-6">
+                  <div className="flex items-center space-x-6">
                     <div className="relative">
                       <Avatar className="w-20 h-20">
                         <AvatarImage
@@ -3765,9 +3767,6 @@ export default function Profile() {
                         </p>
                       </div>
                     </div>
-                    <div className="w-48 flex-shrink-0">
-                      <CompactGoalHeatMap />
-                    </div>
                   </div>
 
                   {profile?.personalDetails?.summary ? (
@@ -3807,7 +3806,13 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              {/* Contact Details Card */}
+              {/* Learning Activity Heat Map */}
+              <div className="lg:sticky lg:top-6">
+                <GoalHeatMap />
+              </div>
+            </div>
+
+            {/* Contact Details Card */}
               <Card className="relative">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
