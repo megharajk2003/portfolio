@@ -143,7 +143,6 @@ export default function CourseLearn() {
     if (!previousModuleData) return false;
 
     // Module unlocks when all lessons in previous module are completed
-    // Also check if totalLessons is greater than 0 to avoid division by zero
     return (
       previousModuleData.totalLessons > 0 &&
       previousModuleData.completedLessons >= previousModuleData.totalLessons
@@ -159,16 +158,17 @@ export default function CourseLearn() {
     // Check if this module is unlocked
     if (!isModuleUnlocked(currentModuleIndex)) return false;
 
-    // First lesson of any unlocked module is always unlocked
-    if (lessonIndex === 0) return true;
+    // Within first module, first lesson is always unlocked
+    if (currentModuleIndex === 0 && lessonIndex === 0) return true;
 
-    // Other lessons unlock when previous lesson is completed
+    // Within any module, other lessons unlock when previous lesson is completed
     if (lessonIndex > 0) {
       const previousProgress = getLessonProgress(lessonIndex - 1);
       return previousProgress?.isCompleted || false;
     }
 
-    return false;
+    // First lesson of non-first modules unlock when module is unlocked
+    return currentModuleIndex === 0;
   };
 
   const isLessonCompleted = (lessonIndex: number) => {
@@ -230,14 +230,6 @@ export default function CourseLearn() {
       // Also invalidate general lesson progress queries
       queryClient.invalidateQueries({
         queryKey: ["/api/lesson-progress"],
-      });
-      // Invalidate all modules data to refresh completion status
-      queryClient.invalidateQueries({
-        queryKey: ["/api/all-modules-data", user?.id, courseId],
-      });
-      // Invalidate user progress to update module completion
-      queryClient.invalidateQueries({
-        queryKey: ["/api/user-progress", user?.id],
       });
       toast({
         title: "Lesson Completed!",
