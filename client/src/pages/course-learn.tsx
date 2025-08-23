@@ -62,6 +62,12 @@ export default function CourseLearn() {
     enabled: !!user && !!selectedModuleId,
   });
 
+  // Fetch user progress for all modules to check completion status
+  const { data: userProgress = [] } = useQuery<any[]>({
+    queryKey: ["/api/user-progress", user?.id],
+    enabled: !!user,
+  });
+
   // Fetch lesson count and progress for all modules
   const { data: allModulesData = [] } = useQuery<any[]>({
     queryKey: ["/api/all-modules-data", user?.id, courseId],
@@ -179,9 +185,24 @@ export default function CourseLearn() {
 
   const goToNextLesson = () => {
     if (currentLessonIndex < lessons.length - 1) {
+      // Move to next lesson in current module
       const nextIndex = currentLessonIndex + 1;
       if (isLessonUnlocked(nextIndex)) {
         setSelectedLessonId(lessons[nextIndex].id);
+      }
+    } else {
+      // Last lesson of current module - try to move to next module
+      const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+      if (currentModuleIndex < modules.length - 1) {
+        const nextModule = modules[currentModuleIndex + 1];
+        // Check if next module is unlocked (sequential unlocking)
+        if (isModuleUnlocked(currentModuleIndex + 1)) {
+          // Navigate to first lesson of next module
+          setSelectedModuleId(nextModule.id);
+          if (nextModule.lessons && nextModule.lessons.length > 0) {
+            setSelectedLessonId(nextModule.lessons[0].id);
+          }
+        }
       }
     }
   };
@@ -487,13 +508,27 @@ export default function CourseLearn() {
 
                     <Button
                       onClick={goToNextLesson}
-                      disabled={
-                        currentLessonIndex === lessons.length - 1 ||
-                        !isLessonUnlocked(currentLessonIndex + 1)
-                      }
+                      disabled={(() => {
+                        // If not the last lesson in module, check if next lesson is unlocked
+                        if (currentLessonIndex < lessons.length - 1) {
+                          return !isLessonUnlocked(currentLessonIndex + 1);
+                        }
+                        
+                        // If last lesson in module, check if next module is available
+                        const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+                        if (currentModuleIndex < modules.length - 1) {
+                          return !isModuleUnlocked(currentModuleIndex + 1);
+                        }
+                        
+                        // If last lesson of last module, disable
+                        return true;
+                      })()}
                       data-testid="button-next-lesson"
                     >
-                      Next
+                      {currentLessonIndex === lessons.length - 1 && 
+                       modules.findIndex(m => m.id === selectedModuleId) < modules.length - 1
+                        ? "Next Module"
+                        : "Next"}
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
