@@ -312,7 +312,7 @@ export const instructors = pgTable("instructors", {
 export const categories = pgTable("categories", {
   id: integer("category_id").primaryKey().generatedAlwaysAsIdentity(),
   name: varchar("name", { length: 100 }).unique().notNull(),
-  parentCategoryId: integer("parent_category_id").references(() => categories.id, { onDelete: "set null" }),
+  parentCategoryId: integer("parent_category_id").references((): any => categories.id, { onDelete: "set null" }),
 });
 
 export const courses = pgTable("courses", {

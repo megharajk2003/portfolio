@@ -1919,7 +1919,7 @@ export class PgStorage implements IStorage {
           }
         } else {
           // Create new module progress record as completed
-          const progressData: InsertUserProgress = {
+          const progressData = {
             userId,
             moduleId,
             currentLesson: totalLessons,
