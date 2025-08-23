@@ -24,9 +24,25 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     return progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 };
   };
 
-  const currentModule = modules.find(module => {
+  // Function to check if a module should be unlocked based on sequential completion
+  const isModuleUnlocked = (moduleIndex: number) => {
+    // First module is always unlocked
+    if (moduleIndex === 0) return true;
+    
+    // Check if all previous modules are completed
+    for (let i = 0; i < moduleIndex; i++) {
+      const previousModule = modules[i];
+      const previousProgress = getModuleProgress(previousModule.id);
+      if (!previousProgress.isCompleted) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const currentModule = modules.find((module, index) => {
     const progress = getModuleProgress(module.id);
-    return !progress.isCompleted && progress.currentLesson > 0;
+    return !progress.isCompleted && progress.currentLesson > 0 && isModuleUnlocked(index);
   });
 
   const completedModules = modules.filter(module => {
@@ -34,9 +50,14 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     return progress.isCompleted;
   });
 
-  const lockedModules = modules.filter(module => {
+  const availableModules = modules.filter((module, index) => {
     const progress = getModuleProgress(module.id);
-    return !progress.isCompleted && progress.currentLesson === 0;
+    return !progress.isCompleted && progress.currentLesson === 0 && isModuleUnlocked(index);
+  });
+
+  const lockedModules = modules.filter((module, index) => {
+    const progress = getModuleProgress(module.id);
+    return !progress.isCompleted && !isModuleUnlocked(index);
   });
 
   return (
@@ -120,7 +141,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
           ))}
 
           {/* Available Modules */}
-          {lockedModules.slice(0, 2).map((module) => (
+          {availableModules.slice(0, 2).map((module) => (
             <Link key={module.id} href={`/module/${module.id}`}>
               <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="flex items-center space-x-3">
@@ -137,6 +158,26 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                 <Badge variant="outline">+{module.xpReward} XP</Badge>
               </div>
             </Link>
+          ))}
+
+          {/* Locked Modules */}
+          {lockedModules.slice(0, 2).map((module) => (
+            <div key={module.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 opacity-60">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <div>
+                  <h5 className="font-medium text-gray-600">{module.title}</h5>
+                  <p className="text-sm text-gray-400">
+                    Complete previous modules to unlock
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-gray-400 border-gray-300">
+                +{module.xpReward} XP
+              </Badge>
+            </div>
           ))}
         </div>
       </CardContent>

@@ -1829,6 +1829,8 @@ export class PgStorage implements IStorage {
   async completeLessonProgress(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress> {
     const existing = await this.getLessonProgressByIndex(userId, moduleId, lessonIndex);
     
+    let completedProgress: LessonProgress;
+    
     if (existing) {
       // Update existing progress
       if (!this.isDbConnected) {
@@ -1840,17 +1842,18 @@ export class PgStorage implements IStorage {
             : p
         );
         this.fallbackData.set(key, updatedList);
-        return updatedList.find((p: any) => p.lessonIndex === lessonIndex);
+        completedProgress = updatedList.find((p: any) => p.lessonIndex === lessonIndex);
+      } else {
+        const [updated] = await db
+          .update(lessonProgress)
+          .set({ 
+            isCompleted: true, 
+            completedAt: new Date() 
+          })
+          .where(eq(lessonProgress.id, existing.id))
+          .returning();
+        completedProgress = updated;
       }
-      const [updated] = await db
-        .update(lessonProgress)
-        .set({ 
-          isCompleted: true, 
-          completedAt: new Date() 
-        })
-        .where(eq(lessonProgress.id, existing.id))
-        .returning();
-      return updated;
     } else {
       // Create new progress record
       const progressData: InsertLessonProgress = {
@@ -1864,7 +1867,71 @@ export class PgStorage implements IStorage {
         xpEarned: 10, // Default XP for lesson completion
         completedAt: new Date()
       };
-      return await this.createLessonProgress(progressData);
+      completedProgress = await this.createLessonProgress(progressData);
+    }
+
+    // Check if all lessons in the module are completed
+    await this.checkAndCompleteModule(userId, moduleId);
+    
+    return completedProgress;
+  }
+
+  // Helper method to check if all lessons are completed and mark module as completed
+  private async checkAndCompleteModule(userId: number, moduleId: string): Promise<void> {
+    try {
+      // Get the module to know how many lessons it has
+      const module = await this.getLearningModule(moduleId);
+      if (!module || !Array.isArray(module.lessons)) return;
+
+      const totalLessons = module.lessons.length;
+
+      // Get all lesson progress for this module
+      const allProgress = await this.getLessonProgress(userId, moduleId);
+      const completedLessons = allProgress.filter(p => p.isCompleted).length;
+
+      // If all lessons are completed, mark the module as completed
+      if (completedLessons >= totalLessons) {
+        // Get or create module progress
+        let moduleProgress = await this.getUserProgress(userId, moduleId);
+        
+        if (moduleProgress) {
+          // Update existing progress to mark as completed
+          if (!this.isDbConnected) {
+            const key = `userProgress_${userId}`;
+            const progressList = this.fallbackData.get(key) || [];
+            const updatedList = progressList.map((p: any) => 
+              p.moduleId === moduleId 
+                ? { ...p, isCompleted: true, completedAt: new Date() }
+                : p
+            );
+            this.fallbackData.set(key, updatedList);
+          } else {
+            await db
+              .update(userProgress)
+              .set({ 
+                isCompleted: true, 
+                completedAt: new Date() 
+              })
+              .where(and(
+                eq(userProgress.userId, userId),
+                eq(userProgress.moduleId, moduleId)
+              ));
+          }
+        } else {
+          // Create new module progress record as completed
+          const progressData: InsertUserProgress = {
+            userId,
+            moduleId,
+            currentLesson: totalLessons,
+            isCompleted: true,
+            xpEarned: module.xpReward || 0,
+            completedAt: new Date()
+          };
+          await this.createUserProgress(progressData);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking module completion:", error);
     }
   }
 
