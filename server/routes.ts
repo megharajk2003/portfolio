@@ -1652,6 +1652,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check course completion status
+  app.get('/api/course-completion/:userId/:courseId', async (req, res) => {
+    try {
+      const { userId, courseId } = req.params;
+
+      // Get all modules for the course
+      const modules = await storage.getCourseModules(courseId);
+      if (!modules || modules.length === 0) {
+        return res.json({ isCompleted: false, completedModules: 0, totalModules: 0 });
+      }
+
+      // Get user progress for all modules
+      const allProgress = await storage.getUserProgress(parseInt(userId));
+      const courseProgress = allProgress.filter(p => 
+        modules.some(m => m.id === p.moduleId)
+      );
+
+      const completedModules = courseProgress.filter(p => p.isCompleted).length;
+      const totalModules = modules.length;
+      const isCompleted = completedModules >= totalModules;
+
+      res.json({
+        isCompleted,
+        completedModules,
+        totalModules,
+        progress: totalModules > 0 ? (completedModules / totalModules) * 100 : 0
+      });
+    } catch (error) {
+      console.error('Error checking course completion:', error);
+      res.status(500).json({ error: 'Failed to check course completion' });
+    }
+  });
+
   // Quiz routes
   app.get("/api/quiz-questions/:moduleId/:lessonIndex", async (req, res) => {
     try {

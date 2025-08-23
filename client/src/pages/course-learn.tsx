@@ -241,15 +241,29 @@ export default function CourseLearn() {
       queryClient.invalidateQueries({
         queryKey: ["/api/user-progress", user?.id],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/user-stats", user?.id],
+      });
       
       // Check if this was the last lesson in the module
       const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
-      if (currentLessonIndex === lessons.length - 1) {
+      const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
+      const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
+      
+      if (isLastLessonInModule && isLastModuleInCourse) {
+        // Course completed
+        toast({
+          title: "🎉 Course Completed!",
+          description: "Congratulations! You've completed the entire course and earned +5 XP!",
+        });
+      } else if (isLastLessonInModule) {
+        // Module completed
         toast({
           title: "Module Completed!",
           description: "Congratulations! You've completed this module and unlocked the next one.",
         });
       } else {
+        // Lesson completed
         toast({
           title: "Lesson Completed!",
           description: "Great job! You've unlocked the next lesson.",

@@ -1956,9 +1956,68 @@ export class PgStorage implements IStorage {
           await this.createUserProgress(progressData);
           console.log(`Created new completed module progress`);
         }
+
+        // Check if all modules in the course are completed
+        await this.checkAndCompleteCourse(userId, moduleId);
       }
     } catch (error) {
       console.error("Error checking module completion:", error);
+    }
+  }
+
+  // Helper method to check if all modules are completed and mark course as completed
+  private async checkAndCompleteCourse(userId: number, moduleId: string): Promise<void> {
+    try {
+      // Get the module to find the courseId
+      const module = await this.getModule(moduleId);
+      if (!module) return;
+
+      const courseId = module.courseId;
+
+      // Get all modules for this course
+      const allModules = await this.getCourseModules(courseId);
+      if (!allModules || allModules.length === 0) return;
+
+      // Check if all modules are completed
+      const allUserProgress = await this.getUserProgress(userId);
+      const courseModuleProgress = allUserProgress.filter(p => 
+        allModules.some(m => m.id === p.moduleId)
+      );
+
+      const completedModules = courseModuleProgress.filter(p => p.isCompleted).length;
+      const totalModules = allModules.length;
+
+      console.log(`Checking course completion: ${completedModules}/${totalModules} modules completed`);
+
+      // If all modules are completed, mark course as completed and award XP
+      if (completedModules >= totalModules) {
+        console.log(`All modules completed, marking course ${courseId} as completed for user ${userId}`);
+
+        // Get or create enrollment record and mark as completed
+        const enrollments = await this.getUserEnrollments(userId);
+        const courseEnrollment = enrollments.find(e => e.courseId === courseId);
+
+        if (courseEnrollment) {
+          await this.updateEnrollment(courseEnrollment.id, {
+            status: 'completed',
+            completedAt: new Date(),
+            progress: 100
+          });
+        }
+
+        // Award course completion XP (5 points as requested)
+        const courseCompletionXP = 5;
+        await this.updateUserStats(userId, {
+          totalXp: sql`COALESCE(${userStats.totalXp}, 0) + ${courseCompletionXP}`
+        });
+
+        console.log(`Awarded ${courseCompletionXP} XP for course completion to user ${userId}`);
+
+        // Check and award course completion badge if available
+        await this.checkAndAwardBadges(userId, 'course_completion', courseId);
+      }
+    } catch (error) {
+      console.error("Error checking course completion:", error);
     }
   }
 
