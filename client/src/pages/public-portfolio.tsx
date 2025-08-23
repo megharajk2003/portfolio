@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Profile } from "@shared/schema";
-import Sidebar from "@/components/sidebar";
 import { 
   Mail, Phone, MapPin, ExternalLink, Github, Calendar, Building, 
   GraduationCap, Award, Download, Star, Users, Code, Palette,
@@ -99,14 +98,11 @@ export default function PublicPortfolio() {
 
   if (!profile) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Portfolio Not Found</h1>
             <p className="text-gray-600 dark:text-gray-400">The portfolio for "{username}" could not be found.</p>
           </div>
-        </div>
       </div>
     );
   }
@@ -117,9 +113,7 @@ export default function PublicPortfolio() {
   const visibleEducation = education; // All education is visible by default
 
   return (
-    <div className="flex h-screen bg-white dark:bg-gray-900">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 py-20 px-6">
         <div className="max-w-6xl mx-auto">
@@ -238,7 +232,7 @@ export default function PublicPortfolio() {
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">About Me</h2>
                 <div className="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed">
                   <p>
-                    {profile.summary || "I'm a passionate full-stack developer with over 5 years of experience creating digital solutions that make a difference. My journey began with a curiosity about how things work, which led me to discover the power of code to transform ideas into reality."}
+                    {profile.personalDetails?.summary || "I'm a passionate full-stack developer with over 5 years of experience creating digital solutions that make a difference. My journey began with a curiosity about how things work, which led me to discover the power of code to transform ideas into reality."}
                   </p>
                   <p>
                     I specialize in building scalable web applications using modern technologies like React, Node.js, and cloud platforms. My approach combines technical expertise with user-centered design thinking to create products that are not only functional but delightful to use.
@@ -283,15 +277,15 @@ export default function PublicPortfolio() {
                   <CardContent className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <Mail className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{profile.email || "megharaj@example.com"}</span>
+                      <span className="text-sm">{profile.contactDetails?.email || "megharaj@example.com"}</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Phone className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{profile.phone || "+91 12345 67890"}</span>
+                      <span className="text-sm">{profile.contactDetails?.phone || "+91 12345 67890"}</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <MapPin className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{profile.location || "Tamil Nadu, India"}</span>
+                      <span className="text-sm">{profile.personalDetails?.location?.city || "Tamil Nadu"}, {profile.personalDetails?.location?.country || "India"}</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Calendar className="h-4 w-4 text-gray-400" />
@@ -364,7 +358,7 @@ export default function PublicPortfolio() {
                         <div className="space-y-2">
                           <h4 className="font-medium text-gray-900 dark:text-white text-sm">Key Achievements:</h4>
                           <ul className="space-y-1">
-                            {exp.achievements.map((achievement, i) => (
+                            {exp.achievements.map((achievement: string, i: number) => (
                               <li key={i} className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400">
                                 <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                                 <span>{achievement}</span>
@@ -615,7 +609,7 @@ export default function PublicPortfolio() {
                       
                       {project.technologies && project.technologies.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {project.technologies.map((tech, i) => (
+                          {project.technologies.map((tech: string, i: number) => (
                             <Badge key={i} variant="outline" className="text-xs">
                               {tech}
                             </Badge>
@@ -739,7 +733,7 @@ export default function PublicPortfolio() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">Email</h3>
-                          <p className="text-gray-600 dark:text-gray-400">{profile.email || "megharaj@example.com"}</p>
+                          <p className="text-gray-600 dark:text-gray-400">{profile.contactDetails?.email || "megharaj@example.com"}</p>
                         </div>
                       </div>
                       <Button className="w-full">
@@ -814,7 +808,7 @@ export default function PublicPortfolio() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-gray-600 dark:text-gray-400">
-                © 2024 {profile.name || "Megharaj K"}. All rights reserved.
+                © 2024 {profile.personalDetails?.fullName || "Megharaj K"}. All rights reserved.
               </p>
             </div>
             <div className="flex space-x-4">
@@ -834,7 +828,6 @@ export default function PublicPortfolio() {
           </div>
         </div>
       </footer>
-      </div>
     </div>
   );
 }
