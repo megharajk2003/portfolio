@@ -249,12 +249,15 @@ export default function GoalTracker() {
     const dataPoints: GoalProgressData[] = [];
     const current = new Date(startDate);
     
-    // Generate weekly data points for the selected timeframe
+    // Generate data points - daily for specific month, weekly for full year
+    const isMonthView = selectedMonth !== 'all';
+    const intervalDays = isMonthView ? 1 : 7; // Daily for month, weekly for year
+    
     while (current <= endDate) {
-      const dateStr = current.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: '2-digit' 
-      });
+      const dateStr = isMonthView 
+        ? current.toLocaleDateString('en-US', { day: '2-digit' })
+        : current.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      
       const progressPoint: GoalProgressData = { date: dateStr };
       
       filteredGoals.forEach((goal) => {
@@ -281,7 +284,7 @@ export default function GoalTracker() {
       });
       
       dataPoints.push(progressPoint);
-      current.setDate(current.getDate() + 7); // Weekly intervals
+      current.setDate(current.getDate() + intervalDays);
     }
     
     return dataPoints;
