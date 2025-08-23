@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Sidebar from "@/components/sidebar";
 import SimpleComprehensiveForm from "@/components/comprehensive-profile-form";
+import CompactGoalHeatMap from "@/components/compact-goal-heat-map";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -3697,7 +3698,7 @@ export default function Profile() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-6">
+                  <div className="flex items-start space-x-6">
                     <div className="relative">
                       <Avatar className="w-20 h-20">
                         <AvatarImage
@@ -3763,6 +3764,9 @@ export default function Profile() {
                             : "Not provided"}
                         </p>
                       </div>
+                    </div>
+                    <div className="w-48 flex-shrink-0">
+                      <CompactGoalHeatMap />
                     </div>
                   </div>
 
