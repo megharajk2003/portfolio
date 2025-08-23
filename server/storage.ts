@@ -1867,7 +1867,7 @@ export class PgStorage implements IStorage {
         xpEarned: 10, // Default XP for lesson completion
         completedAt: new Date()
       };
-      completedProgress = await this.createLessonProgress(progressData);
+      completedProgress = await this.createLessonProgress(progressData);essData);
     }
 
     // Check if all lessons in the module are completed
@@ -1887,12 +1887,12 @@ export class PgStorage implements IStorage {
 
       // Get all lesson progress for this module
       const allProgress = await this.getLessonProgress(userId, moduleId);
-      const completedLessons = allProgress.filter(p => p.isCompleted).length;
+      const completedLessons = allProgress.filter(p => p.isCompleted).length;).length;
 
       // If all lessons are completed, mark the module as completed
       if (completedLessons >= totalLessons) {
         // Get or create module progress
-        let moduleProgress = await this.getUserProgress(userId, moduleId);
+        let moduleProgress = await this.getUserProgressForModule(userId, moduleId);
         
         if (moduleProgress) {
           // Update existing progress to mark as completed
