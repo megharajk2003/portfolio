@@ -235,6 +235,89 @@ export default function Home() {
           {/* Learning Modules */}
           <LearningModules userId={userId} />
 
+          {/* Milestone Badges */}
+          <section>
+            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center text-xl">
+                    🏆 Achievement Badges
+                  </CardTitle>
+                  <Badge variant="secondary" className="px-3 py-1">
+                    4 Earned
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-xl border-2 border-purple-300 shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-purple-500 border-2 border-purple-400 flex items-center justify-center shadow-sm">
+                        <Zap className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <h4 className="text-sm font-semibold text-purple-800 mb-1">AI Pioneer</h4>
+                      <p className="text-xs text-gray-600 mb-2">Completed AI course</p>
+                      <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        +100 XP
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-4 rounded-xl border-2 border-yellow-300 shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-yellow-500 border-2 border-yellow-400 flex items-center justify-center shadow-sm">
+                        <Award className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <h4 className="text-sm font-semibold text-yellow-800 mb-1">Perfect Score</h4>
+                      <p className="text-xs text-gray-600 mb-2">100% on exam</p>
+                      <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        +100 XP
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 p-4 rounded-xl border-2 border-emerald-300 shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-emerald-500 border-2 border-emerald-400 flex items-center justify-center shadow-sm">
+                        <Calendar className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <h4 className="text-sm font-semibold text-emerald-800 mb-1">Streak Master</h4>
+                      <p className="text-xs text-gray-600 mb-2">7-day streak</p>
+                      <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        +50 XP
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-xl border-2 border-blue-300 shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-blue-500 border-2 border-blue-400 flex items-center justify-center shadow-sm">
+                        <Target className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <h4 className="text-sm font-semibold text-blue-800 mb-1">Knowledge Seeker</h4>
+                      <p className="text-xs text-gray-600 mb-2">Completed 5 courses</p>
+                      <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        +200 XP
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-600">Complete more courses and activities to unlock more badges!</p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
           {/* Skill Dashboard */}
           <section>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">

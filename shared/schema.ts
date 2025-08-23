@@ -248,6 +248,38 @@ export const quizAttempts = pgTable("quiz_attempts", {
   completedAt: timestamp("completed_at").defaultNow().notNull(),
 });
 
+// Badge system for achievements
+export const badges = pgTable("badges", {
+  id: varchar("badge_id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  icon: varchar("icon", { length: 100 }).notNull(), // Lucide icon name
+  color: varchar("color", { length: 50 }).default("blue"), // Color scheme
+  type: varchar("type", { length: 50 }).$type<"course_completion" | "milestone" | "streak" | "achievement">().notNull(),
+  criteria: jsonb("criteria"), // JSON object with completion criteria
+  xpReward: integer("xp_reward").default(0),
+  rarity: varchar("rarity", { length: 20 }).$type<"common" | "rare" | "epic" | "legendary">().default("common"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userBadges = pgTable("user_badges", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  badgeId: varchar("badge_id")
+    .notNull()
+    .references(() => badges.id, { onDelete: "cascade" }),
+  earnedAt: timestamp("earned_at").defaultNow(),
+  relatedId: varchar("related_id"), // Course ID, module ID, etc.
+}, (table) => ({
+  unique: { columns: [table.userId, table.badgeId] },
+}));
+
 export const userStats = pgTable("user_stats", {
   id: varchar("id")
     .primaryKey()
@@ -1174,3 +1206,13 @@ export type CertificationWithUser = z.infer<typeof certificationWithUserSchema>;
 export type PublicationWithUser = z.infer<typeof publicationWithUserSchema>;
 export type OrganizationWithUser = z.infer<typeof organizationWithUserSchema>;
 export type VolunteerWithUser = z.infer<typeof volunteerWithUserSchema>;
+
+// Badge types
+export type Badge = typeof badges.$inferSelect;
+export type UserBadge = typeof userBadges.$inferSelect;
+export type InsertBadge = typeof badges.$inferInsert;
+export type InsertUserBadge = typeof userBadges.$inferInsert;
+
+// Badge schemas
+export const insertBadgeSchema = createInsertSchema(badges);
+export const insertUserBadgeSchema = createInsertSchema(userBadges);

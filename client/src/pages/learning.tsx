@@ -469,6 +469,51 @@ export default function Learning() {
               </Select>
             </div>
 
+            {/* Course completion badges */}
+            {courses.length > 0 && (
+              <Card className="bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200 mb-6">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-emerald-800 mb-4 flex items-center">
+                    🏆 Course Completion Badges
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-lg text-center border border-purple-300 shadow-md hover:scale-105 transition-all duration-200">
+                      <div className="w-10 h-10 bg-purple-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                        <Zap className="h-5 w-5 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-purple-800 text-sm">AI Pioneer</h4>
+                      <p className="text-xs text-purple-600">Complete AI course</p>
+                      <Badge className="mt-2 bg-purple-500 text-white text-xs">+100 XP</Badge>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-lg text-center border border-blue-300 shadow-md hover:scale-105 transition-all duration-200">
+                      <div className="w-10 h-10 bg-blue-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                        <Trophy className="h-5 w-5 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-blue-800 text-sm">Data Scientist</h4>
+                      <p className="text-xs text-blue-600">Master Data Science</p>
+                      <Badge className="mt-2 bg-blue-500 text-white text-xs">+150 XP</Badge>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-4 rounded-lg text-center border border-yellow-300 shadow-md hover:scale-105 transition-all duration-200">
+                      <div className="w-10 h-10 bg-yellow-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                        <Star className="h-5 w-5 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-yellow-800 text-sm">Perfect Score</h4>
+                      <p className="text-xs text-yellow-600">100% on exam</p>
+                      <Badge className="mt-2 bg-yellow-500 text-white text-xs">+100 XP</Badge>
+                    </div>
+                    <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 p-4 rounded-lg text-center border border-emerald-300 shadow-md hover:scale-105 transition-all duration-200">
+                      <div className="w-10 h-10 bg-emerald-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                        <Calendar className="h-5 w-5 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-emerald-800 text-sm">Streak Master</h4>
+                      <p className="text-xs text-emerald-600">7-day streak</p>
+                      <Badge className="mt-2 bg-emerald-500 text-white text-xs">+50 XP</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Course Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCourses.length === 0 && (

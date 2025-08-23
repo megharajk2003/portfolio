@@ -42,6 +42,10 @@ import {
   type InsertForumReply,
   type ForumLike,
   type InsertForumLike,
+  type Badge,
+  type InsertBadge,
+  type UserBadge,
+  type InsertUserBadge,
   users,
   profiles,
   learningModules,
@@ -71,6 +75,8 @@ import {
   forumPosts,
   forumReplies,
   forumLikes,
+  badges,
+  userBadges,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, sql, desc, ne, or, isNull } from "drizzle-orm";
@@ -246,6 +252,13 @@ export interface IStorage {
   getLessonProgressByIndex(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress | undefined>;
   createLessonProgress(progress: InsertLessonProgress): Promise<LessonProgress>;
   completeLessonProgress(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress>;
+
+  // Badge system methods
+  getBadges(): Promise<Badge[]>;
+  createBadge(badge: InsertBadge): Promise<Badge>;
+  getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]>;
+  awardBadge(userBadge: InsertUserBadge): Promise<UserBadge>;
+  checkAndAwardBadges(userId: number, type: string, relatedId?: string): Promise<UserBadge[]>;
 }
 
 export class PgStorage implements IStorage {

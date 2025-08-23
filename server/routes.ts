@@ -29,6 +29,8 @@ import {
   insertForumPostSchema,
   insertForumReplySchema,
   insertForumLikeSchema,
+  insertBadgeSchema,
+  insertUserBadgeSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1296,6 +1298,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  // Badge System Routes
+  app.get("/api/badges", async (req, res) => {
+    try {
+      const badges = await storage.getBadges();
+      res.json(badges);
+    } catch (error) {
+      console.error("Error fetching badges:", error);
+      res.status(500).json({ message: "Failed to fetch badges" });
+    }
+  });
+
+  app.get("/api/users/:userId/badges", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const userBadges = await storage.getUserBadges(userId);
+      res.json(userBadges);
+    } catch (error) {
+      console.error("Error fetching user badges:", error);
+      res.status(500).json({ message: "Failed to fetch user badges" });
+    }
+  });
+
+  app.post("/api/users/:userId/badges", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const userBadge = await storage.awardBadge({ userId, ...req.body });
+      res.json(userBadge);
+    } catch (error) {
+      console.error("Error awarding badge:", error);
+      res.status(500).json({ message: "Failed to award badge" });
     }
   });
 
