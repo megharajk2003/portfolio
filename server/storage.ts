@@ -1590,7 +1590,7 @@ export class PgStorage implements IStorage {
       return false;
     }
     const result = await db.delete(courses).where(eq(courses.id, id));
-    return result.rowCount > 0;
+    return result.length > 0;
   }
 
   async getCategories(): Promise<Category[]> {
@@ -1892,7 +1892,7 @@ export class PgStorage implements IStorage {
       // If all lessons are completed, mark the module as completed
       if (completedLessons >= totalLessons) {
         // Get or create module progress
-        let moduleProgress = await this.getUserProgress(userId, moduleId);
+        let moduleProgress = await this.getUserProgressForModule(userId, moduleId);
         
         if (moduleProgress) {
           // Update existing progress to mark as completed
@@ -2173,7 +2173,7 @@ export class PgStorage implements IStorage {
   }
 
   // Forum methods implementation
-  async getForumPosts(): Promise<(ForumPost & { user: User })[]> {
+  async getForumPosts(): Promise<(ForumPost & { user: User; repliesCount: number })[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get('forumPosts') || [];
     }
@@ -2187,7 +2187,8 @@ export class PgStorage implements IStorage {
       
       return result.map(row => ({
         ...row.forum_posts,
-        user: row.users
+        user: row.users,
+        repliesCount: row.forum_posts.repliesCount || 0
       }));
     } catch (error) {
       console.error("Error fetching forum posts:", error);
@@ -2320,6 +2321,7 @@ export class PgStorage implements IStorage {
       const newReply = {
         id: randomUUID(),
         ...data,
+        parentReplyId: data.parentReplyId || null,
         isActive: true,
         likesCount: 0,
         createdAt: new Date(),
@@ -2342,7 +2344,10 @@ export class PgStorage implements IStorage {
     try {
       const result = await db
         .insert(forumReplies)
-        .values(data)
+        .values({
+          ...data,
+          parentReplyId: data.parentReplyId || null
+        })
         .returning();
       
       // Update reply count in the post
@@ -2550,6 +2555,140 @@ export class PgStorage implements IStorage {
     } catch (error) {
       console.error("Error fetching forum like:", error);
       return undefined;
+    }
+  }
+
+  // Badge system implementation
+  async getBadges(): Promise<Badge[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get('badges') || [];
+    }
+    try {
+      return await db.select().from(badges);
+    } catch (error) {
+      console.error("Error fetching badges:", error);
+      return this.fallbackData.get('badges') || [];
+    }
+  }
+
+  async createBadge(badge: InsertBadge): Promise<Badge> {
+    if (!this.isDbConnected) {
+      const newBadge = { ...badge, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() };
+      const allBadges = this.fallbackData.get('badges') || [];
+      allBadges.push(newBadge);
+      this.fallbackData.set('badges', allBadges);
+      return newBadge as Badge;
+    }
+    try {
+      const [createdBadge] = await db.insert(badges).values(badge).returning();
+      return createdBadge;
+    } catch (error) {
+      console.error("Error creating badge:", error);
+      throw error;
+    }
+  }
+
+  async getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]> {
+    if (!this.isDbConnected) {
+      const userBadges = this.fallbackData.get(`userBadges_${userId}`) || [];
+      const allBadges = this.fallbackData.get('badges') || [];
+      return userBadges.map((ub: any) => ({
+        ...ub,
+        badge: allBadges.find((b: any) => b.id === ub.badgeId) || {}
+      }));
+    }
+    try {
+      const result = await db
+        .select({
+          id: userBadges.id,
+          userId: userBadges.userId,
+          badgeId: userBadges.badgeId,
+          earnedAt: userBadges.earnedAt,
+          relatedId: userBadges.relatedId,
+          badge: badges
+        })
+        .from(userBadges)
+        .innerJoin(badges, eq(userBadges.badgeId, badges.id))
+        .where(eq(userBadges.userId, userId));
+      return result;
+    } catch (error) {
+      console.error("Error fetching user badges:", error);
+      return [];
+    }
+  }
+
+  async awardBadge(userBadge: InsertUserBadge): Promise<UserBadge> {
+    if (!this.isDbConnected) {
+      const newUserBadge = { ...userBadge, id: randomUUID(), awardedAt: new Date() };
+      const allUserBadges = this.fallbackData.get(`userBadges_${userBadge.userId}`) || [];
+      allUserBadges.push(newUserBadge);
+      this.fallbackData.set(`userBadges_${userBadge.userId}`, allUserBadges);
+      return newUserBadge as UserBadge;
+    }
+    try {
+      const [awarded] = await db.insert(userBadges).values(userBadge).returning();
+      return awarded;
+    } catch (error) {
+      console.error("Error awarding badge:", error);
+      throw error;
+    }
+  }
+
+  async checkAndAwardBadges(userId: number, type: string, relatedId?: string): Promise<UserBadge[]> {
+    try {
+      // Get available badges for the given type
+      const availableBadges = await this.getBadges();
+      const typeBadges = availableBadges.filter(badge => badge.type === type);
+      
+      if (typeBadges.length === 0) return [];
+
+      // Get user's current badges to avoid duplicates
+      const currentUserBadges = await this.getUserBadges(userId);
+      const currentBadgeIds = currentUserBadges.map(ub => ub.badgeId);
+      
+      const newBadges: UserBadge[] = [];
+      
+      for (const badge of typeBadges) {
+        if (currentBadgeIds.includes(badge.id)) continue; // Already has this badge
+        
+        // Check if user meets criteria for this badge
+        const meetsRequirement = await this.checkBadgeRequirement(userId, badge, relatedId);
+        if (meetsRequirement) {
+          const userBadge = await this.awardBadge({
+            userId,
+            badgeId: badge.id,
+            relatedId: relatedId || null
+          });
+          newBadges.push(userBadge);
+        }
+      }
+      
+      return newBadges;
+    } catch (error) {
+      console.error("Error checking and awarding badges:", error);
+      return [];
+    }
+  }
+
+  private async checkBadgeRequirement(userId: number, badge: Badge, relatedId?: string): Promise<boolean> {
+    // Basic badge requirement checking logic
+    // This can be expanded based on specific badge criteria
+    try {
+      switch (badge.type) {
+        case 'course_completion':
+          return true; // Award badge for completing any course
+        case 'milestone':
+          return true; // Award badge for reaching milestones
+        case 'streak':
+          return true; // Award badge for maintaining streaks
+        case 'achievement':
+          return true; // Award badge for achievements
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error("Error checking badge requirement:", error);
+      return false;
     }
   }
 }
