@@ -9,23 +9,38 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { 
-  MessageCircle, 
-  Heart, 
-  Reply, 
-  Plus, 
+import {
+  MessageCircle,
+  Heart,
+  Reply,
+  Plus,
   Clock,
   Users,
-  Send
+  Send,
+  Menu,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
+import Sidebar from "@/components/sidebar";
 
 const createPostSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -66,18 +81,32 @@ type ForumReply = {
   };
 };
 
-function UserAvatar({ user, size = "h-10 w-10" }: { user: any; size?: string }) {
-  const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
-  const displayName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+function UserAvatar({
+  user,
+  size = "h-10 w-10",
+}: {
+  user: any;
+  size?: string;
+}) {
+  const initials = `${user.firstName?.[0] || ""}${
+    user.lastName?.[0] || ""
+  }`.toUpperCase();
+  const displayName =
+    `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
 
   return (
-    <Link href={`/public-portfolio/${user.email.split('@')[0]}`} data-testid={`link-user-profile-${user.id}`}>
-      <Avatar className={`${size} cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all`} data-testid={`avatar-user-${user.id}`}>
-        <AvatarImage 
-          src={user.profileImageUrl || ""} 
-          alt={displayName}
-        />
-        <AvatarFallback>{initials || user.email[0].toUpperCase()}</AvatarFallback>
+    <Link
+      href={`/public-portfolio/${user.email.split("@")[0]}`}
+      data-testid={`link-user-profile-${user.id}`}
+    >
+      <Avatar
+        className={`${size} cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all`}
+        data-testid={`avatar-user-${user.id}`}
+      >
+        <AvatarImage src={user.profileImageUrl || ""} alt={displayName} />
+        <AvatarFallback>
+          {initials || user.email[0].toUpperCase()}
+        </AvatarFallback>
       </Avatar>
     </Link>
   );
@@ -117,15 +146,21 @@ function PostCard({ post }: { post: ForumPost }) {
 
   const replyMutation = useMutation({
     mutationFn: async (content: string) => {
-      const res = await apiRequest("POST", `/api/forum/posts/${post.id}/replies`, {
-        content,
-        userId: user?.id,
-      });
+      const res = await apiRequest(
+        "POST",
+        `/api/forum/posts/${post.id}/replies`,
+        {
+          content,
+          userId: user?.id,
+        }
+      );
       return res.json();
     },
     onSuccess: () => {
       setReplyContent("");
-      queryClient.invalidateQueries({ queryKey: [`/api/forum/posts/${post.id}/replies`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/forum/posts/${post.id}/replies`],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
       toast({
         title: "Success",
@@ -134,7 +169,7 @@ function PostCard({ post }: { post: ForumPost }) {
     },
     onError: () => {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Failed to post reply",
         variant: "destructive",
       });
@@ -153,25 +188,36 @@ function PostCard({ post }: { post: ForumPost }) {
           <UserAvatar user={post.user} />
           <div className="flex-1">
             <div className="flex items-center space-x-2">
-              <h3 className="font-semibold text-gray-900 dark:text-white" data-testid={`text-post-title-${post.id}`}>
+              <h3
+                className="font-semibold text-gray-900 dark:text-white"
+                data-testid={`text-post-title-${post.id}`}
+              >
                 {post.title}
               </h3>
               <Badge variant="outline" className="text-xs">
                 <Clock className="h-3 w-3 mr-1" />
-                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(post.createdAt), {
+                  addSuffix: true,
+                })}
               </Badge>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400" data-testid={`text-post-author-${post.id}`}>
+            <p
+              className="text-sm text-gray-600 dark:text-gray-400"
+              data-testid={`text-post-author-${post.id}`}
+            >
               by {post.user.firstName || post.user.email}
             </p>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-800 dark:text-gray-200 mb-4 whitespace-pre-wrap" data-testid={`text-post-content-${post.id}`}>
+        <p
+          className="text-gray-800 dark:text-gray-200 mb-4 whitespace-pre-wrap"
+          data-testid={`text-post-content-${post.id}`}
+        >
           {post.content}
         </p>
-        
+
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
@@ -184,7 +230,7 @@ function PostCard({ post }: { post: ForumPost }) {
             <Heart className="h-4 w-4 mr-1" />
             {post.likesCount}
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -193,14 +239,14 @@ function PostCard({ post }: { post: ForumPost }) {
             data-testid={`button-toggle-replies-${post.id}`}
           >
             <MessageCircle className="h-4 w-4 mr-1" />
-            {post.repliesCount} {post.repliesCount === 1 ? 'reply' : 'replies'}
+            {post.repliesCount} {post.repliesCount === 1 ? "reply" : "replies"}
           </Button>
         </div>
 
         {showReplies && (
           <>
             <Separator className="my-4" />
-            
+
             {user && (
               <div className="mb-4">
                 <div className="flex items-start space-x-3">
@@ -226,21 +272,33 @@ function PostCard({ post }: { post: ForumPost }) {
                 </div>
               </div>
             )}
-            
+
             <div className="space-y-3">
               {replies.map((reply) => (
-                <div key={reply.id} className="flex items-start space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg" data-testid={`card-reply-${reply.id}`}>
+                <div
+                  key={reply.id}
+                  className="flex items-start space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"
+                  data-testid={`card-reply-${reply.id}`}
+                >
                   <UserAvatar user={reply.user} size="h-8 w-8" />
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white" data-testid={`text-reply-author-${reply.id}`}>
+                      <span
+                        className="text-sm font-medium text-gray-900 dark:text-white"
+                        data-testid={`text-reply-author-${reply.id}`}
+                      >
                         {reply.user.firstName || reply.user.email}
                       </span>
                       <span className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(reply.createdAt), {
+                          addSuffix: true,
+                        })}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap" data-testid={`text-reply-content-${reply.id}`}>
+                    <p
+                      className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
+                      data-testid={`text-reply-content-${reply.id}`}
+                    >
                       {reply.content}
                     </p>
                   </div>
@@ -321,9 +379,9 @@ function CreatePostDialog() {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter post title..." 
-                      {...field} 
+                    <Input
+                      placeholder="Enter post title..."
+                      {...field}
                       data-testid="input-post-title"
                     />
                   </FormControl>
@@ -350,11 +408,15 @@ function CreatePostDialog() {
               )}
             />
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createPostMutation.isPending}
                 data-testid="button-submit-post"
               >
@@ -370,30 +432,89 @@ function CreatePostDialog() {
 
 export default function Forum() {
   const { user } = useAuth();
-  
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const { data: posts = [], isLoading } = useQuery<ForumPost[]>({
     queryKey: ["/api/forum/posts"],
   });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center">Loading forum posts...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {sidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <div
+          className={`
+            fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            lg:translate-x-0 
+          `}
+        >
+          <Sidebar onClose={() => setSidebarOpen(false)} />
         </div>
+
+        {/* Main content */}
+        <main className="lg:ml-64 min-h-screen p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center">Loading forum posts...</div>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Community Forum</h1>
-              <p className="text-gray-600 dark:text-gray-400">Connect with other learners and share your experiences</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0 
+        `}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      {/* Main content */}
+      <main className="lg:ml-64 min-h-screen">
+        {/* Header */}
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              {/* Mobile menu button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                  Community Forum
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
+                  Connect with other learners and share your experiences
+                </p>
+              </div>
             </div>
+
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-1" />
@@ -401,31 +522,37 @@ export default function Forum() {
               </div>
             </div>
           </div>
-          
-          <CreatePostDialog />
-        </div>
+        </header>
 
-        {posts.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <MessageCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                No posts yet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Be the first to start a conversation in the community forum!
-              </p>
-              {user && <CreatePostDialog />}
-            </CardContent>
-          </Card>
-        ) : (
-          <div>
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <CreatePostDialog />
+            </div>
+
+            {posts.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <MessageCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No posts yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Be the first to start a conversation in the community forum!
+                  </p>
+                  {user && <CreatePostDialog />}
+                </CardContent>
+              </Card>
+            ) : (
+              <div>
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
