@@ -108,7 +108,6 @@ function Router() {
           <Route path="/course/:id" component={CourseDetail} />
           <Route path="/module/:id" component={ModuleDetail} />
           <Route path="/edit-portfolio" component={EditPortfolio} />
-          <Route path="/portfolio/:username" component={PublicPortfolio} />
           <Route path="/public-portfolio/:username" component={PublicPortfolio} />
           <Route path="/career-tools" component={CareerTools} />
           <Route path="/career-advisor" component={CareerAdvisor} />

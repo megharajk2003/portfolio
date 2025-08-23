@@ -57,14 +57,14 @@ export default function Portfolio() {
                   <p className="text-sm text-gray-600">
                     Your portfolio is live at: <br />
                     <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                      /portfolio/{username}
+                      /public-portfolio/{username}
                     </span>
                   </p>
                   <Button className="w-full" asChild>
-                    <Link href={`/portfolio/${username}`}>
+                    <a href={`/public-portfolio/${username}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View Public Portfolio
-                    </Link>
+                    </a>
                   </Button>
                 </div>
               </CardContent>

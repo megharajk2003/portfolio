@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function PublicPortfolio() {
-  const [, params] = useRoute("/portfolio/:username");
+  const [, params] = useRoute("/public-portfolio/:username");
   const [activeTab, setActiveTab] = useState("about");
   const username = params?.username;
   const [sidebarOpen, setSidebarOpen] = useState(false);
