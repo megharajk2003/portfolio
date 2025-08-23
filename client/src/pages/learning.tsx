@@ -176,10 +176,10 @@ export default function Learning() {
   }, [courses]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+      <div className="max-w-7xl mx-auto p-6 animate-fade-in">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 animate-slide-up">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Learning Hub</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">Explore courses and advance your skills</p>

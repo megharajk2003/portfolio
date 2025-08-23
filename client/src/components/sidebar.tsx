@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "./user-profile-dropdown";
+import { ThemeSwitcher } from "./theme-switcher";
 import {
   LayoutDashboard,
   User,
@@ -33,7 +34,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const [location] = useLocation();
 
   return (
-    <aside className="w-64 h-screen bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 relative inset-y-0 left-0 z-30 flex flex-col p-4">
+    <aside className="w-64 h-screen bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-xl border-r border-gray-200/50 dark:border-gray-700/50 relative inset-y-0 left-0 z-30 flex flex-col p-4">
       {/* Mobile close button */}
       {onClose && (
         <div className="lg:hidden flex justify-end mb-4">
@@ -43,26 +44,34 @@ export default function Sidebar({ onClose }: SidebarProps) {
         </div>
       )}
       {/* Logo */}
-      <div className="flex items-center space-x-3 mb-8">
-        <div className="w-10 h-10 bg-gradient-to-r from-primary to-purple-600 rounded-lg flex items-center justify-center">
-          <User className="text-white h-5 w-5" />
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+            <User className="text-white h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              knowme
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Dashboard</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            knowme
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Dashboard</p>
-        </div>
+        <ThemeSwitcher />
       </div>
 
-      <div className="bg-gradient-to-r from-primary to-purple-600 rounded-lg p-3 mb-4 text-white">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs opacity-90">Total XP</span>
-          <span className="text-sm font-bold">2,847</span>
+      <div className="gradient-primary rounded-xl p-4 mb-6 text-white shadow-lg border border-white/20">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs opacity-90 font-medium">Total XP</span>
+          <span className="text-lg font-bold">2,847</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <Flame className="h-3 w-3 text-yellow-300" />
-          <span className="text-xs">5 day streak</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1">
+            <Flame className="h-4 w-4 text-yellow-300" />
+            <span className="text-sm font-medium">5 day streak</span>
+          </div>
+          <div className="w-8 h-1 bg-white/30 rounded-full overflow-hidden">
+            <div className="w-5/6 h-full bg-yellow-300 rounded-full"></div>
+          </div>
         </div>
       </div>
 

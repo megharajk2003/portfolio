@@ -16,11 +16,11 @@ export default function Portfolio() {
   const username = user?.email?.split('@')[0] || 'user';
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       <Sidebar />
       <div className="flex-1 overflow-auto p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+        <div className="max-w-4xl mx-auto animate-fade-in">
+          <div className="flex justify-between items-center mb-8 animate-slide-up">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Portfolio Management</h1>
               <p className="text-gray-600 mt-1">Manage your public portfolio settings and preview</p>
@@ -31,7 +31,7 @@ export default function Portfolio() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Card>
+            <Card className="card-hover shadow-lg border-0 gradient-border">
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Portfolio Settings</h2>
                 <div className="space-y-4">
@@ -50,7 +50,7 @@ export default function Portfolio() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-hover shadow-lg border-0 gradient-border">
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Public Portfolio</h2>
                 <div className="space-y-4">

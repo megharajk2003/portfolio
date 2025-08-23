@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/ui/footer";
 import { Link } from "wouter";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import {
   Rocket,
   Users,
@@ -26,9 +27,14 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 gradient-primary rounded-full opacity-10 animate-pulse-slow"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 gradient-success rounded-full opacity-10 animate-pulse-slow delay-1000"></div>
+      </div>
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="relative z-10 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -38,14 +44,17 @@ export default function Landing() {
               knowme
             </span>
           </div>
-          <Link href="/auth">
-            <Button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              data-testid="button-login"
-            >
-              Sign In
-            </Button>
-          </Link>
+          <div className="flex items-center space-x-4">
+            <ThemeSwitcher />
+            <Link href="/auth">
+              <Button
+                className="gradient-primary border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                data-testid="button-login"
+              >
+                Sign In
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

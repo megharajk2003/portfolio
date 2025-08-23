@@ -65,7 +65,7 @@ export default function Home() {
     console.log("Exporting PDF...");
   };
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {sidebarOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
@@ -87,7 +87,7 @@ export default function Home() {
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               {/* Mobile menu button */}
@@ -101,8 +101,8 @@ export default function Home() {
               </Button>
 
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                  Welcome back,{" "}
+                <h2 className="text-2xl sm:text-3xl font-bold">
+                  <span className="text-gradient">Welcome back,</span>{" "}
                   <span className="text-primary">
                     {user?.firstName ||
                       profile?.personalDetails?.fullName?.split(" ")[0] ||
