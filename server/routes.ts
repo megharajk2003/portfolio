@@ -44,10 +44,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user-by-username/:username", async (req, res) => {
     try {
       const username = req.params.username.toLowerCase();
-      
+
       // Try to find user by email (if username is the full email)
       let user = await storage.getUserByEmail(username);
-      
+
       // If not found, try to find by various username patterns
       if (!user) {
         const users = await storage.getAllUsers();
@@ -55,27 +55,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Check email prefix (part before @)
           const emailPrefix = u.email.split('@')[0].toLowerCase();
           if (emailPrefix === username) return true;
-          
+
           // Check firstName (case insensitive)
           if (u.firstName && u.firstName.toLowerCase() === username) return true;
-          
+
           // Check lastName (case insensitive)
           if (u.lastName && u.lastName.toLowerCase() === username) return true;
-          
+
           // Check full name combination (firstName + lastName)
           if (u.firstName && u.lastName) {
             const fullName = (u.firstName + u.lastName).toLowerCase().replace(/\s+/g, '');
             if (fullName === username) return true;
           }
-          
+
           return false;
         });
       }
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       // Return basic user info (not sensitive data)
       res.json({
         id: user.id,
@@ -1413,9 +1413,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enrollments
   app.get("/api/users/:userId/enrollments", async (req, res) => {
     try {
-      const enrollments = await storage.getUserEnrollments(
-        parseInt(req.params.userId)
-      );
+      const userId = parseInt(req.params.userId);
+
+      const enrollments = await storage.getUserEnrollments(userId);
       res.json(enrollments);
     } catch (error) {
       console.error("Error fetching user enrollments:", error);
@@ -2211,14 +2211,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Goal Tracking API Routes
-  
+
   // Get user's goals
   app.get("/api/goals", async (req, res) => {
     try {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const goals = await storage.getUserGoals(req.user.id);
       res.json(goals);
     } catch (error) {
@@ -2233,19 +2233,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const goalId = req.params.id;
       const goal = await storage.getGoalWithCategories(goalId);
-      
+
       if (!goal) {
         return res.status(404).json({ message: "Goal not found" });
       }
-      
+
       // Ensure the goal belongs to the current user
       if (goal.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       res.json(goal);
     } catch (error) {
       console.error("Error fetching goal:", error);
@@ -2259,12 +2259,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const goalData = insertGoalSchema.parse({
         ...req.body,
         userId: req.user.id
       });
-      
+
       const goal = await storage.createGoal(goalData);
       res.status(201).json(goal);
     } catch (error) {
@@ -2279,15 +2279,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const { goalName, csvData } = req.body;
-      
+
       if (!goalName || !Array.isArray(csvData) || csvData.length === 0) {
         return res.status(400).json({ 
           message: "Goal name and CSV data are required" 
         });
       }
-      
+
       // Validate CSV data structure
       const requiredFields = ['category', 'topic', 'status'];
       const hasValidStructure = csvData.every(row => 
@@ -2295,13 +2295,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           row[field] || row[field.charAt(0).toUpperCase() + field.slice(1)]
         )
       );
-      
+
       if (!hasValidStructure) {
         return res.status(400).json({ 
           message: "CSV must contain Category, Topic, and Status columns" 
         });
       }
-      
+
       const goal = await storage.createGoalFromCSV(req.user.id, goalName, csvData);
       res.status(201).json(goal);
     } catch (error) {
@@ -2316,16 +2316,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const goalId = req.params.id;
       const goalData = req.body;
-      
+
       // Verify goal ownership
       const existingGoal = await storage.getGoal(goalId);
       if (!existingGoal || existingGoal.userId !== req.user.id) {
         return res.status(404).json({ message: "Goal not found" });
       }
-      
+
       const updatedGoal = await storage.updateGoal(goalId, goalData);
       res.json(updatedGoal);
     } catch (error) {
@@ -2340,15 +2340,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const goalId = req.params.id;
-      
+
       // Verify goal ownership
       const existingGoal = await storage.getGoal(goalId);
       if (!existingGoal || existingGoal.userId !== req.user.id) {
         return res.status(404).json({ message: "Goal not found" });
       }
-      
+
       const deleted = await storage.deleteGoal(goalId);
       res.json({ success: deleted });
     } catch (error) {
@@ -2363,10 +2363,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user?.id) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const topicId = req.params.id;
       const { status, notes } = req.body;
-      
+
       // Validate status
       const validStatuses = ['pending', 'in_progress', 'completed'];
       if (!validStatuses.includes(status)) {
@@ -2374,17 +2374,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Invalid status. Must be pending, in_progress, or completed" 
         });
       }
-      
+
       const updatedTopic = await storage.updateTopicStatus(
         topicId, 
         status as "pending" | "in_progress" | "completed",
         notes
       );
-      
+
       if (!updatedTopic) {
         return res.status(404).json({ message: "Topic not found" });
       }
-      
+
       res.json(updatedTopic);
     } catch (error) {
       console.error("Error updating topic status:", error);

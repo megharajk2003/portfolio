@@ -19,6 +19,15 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     queryKey: ["/api/user-progress", userId],
   });
 
+  // Get user enrollments for courses
+  const { data: userEnrollments = [] } = useQuery({
+    queryKey: ["/api/users", userId, "enrollments"],
+  });
+
+  const { data: courses = [] } = useQuery({
+    queryKey: ["/api/courses"],
+  });
+
   const getModuleProgress = (moduleId: string) => {
     const progress = userProgress.find(p => p.moduleId === moduleId);
     return progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 };
@@ -60,6 +69,11 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     return !progress.isCompleted && !isModuleUnlocked(index);
   });
 
+  // Get enrolled courses
+  const enrolledCourses = courses.filter(course => 
+    userEnrollments.some(enrollment => enrollment.courseId === course.id)
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -73,6 +87,48 @@ export default function LearningModules({ userId }: LearningModulesProps) {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Enrolled Courses */}
+        {enrolledCourses.length > 0 && (
+          <div className="mb-6">
+            <h4 className="font-semibold text-gray-900 mb-3">My Enrolled Courses</h4>
+            <div className="space-y-3">
+              {enrolledCourses.slice(0, 3).map((course) => (
+                <div
+                  key={course.id}
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Play className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-gray-900">{course.title}</h5>
+                      <p className="text-sm text-gray-500">
+                        {course.provider || 'Course Provider'}
+                      </p>
+                    </div>
+                  </div>
+                  <Link href={`/course/${course.id}/learn`}>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Play className="mr-1 h-3 w-3" />
+                      Resume
+                    </Button>
+                  </Link>
+                </div>
+              ))}
+            </div>
+            {enrolledCourses.length > 3 && (
+              <div className="mt-3 text-center">
+                <Link href="/learning">
+                  <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                    View all {enrolledCourses.length} enrolled courses
+                  </span>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Current Module */}
         {currentModule && (
           <div className="border-2 border-primary rounded-lg p-4 mb-6">

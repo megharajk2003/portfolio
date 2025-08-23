@@ -61,6 +61,11 @@ export default function Home() {
     queryKey: ["/api/user-stats", userId],
   });
 
+  // Pre-fetch courses data for learning modules
+  const { data: courses } = useQuery({
+    queryKey: ["/api/courses"],
+  });
+
   const handleExportPDF = () => {
     // PDF export functionality will be implemented
     console.log("Exporting PDF...");
