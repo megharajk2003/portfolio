@@ -56,10 +56,18 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const [location] = useLocation();
   const { user } = useAuth();
 
+  const userId = user?.id?.toString() ?? "1"; // Fallback for demo
+
   // Check if we're on a goal details page
   const isGoalDetailsPage =
     location.startsWith("/goal-tracker/") && location !== "/goal-tracker";
   const currentGoalId = isGoalDetailsPage ? location.split("/")[2] : null;
+
+  // Fetch user stats for streak and XP display
+  const { data: userStats } = useQuery({
+    queryKey: ["/api/user-stats", userId],
+    enabled: !!user,
+  });
 
   // Fetch user goals for goal tracker section
   const { data: goals } = useQuery<Goal[]>({
@@ -104,15 +112,24 @@ export default function Sidebar({ onClose }: SidebarProps) {
       <div className="gradient-primary rounded-xl p-4 mb-6 text-white shadow-lg border border-white/20">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs opacity-90 font-medium">Total XP</span>
-          <span className="text-lg font-bold">2,847</span>
+          <span className="text-lg font-bold">
+            {userStats?.totalXp?.toLocaleString() || "0"}
+          </span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1">
             <Flame className="h-4 w-4 text-yellow-300" />
-            <span className="text-sm font-medium">5 day streak</span>
+            <span className="text-sm font-medium">
+              {userStats?.currentStreak || 0} day streak
+            </span>
           </div>
           <div className="w-8 h-1 bg-white/30 rounded-full overflow-hidden">
-            <div className="w-5/6 h-full bg-yellow-300 rounded-full"></div>
+            <div 
+              className="h-full bg-yellow-300 rounded-full transition-all duration-300" 
+              style={{ 
+                width: `${Math.min(((userStats?.currentStreak || 0) / 7) * 100, 100)}%` 
+              }}
+            ></div>
           </div>
         </div>
       </div>

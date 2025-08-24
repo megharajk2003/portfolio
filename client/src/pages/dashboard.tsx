@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 // FIX: Import the 'profiles' table object itself, not its type.
 import { profiles } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
@@ -70,9 +71,57 @@ export default function Home() {
     queryKey: ["/api/courses"],
   });
 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Daily check-in mutation
+  const checkInMutation = useMutation({
+    mutationFn: async () => {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      const response = await fetch('/api/daily-activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          date: today,
+          xpEarned: 10, // Daily check-in XP reward
+          lessonsCompleted: 0
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to check in');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Daily Check-in Complete! 🎉",
+        description: "You earned 10 XP for checking in today. Keep your streak going!",
+      });
+      
+      // Invalidate relevant queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["/api/user-stats", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Check-in Failed",
+        description: error.message.includes('already checked in') 
+          ? "You've already checked in today! Come back tomorrow to continue your streak."
+          : "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCheckIn = () => {
-    // PDF export functionality will be implemented
-    console.log("Checking in...");
+    checkInMutation.mutate();
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
@@ -130,21 +179,24 @@ export default function Home() {
               {/* PDF Export Button - Hidden on mobile */}
               <Button
                 onClick={handleCheckIn}
-                className="hidden sm:flex bg-yellow-500 text-white hover:bg-red-700"
+                disabled={checkInMutation.isPending}
+                className="hidden sm:flex bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
                 size="sm"
               >
                 <CircleCheckBig className="mr-2 h-4 w-4" />
-                Daily Check In
+                {checkInMutation.isPending ? "Checking in..." : "Daily Check In"}
               </Button>
 
-              {/* Mobile PDF button */}
+              {/* Mobile check-in button */}
               <Button
                 onClick={handleCheckIn}
+                disabled={checkInMutation.isPending}
                 variant="ghost"
                 size="icon"
                 className="sm:hidden"
+                title="Daily Check In"
               >
-                <CircleCheckBig className="mr-2 h-4 w-4" />
+                <CircleCheckBig className="h-4 w-4" />
               </Button>
 
               {/* Notifications */}

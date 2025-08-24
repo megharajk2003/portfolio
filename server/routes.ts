@@ -1599,12 +1599,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/daily-activity", async (req, res) => {
     try {
       const activityData = insertDailyActivitySchema.parse(req.body);
+      
+      // Check if user already checked in today
+      const today = activityData.date;
+      const existingActivity = await storage.getDailyActivity(
+        activityData.userId, 
+        today, 
+        today
+      );
+      
+      if (existingActivity.length > 0) {
+        return res.status(400).json({ 
+          message: "You have already checked in today!" 
+        });
+      }
+      
+      // Create daily activity record
       const activity = await storage.createDailyActivity(activityData);
+      
+      // Update user stats with streak calculation
+      await updateUserStreakStats(activityData.userId, today, activityData.xpEarned || 0);
+      
       res.json(activity);
     } catch (error) {
+      console.error("Error creating daily activity:", error);
       res.status(400).json({ message: "Invalid activity data" });
     }
   });
+
+  // Helper function to calculate and update streak
+  async function updateUserStreakStats(userId: number, todayDate: string, xpEarned: number) {
+    try {
+      const currentStats = await storage.getUserStats(userId);
+      const today = new Date(todayDate);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      let newStreak = 1;
+      let newLongestStreak = 1;
+      
+      if (currentStats) {
+        const lastActivityDate = currentStats.lastActivityDate;
+        
+        if (lastActivityDate) {
+          const lastActivity = lastActivityDate.toISOString().split('T')[0];
+          
+          // If last activity was yesterday, increment streak
+          if (lastActivity === yesterdayStr) {
+            newStreak = (currentStats.currentStreak || 0) + 1;
+          }
+          // If last activity was today, this shouldn't happen due to our check above
+          // If last activity was before yesterday, reset streak to 1
+        }
+        
+        newLongestStreak = Math.max(newStreak, currentStats.longestStreak || 0);
+      }
+      
+      // Update user stats
+      await storage.updateUserStats(userId, {
+        totalXp: (currentStats?.totalXp || 0) + xpEarned,
+        currentStreak: newStreak,
+        longestStreak: newLongestStreak,
+        lastActivityDate: today
+      });
+      
+    } catch (error) {
+      console.error("Error updating user streak stats:", error);
+    }
+  }
 
   // Enhanced lesson progress routes
   app.get("/api/user-progress/:userId/:moduleId", async (req, res) => {
