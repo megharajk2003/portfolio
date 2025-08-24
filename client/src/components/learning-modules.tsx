@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Check, Lock, Play, RotateCcw } from "lucide-react";
+import { BookOpen, Check, Lock, Play, RotateCcw } from "lucide-react";
 
 interface LearningModulesProps {
   userId: string;
@@ -95,46 +95,64 @@ export default function LearningModules({ userId }: LearningModulesProps) {
       </CardHeader>
       <CardContent>
         {/* Enrolled Courses */}
-        {enrolledCourses.length > 0 && (
-          <div className="mb-6">
-            <h4 className="font-semibold text-gray-900 mb-3">My Enrolled Courses</h4>
-            <div className="space-y-3">
-              {enrolledCourses.slice(0, 3).map((course) => (
-                <div
-                  key={course.id}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Play className="h-5 w-5 text-blue-600" />
+        <div className="mb-6">
+          <h4 className="font-semibold text-gray-900 mb-3">My Enrolled Courses</h4>
+          {enrolledCourses.length > 0 ? (
+            <>
+              <div className="space-y-3">
+                {enrolledCourses.slice(0, 3).map((course) => (
+                  <div
+                    key={course.id}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Play className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900">{course.title}</h5>
+                        <p className="text-sm text-gray-500">
+                          {course.provider || 'Course Provider'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h5 className="font-medium text-gray-900">{course.title}</h5>
-                      <p className="text-sm text-gray-500">
-                        {course.provider || 'Course Provider'}
-                      </p>
-                    </div>
+                    <Link href={`/course/${course.id}/learn`}>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        <Play className="mr-1 h-3 w-3" />
+                        Resume
+                      </Button>
+                    </Link>
                   </div>
-                  <Link href={`/course/${course.id}/learn`}>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                      <Play className="mr-1 h-3 w-3" />
-                      Resume
-                    </Button>
+                ))}
+              </div>
+              {enrolledCourses.length > 3 && (
+                <div className="mt-3 text-center">
+                  <Link href="/learning">
+                    <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                      View all {enrolledCourses.length} enrolled courses
+                    </span>
                   </Link>
                 </div>
-              ))}
-            </div>
-            {enrolledCourses.length > 3 && (
-              <div className="mt-3 text-center">
-                <Link href="/learning">
-                  <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
-                    View all {enrolledCourses.length} enrolled courses
-                  </span>
-                </Link>
+              )}
+            </>
+          ) : (
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <BookOpen className="h-8 w-8 text-blue-600" />
               </div>
-            )}
-          </div>
-        )}
+              <h5 className="font-semibold text-gray-900 mb-2">No enrolled courses yet</h5>
+              <p className="text-sm text-gray-600 mb-4">
+                Discover and enroll in courses to start your learning journey
+              </p>
+              <Link href="/learning">
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Play className="mr-2 h-4 w-4" />
+                  Browse Courses
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Current Module */}
         {currentModule && (
