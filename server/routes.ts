@@ -1788,16 +1788,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Complete course (for the finish course button)
+  app.post('/api/course-completion/finish', async (req, res) => {
+    try {
+      const { userId, moduleId, lessonIndex, courseId } = req.body;
+      const userIdInt = parseInt(userId);
+      
+      // First complete the final lesson
+      await storage.completeLessonProgress(userIdInt, moduleId, lessonIndex);
+      
+      // Get the course to find all modules and verify all lessons are completed
+      const modules = await storage.getCourseModules(courseId);
+      let allLessonsCompleted = true;
+      
+      for (const module of modules) {
+        const lessons = await storage.getModuleLessons(module.id);
+        if (!lessons || lessons.length === 0) continue;
+        
+        const lessonProgress = await storage.getLessonProgress(userIdInt, module.id);
+        const completedLessons = lessonProgress.filter(p => p.isCompleted).length;
+        
+        if (completedLessons < lessons.length) {
+          allLessonsCompleted = false;
+          break;
+        }
+      }
+      
+      if (allLessonsCompleted) {
+        // Mark the enrollment as completed
+        const enrollments = await storage.getUserEnrollments(userIdInt);
+        const courseEnrollment = enrollments.find(e => e.courseId === courseId);
+        
+        if (courseEnrollment && !courseEnrollment.completedAt) {
+          await storage.updateEnrollment(courseEnrollment.id, {
+            completedAt: new Date(),
+            progress: '100'
+          });
+          
+          // Award course completion XP
+          const courseCompletionXP = 5;
+          const currentStats = await storage.getUserStats(userIdInt);
+          const newXp = (currentStats?.totalXp || 0) + courseCompletionXP;
+          await storage.updateUserStats(userIdInt, {
+            totalXp: newXp
+          });
+          
+          // Award course completion badges
+          await storage.checkAndAwardBadges(userIdInt, 'course_completion', courseId);
+          
+          res.json({ 
+            success: true, 
+            message: 'Course completed successfully!',
+            xpAwarded: courseCompletionXP 
+          });
+        } else {
+          res.json({ 
+            success: true, 
+            message: 'Course already completed',
+            xpAwarded: 0 
+          });
+        }
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Cannot complete course: not all lessons are finished' 
+        });
+      }
+    } catch (error) {
+      console.error('Error finishing course:', error);
+      res.status(500).json({ error: 'Failed to finish course' });
+    }
+  });
+
   // Check course completion status
   app.get('/api/course-completion/:userId/:courseId', async (req, res) => {
     try {
       const { userId, courseId } = req.params;
       const userIdInt = parseInt(userId);
 
-      // Get all modules for the course
+      // Use the corrected checkCourseCompletion method that checks both lessons and enrollment
+      const courseCompletion = await storage.checkCourseCompletion(userIdInt, courseId);
+      
+      // Get all modules for the course to calculate module progress
       const modules = await storage.getCourseModules(courseId);
       if (!modules || modules.length === 0) {
-        return res.json({ isCompleted: false, completedModules: 0, totalModules: 0 });
+        return res.json({ isCompleted: false, completedModules: 0, totalModules: 0, progress: 0 });
       }
 
       let completedModules = 0;
@@ -1819,15 +1894,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const totalModules = modules.length;
-      const isCompleted = completedModules >= totalModules;
 
-      // If course is completed, award completion badges
-      if (isCompleted) {
+      // Award badges only if the course is officially completed (enrollment marked as completed)
+      if (courseCompletion.isCompleted) {
         await storage.checkAndAwardBadges(userIdInt, 'course_completion', courseId);
       }
 
       res.json({
-        isCompleted,
+        isCompleted: courseCompletion.isCompleted,
         completedModules,
         totalModules,
         progress: totalModules > 0 ? (completedModules / totalModules) * 100 : 0

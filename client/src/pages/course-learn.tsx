@@ -284,14 +284,13 @@ export default function CourseLearn() {
   // Course completion mutation (for the final lesson)
   const finishCourseMutation = useMutation({
     mutationFn: async (lessonIndex: number) => {
-      // First complete the lesson
-      await apiRequest(`/api/lesson-progress/complete`, "POST", {
+      // Complete the lesson and officially finish the course
+      return apiRequest(`/api/course-completion/finish`, "POST", {
         userId: user?.id,
         moduleId: selectedModuleId,
         lessonIndex,
+        courseId,
       });
-      // Then check course completion status to trigger badges and XP
-      return apiRequest(`/api/course-completion/${user?.id}/${courseId}`);
     },
     onSuccess: (data) => {
       // Invalidate all related queries to ensure fresh data

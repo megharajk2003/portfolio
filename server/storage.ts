@@ -2234,6 +2234,10 @@ export class PgStorage implements IStorage {
     completedLessons: number;
   }> {
     try {
+      // First check if the enrollment is officially completed
+      const enrollments = await this.getUserEnrollments(userId);
+      const enrollment = enrollments.find(e => e.courseId === courseId);
+      
       // Get all modules for the course
       const modules = await this.getCourseModules(courseId);
       if (!modules || modules.length === 0) {
@@ -2255,19 +2259,16 @@ export class PgStorage implements IStorage {
         completedLessons += lessonProgress.filter(p => p.isCompleted).length;
       }
 
-      const isCompleted = totalLessons > 0 && completedLessons >= totalLessons;
-      
-      // Get completion date from enrollment if completed
-      let completedAt: Date | undefined = undefined;
-      if (isCompleted) {
-        const enrollments = await this.getUserEnrollments(userId);
-        const enrollment = enrollments.find(e => e.courseId === courseId);
-        completedAt = enrollment?.completedAt || undefined;
-      }
+      // A course is only completed if:
+      // 1. All lessons are completed AND
+      // 2. The enrollment is marked as completed (progress = '100' and completedAt exists)
+      const allLessonsCompleted = totalLessons > 0 && completedLessons >= totalLessons;
+      const enrollmentCompleted = enrollment?.completedAt != null && enrollment?.progress === '100';
+      const isCompleted = allLessonsCompleted && enrollmentCompleted;
 
       return {
         isCompleted,
-        completedAt,
+        completedAt: enrollment?.completedAt || undefined,
         totalLessons,
         completedLessons
       };
