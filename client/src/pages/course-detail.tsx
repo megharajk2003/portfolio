@@ -185,6 +185,13 @@ export default function CourseDetail() {
     queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
   });
 
+  // Check if user is enrolled in a course - moved here to avoid initialization issues
+  const isEnrolled = (courseId: string) => {
+    return userEnrollments.some(
+      (enrollment: any) => enrollment.courseId === courseId
+    );
+  };
+
   // Check course completion status
   const { data: courseCompletion } = useQuery<{
     isCompleted: boolean;
@@ -223,13 +230,6 @@ export default function CourseDetail() {
       });
     },
   });
-
-  // Check if user is enrolled in a course
-  const isEnrolled = (courseId: string) => {
-    return userEnrollments.some(
-      (enrollment: any) => enrollment.courseId === courseId
-    );
-  };
 
   // Check if course is completed
   const isCourseCompleted = () => {
