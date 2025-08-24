@@ -28,6 +28,11 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     queryKey: ["/api/courses"],
   });
 
+  // Get completed courses to filter them out from enrolled courses
+  const { data: completedCourses = [] } = useQuery({
+    queryKey: ["/api/users", userId, "completed-courses"],
+  });
+
   const getModuleProgress = (moduleId: string) => {
     const progress = userProgress.find(p => p.moduleId === moduleId);
     return progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 };
@@ -69,10 +74,12 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     return !progress.isCompleted && !isModuleUnlocked(index);
   });
 
-  // Get enrolled courses
-  const enrolledCourses = courses.filter(course => 
-    userEnrollments.some(enrollment => enrollment.courseId === course.id)
-  );
+  // Get enrolled courses (only pending ones, not completed)
+  const enrolledCourses = courses.filter(course => {
+    const isEnrolled = userEnrollments.some((enrollment: any) => enrollment.courseId === course.id);
+    const isCompleted = completedCourses.some((completedCourse: any) => completedCourse.id === course.id);
+    return isEnrolled && !isCompleted;
+  });
 
   return (
     <Card>
