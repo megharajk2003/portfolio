@@ -71,6 +71,19 @@ export default function Home() {
     queryKey: ["/api/courses"],
   });
 
+  // Check if user has already checked in today
+  const today = new Date().toISOString().split('T')[0];
+  const { data: todayActivity } = useQuery({
+    queryKey: ["/api/daily-activity", userId, today],
+    queryFn: async () => {
+      const response = await fetch(`/api/daily-activity/${userId}?startDate=${today}&endDate=${today}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  const hasCheckedInToday = todayActivity && todayActivity.length > 0;
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -108,6 +121,7 @@ export default function Home() {
       // Invalidate relevant queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["/api/user-stats", userId] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId, today] });
     },
     onError: (error: Error) => {
       toast({
@@ -179,22 +193,33 @@ export default function Home() {
               {/* PDF Export Button - Hidden on mobile */}
               <Button
                 onClick={handleCheckIn}
-                disabled={checkInMutation.isPending}
-                className="hidden sm:flex bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
+                disabled={checkInMutation.isPending || hasCheckedInToday}
+                className={`hidden sm:flex text-white disabled:opacity-50 ${
+                  hasCheckedInToday 
+                    ? "bg-green-500 hover:bg-green-500 cursor-not-allowed" 
+                    : "bg-yellow-500 hover:bg-yellow-600"
+                }`}
                 size="sm"
               >
                 <CircleCheckBig className="mr-2 h-4 w-4" />
-                {checkInMutation.isPending ? "Checking in..." : "Daily Check In"}
+                {checkInMutation.isPending 
+                  ? "Checking in..." 
+                  : hasCheckedInToday 
+                    ? "Checked In" 
+                    : "Daily Check In"
+                }
               </Button>
 
               {/* Mobile check-in button */}
               <Button
                 onClick={handleCheckIn}
-                disabled={checkInMutation.isPending}
+                disabled={checkInMutation.isPending || hasCheckedInToday}
                 variant="ghost"
                 size="icon"
-                className="sm:hidden"
-                title="Daily Check In"
+                className={`sm:hidden ${
+                  hasCheckedInToday ? "text-green-500" : ""
+                }`}
+                title={hasCheckedInToday ? "Checked In" : "Daily Check In"}
               >
                 <CircleCheckBig className="h-4 w-4" />
               </Button>
