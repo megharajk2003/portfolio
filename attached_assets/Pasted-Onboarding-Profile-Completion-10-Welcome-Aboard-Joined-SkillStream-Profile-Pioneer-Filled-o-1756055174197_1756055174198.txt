@@ -1,0 +1,138 @@
+Onboarding & Profile Completion (10)
+Welcome Aboard: Joined SkillStream.
+Profile Pioneer: Filled out basic profile information.
+Skill Starter: Added your first 5 skills.
+Portfolio Novice: Added your first project.
+Goal Setter: Created your first learning goal.
+Bio Builder: Wrote a personal biography.
+Picture Perfect: Uploaded a profile picture.
+Experience Enthusiast: Added your first work experience.
+Education Expert: Added your educational background.
+Profile Pro: Achieved 100% profile completion.
+Learning & Course Completion (25)
+First Steps: Completed your first lesson.
+Course Starter: Enrolled in your first course.
+Course Conqueror: Completed your first course.
+Module Master: Completed your first module.
+Weekend Warrior: Completed a course over a weekend.
+Five-Course Finisher: Completed 5 courses.
+Ten-Course Titan: Completed 10 courses.
+Twenty-Five-Course Champion: Completed 25 courses.
+Fifty-Course Legend: Completed 50 courses.
+Subject Specialist: Completed 5 courses in the same category.
+Polymath: Completed a course in 5 different categories.
+Speed Learner: Completed a course in half the estimated time.
+Quiz Whiz: Scored 100% on a quiz.
+Perfect Scorer: Scored 100% on all quizzes in a course.
+Learning Spree: Completed 3 courses in a single week.
+Video Voyager: Watched 10 hours of video content.
+Video Virtuoso: Watched 50 hours of video content.
+Reading Ranger: Read 20 articles or text-based lessons.
+Certified Learner: Earned your first certificate.
+Triple Threat: Earned 3 certificates.
+Certificate Collector: Earned 10 certificates.
+Lifelong Learner: Completed a course 30 days after your last one.
+Night Owl: Completed a lesson between midnight and 4 AM.
+Early Bird: Completed a lesson between 5 AM and 8 AM.
+Avid Learner: Completed 100 total lessons.
+Skill Mastery (15)
+Skill Collector: Added 10 skills to your profile.
+Skill Hoarder: Added 25 skills to your profile.
+Skill Sensei: Added 50 skills to your profile.
+Skill Adept: Reached 'Intermediate' level in a skill.
+Skill Expert: Reached 'Expert' level in a skill.
+Top 5 Specialist: Reached 'Expert' level in 5 different skills.
+Tech Titan: Mastered a popular technology skill (e.g., React, Python).
+Soft Skill Superstar: Mastered a soft skill (e.g., Communication).
+Skill Verifier: Got a skill endorsed or verified.
+Trendsetter: Added a newly trending skill to your profile.
+Skill Synergist: Mastered a combination of related skills (e.g., HTML, CSS, JS).
+Chart Topper: Your skill chart is full.
+Radar Rocker: Your skill radar chart shows balanced growth.
+Skill Refresher: Updated the proficiency level of a skill after 6 months.
+Ambitious Learner: Added a skill with a 'Beginner' level.
+Goal Achievement (10)
+Goal Getter: Completed your first goal.
+Goal Guardian: Completed 5 goals.
+Goal Guru: Completed 10 goals.
+Goal Grandmaster: Completed 25 goals.
+Ambitious Achiever: Completed a "Hard" difficulty goal.
+Long-Term Visionary: Completed a goal that took over 3 months.
+Quick Win: Completed a goal in under a week.
+On Track: Consistently met sub-tasks for a goal for a month.
+Goal Streak: Completed 3 goals in 30 days.
+Heat Mapper: Filled your goal heat map for a full month.
+Project & Portfolio Milestones (10)
+Project Pro: Added 5 projects to your portfolio.
+Portfolio Powerhouse: Added 10 projects to your portfolio.
+Showcase Star: Your portfolio has been viewed 10 times.
+Public Profile: Made your portfolio public.
+Detailed Describer: Added a project with a description over 200 words.
+Tech Tagger: Used 5 different technologies in your projects.
+Team Player: Completed a collaborative project.
+Soloist: Completed a project by yourself.
+Code Contributor: Linked a project to a GitHub repository.
+Project Polisher: Updated an old project with new details.
+Consistency & Streaks (10)
+Daily Dabbler: Visited the platform 3 days in a row.
+Weekly Regular: Visited every day for a week.
+Monthly Mainstay: Visited every day for a month.
+Perfect Week: Completed a lesson every day for a week.
+Perfect Month: Completed a lesson every day for a month.
+Streak Starter: Maintained a 3-day learning streak.
+Streak Keeper: Maintained a 7-day learning streak.
+Streak Champion: Maintained a 30-day learning streak.
+Year-Round Learner: Visited the platform in all 12 months of a year.
+Committed Learner: Logged in 50 times.
+Community & Engagement (5)
+Forum First-Timer: Made your first post in the forum.
+Helpful Hand: Your forum reply was marked as helpful.
+Discussion Starter: Started a forum thread that got 10 replies.
+Community Contributor: Made 25 posts or replies in the forum.
+Respected Voice: Received 50 upvotes/likes in the forum.
+Career Development (5)
+Resume Ready: Generated your first resume.
+Career Explorer: Used the Career Advisor tool.
+Timeline Traveler: Created a career timeline.
+Future Focused: Planned a career goal 5 years into the future.
+Interview Prep Pro: Completed an interview prep module.
+Special Achievements & Meta-Badges (10)
+Badge Beginner: Earned your first badge.
+Badge Collector: Earned 10 badges.
+Badge Enthusiast: Earned 25 badges.
+Badge Baron: Earned 50 badges.
+Badge Legend: Earned 100 badges.
+Category Champion: Earned all badges in one category.
+Beta Tester: Used a new feature within the first week of its release.
+Anniversary Achiever: Used the platform for one year.
+Feedback Giver: Submitted feedback about the platform.
+SkillStream Superstar: Unlocked a secret, hard-to-get achievement.
+
+
+
+ badge ideas specifically for the number of goals completed, structured in tiers to show a clear progression path for the user.
+
+Bronze Tier: Getting Started
+Goal Starter: Complete 1 goal.
+Goal Getter: Complete 5 goals.
+Persistent Player: Complete 10 goals.
+Ambitious Achiever: Complete 15 goals.
+Dedicated Doer: Complete 20 goals.
+Silver Tier: Consistent Performer
+Goal Guardian: Complete 25 goals.
+Silver Sentinel: Complete 30 goals.
+Focused Finisher: Complete 40 goals.
+Goal Guru: Complete 50 goals.
+Accomplishment Ace: Complete 60 goals.
+Gold Tier: Expert Achiever
+Golden Gladiator: Complete 75 goals.
+Goal Grandmaster: Complete 100 goals.
+Centurion of Success: Complete 125 goals.
+Milestone Master: Complete 150 goals.
+Virtuoso of Victory: Complete 175 goals.
+Platinum Tier: Elite Status
+Platinum Planner: Complete 200 goals.
+Diamond Dominator: Complete 250 goals.
+Titan of Tasks: Complete 300 goals.
+Legend of Accomplishment: Complete 400 goals.
+SkillStream Sovereign: Complete 500 goals.

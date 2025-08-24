@@ -6,6 +6,7 @@ import { z } from "zod";
 import Sidebar from "@/components/sidebar";
 import SimpleComprehensiveForm from "@/components/comprehensive-profile-form";
 import GoalHeatMap from "@/components/goal-heat-map";
+import AllBadgesDisplay from "@/components/all-badges-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -4509,6 +4510,9 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Badge Collection */}
+              <AllBadgesDisplay userId={user?.id || 0} />
 
               {/* Portfolio Summary */}
               <Card>
