@@ -3167,6 +3167,7 @@ export class PgStorage implements IStorage {
         }
         
         // Create subtopic with the status
+        const priority = (row.priority || row.Priority || 'medium').toLowerCase();
         const subtopicData: InsertGoalSubtopic = {
           topicId,
           name: subtopicName.trim(),
@@ -3174,7 +3175,9 @@ export class PgStorage implements IStorage {
           status: ['pending', 'in_progress', 'completed'].includes(status) 
             ? status as "pending" | "in_progress" | "completed" 
             : 'pending',
-          priority: (row.priority || row.Priority || 'medium').toLowerCase() as "low" | "medium" | "high",
+          priority: ['low', 'medium', 'high'].includes(priority) 
+            ? priority as "low" | "medium" | "high" 
+            : 'medium',
           notes: row.notes || row.Notes || null,
           dueDate: row.dueDate || row.DueDate ? new Date(row.dueDate || row.DueDate) : null
         };
@@ -3398,7 +3401,7 @@ export class PgStorage implements IStorage {
       return newSubtopic as GoalSubtopic;
     }
     
-    const [subtopic] = await db.insert(goalSubtopics).values({...subtopicData}).returning();
+    const [subtopic] = await db.insert(goalSubtopics).values([{...subtopicData}]).returning();
     return subtopic;
   }
 

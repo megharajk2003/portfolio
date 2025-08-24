@@ -24,6 +24,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   Target,
   CheckCircle2,
@@ -41,7 +52,7 @@ import {
   FileText
 } from "lucide-react";
 import Sidebar from "@/components/sidebar";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 interface GoalSubtopic {
   id: string;
@@ -131,6 +142,7 @@ export default function GoalDetails() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, params] = useRoute("/goal-tracker/:id");
+  const [, setLocation] = useLocation();
   const goalId = params?.id;
   const [newSubtopicData, setNewSubtopicData] = useState({
     name: "",
@@ -143,6 +155,37 @@ export default function GoalDetails() {
   const { data: goal, isLoading } = useQuery<Goal>({
     queryKey: [`/api/goals/${goalId}`],
     enabled: !!user && !!goalId
+  });
+
+  // Delete goal mutation
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      const response = await fetch(`/api/goals/${goalId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete goal");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Goal deleted",
+        description: "Goal has been successfully deleted."
+      });
+      setLocation("/goal-tracker");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Delete failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   });
 
   // Update subtopic status mutation
@@ -290,8 +333,8 @@ export default function GoalDetails() {
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6 space-y-6" data-testid="goal-details-page">
           {/* Goal Header */}
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Link href="/goal-tracker">
                   <Button 
@@ -320,7 +363,49 @@ export default function GoalDetails() {
               </div>
             </div>
             
-            <div className="text-right">
+            <div className="flex items-center gap-3">
+              {/* Delete Goal Button */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                    data-testid="button-delete-goal"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Goal
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent data-testid="delete-goal-dialog">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete "{goal.name}"? This action cannot be undone. 
+                      All categories, topics, and subtopics will be permanently removed.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel data-testid="button-cancel-delete">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteGoalMutation.mutate(goal.id)}
+                      disabled={deleteGoalMutation.isPending}
+                      className="bg-red-600 hover:bg-red-700"
+                      data-testid="button-confirm-delete"
+                    >
+                      {deleteGoalMutation.isPending ? "Deleting..." : "Delete Goal"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+          
+          {/* Progress Section */}
+          <div className="flex justify-end">
+            <div>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 Overall Progress
               </div>
