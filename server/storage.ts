@@ -3024,11 +3024,11 @@ export class PgStorage implements IStorage {
     }
     
     try {
-      const goals = await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
+      const userGoals = await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
       
       // Calculate subtopic totals for each goal
       const goalsWithSubtopicTotals = await Promise.all(
-        goals.map(async (goal) => {
+        userGoals.map(async (goal) => {
           const { totalSubtopics, completedSubtopics } = await this.calculateGoalSubtopicTotals(goal.id);
           return {
             ...goal,

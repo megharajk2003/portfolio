@@ -1,0 +1,50 @@
+💼 GET /api/work-experience/1 - Retrieved 1 records
+5:51:25 PM [express] GET /api/work-experience/1 304 in 32ms :: [{"id":"42d8989a-4c83-476b-a10c-010a8…
+5:51:43 PM [express] POST /api/goals/from-csv 201 in 542ms :: {"id":"435cb773-f1c2-4f5a-8e47-1a082c1…
+Error fetching user goals: ReferenceError: Cannot access 'goals2' before initialization
+    at PgStorage.getUserGoals (D:\react project\SkillStream\server\storage.ts:3027:44)
+    at <anonymous> (D:\react project\SkillStream\server\routes.ts:2282:35)
+    at Layer.handle [as handle_request] (D:\react project\SkillStream\node_modules\express\lib\router\layer.js:95:5)
+    at next (D:\react project\SkillStream\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (D:\react project\SkillStream\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (D:\react project\SkillStream\node_modules\express\lib\router\layer.js:95:5)
+    at D:\react project\SkillStream\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (D:\react project\SkillStream\node_modules\express\lib\router\index.js:346:12)
+    at next (D:\react project\SkillStream\node_modules\express\lib\router\index.js:280:10)
+    at strategy.pass (D:\react project\SkillStream\node_modules\passport\lib\middleware\authenticate.js:355:9)
+    at D:\react project\SkillStream\node_modules\passport\lib\strategies\session.js:120:12
+    at pass (D:\react project\SkillStream\node_modules\passport\lib\authenticator.js:352:31)
+    at deserialized (D:\react project\SkillStream\node_modules\passport\lib\authenticator.js:364:7)
+    at <anonymous> (D:\react project\SkillStream\server\auth.ts:75:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+5:51:43 PM [express] GET /api/goals 304 in 8ms :: []
+5:51:46 PM [express] GET /api/user 304 in 8ms :: {"id":1,"email":"admin2@email.com","firstName":"aka…
+Error fetching user goals: ReferenceError: Cannot access 'goals2' before initialization
+    at PgStorage.getUserGoals (D:\react project\SkillStream\server\storage.ts:3027:44)
+    at <anonymous> (D:\react project\SkillStream\server\routes.ts:2282:35)
+    at Layer.handle [as handle_request] (D:\react project\SkillStream\node_modules\express\lib\router\layer.js:95:5)
+    at next (D:\react project\SkillStream\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (D:\react project\SkillStream\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (D:\react project\SkillStream\node_modules\express\lib\router\layer.js:95:5)
+    at D:\react project\SkillStream\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (D:\react project\SkillStream\node_modules\express\lib\router\index.js:346:12)
+    at next (D:\react project\SkillStream\node_modules\express\lib\router\index.js:280:10)
+    at strategy.pass (D:\react project\SkillStream\node_modules\passport\lib\middleware\authenticate.js:355:9)
+    at D:\react project\SkillStream\node_modules\passport\lib\strategies\session.js:120:12
+    at pass (D:\react project\SkillStream\node_modules\passport\lib\authenticator.js:352:31)
+    at deserialized (D:\react project\SkillStream\node_modules\passport\lib\authenticator.js:364:7)
+    at <anonymous> (D:\react project\SkillStream\server\auth.ts:75:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+5:51:46 PM [express] GET /api/goals 304 in 25ms :: []
+
+
+
+
+
+
+
+
+
+
+
+
