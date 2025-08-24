@@ -272,6 +272,14 @@ export interface IStorage {
   awardBadge(userBadge: InsertUserBadge): Promise<UserBadge>;
   checkAndAwardBadges(userId: number, type: string, relatedId?: string): Promise<UserBadge[]>;
   
+  // Course completion checking
+  checkCourseCompletion(userId: number, courseId: string): Promise<{
+    isCompleted: boolean;
+    completedAt?: Date;
+    totalLessons: number;
+    completedLessons: number;
+  }>;
+
   // Goal tracking methods
   createGoal(goalData: InsertGoal): Promise<Goal>;
   getUserGoals(userId: number): Promise<Goal[]>;
@@ -2204,6 +2212,56 @@ export class PgStorage implements IStorage {
       }
     } catch (error) {
       console.error("Error checking course completion:", error);
+    }
+  }
+
+  async checkCourseCompletion(userId: number, courseId: string): Promise<{
+    isCompleted: boolean;
+    completedAt?: Date;
+    totalLessons: number;
+    completedLessons: number;
+  }> {
+    try {
+      // Get all modules for the course
+      const modules = await this.getCourseModules(courseId);
+      if (!modules || modules.length === 0) {
+        return { isCompleted: false, totalLessons: 0, completedLessons: 0 };
+      }
+
+      let totalLessons = 0;
+      let completedLessons = 0;
+      
+      // Check each module's lesson completion status
+      for (const module of modules) {
+        const lessons = await this.getModuleLessons(module.id);
+        if (!lessons || lessons.length === 0) continue;
+        
+        totalLessons += lessons.length;
+        
+        // Get lesson progress for this module
+        const lessonProgress = await this.getLessonProgress(userId, module.id);
+        completedLessons += lessonProgress.filter(p => p.isCompleted).length;
+      }
+
+      const isCompleted = totalLessons > 0 && completedLessons >= totalLessons;
+      
+      // Get completion date from enrollment if completed
+      let completedAt: Date | undefined = undefined;
+      if (isCompleted) {
+        const enrollments = await this.getUserEnrollments(userId);
+        const enrollment = enrollments.find(e => e.courseId === courseId);
+        completedAt = enrollment?.completedAt || undefined;
+      }
+
+      return {
+        isCompleted,
+        completedAt,
+        totalLessons,
+        completedLessons
+      };
+    } catch (error) {
+      console.error("Error checking course completion status:", error);
+      return { isCompleted: false, totalLessons: 0, completedLessons: 0 };
     }
   }
 

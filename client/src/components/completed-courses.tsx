@@ -2,25 +2,40 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Trophy, Calendar, BookOpen } from "lucide-react";
-import { Goal } from "@shared/schema";
+import { Goal, Course } from "@shared/schema";
 
 interface CompletedCoursesProps {
   userId: string;
 }
 
+type CompletedCourse = Course & {
+  completionDate?: Date;
+  totalLessons?: number;
+  completedLessons?: number;
+};
+
 export default function CompletedCourses({ userId }: CompletedCoursesProps) {
-  const { data: goals, isLoading } = useQuery<Goal[]>({
+  // Fetch completed actual courses
+  const { data: completedCourses, isLoading: coursesLoading } = useQuery<CompletedCourse[]>({
+    queryKey: ["/api/users", userId, "completed-courses"],
+  });
+
+  // Fetch completed goals
+  const { data: goals, isLoading: goalsLoading } = useQuery<Goal[]>({
     queryKey: ["/api/goals"],
   });
 
-  // Filter for completed goals (courses)
-  const completedCourses = goals?.filter(
+  // Filter for completed goals
+  const completedGoals = goals?.filter(
     (goal) => 
       goal.totalSubtopics && 
       goal.completedSubtopics && 
       goal.totalSubtopics > 0 && 
       goal.completedSubtopics === goal.totalSubtopics
   ) || [];
+
+  const isLoading = coursesLoading || goalsLoading;
+  const totalCompleted = (completedCourses?.length || 0) + completedGoals.length;
 
   if (isLoading) {
     return (
@@ -47,12 +62,12 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
             Completed Courses
           </CardTitle>
           <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-800 dark:text-emerald-200 px-3 py-1">
-            {completedCourses.length} Complete
+            {totalCompleted} Complete
           </Badge>
         </div>
       </CardHeader>
       <CardContent>
-        {completedCourses.length === 0 ? (
+        {totalCompleted === 0 ? (
           <div className="text-center py-8">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 mb-2">No completed courses yet</p>
@@ -62,9 +77,10 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
           </div>
         ) : (
           <div className="space-y-4 max-h-80 overflow-y-auto">
-            {completedCourses.map((course) => (
+            {/* Completed Courses */}
+            {completedCourses?.map((course) => (
               <div
-                key={course.id}
+                key={`course-${course.id}`}
                 className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-emerald-200 dark:border-emerald-700 shadow-sm hover:shadow-md transition-shadow duration-200"
                 data-testid={`completed-course-${course.id}`}
               >
@@ -73,16 +89,49 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
                     <div className="flex items-center mb-2">
                       <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" />
                       <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                        {course.name}
+                        {course.title}
                       </h4>
                     </div>
                     <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
                       <Calendar className="h-3 w-3 mr-1" />
-                      Completed {course.updatedAt ? new Date(course.updatedAt).toLocaleDateString() : 'Recently'}
+                      Completed {course.completionDate ? new Date(course.completionDate).toLocaleDateString() : 'Recently'}
                     </div>
                     <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400">
                       <BookOpen className="h-3 w-3 mr-1" />
-                      {course.totalSubtopics || 0} lessons mastered
+                      {course.totalLessons || 0} lessons mastered
+                    </div>
+                  </div>
+                  <div className="ml-4 flex-shrink-0">
+                    <Badge className="bg-emerald-500 text-white text-xs px-2 py-1">
+                      100%
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Completed Goals */}
+            {completedGoals.map((goal) => (
+              <div
+                key={`goal-${goal.id}`}
+                className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-emerald-200 dark:border-emerald-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+                data-testid={`completed-goal-${goal.id}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center mb-2">
+                      <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" />
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                        {goal.name}
+                      </h4>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Completed {goal.updatedAt ? new Date(goal.updatedAt).toLocaleDateString() : 'Recently'}
+                    </div>
+                    <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400">
+                      <BookOpen className="h-3 w-3 mr-1" />
+                      {goal.totalSubtopics || 0} lessons mastered
                     </div>
                   </div>
                   <div className="ml-4 flex-shrink-0">
@@ -96,12 +145,12 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
           </div>
         )}
         
-        {completedCourses.length > 0 && (
+        {totalCompleted > 0 && (
           <div className="mt-6 p-4 bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 rounded-lg border border-emerald-200 dark:border-emerald-700">
             <div className="flex items-center justify-center">
               <Trophy className="h-5 w-5 text-emerald-600 mr-2" />
               <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                Great job! You've completed {completedCourses.length} course{completedCourses.length !== 1 ? 's' : ''}
+                Great job! You've completed {totalCompleted} course{totalCompleted !== 1 ? 's' : ''}
               </p>
             </div>
             <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center mt-1">

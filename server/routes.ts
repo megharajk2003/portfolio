@@ -1662,6 +1662,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get completed courses for a user
+  app.get("/api/users/:userId/completed-courses", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const enrollments = await storage.getUserEnrollments(userId);
+      const completedCourses = [];
+
+      for (const enrollment of enrollments) {
+        const courseCompletion = await storage.checkCourseCompletion(userId, enrollment.courseId);
+        if (courseCompletion.isCompleted) {
+          const course = await storage.getCourse(enrollment.courseId);
+          completedCourses.push({
+            ...course,
+            completionDate: courseCompletion.completedAt,
+            totalLessons: courseCompletion.totalLessons,
+            completedLessons: courseCompletion.completedLessons
+          });
+        }
+      }
+
+      res.json(completedCourses);
+    } catch (error) {
+      console.error('Error fetching completed courses:', error);
+      res.status(500).json({ error: 'Failed to fetch completed courses' });
+    }
+  });
+
   // Check course completion status
   app.get('/api/course-completion/:userId/:courseId', async (req, res) => {
     try {
