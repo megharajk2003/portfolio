@@ -50,6 +50,8 @@ interface Goal {
   description?: string;
   totalTopics: number;
   completedTopics: number;
+  totalSubtopics: number;
+  completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -272,9 +274,9 @@ export default function GoalTracker() {
           let cumulativeProgress = 0;
           if (totalTimespan > 0) {
             const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
-            cumulativeProgress = Math.floor(goal.completedTopics * progressRatio);
+            cumulativeProgress = Math.floor(goal.completedSubtopics * progressRatio);
           } else if (current >= goalUpdated) {
-            cumulativeProgress = goal.completedTopics;
+            cumulativeProgress = goal.completedSubtopics;
           }
           
           progressPoint[goal.name] = Math.max(0, cumulativeProgress);
@@ -445,11 +447,11 @@ export default function GoalTracker() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium">Progress</span>
                       <span className="text-sm text-gray-600">
-                        {goal.completedTopics} / {goal.totalTopics}
+                        {goal.completedSubtopics} / {goal.totalSubtopics}
                       </span>
                     </div>
                     <Progress 
-                      value={(goal.completedTopics / goal.totalTopics) * 100} 
+                      value={(goal.completedSubtopics / goal.totalSubtopics) * 100} 
                       className="h-2"
                       data-testid={`progress-goal-${goal.id}`}
                     />
@@ -457,14 +459,14 @@ export default function GoalTracker() {
                   
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">
-                      {Math.round((goal.completedTopics / goal.totalTopics) * 100)}% Complete
+                      {Math.round((goal.completedSubtopics / goal.totalSubtopics) * 100)}% Complete
                     </span>
                     <Badge className={getStatusColor(
-                      goal.completedTopics === goal.totalTopics ? 'completed' : 
-                      goal.completedTopics > 0 ? 'in_progress' : 'pending'
+                      goal.completedSubtopics === goal.totalSubtopics ? 'completed' : 
+                      goal.completedSubtopics > 0 ? 'in_progress' : 'pending'
                     )}>
-                      {goal.completedTopics === goal.totalTopics ? 'Completed' : 
-                       goal.completedTopics > 0 ? 'In Progress' : 'Not Started'}
+                      {goal.completedSubtopics === goal.totalSubtopics ? 'Completed' : 
+                       goal.completedSubtopics > 0 ? 'In Progress' : 'Not Started'}
                     </Badge>
                   </div>
                 </div>
@@ -483,7 +485,7 @@ export default function GoalTracker() {
               Study Performance
             </CardTitle>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              This chart shows the cumulative number of topics you've completed for each goal {selectedMonth !== 'all' ? `in ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}` : `in ${selectedYear}`}.
+              This chart shows the cumulative number of subtopics you've completed for each goal {selectedMonth !== 'all' ? `in ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}` : `in ${selectedYear}`}.
             </p>
           </CardHeader>
           <CardContent>

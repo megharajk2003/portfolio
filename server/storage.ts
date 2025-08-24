@@ -3364,12 +3364,14 @@ export class PgStorage implements IStorage {
       const category = await this.getGoalCategory(categoryId);
       if (category) {
         const allCategories = await this.getGoalCategories(category.goalId);
-        const totalSubtopics = allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0);
+        const totalSubtopics = allCategories.reduce((sum, cat) => sum + (cat.totalTopics || 0), 0);
         const completedSubtopics = allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0);
         
         await this.updateGoal(category.goalId, {
           totalTopics: allCategories.length,
-          completedTopics: completedSubtopics
+          completedTopics: completedSubtopics,
+          totalSubtopics: totalSubtopics,
+          completedSubtopics: completedSubtopics
         });
       }
     } catch (error) {

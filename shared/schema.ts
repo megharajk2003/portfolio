@@ -1230,6 +1230,8 @@ export const goals = pgTable("goals", {
   csvData: jsonb("csv_data"), // Store original CSV data
   totalTopics: integer("total_topics").default(0),
   completedTopics: integer("completed_topics").default(0),
+  totalSubtopics: integer("total_subtopics").default(0),
+  completedSubtopics: integer("completed_subtopics").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
