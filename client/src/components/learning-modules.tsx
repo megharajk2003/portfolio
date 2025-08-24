@@ -5,37 +5,60 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Check, Lock, Play, RotateCcw } from "lucide-react";
+import type { 
+  LearningModule, 
+  UserProgress as UserProgressType, 
+  Course, 
+  Enrollment 
+} from "@shared/schema";
+
+type CompletedCourse = Course & {
+  completionDate?: Date;
+  totalLessons?: number;
+  completedLessons?: number;
+};
 
 interface LearningModulesProps {
   userId: string;
 }
 
 export default function LearningModules({ userId }: LearningModulesProps) {
-  const { data: modules = [] } = useQuery({
+  const { data: modules = [] } = useQuery<LearningModule[]>({
     queryKey: ["/api/learning-modules"],
   });
 
-  const { data: userProgress = [] } = useQuery({
+  const { data: userProgress = [] } = useQuery<UserProgressType[]>({
     queryKey: ["/api/user-progress", userId],
   });
 
   // Get user enrollments for courses
-  const { data: userEnrollments = [] } = useQuery({
+  const { data: userEnrollments = [] } = useQuery<Enrollment[]>({
     queryKey: ["/api/users", userId, "enrollments"],
   });
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
   // Get completed courses to filter them out from enrolled courses
-  const { data: completedCourses = [] } = useQuery({
+  const { data: completedCourses = [] } = useQuery<CompletedCourse[]>({
     queryKey: ["/api/users", userId, "completed-courses"],
   });
 
-  const getModuleProgress = (moduleId: string) => {
-    const progress = userProgress.find(p => p.moduleId === moduleId);
-    return progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 };
+  const getModuleProgress = (moduleId: string): UserProgressType => {
+    const progress = userProgress.find((p: UserProgressType) => p.moduleId === moduleId);
+    return progress || { 
+      id: '', 
+      userId: parseInt(userId), 
+      moduleId, 
+      currentLesson: 0, 
+      isCompleted: false, 
+      xpEarned: 0,
+      completedAt: null,
+      finalExamPassed: false,
+      finalExamScore: null,
+      finalExamAttempts: 0
+    };
   };
 
   // Function to check if a module should be unlocked based on sequential completion
@@ -56,7 +79,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
 
   const currentModule = modules.find((module, index) => {
     const progress = getModuleProgress(module.id);
-    return !progress.isCompleted && progress.currentLesson > 0 && isModuleUnlocked(index);
+    return !progress.isCompleted && (progress.currentLesson || 0) > 0 && isModuleUnlocked(index);
   });
 
   const completedModules = modules.filter(module => {
@@ -75,9 +98,9 @@ export default function LearningModules({ userId }: LearningModulesProps) {
   });
 
   // Get enrolled courses (only pending ones, not completed)
-  const enrolledCourses = courses.filter(course => {
-    const isEnrolled = userEnrollments.some((enrollment: any) => enrollment.courseId === course.id);
-    const isCompleted = completedCourses.some((completedCourse: any) => completedCourse.id === course.id);
+  const enrolledCourses = courses.filter((course: Course) => {
+    const isEnrolled = userEnrollments.some((enrollment: Enrollment) => enrollment.courseId === course.id);
+    const isCompleted = completedCourses.some((completedCourse: CompletedCourse) => completedCourse.id === course.id);
     return isEnrolled && !isCompleted;
   });
 
@@ -112,7 +135,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                       <div>
                         <h5 className="font-medium text-gray-900">{course.title}</h5>
                         <p className="text-sm text-gray-500">
-                          {course.provider || 'Course Provider'}
+                          Course Provider
                         </p>
                       </div>
                     </div>
@@ -169,7 +192,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                   {(() => {
                     const progress = getModuleProgress(currentModule.id);
                     const totalLessons = Array.isArray(currentModule.lessons) ? currentModule.lessons.length : 1;
-                    const progressPercentage = (progress.currentLesson / totalLessons) * 100;
+                    const progressPercentage = ((progress.currentLesson || 0) / totalLessons) * 100;
                     return (
                       <div 
                         className="bg-primary h-2 rounded-full" 
@@ -182,7 +205,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                   {(() => {
                     const progress = getModuleProgress(currentModule.id);
                     const totalLessons = Array.isArray(currentModule.lessons) ? currentModule.lessons.length : 1;
-                    return Math.round((progress.currentLesson / totalLessons) * 100);
+                    return Math.round(((progress.currentLesson || 0) / totalLessons) * 100);
                   })()}%
                 </span>
               </div>
