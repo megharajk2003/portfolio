@@ -37,6 +37,7 @@ import {
   Users,
   Send,
   Menu,
+  Search,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
@@ -436,10 +437,18 @@ function CreatePostDialog() {
 export default function Forum() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: posts = [], isLoading } = useQuery<ForumPost[]>({
     queryKey: ["/api/forum/posts"],
   });
+
+  const filteredPosts = posts.filter(post => 
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (post.user.firstName && post.user.firstName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    post.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -529,30 +538,55 @@ export default function Forum() {
 
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
+            <div className="mb-6">
+              <Input
+                placeholder="Search posts by title, content, or author..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+                data-testid="input-search-posts"
+              />
+            </div>
+
             <div className="mb-8">
               <CreatePostDialog />
             </div>
 
-            {posts.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <MessageCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    No posts yet
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Be the first to start a conversation in the community forum!
-                  </p>
-                  {user && <CreatePostDialog />}
-                </CardContent>
-              </Card>
-            ) : (
-              <div>
-                {posts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            )}
+            <Card className="card-with-gradient-outline">
+              <CardContent className="p-6">
+                {filteredPosts.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <MessageCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    {searchQuery ? (
+                      <>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                          No posts found
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                          Try adjusting your search terms or browse all posts.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                          No posts yet
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                          Be the first to start a conversation in the community forum!
+                        </p>
+                        {user && <CreatePostDialog />}
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {filteredPosts.map((post) => (
+                      <PostCard key={post.id} post={post} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
