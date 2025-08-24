@@ -3,7 +3,7 @@ import { badges } from "./shared/schema";
 
 async function seedBadges() {
   console.log("🏆 Seeding badge data...");
-  
+
   try {
     // Delete existing badges
     await db.delete(badges);
@@ -519,15 +519,34 @@ async function seedBadges() {
       },
     ];
 
-    const insertedBadges = await db.insert(badges).values(badgeData).returning();
+    const insertedBadges = await db
+      .insert(badges)
+      .values(badgeData)
+      .returning();
     console.log(`✅ Inserted ${insertedBadges.length} badges`);
 
     console.log("🎉 Badge seeding completed successfully!");
     console.log("📊 Badge Summary:");
-    console.log(`  - ${insertedBadges.filter(b => b.rarity === 'common').length} Common badges`);
-    console.log(`  - ${insertedBadges.filter(b => b.rarity === 'rare').length} Rare badges`);
-    console.log(`  - ${insertedBadges.filter(b => b.rarity === 'epic').length} Epic badges`);
-    console.log(`  - ${insertedBadges.filter(b => b.rarity === 'legendary').length} Legendary badges`);
+    console.log(
+      `  - ${
+        insertedBadges.filter((b) => b.rarity === "common").length
+      } Common badges`
+    );
+    console.log(
+      `  - ${
+        insertedBadges.filter((b) => b.rarity === "rare").length
+      } Rare badges`
+    );
+    console.log(
+      `  - ${
+        insertedBadges.filter((b) => b.rarity === "epic").length
+      } Epic badges`
+    );
+    console.log(
+      `  - ${
+        insertedBadges.filter((b) => b.rarity === "legendary").length
+      } Legendary badges`
+    );
 
     return insertedBadges;
   } catch (error) {
@@ -537,16 +556,15 @@ async function seedBadges() {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  seedBadges()
-    .then(() => {
-      console.log("✅ Badge seeding completed successfully");
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error("❌ Badge seeding failed:", error);
-      process.exit(1);
-    });
-}
+// Run the seeding function directly
+seedBadges()
+  .then(() => {
+    console.log("✅ Seeding script finished successfully.");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("❌ Seeding script failed:", error);
+    process.exit(1);
+  });
 
 export { seedBadges };
