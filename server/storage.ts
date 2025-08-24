@@ -3403,7 +3403,8 @@ export class PgStorage implements IStorage {
     
     const [subtopic] = await db.insert(goalSubtopics).values([{
       ...subtopicData,
-      status: subtopicData.status as "pending" | "start" | "completed"
+      status: subtopicData.status as "pending" | "start" | "completed",
+      priority: subtopicData.priority as "low" | "medium" | "high"
     }]).returning();
     return subtopic;
   }

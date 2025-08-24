@@ -533,7 +533,7 @@ export default function GoalDetails() {
                 </CardContent>
               </Card>
             ) : (
-              <Accordion type="multiple" className="space-y-4" data-testid="categories-accordion">
+              <Accordion type="single" collapsible className="space-y-4" data-testid="categories-accordion">
                 {goal.categories.map((category) => {
                   const categoryProgress = category.totalTopics > 0 
                     ? (category.completedTopics / category.totalTopics) * 100 
@@ -705,7 +705,9 @@ export default function GoalDetails() {
                                         </div>
                                       ) : (
                                         <div className="space-y-3">
-                                          {topic.subtopics.map((subtopic) => (
+                                          {topic.subtopics
+                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                                            .map((subtopic) => (
                                             <div
                                               key={subtopic.id}
                                               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
