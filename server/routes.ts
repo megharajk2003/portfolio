@@ -1640,11 +1640,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/lesson-progress/complete", async (req, res) => {
     try {
       const { userId, moduleId, lessonIndex } = req.body;
-      const progress = await storage.completeLessonProgress(
-        parseInt(userId),
-        moduleId,
-        lessonIndex
-      );
+      const userIdInt = parseInt(userId);
+      
+      // Complete the lesson and award XP
+      const progress = await storage.completeLessonProgress(userIdInt, moduleId, lessonIndex);
+      
+      // Check for milestone badges
+      await storage.checkAndAwardBadges(userIdInt, 'milestone');
+      
+      // Check if module is now complete and award course completion badges
+      const moduleProgress = await storage.getUserProgressForModule(userIdInt, moduleId);
+      if (moduleProgress?.isCompleted) {
+        // Award course completion badge for the completed module
+        await storage.checkAndAwardBadges(userIdInt, 'course_completion', moduleId);
+      }
+      
       res.json(progress);
     } catch (error) {
       console.error("Error completing lesson:", error);

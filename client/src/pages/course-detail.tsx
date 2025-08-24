@@ -185,6 +185,17 @@ export default function CourseDetail() {
     queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
   });
 
+  // Check course completion status
+  const { data: courseCompletion } = useQuery<{
+    isCompleted: boolean;
+    completedModules: number;
+    totalModules: number;
+    progress: number;
+  }>({
+    queryKey: ["/api/course-completion", CURRENT_USER_ID, courseId],
+    enabled: isEnrolled(courseId),
+  });
+
   // Enrollment mutation
   const enrollMutation = useMutation({
     mutationFn: async (courseId: string) => {
@@ -218,6 +229,11 @@ export default function CourseDetail() {
     return userEnrollments.some(
       (enrollment: any) => enrollment.courseId === courseId
     );
+  };
+
+  // Check if course is completed
+  const isCourseCompleted = () => {
+    return courseCompletion?.isCompleted || false;
   };
 
   // Handle enrollment
@@ -339,10 +355,24 @@ export default function CourseDetail() {
               <div className="lg:col-span-1">
                 <Card>
                   <CardContent className="p-6">
-                    {isEnrolled(courseId) ? (
+                    {isCourseCompleted() ? (
+                      <div className="text-center space-y-2">
+                        <Button
+                          className="w-full mb-4 bg-green-600 hover:bg-green-700 text-white"
+                          size="lg"
+                          disabled
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Course Completed
+                        </Button>
+                        <p className="text-sm text-green-600 font-medium">
+                          Congratulations! You've completed this course.
+                        </p>
+                      </div>
+                    ) : isEnrolled(courseId) ? (
                       <Link href={`/course/${courseId}/learn`}>
                         <Button className="w-full mb-4" size="lg">
-                          Start Learning
+                          Continue Learning
                           <PlayCircle className="ml-2 h-4 w-4" />
                         </Button>
                       </Link>

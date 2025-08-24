@@ -1999,16 +1999,17 @@ export class PgStorage implements IStorage {
 
         if (courseEnrollment) {
           await this.updateEnrollment(courseEnrollment.id, {
-            status: 'completed',
             completedAt: new Date(),
-            progress: 100
+            progress: '100'
           });
         }
 
         // Award course completion XP (5 points as requested)
         const courseCompletionXP = 5;
+        const currentStats = await this.getUserStats(userId);
+        const newXp = (currentStats?.totalXp || 0) + courseCompletionXP;
         await this.updateUserStats(userId, {
-          totalXp: sql`COALESCE(${userStats.totalXp}, 0) + ${courseCompletionXP}`
+          totalXp: newXp
         });
 
         console.log(`Awarded ${courseCompletionXP} XP for course completion to user ${userId}`);
@@ -2757,18 +2758,46 @@ export class PgStorage implements IStorage {
   }
 
   private async checkBadgeRequirement(userId: number, badge: Badge, relatedId?: string): Promise<boolean> {
-    // Basic badge requirement checking logic
-    // This can be expanded based on specific badge criteria
     try {
+      const criteria = badge.criteria as any;
+      
       switch (badge.type) {
         case 'course_completion':
+          if (criteria?.courseType && relatedId) {
+            const course = await this.getCourse(relatedId);
+            return !!(course?.title?.includes(criteria.courseType) || course?.description?.includes(criteria.courseType));
+          }
           return true; // Award badge for completing any course
+          
         case 'milestone':
-          return true; // Award badge for reaching milestones
+          if (criteria?.coursesCompleted) {
+            const userProgress = await this.getUserProgress(userId);
+            const completedCourses = userProgress.filter(p => p.isCompleted).length;
+            return completedCourses >= criteria.coursesCompleted;
+          }
+          if (criteria?.totalXp) {
+            const userStats = await this.getUserStats(userId);
+            return (userStats?.totalXp || 0) >= criteria.totalXp;
+          }
+          if (criteria?.firstLogin) {
+            return true; // Assume this is checked on first login
+          }
+          return true;
+          
         case 'streak':
-          return true; // Award badge for maintaining streaks
+          if (criteria?.streakDays) {
+            const userStats = await this.getUserStats(userId);
+            return (userStats?.currentStreak || 0) >= criteria.streakDays;
+          }
+          return true;
+          
         case 'achievement':
-          return true; // Award badge for achievements
+          if (criteria?.examScore) {
+            // Check for perfect scores or high achievements
+            return true; // Placeholder for now
+          }
+          return true;
+          
         default:
           return false;
       }
@@ -3085,12 +3114,14 @@ export class PgStorage implements IStorage {
       return newTopic as GoalTopic;
     }
     
-    const [topic] = await db.insert(goalTopics).values({
-      ...topicData,
-      id: randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }).returning();
+    const insertData = {
+      name: topicData.name,
+      categoryId: topicData.categoryId,
+      status: (topicData.status as 'pending' | 'in_progress' | 'completed') || 'pending',
+      ...(topicData.notes && { notes: topicData.notes }),
+      ...(topicData.dueDate && { dueDate: topicData.dueDate })
+    };
+    const [topic] = await db.insert(goalTopics).values(insertData).returning();
     return topic;
   }
 

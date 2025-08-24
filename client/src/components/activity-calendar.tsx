@@ -15,27 +15,19 @@ export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
     queryKey: ["/api/daily-activity", userId],
   });
 
-  // Generate mock activity data for the last 365 days
-  const generateActivityData = () => {
-    const data = [];
-    const today = new Date();
-    for (let i = TOTAL_DAYS - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-
-      // Mock activity intensity (0-3)
-      const intensity = Math.floor(Math.random() * 4);
-      data.push({
-        date: date.toISOString().split("T")[0],
-        xpEarned: intensity * 20,
-        intensity,
-      });
-    }
-    return data;
+  // Calculate intensity based on real XP earned
+  const calculateIntensity = (xpEarned: number) => {
+    if (xpEarned === 0) return 0;
+    if (xpEarned <= 10) return 1;
+    if (xpEarned <= 30) return 2;
+    return 3;
   };
 
-  const activityData =
-    dailyActivity.length > 0 ? dailyActivity : generateActivityData();
+  // Use real activity data with calculated intensity
+  const activityData = dailyActivity.map(day => ({
+    ...day,
+    intensity: calculateIntensity(day.xpEarned || 0)
+  }));
 
   // --- Helper Functions and Data for Yearly View ---
 
