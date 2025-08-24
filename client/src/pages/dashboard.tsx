@@ -16,6 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Player } from "@lottiefiles/react-lottie-player";
+
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";
@@ -33,6 +35,7 @@ import {
   Edit,
   FileText,
   Link,
+  CircleCheckBig,
   Menu,
 } from "lucide-react";
 import ProfileCompletionNotification from "@/components/profile-completion-notification";
@@ -67,9 +70,9 @@ export default function Home() {
     queryKey: ["/api/courses"],
   });
 
-  const handleExportPDF = () => {
+  const handleCheckIn = () => {
     // PDF export functionality will be implemented
-    console.log("Exporting PDF...");
+    console.log("Checking in...");
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
@@ -126,22 +129,22 @@ export default function Home() {
             <div className="flex items-center space-x-2 sm:space-x-4">
               {/* PDF Export Button - Hidden on mobile */}
               <Button
-                onClick={handleExportPDF}
-                className="hidden sm:flex bg-red-600 text-white hover:bg-red-700"
+                onClick={handleCheckIn}
+                className="hidden sm:flex bg-yellow-500 text-white hover:bg-red-700"
                 size="sm"
               >
-                <FileText className="mr-2 h-4 w-4" />
-                Export PDF
+                <CircleCheckBig className="mr-2 h-4 w-4" />
+                Daily Check In
               </Button>
 
               {/* Mobile PDF button */}
               <Button
-                onClick={handleExportPDF}
+                onClick={handleCheckIn}
                 variant="ghost"
                 size="icon"
                 className="sm:hidden"
               >
-                <FileText className="h-5 w-5" />
+                <CircleCheckBig className="mr-2 h-4 w-4" />
               </Button>
 
               {/* Notifications */}
@@ -166,15 +169,15 @@ export default function Home() {
           <ProfileCompletionNotification />
 
           {/* Hero Section */}
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Learning Heat Map */}
             <GoalHeatMap />
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 justify-between flex flex-col">
               <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 border border-gray-200 dark:border-gray-700 flex items-center justify-between ">
                 <div className="flex items-center space-x-4">
-                  <div className="relative ">
+                  <div className="px-5 relative ">
                     <img
-                      className="w-32 h-32 rounded-xl object-cover"
+                      className="w-32 h-32 rounded-full object-contain bg-gray-100 dark:bg-gray-800"
                       src={
                         profile?.personalDetails?.photo ||
                         "https://img.freepik.com/premium-photo/avatar-icon_665280-58322.jpg"
@@ -185,7 +188,7 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
                       {profile?.personalDetails?.fullName ||
                         `${user?.firstName || ""} ${
                           user?.lastName || ""
@@ -196,13 +199,36 @@ export default function Home() {
                       {profile?.personalDetails?.roleOrTitle ||
                         "Professional Role"}
                     </p>
+
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {profile?.contactDetails?.email ||
                         user?.email ||
                         "email@example.com"}
                     </p>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">
+                      {profile?.contactDetails?.phone || "Phone"}
+                    </p>
                   </div>
+                  <Player
+                    autoplay
+                    loop
+                    src="https://lottie.host/808a860f-b6c9-4e5a-a7e2-659f5a45127c/ebhZk5XZe6.json"
+                    style={{ height: "150px", width: "150px" }} // Adjusted size slightly for this animation
+                  />
                 </div>
+              </div>
+              <div className="hidden lg:block">
+                <QuickActions
+                  onAddCertification={() =>
+                    console.log("Dashboard: Navigate to certification form")
+                  }
+                  onAddProject={() =>
+                    console.log("Dashboard: Navigate to project form")
+                  }
+                  onAddExperience={() =>
+                    console.log("Dashboard: Navigate to experience form")
+                  }
+                />
               </div>
             </section>
           </div>
@@ -350,21 +376,6 @@ export default function Home() {
             </h3>
             <ProjectsAchievements userId={userId} />
           </section>
-
-          {/* Right sidebar content for desktop */}
-          <div className="hidden lg:block">
-            <QuickActions
-              onAddCertification={() =>
-                console.log("Dashboard: Navigate to certification form")
-              }
-              onAddProject={() =>
-                console.log("Dashboard: Navigate to project form")
-              }
-              onAddExperience={() =>
-                console.log("Dashboard: Navigate to experience form")
-              }
-            />
-          </div>
         </div>
 
         {/* Footer */}

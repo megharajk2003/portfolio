@@ -443,11 +443,15 @@ export default function Forum() {
     queryKey: ["/api/forum/posts"],
   });
 
-  const filteredPosts = posts.filter(post => 
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (post.user.firstName && post.user.firstName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    post.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPosts = posts.filter(
+    (post) =>
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (post.user.firstName &&
+        post.user.firstName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      post.user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
@@ -538,18 +542,23 @@ export default function Forum() {
 
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
-            <div className="mb-6">
-              <Input
-                placeholder="Search posts by title, content, or author..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-                data-testid="input-search-posts"
-              />
-            </div>
+            <div className="p-6">
+              {/* Flex container for search and button */}
+              <div className="flex items-center gap-4 mb-8">
+                {/* Search Input (3/4 width) */}
+                <Input
+                  placeholder="Search posts by title, content, or author..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-3/4"
+                  data-testid="input-search-posts"
+                />
 
-            <div className="mb-8">
-              <CreatePostDialog />
+                {/* Wrapper for the button (1/4 width) */}
+                <div className="w-1/4">
+                  <CreatePostDialog />
+                </div>
+              </div>
             </div>
 
             <Card className="card-with-gradient-outline">
@@ -572,7 +581,8 @@ export default function Forum() {
                           No posts yet
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 mb-4">
-                          Be the first to start a conversation in the community forum!
+                          Be the first to start a conversation in the community
+                          forum!
                         </p>
                         {user && <CreatePostDialog />}
                       </>
