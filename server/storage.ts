@@ -3304,7 +3304,7 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`categories_${goalId}`) || [];
     }
     
-    return await db.select().from(goalCategories).where(eq(goalCategories.goalId, goalId));
+    return await db.select().from(goalCategories).where(eq(goalCategories.goalId, goalId)).orderBy(goalCategories.createdAt);
   }
 
   private async updateGoalCategory(id: string, data: Partial<InsertGoalCategory>): Promise<GoalCategory | undefined> {
@@ -3345,7 +3345,7 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`topics_${categoryId}`) || [];
     }
     
-    return await db.select().from(goalTopics).where(eq(goalTopics.categoryId, categoryId));
+    return await db.select().from(goalTopics).where(eq(goalTopics.categoryId, categoryId)).orderBy(goalTopics.createdAt);
   }
 
   private async updateProgressCounters(categoryId: string): Promise<void> {
@@ -3414,7 +3414,7 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`subtopics_${topicId}`) || [];
     }
     
-    return await db.select().from(goalSubtopics).where(eq(goalSubtopics.topicId, topicId));
+    return await db.select().from(goalSubtopics).where(eq(goalSubtopics.topicId, topicId)).orderBy(goalSubtopics.createdAt);
   }
 
   async updateSubtopicStatus(subtopicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalSubtopic | undefined> {

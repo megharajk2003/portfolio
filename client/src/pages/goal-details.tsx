@@ -534,7 +534,9 @@ export default function GoalDetails() {
               </Card>
             ) : (
               <Accordion type="single" collapsible className="space-y-4" data-testid="categories-accordion">
-                {goal.categories.map((category) => {
+                {goal.categories
+                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                  .map((category) => {
                   const categoryProgress = category.totalTopics > 0 
                     ? (category.completedTopics / category.totalTopics) * 100 
                     : 0;
@@ -584,7 +586,9 @@ export default function GoalDetails() {
                               </div>
                             ) : (
                               <Accordion type="single" collapsible className="space-y-2">
-                                {category.topics.map((topic) => {
+                                {category.topics
+                                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                                  .map((topic) => {
                                   const topicProgress = topic.totalSubtopics > 0 
                                     ? (topic.completedSubtopics / topic.totalSubtopics) * 100 
                                     : 0;
