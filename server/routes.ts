@@ -2428,16 +2428,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes } = req.body;
 
       // Validate status
-      const validStatuses = ['pending', 'in_progress', 'completed'];
+      const validStatuses = ['pending', 'start', 'completed'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ 
-          message: "Invalid status. Must be pending, in_progress, or completed" 
+          message: "Invalid status. Must be pending, start, or completed" 
         });
       }
 
       const updatedTopic = await storage.updateTopicStatus(
         topicId, 
-        status as "pending" | "in_progress" | "completed",
+        status as "pending" | "start" | "completed",
         notes
       );
 
@@ -2463,16 +2463,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes } = req.body;
 
       // Validate status
-      const validStatuses = ['pending', 'in_progress', 'completed'];
+      const validStatuses = ['pending', 'start', 'completed'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ 
-          message: "Invalid status. Must be pending, in_progress, or completed" 
+          message: "Invalid status. Must be pending, start, or completed" 
         });
       }
 
       const updatedSubtopic = await storage.updateSubtopicStatus(
         subtopicId, 
-        status as "pending" | "in_progress" | "completed",
+        status as "pending" | "start" | "completed",
         notes
       );
 

@@ -280,11 +280,11 @@ export interface IStorage {
   deleteGoal(id: string): Promise<boolean>;
   createGoalFromCSV(userId: number, goalName: string, csvData: any[]): Promise<Goal>;
   getGoalWithCategories(goalId: string): Promise<Goal & { categories: (GoalCategory & { topics: (GoalTopic & { subtopics: GoalSubtopic[] })[] })[] } | undefined>;
-  updateTopicStatus(topicId: string, status: "pending" | "in_progress" | "completed", notes?: string): Promise<GoalTopic | undefined>;
+  updateTopicStatus(topicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalTopic | undefined>;
   // Subtopic methods
   createGoalSubtopic(subtopicData: InsertGoalSubtopic): Promise<GoalSubtopic>;
   getTopicSubtopics(topicId: string): Promise<GoalSubtopic[]>;
-  updateSubtopicStatus(subtopicId: string, status: "pending" | "in_progress" | "completed", notes?: string): Promise<GoalSubtopic | undefined>;
+  updateSubtopicStatus(subtopicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalSubtopic | undefined>;
   deleteSubtopic(subtopicId: string): Promise<boolean>;
 }
 
@@ -3172,8 +3172,8 @@ export class PgStorage implements IStorage {
           topicId,
           name: subtopicName.trim(),
           description: row.description || row.Description || null,
-          status: ['pending', 'in_progress', 'completed'].includes(status) 
-            ? status as "pending" | "in_progress" | "completed" 
+          status: ['pending', 'start', 'completed'].includes(status) 
+            ? status as "pending" | "start" | "completed" 
             : 'pending',
           priority: ['low', 'medium', 'high'].includes(priority) 
             ? priority as "low" | "medium" | "high" 
@@ -3254,7 +3254,7 @@ export class PgStorage implements IStorage {
     return { ...goal, categories: categoriesWithTopics };
   }
 
-  async updateTopicStatus(topicId: string, status: "pending" | "in_progress" | "completed", notes?: string): Promise<GoalTopic | undefined> {
+  async updateTopicStatus(topicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalTopic | undefined> {
     // This method is deprecated - status is now managed at subtopic level
     // Return the topic for compatibility
     return await this.getTopic(topicId);
@@ -3401,7 +3401,10 @@ export class PgStorage implements IStorage {
       return newSubtopic as GoalSubtopic;
     }
     
-    const [subtopic] = await db.insert(goalSubtopics).values([{...subtopicData}]).returning();
+    const [subtopic] = await db.insert(goalSubtopics).values([{
+      ...subtopicData,
+      status: subtopicData.status as "pending" | "start" | "completed"
+    }]).returning();
     return subtopic;
   }
 
