@@ -298,12 +298,122 @@ export class PgStorage implements IStorage {
       console.log("Database connection established");
     } catch (error) {
       this.isDbConnected = false;
+      this.seedBadgesInFallback();
       console.log("Database not available, using in-memory fallback storage");
     }
   }
 
   private initializeSessionStore() {
     console.log("Session store initialized for PgStorage");
+  }
+
+  private seedBadgesInFallback() {
+    const badgeData = [
+      // Course Completion Badges
+      {
+        id: "badge-ai-pioneer",
+        title: "AI Pioneer",
+        description: "Completed your first AI & Machine Learning course",
+        icon: "Zap",
+        color: "purple",
+        type: "course_completion",
+        criteria: { courseType: "AI & Machine Learning" },
+        xpReward: 100,
+        rarity: "rare",
+        createdAt: new Date(),
+      },
+      {
+        id: "badge-data-scientist",
+        title: "Data Scientist",
+        description: "Mastered Data Science fundamentals",
+        icon: "Trophy",
+        color: "blue",
+        type: "course_completion",
+        criteria: { courseType: "Data Science" },
+        xpReward: 150,
+        rarity: "epic",
+        createdAt: new Date(),
+      },
+      
+      // Milestone Badges
+      {
+        id: "badge-fast-learner",
+        title: "Fast Learner",
+        description: "Completed first course in under 30 days",
+        icon: "Flame",
+        color: "orange",
+        type: "milestone",
+        criteria: { timeLimit: 30 },
+        xpReward: 75,
+        rarity: "rare",
+        createdAt: new Date(),
+      },
+      {
+        id: "badge-streak-master",
+        title: "Streak Master",
+        description: "Maintained a 7-day learning streak",
+        icon: "Calendar",
+        color: "green",
+        type: "streak",
+        criteria: { streakDays: 7 },
+        xpReward: 50,
+        rarity: "common",
+        createdAt: new Date(),
+      },
+      {
+        id: "badge-knowledge-seeker",
+        title: "Knowledge Seeker",
+        description: "Completed 5 courses",
+        icon: "BookOpen",
+        color: "indigo",
+        type: "milestone",
+        criteria: { coursesCompleted: 5 },
+        xpReward: 200,
+        rarity: "epic",
+        createdAt: new Date(),
+      },
+      
+      // Achievement Badges
+      {
+        id: "badge-perfect-score",
+        title: "Perfect Score",
+        description: "Achieved 100% on a final exam",
+        icon: "Star",
+        color: "yellow",
+        type: "achievement",
+        criteria: { examScore: 100 },
+        xpReward: 100,
+        rarity: "rare",
+        createdAt: new Date(),
+      },
+      {
+        id: "badge-learning-champion",
+        title: "Learning Champion",
+        description: "Completed 10 courses with distinction",
+        icon: "Crown",
+        color: "gold",
+        type: "milestone",
+        criteria: { coursesCompleted: 10, grade: "distinction" },
+        xpReward: 500,
+        rarity: "legendary",
+        createdAt: new Date(),
+      },
+      {
+        id: "badge-first-steps",
+        title: "First Steps",
+        description: "Welcome to your learning journey!",
+        icon: "Star",
+        color: "blue",
+        type: "milestone",
+        criteria: { firstLogin: true },
+        xpReward: 25,
+        rarity: "common",
+        createdAt: new Date(),
+      }
+    ];
+
+    this.fallbackData.set('badges', badgeData);
+    console.log(`✅ Seeded ${badgeData.length} badges in fallback storage`);
   }
 
   // User management
@@ -531,16 +641,29 @@ export class PgStorage implements IStorage {
     startDate: string,
     endDate: string
   ): Promise<DailyActivity[]> {
-    return await db
-      .select()
-      .from(dailyActivity)
-      .where(
-        and(
-          eq(dailyActivity.userId, userId),
-          gte(dailyActivity.date, startDate),
-          lte(dailyActivity.date, endDate)
-        )
-      );
+    if (!this.isDbConnected) {
+      const key = `dailyActivity_${userId}`;
+      const activities = this.fallbackData.get(key) || [];
+      // Filter by date range  
+      return activities.filter((activity: any) => 
+        activity.date >= startDate && activity.date <= endDate
+      ).sort((a: any, b: any) => a.date.localeCompare(b.date));
+    }
+    try {
+      return await db
+        .select()
+        .from(dailyActivity)
+        .where(
+          and(
+            eq(dailyActivity.userId, userId),
+            gte(dailyActivity.date, startDate),
+            lte(dailyActivity.date, endDate)
+          )
+        );
+    } catch (error) {
+      console.error("Error fetching daily activity:", error);
+      return [];
+    }
   }
 
   async createDailyActivity(
@@ -1931,18 +2054,16 @@ export class PgStorage implements IStorage {
         await db
           .insert(dailyActivity)
           .values({
-            userId,
             date: today,
+            userId,
             xpEarned,
-            lessonsCompleted: 1,
-            timeSpent: 30
+            lessonsCompleted: 1
           })
           .onConflictDoUpdate({
             target: [dailyActivity.userId, dailyActivity.date],
             set: {
               xpEarned: sql`${dailyActivity.xpEarned} + ${xpEarned}`,
-              lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`,
-              timeSpent: sql`${dailyActivity.timeSpent} + 30`
+              lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`
             }
           });
       }
