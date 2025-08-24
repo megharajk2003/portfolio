@@ -1666,6 +1666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/course-completion/:userId/:courseId', async (req, res) => {
     try {
       const { userId, courseId } = req.params;
+      const userIdInt = parseInt(userId);
 
       // Get all modules for the course
       const modules = await storage.getCourseModules(courseId);
@@ -1673,15 +1674,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ isCompleted: false, completedModules: 0, totalModules: 0 });
       }
 
-      // Get user progress for all modules
-      const allProgress = await storage.getUserProgress(parseInt(userId));
-      const courseProgress = allProgress.filter(p => 
-        modules.some(m => m.id === p.moduleId)
-      );
+      let completedModules = 0;
+      
+      // Check each module's completion status based on lesson progress
+      for (const module of modules) {
+        // Get all lessons for this module
+        const lessons = await storage.getModuleLessons(module.id);
+        if (!lessons || lessons.length === 0) continue;
 
-      const completedModules = courseProgress.filter(p => p.isCompleted).length;
+        // Get lesson progress for this module
+        const lessonProgress = await storage.getLessonProgress(userIdInt, module.id);
+        const completedLessons = lessonProgress.filter(p => p.isCompleted).length;
+        
+        // Module is completed if all lessons are completed
+        if (completedLessons >= lessons.length) {
+          completedModules++;
+        }
+      }
+
       const totalModules = modules.length;
       const isCompleted = completedModules >= totalModules;
+
+      // If course is completed, award completion badges
+      if (isCompleted) {
+        await storage.checkAndAwardBadges(userIdInt, 'course_completion', courseId);
+      }
 
       res.json({
         isCompleted,

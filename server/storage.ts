@@ -440,6 +440,11 @@ export class PgStorage implements IStorage {
     userId: number,
     moduleId: string
   ): Promise<UserProgress | undefined> {
+    if (!this.isDbConnected) {
+      const key = `userProgress_${userId}`;
+      const progressList = this.fallbackData.get(key) || [];
+      return progressList.find((p: any) => p.moduleId === moduleId);
+    }
     const result = await db
       .select()
       .from(userProgress)
@@ -1889,10 +1894,61 @@ export class PgStorage implements IStorage {
       completedProgress = await this.createLessonProgress(progressData);
     }
 
+    // Update daily activity with real XP
+    await this.updateDailyActivityForLessonCompletion(userId, completedProgress.xpEarned || 10);
+
     // Check if all lessons in the module are completed
     await this.checkAndCompleteModule(userId, moduleId);
     
     return completedProgress;
+  }
+
+  // Helper method to update daily activity when lessons are completed
+  private async updateDailyActivityForLessonCompletion(userId: number, xpEarned: number): Promise<void> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (!this.isDbConnected) {
+        const key = `dailyActivity_${userId}`;
+        const activities = this.fallbackData.get(key) || [];
+        const existingActivity = activities.find((a: any) => a.date === today);
+        
+        if (existingActivity) {
+          existingActivity.xpEarned = (existingActivity.xpEarned || 0) + xpEarned;
+          existingActivity.lessonsCompleted = (existingActivity.lessonsCompleted || 0) + 1;
+        } else {
+          activities.push({
+            userId,
+            date: today,
+            xpEarned,
+            lessonsCompleted: 1,
+            timeSpent: 30 // Default 30 minutes per lesson
+          });
+        }
+        this.fallbackData.set(key, activities);
+      } else {
+        // Update database daily activity
+        await db
+          .insert(dailyActivity)
+          .values({
+            userId,
+            date: today,
+            xpEarned,
+            lessonsCompleted: 1,
+            timeSpent: 30
+          })
+          .onConflictDoUpdate({
+            target: [dailyActivity.userId, dailyActivity.date],
+            set: {
+              xpEarned: sql`${dailyActivity.xpEarned} + ${xpEarned}`,
+              lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`,
+              timeSpent: sql`${dailyActivity.timeSpent} + 30`
+            }
+          });
+      }
+    } catch (error) {
+      console.error('Error updating daily activity:', error);
+    }
   }
 
   // Helper method to check if all lessons are completed and mark module as completed
