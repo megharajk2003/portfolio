@@ -557,9 +557,9 @@ export default function CourseLearn() {
                   </div>
 
                   {/* Lesson Completion */}
-                  {!isLessonCompleted(currentLessonIndex) && (
-                    <div className="flex justify-center pt-6 border-t">
-                      {isLastLessonOfCourse() ? (
+                  <div className="flex justify-center pt-6 border-t">
+                    {!isLessonCompleted(currentLessonIndex) ? (
+                      isLastLessonOfCourse() ? (
                         <Button
                           onClick={() =>
                             finishCourseMutation.mutate(currentLessonIndex)
@@ -587,9 +587,41 @@ export default function CourseLearn() {
                             ? "Marking Complete..."
                             : "Mark as Complete"}
                         </Button>
-                      )}
-                    </div>
-                  )}
+                      )
+                    ) : isLastLessonOfCourse() ? (
+                      <div className="text-center">
+                        <div className="mb-4">
+                          <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            Final Lesson Complete!
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Ready to finish the entire course?
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() =>
+                            finishCourseMutation.mutate(currentLessonIndex)
+                          }
+                          disabled={finishCourseMutation.isPending}
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+                          data-testid="button-finish-course"
+                        >
+                          <CheckCircle className="mr-2 h-5 w-5" />
+                          {finishCourseMutation.isPending
+                            ? "Finishing Course..."
+                            : "🎉 Finish Course"}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Lesson completed!
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Navigation */}
                   <div className="flex justify-between items-center pt-6 border-t">
