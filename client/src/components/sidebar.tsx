@@ -23,7 +23,7 @@ import {
   Target,
   ChevronRight,
   Folder,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 
 const navigation = [
@@ -55,21 +55,22 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const [location] = useLocation();
   const { user } = useAuth();
-  
+
   // Check if we're on a goal details page
-  const isGoalDetailsPage = location.startsWith('/goal-tracker/') && location !== '/goal-tracker';
-  const currentGoalId = isGoalDetailsPage ? location.split('/')[2] : null;
-  
+  const isGoalDetailsPage =
+    location.startsWith("/goal-tracker/") && location !== "/goal-tracker";
+  const currentGoalId = isGoalDetailsPage ? location.split("/")[2] : null;
+
   // Fetch user goals for goal tracker section
   const { data: goals } = useQuery<Goal[]>({
     queryKey: ["/api/goals"],
-    enabled: !!user
+    enabled: !!user,
   });
-  
+
   // Fetch current goal details for enhanced sidebar
   const { data: currentGoal } = useQuery<Goal>({
     queryKey: [`/api/goals/${currentGoalId}`],
-    enabled: !!currentGoalId && !!user
+    enabled: !!currentGoalId && !!user,
   });
 
   return (
@@ -92,7 +93,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               knowme
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Dashboard</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Dashboard
+            </p>
           </div>
         </div>
         <ThemeSwitcher />
@@ -121,7 +124,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
           const isActive =
             location === item.href ||
             (item.href === "/dashboard" && location === "/") ||
-            (item.href === "/goal-tracker" && location.startsWith("/goal-tracker"));
+            (item.href === "/goal-tracker" &&
+              location.startsWith("/goal-tracker"));
 
           return (
             <Link key={item.name} href={item.href}>
@@ -146,145 +150,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
           );
         })}
       </nav>
-
-      {/* Goal Tracker Enhanced Section */}
-      {location.startsWith('/goal-tracker') && (
-        <div className="mt-6 space-y-4">
-          {isGoalDetailsPage && currentGoal ? (
-            // Enhanced goal details sidebar
-            <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-              <Link href="/goal-tracker">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-blue-600 hover:text-blue-700 mb-3 h-8"
-                  onClick={() => onClose && onClose()}
-                >
-                  <ChevronRight className="h-4 w-4 mr-1 rotate-180" />
-                  Back to All Goals
-                </Button>
-              </Link>
-              
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-blue-600" />
-                  <span className="font-semibold text-sm text-blue-900 dark:text-blue-100 truncate">
-                    {currentGoal.name}
-                  </span>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-blue-700 dark:text-blue-300">Progress</span>
-                    <span className="font-medium text-blue-900 dark:text-blue-100">
-                      {Math.round((currentGoal.completedTopics / currentGoal.totalTopics) * 100)}%
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(currentGoal.completedTopics / currentGoal.totalTopics) * 100} 
-                    className="h-2"
-                  />
-                  <div className="text-xs text-blue-600 dark:text-blue-400">
-                    {currentGoal.completedTopics} of {currentGoal.totalTopics} completed
-                  </div>
-                </div>
-                
-                {/* Categories Navigation */}
-                {currentGoal.categories && currentGoal.categories.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-2">
-                      Categories
-                    </h4>
-                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                      {currentGoal.categories.slice(0, 4).map((category) => {
-                        const categoryProgress = category.totalTopics > 0 
-                          ? (category.completedTopics / category.totalTopics) * 100 
-                          : 0;
-                        const isCompleted = categoryProgress === 100;
-                        
-                        return (
-                          <div key={category.id} className="flex items-center gap-2 p-2 rounded hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                            {isCompleted ? (
-                              <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
-                            ) : (
-                              <Folder className="h-3 w-3 text-blue-400 flex-shrink-0" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xs font-medium text-blue-900 dark:text-blue-100 truncate">
-                                {category.name}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Progress value={categoryProgress} className="h-1 flex-1" />
-                                <span className="text-xs text-blue-600 dark:text-blue-400">
-                                  {Math.round(categoryProgress)}%
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {currentGoal.categories.length > 4 && (
-                        <div className="text-xs text-blue-600 dark:text-blue-400 text-center py-1">
-                          +{currentGoal.categories.length - 4} more categories
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            // Regular goals list for main goal tracker page
-            goals && goals.length > 0 && (
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-                  Your Goals
-                </h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {goals.slice(0, 5).map((goal) => {
-                    const progress = goal.totalTopics > 0 ? (goal.completedTopics / goal.totalTopics) * 100 : 0;
-                    const isActive = location === `/goal-tracker/${goal.id}`;
-                    
-                    return (
-                      <Link key={goal.id} href={`/goal-tracker/${goal.id}`}>
-                        <div
-                          className={cn(
-                            "p-3 rounded-lg transition-colors cursor-pointer",
-                            isActive
-                              ? "bg-primary text-white"
-                              : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                          )}
-                          onClick={() => onClose && onClose()}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-4 w-4 flex-shrink-0" />
-                            <span className="font-medium text-sm truncate">{goal.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Progress value={progress} className="h-1 flex-1" />
-                            <span className="text-xs font-medium">
-                              {Math.round(progress)}%
-                            </span>
-                          </div>
-                          <div className="text-xs opacity-75 mt-1">
-                            {goal.completedTopics}/{goal.totalTopics} completed
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                  
-                  {goals.length > 5 && (
-                    <div className="text-xs text-center py-2 text-gray-500">
-                      +{goals.length - 5} more goals
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          )}
-        </div>
-      )}
 
       {/* Portfolio Link */}
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
