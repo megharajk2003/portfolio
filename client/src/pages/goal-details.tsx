@@ -98,6 +98,8 @@ interface Goal {
   description?: string;
   totalTopics: number;
   completedTopics: number;
+  totalSubtopics: number;
+  completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
   categories: GoalCategory[];
@@ -340,7 +342,13 @@ export default function GoalDetails() {
     );
   }
 
-  const overallProgress = goal.totalTopics > 0 ? (goal.completedTopics / goal.totalTopics) * 100 : 0;
+  // Calculate total subtopics from all categories and topics
+  const totalSubtopics = goal.categories.reduce((total, category) => 
+    total + category.topics.reduce((topicSum, topic) => topicSum + topic.totalSubtopics, 0), 0);
+  const completedSubtopics = goal.categories.reduce((total, category) => 
+    total + category.topics.reduce((topicSum, topic) => topicSum + topic.completedSubtopics, 0), 0);
+  
+  const overallProgress = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
 
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
@@ -433,7 +441,7 @@ export default function GoalDetails() {
                 </div>
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                {goal.completedTopics} of {goal.totalTopics} completed
+                {completedSubtopics} of {totalSubtopics} lessons completed
               </div>
             </div>
           </div>
@@ -456,7 +464,7 @@ export default function GoalDetails() {
                       {Math.round(overallProgress)}%
                     </span>
                     <span className="text-sm text-gray-600">
-                      {goal.completedTopics} / {goal.totalTopics}
+                      {completedSubtopics} / {totalSubtopics}
                     </span>
                   </div>
                   <Progress 
@@ -464,7 +472,7 @@ export default function GoalDetails() {
                     className="h-3"
                   />
                   <p className="text-sm text-gray-600">
-                    {goal.completedTopics} topics completed
+                    {completedSubtopics} lessons completed
                   </p>
                 </div>
               </CardContent>
@@ -537,8 +545,11 @@ export default function GoalDetails() {
                 {goal.categories
                   .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                   .map((category) => {
-                  const categoryProgress = category.totalTopics > 0 
-                    ? (category.completedTopics / category.totalTopics) * 100 
+                  // Calculate category progress based on subtopics
+                  const categoryTotalSubtopics = category.topics.reduce((sum, topic) => sum + topic.totalSubtopics, 0);
+                  const categoryCompletedSubtopics = category.topics.reduce((sum, topic) => sum + topic.completedSubtopics, 0);
+                  const categoryProgress = categoryTotalSubtopics > 0 
+                    ? (categoryCompletedSubtopics / categoryTotalSubtopics) * 100 
                     : 0;
 
                   return (
@@ -568,7 +579,7 @@ export default function GoalDetails() {
                                   {Math.round(categoryProgress)}% Complete
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {category.completedTopics} of {category.totalTopics} topics
+                                  {categoryCompletedSubtopics} of {categoryTotalSubtopics} lessons
                                 </div>
                               </div>
                               <div className="w-24">
