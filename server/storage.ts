@@ -3024,10 +3024,47 @@ export class PgStorage implements IStorage {
     }
     
     try {
-      return await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
+      const goals = await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
+      
+      // Calculate subtopic totals for each goal
+      const goalsWithSubtopicTotals = await Promise.all(
+        goals.map(async (goal) => {
+          const { totalSubtopics, completedSubtopics } = await this.calculateGoalSubtopicTotals(goal.id);
+          return {
+            ...goal,
+            totalSubtopics,
+            completedSubtopics
+          };
+        })
+      );
+      
+      return goalsWithSubtopicTotals;
     } catch (error) {
       console.error("Error fetching user goals:", error);
       return this.fallbackData.get(`goals_${userId}`) || [];
+    }
+  }
+
+  // Helper method to calculate subtopic totals for a goal
+  private async calculateGoalSubtopicTotals(goalId: string): Promise<{ totalSubtopics: number; completedSubtopics: number }> {
+    try {
+      const categories = await this.getGoalCategories(goalId);
+      let totalSubtopics = 0;
+      let completedSubtopics = 0;
+      
+      for (const category of categories) {
+        const topics = await this.getCategoryTopics(category.id);
+        for (const topic of topics) {
+          const subtopics = await this.getTopicSubtopics(topic.id);
+          totalSubtopics += subtopics.length;
+          completedSubtopics += subtopics.filter(s => s.status === 'completed').length;
+        }
+      }
+      
+      return { totalSubtopics, completedSubtopics };
+    } catch (error) {
+      console.error("Error calculating subtopic totals:", error);
+      return { totalSubtopics: 0, completedSubtopics: 0 };
     }
   }
 
