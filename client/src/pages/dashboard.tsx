@@ -36,6 +36,7 @@ import {
   Edit,
   FileText,
   Link,
+  X,
   CircleCheckBig,
   Menu,
   History,
@@ -76,11 +77,13 @@ export default function Home() {
   });
 
   // Check if user has already checked in today
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   const { data: todayActivity } = useQuery({
     queryKey: ["/api/daily-activity", userId, today],
     queryFn: async () => {
-      const response = await fetch(`/api/daily-activity/${userId}?startDate=${today}&endDate=${today}`);
+      const response = await fetch(
+        `/api/daily-activity/${userId}?startDate=${today}&endDate=${today}`
+      );
       if (!response.ok) return [];
       return response.json();
     },
@@ -91,15 +94,20 @@ export default function Home() {
   // Fetch check-in history for the past 30 days
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const startDate = thirtyDaysAgo.toISOString().split('T')[0];
-  
+  const startDate = thirtyDaysAgo.toISOString().split("T")[0];
+
   const { data: checkInHistory } = useQuery({
     queryKey: ["/api/daily-activity", userId, "history"],
     queryFn: async () => {
-      const response = await fetch(`/api/daily-activity/${userId}?startDate=${startDate}&endDate=${today}`);
+      const response = await fetch(
+        `/api/daily-activity/${userId}?startDate=${startDate}&endDate=${today}`
+      );
       if (!response.ok) return [];
       const data = await response.json();
-      return data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return data.sort(
+        (a: any, b: any) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
     },
   });
 
@@ -109,24 +117,24 @@ export default function Home() {
   // Daily check-in mutation
   const checkInMutation = useMutation({
     mutationFn: async () => {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      
-      const response = await fetch('/api/daily-activity', {
-        method: 'POST',
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+      const response = await fetch("/api/daily-activity", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: parseInt(userId),
           date: today,
           xpEarned: 10, // Daily check-in XP reward
-          lessonsCompleted: 0
+          lessonsCompleted: 0,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to check in');
+        throw new Error(error.message || "Failed to check in");
       }
 
       return response.json();
@@ -134,19 +142,26 @@ export default function Home() {
     onSuccess: () => {
       toast({
         title: "Daily Check-in Complete! 🎉",
-        description: "You earned 10 XP for checking in today. Keep your streak going!",
+        description:
+          "You earned 10 XP for checking in today. Keep your streak going!",
       });
-      
+
       // Invalidate relevant queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["/api/user-stats", userId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId, today] });
-      queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId, "history"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/daily-activity", userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/daily-activity", userId, today],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/daily-activity", userId, "history"],
+      });
     },
     onError: (error: Error) => {
       toast({
         title: "Check-in Failed",
-        description: error.message.includes('already checked in') 
+        description: error.message.includes("already checked in")
           ? "You've already checked in today! Come back tomorrow to continue your streak."
           : "Something went wrong. Please try again.",
         variant: "destructive",
@@ -215,19 +230,18 @@ export default function Home() {
                 onClick={handleCheckIn}
                 disabled={checkInMutation.isPending || hasCheckedInToday}
                 className={`hidden sm:flex text-white disabled:opacity-50 ${
-                  hasCheckedInToday 
-                    ? "bg-green-500 hover:bg-green-500 cursor-not-allowed" 
+                  hasCheckedInToday
+                    ? "bg-green-500 hover:bg-green-500 cursor-not-allowed"
                     : "bg-yellow-500 hover:bg-yellow-600"
                 }`}
                 size="sm"
               >
                 <CircleCheckBig className="mr-2 h-4 w-4" />
-                {checkInMutation.isPending 
-                  ? "Checking in..." 
-                  : hasCheckedInToday 
-                    ? "Checked In" 
-                    : "Daily Check In"
-                }
+                {checkInMutation.isPending
+                  ? "Checking in..."
+                  : hasCheckedInToday
+                  ? "Checked In"
+                  : "Daily Check In"}
               </Button>
 
               {/* Mobile check-in button */}
@@ -287,64 +301,6 @@ export default function Home() {
             </div>
           </div>
         </header>
-
-        {/* Check-in History Panel */}
-        {showCheckInHistory && (
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Check-in History
-                </h3>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Last 30 days
-                </span>
-              </div>
-              
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {checkInHistory && checkInHistory.length > 0 ? (
-                  checkInHistory.map((activity: any) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          {new Date(activity.date).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-green-600 dark:text-green-400">
-                            +{activity.xpEarned} XP
-                          </div>
-                          {activity.lessonsCompleted > 0 && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {activity.lessonsCompleted} lessons
-                            </div>
-                          )}
-                        </div>
-                        <CircleCheckBig className="h-5 w-5 text-green-500" />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No check-in history yet</p>
-                    <p className="text-sm">Start your daily check-in streak today!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
           {/* Profile Completion Notification */}
@@ -563,6 +519,84 @@ export default function Home() {
         {/* Footer */}
         <Footer />
       </main>
+
+      {/* NEW: Check-in History Overlay & Panel */}
+      {/* This is the semi-transparent background */}
+      {showCheckInHistory && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 "
+          onClick={() => setShowCheckInHistory(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* This is the vertical sidebar itself */}
+      <div
+        className={`
+  fixed top-0 right-0 h-full z-50 w-96 bg-white dark:bg-gray-900 shadow-2xl 
+  transform transition-transform duration-300 ease-in-out
+  flex flex-col
+  ${showCheckInHistory ? "translate-x-0" : "translate-x-full"}
+`}
+      >
+        {/* Panel Header */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
+          <div className="flex items-center space-x-2">
+            <History className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Check-in History
+            </h3>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowCheckInHistory(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {/* Panel Content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-2">
+            {checkInHistory && checkInHistory.length > 0 ? (
+              checkInHistory.map((activity: any) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="font-medium text-gray-900 dark:text-white text-sm">
+                      {new Date(activity.date).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                        +{activity.xpEarned} XP
+                      </div>
+                    </div>
+                    <CircleCheckBig className="h-5 w-5 text-green-500" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+                <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No check-in history yet</p>
+                <p className="text-sm">
+                  Start your daily check-in streak today!
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
