@@ -6,6 +6,7 @@ import Sidebar from "@/components/sidebar";
 import Footer from "@/components/ui/footer";
 import StatsGrid from "@/components/stats-grid";
 import LearningModules from "@/components/learning-modules";
+import CompletedCourses from "@/components/completed-courses";
 import SkillRadarChart from "@/components/skill-radar-chart";
 import { Button } from "@/components/ui/button";
 import {
@@ -231,8 +232,11 @@ export default function Home() {
             <ActivityCalendar userId={userId} />
           </section>
 
-          {/* Learning Modules */}
-          <LearningModules userId={userId} />
+          {/* Learning Modules and Completed Courses */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <LearningModules userId={userId} />
+            <CompletedCourses userId={userId} />
+          </div>
 
           {/* Milestone Badges */}
           <section>
