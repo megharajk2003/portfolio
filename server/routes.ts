@@ -1620,12 +1620,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user stats with streak calculation
       await updateUserStreakStats(activityData.userId, today, activityData.xpEarned || 0);
       
+      // Create check-in notification
+      await createNotificationHelper(activityData.userId, {
+        type: "goal_progress",
+        title: "Daily Check-in Complete! 🎉",
+        message: `You earned ${activityData.xpEarned || 10} XP for checking in today. Keep your streak going!`,
+        actionUrl: "/dashboard"
+      });
+      
       res.json(activity);
     } catch (error) {
       console.error("Error creating daily activity:", error);
       res.status(400).json({ message: "Invalid activity data" });
     }
   });
+
+  // Helper function to create notifications
+  async function createNotificationHelper(userId: number, notificationData: {
+    type: "goal_progress" | "goal_deadline" | "goal_completed" | "new_content" | "badge_unlock" | "forum_message" | "forum_reply";
+    title: string;
+    message: string;
+    actionUrl?: string;
+    metadata?: any;
+  }) {
+    try {
+      await storage.createNotification({
+        userId,
+        ...notificationData
+      });
+    } catch (error) {
+      console.error("Error creating notification:", error);
+    }
+  }
 
   // Helper function to calculate and update streak
   async function updateUserStreakStats(userId: number, todayDate: string, xpEarned: number) {
@@ -1663,6 +1689,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         longestStreak: newLongestStreak,
         lastActivityDate: today
       });
+
+      // Check for streak milestone notifications
+      if (newStreak > 0 && newStreak % 7 === 0) {
+        await createNotificationHelper(userId, {
+          type: "goal_progress",
+          title: `${newStreak} Day Streak! 🔥`,
+          message: `Amazing! You've maintained a ${newStreak}-day learning streak. Keep it going!`,
+          actionUrl: "/dashboard"
+        });
+      }
       
     } catch (error) {
       console.error("Error updating user streak stats:", error);
@@ -2570,6 +2606,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Subtopic not found" });
       }
 
+      // Check if goal is completed after this subtopic update
+      if (status === "completed") {
+        const goal = await storage.getGoalWithCategories(updatedSubtopic.topicId);
+        if (goal) {
+          const isCompleted = goal.categories.every(cat => 
+            cat.topics.every(topic => 
+              topic.subtopics.every(sub => sub.status === "completed")
+            )
+          );
+          
+          if (isCompleted) {
+            await createNotificationHelper(req.user.id, {
+              type: "goal_completed",
+              title: "Goal Completed! 🎯",
+              message: `Congratulations! You've completed your goal: "${goal.name}". Time to set your next challenge!`,
+              actionUrl: "/goal-tracker",
+              metadata: { goalId: goal.id }
+            });
+          }
+        }
+      }
+
       res.json(updatedSubtopic);
     } catch (error) {
       console.error("Error updating subtopic status:", error);
@@ -2624,6 +2682,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting subtopic:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Notifications routes
+  app.get("/api/notifications/:userId", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const notifications = await storage.getNotifications(
+        parseInt(req.params.userId),
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/:userId/unread", async (req, res) => {
+    try {
+      const unreadNotifications = await storage.getUnreadNotifications(
+        parseInt(req.params.userId)
+      );
+      res.json(unreadNotifications);
+    } catch (error) {
+      console.error("Error fetching unread notifications:", error);
+      res.status(500).json({ message: "Failed to fetch unread notifications" });
+    }
+  });
+
+  app.get("/api/notifications/:userId/count", async (req, res) => {
+    try {
+      const { unreadOnly } = req.query;
+      const count = await storage.getNotificationCount(
+        parseInt(req.params.userId),
+        unreadOnly === 'true'
+      );
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
+      res.status(500).json({ message: "Failed to fetch notification count" });
+    }
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    try {
+      const notification = await storage.createNotification(req.body);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      res.status(400).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const success = await storage.markNotificationAsRead(req.params.id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Notification not found" });
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/:userId/read-all", async (req, res) => {
+    try {
+      const success = await storage.markAllNotificationsAsRead(
+        parseInt(req.params.userId)
+      );
+      res.json({ success });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteNotification(req.params.id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Notification not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
     }
   });
 

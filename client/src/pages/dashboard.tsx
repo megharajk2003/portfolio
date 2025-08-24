@@ -36,12 +36,14 @@ import {
   Edit,
   FileText,
   Link,
-  X,
   CircleCheckBig,
   Menu,
   History,
   ChevronDown,
   ChevronUp,
+  X,
+  Check,
+  Trash2,
 } from "lucide-react";
 import ProfileCompletionNotification from "@/components/profile-completion-notification";
 import ActivityCalendar from "@/components/activity-calendar";
@@ -49,6 +51,13 @@ import ProjectsAchievements from "@/components/projects-achievements";
 import QuickActions from "@/components/quick-actions";
 import GoalHeatMap from "@/components/goal-heat-map";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // FIX: Infer the type for a single profile row from the Drizzle schema.
 type Profile = typeof profiles.$inferSelect;
@@ -90,6 +99,22 @@ export default function Home() {
   });
 
   const hasCheckedInToday = todayActivity && todayActivity.length > 0;
+
+  // Fetch notifications
+  const { data: notifications } = useQuery({
+    queryKey: ["/api/notifications", userId],
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const { data: unreadCount } = useQuery({
+    queryKey: ["/api/notifications", userId, "count"],
+    queryFn: async () => {
+      const response = await fetch(`/api/notifications/${userId}/count?unreadOnly=true`);
+      if (!response.ok) return { count: 0 };
+      return response.json();
+    },
+    refetchInterval: 30000,
+  });
 
   // Fetch check-in history for the past 30 days
   const thirtyDaysAgo = new Date();
@@ -172,6 +197,49 @@ export default function Home() {
   const handleCheckIn = () => {
     checkInMutation.mutate();
   };
+
+  // Notification mutations
+  const markAsReadMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const response = await fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+      });
+      if (!response.ok) throw new Error('Failed to mark as read');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId, 'count'] });
+    },
+  });
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/notifications/${userId}/read-all`, {
+        method: 'PATCH',
+      });
+      if (!response.ok) throw new Error('Failed to mark all as read');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId, 'count'] });
+    },
+  });
+
+  const deleteNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete notification');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId, 'count'] });
+    },
+  });
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {sidebarOpen && (
@@ -286,18 +354,113 @@ export default function Home() {
               </Button>
 
               {/* Notifications */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                >
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    3
-                  </span>
-                </Button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  >
+                    <Bell className="h-5 w-5" />
+                    {unreadCount && unreadCount.count > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {unreadCount.count > 9 ? '9+' : unreadCount.count}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
+                  <div className="flex items-center justify-between p-2">
+                    <h3 className="font-semibold">Notifications</h3>
+                    {unreadCount && unreadCount.count > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => markAllAsReadMutation.mutate()}
+                        disabled={markAllAsReadMutation.isPending}
+                      >
+                        Mark all read
+                      </Button>
+                    )}
+                  </div>
+                  <DropdownMenuSeparator />
+                  
+                  {notifications && notifications.length > 0 ? (
+                    notifications.slice(0, 10).map((notification: any) => (
+                      <DropdownMenuItem
+                        key={notification.id}
+                        className={`p-3 cursor-pointer ${
+                          !notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                        }`}
+                        onClick={() => {
+                          if (!notification.isRead) {
+                            markAsReadMutation.mutate(notification.id);
+                          }
+                          if (notification.actionUrl) {
+                            window.location.href = notification.actionUrl;
+                          }
+                        }}
+                      >
+                        <div className="flex items-start justify-between space-x-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <div className="text-sm font-medium truncate">
+                                {notification.title}
+                              </div>
+                              {!notification.isRead && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                              {new Date(notification.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                          <div className="flex space-x-1">
+                            {!notification.isRead && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  markAsReadMutation.mutate(notification.id);
+                                }}
+                                disabled={markAsReadMutation.isPending}
+                                className="p-1 h-6 w-6"
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotificationMutation.mutate(notification.id);
+                              }}
+                              disabled={deleteNotificationMutation.isPending}
+                              className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <DropdownMenuItem disabled className="p-4 text-center text-gray-500">
+                      No notifications yet
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>

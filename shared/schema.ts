@@ -1322,3 +1322,30 @@ export type InsertGoalTopic = z.infer<typeof insertGoalTopicSchema>;
 export type GoalTopic = typeof goalTopics.$inferSelect;
 export type InsertGoalSubtopic = z.infer<typeof insertGoalSubtopicSchema>;
 export type GoalSubtopic = typeof goalSubtopics.$inferSelect;
+
+// Notifications System
+export const notifications = pgTable("notifications", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 50 })
+    .$type<"goal_progress" | "goal_deadline" | "goal_completed" | "new_content" | "badge_unlock" | "forum_message" | "forum_reply">()
+    .notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
+  actionUrl: varchar("action_url", { length: 500 }), // Optional URL for notification action
+  metadata: jsonb("metadata"), // Store related IDs, progress data, etc.
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;

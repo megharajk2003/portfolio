@@ -54,6 +54,8 @@ import {
   type InsertGoalTopic,
   type GoalSubtopic,
   type InsertGoalSubtopic,
+  type Notification,
+  type InsertNotification,
   users,
   profiles,
   learningModules,
@@ -89,6 +91,7 @@ import {
   goalCategories,
   goalTopics,
   goalSubtopics,
+  notifications,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, sql, desc, ne, or, isNull } from "drizzle-orm";
@@ -294,6 +297,15 @@ export interface IStorage {
   getTopicSubtopics(topicId: string): Promise<GoalSubtopic[]>;
   updateSubtopicStatus(subtopicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalSubtopic | undefined>;
   deleteSubtopic(subtopicId: string): Promise<boolean>;
+
+  // Notifications methods
+  getNotifications(userId: number, limit?: number): Promise<Notification[]>;
+  getUnreadNotifications(userId: number): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: string): Promise<boolean>;
+  markAllNotificationsAsRead(userId: number): Promise<boolean>;
+  deleteNotification(id: string): Promise<boolean>;
+  getNotificationCount(userId: number, unreadOnly?: boolean): Promise<number>;
 }
 
 export class PgStorage implements IStorage {
@@ -3603,6 +3615,154 @@ export class PgStorage implements IStorage {
       }
     } catch (error) {
       console.error("Error updating topic progress counters:", error);
+    }
+  }
+
+  // Notifications implementation
+  async getNotifications(userId: number, limit: number = 50): Promise<Notification[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get(`notifications_${userId}`) || [];
+    }
+    try {
+      const result = await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.userId, userId))
+        .orderBy(desc(notifications.createdAt))
+        .limit(limit);
+      return result;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      return this.fallbackData.get(`notifications_${userId}`) || [];
+    }
+  }
+
+  async getUnreadNotifications(userId: number): Promise<Notification[]> {
+    if (!this.isDbConnected) {
+      const allNotifications = this.fallbackData.get(`notifications_${userId}`) || [];
+      return allNotifications.filter((n: Notification) => !n.isRead);
+    }
+    try {
+      const result = await db
+        .select()
+        .from(notifications)
+        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)))
+        .orderBy(desc(notifications.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Error fetching unread notifications:", error);
+      return [];
+    }
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    if (!this.isDbConnected) {
+      const newNotification = {
+        ...notification,
+        id: randomUUID(),
+        createdAt: new Date(),
+      } as Notification;
+      const existing = this.fallbackData.get(`notifications_${notification.userId}`) || [];
+      this.fallbackData.set(`notifications_${notification.userId}`, [newNotification, ...existing]);
+      return newNotification;
+    }
+    try {
+      const result = await db.insert(notifications).values(notification).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      throw error;
+    }
+  }
+
+  async markNotificationAsRead(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const [key, notifications] of this.fallbackData.entries()) {
+        if (key.startsWith('notifications_')) {
+          const notificationList = notifications as Notification[];
+          const notification = notificationList.find(n => n.id === id);
+          if (notification) {
+            notification.isRead = true;
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    try {
+      const result = await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(eq(notifications.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      return false;
+    }
+  }
+
+  async markAllNotificationsAsRead(userId: number): Promise<boolean> {
+    if (!this.isDbConnected) {
+      const userNotifications = this.fallbackData.get(`notifications_${userId}`) || [];
+      userNotifications.forEach((n: Notification) => n.isRead = true);
+      return true;
+    }
+    try {
+      await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+      return true;
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      return false;
+    }
+  }
+
+  async deleteNotification(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const [key, notifications] of this.fallbackData.entries()) {
+        if (key.startsWith('notifications_')) {
+          const notificationList = notifications as Notification[];
+          const index = notificationList.findIndex(n => n.id === id);
+          if (index !== -1) {
+            notificationList.splice(index, 1);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    try {
+      const result = await db.delete(notifications).where(eq(notifications.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      return false;
+    }
+  }
+
+  async getNotificationCount(userId: number, unreadOnly: boolean = false): Promise<number> {
+    if (!this.isDbConnected) {
+      const userNotifications = this.fallbackData.get(`notifications_${userId}`) || [];
+      return unreadOnly 
+        ? userNotifications.filter((n: Notification) => !n.isRead).length
+        : userNotifications.length;
+    }
+    try {
+      const whereCondition = unreadOnly
+        ? and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+        : eq(notifications.userId, userId);
+      
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(notifications)
+        .where(whereCondition);
+      
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error("Error getting notification count:", error);
+      return 0;
     }
   }
 }
