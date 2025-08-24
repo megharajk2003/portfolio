@@ -765,7 +765,7 @@ export default function GoalDetails() {
                                                     >
                                                       {subtopic.status === 'pending' ? 'Start' : 
                                                        subtopic.status === 'start' ? 'Complete' : 
-                                                       'Pending'}
+                                                       'Reset'}
                                                     </Button>
                                                   </div>
                                                 </div>
