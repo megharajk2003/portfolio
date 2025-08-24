@@ -2417,7 +2417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update topic status
+  // Update topic status (deprecated - status now at subtopic level)
   app.put("/api/topics/:id/status", async (req, res) => {
     try {
       if (!req.user?.id) {
@@ -2448,6 +2448,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedTopic);
     } catch (error) {
       console.error("Error updating topic status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Subtopic management routes
+  app.put("/api/subtopics/:id/status", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const subtopicId = req.params.id;
+      const { status, notes } = req.body;
+
+      // Validate status
+      const validStatuses = ['pending', 'in_progress', 'completed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          message: "Invalid status. Must be pending, in_progress, or completed" 
+        });
+      }
+
+      const updatedSubtopic = await storage.updateSubtopicStatus(
+        subtopicId, 
+        status as "pending" | "in_progress" | "completed",
+        notes
+      );
+
+      if (!updatedSubtopic) {
+        return res.status(404).json({ message: "Subtopic not found" });
+      }
+
+      res.json(updatedSubtopic);
+    } catch (error) {
+      console.error("Error updating subtopic status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/topics/:id/subtopics", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const topicId = req.params.id;
+      const subtopics = await storage.getTopicSubtopics(topicId);
+      res.json(subtopics);
+    } catch (error) {
+      console.error("Error fetching subtopics:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/topics/:id/subtopics", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const topicId = req.params.id;
+      const subtopicData = {
+        ...req.body,
+        topicId
+      };
+
+      const newSubtopic = await storage.createGoalSubtopic(subtopicData);
+      res.status(201).json(newSubtopic);
+    } catch (error) {
+      console.error("Error creating subtopic:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/subtopics/:id", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const subtopicId = req.params.id;
+      const deleted = await storage.deleteSubtopic(subtopicId);
+      res.json({ success: deleted });
+    } catch (error) {
+      console.error("Error deleting subtopic:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

@@ -1256,9 +1256,29 @@ export const goalTopics = pgTable("goal_topics", {
     .notNull()
     .references(() => goalCategories.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  totalSubtopics: integer("total_subtopics").default(0),
+  completedSubtopics: integer("completed_subtopics").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const goalSubtopics = pgTable("goal_subtopics", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  topicId: varchar("topic_id")
+    .notNull()
+    .references(() => goalTopics.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
   status: varchar("status", { length: 20 })
     .$type<"pending" | "in_progress" | "completed">()
     .default("pending")
+    .notNull(),
+  priority: varchar("priority", { length: 10 })
+    .$type<"low" | "medium" | "high">()
+    .default("medium")
     .notNull(),
   notes: text("notes"),
   dueDate: timestamp("due_date"),
@@ -1283,6 +1303,12 @@ export const insertGoalTopicSchema = createInsertSchema(goalTopics).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertGoalSubtopicSchema = createInsertSchema(goalSubtopics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
   completedAt: true,
 });
 
@@ -1292,3 +1318,5 @@ export type InsertGoalCategory = z.infer<typeof insertGoalCategorySchema>;
 export type GoalCategory = typeof goalCategories.$inferSelect;
 export type InsertGoalTopic = z.infer<typeof insertGoalTopicSchema>;
 export type GoalTopic = typeof goalTopics.$inferSelect;
+export type InsertGoalSubtopic = z.infer<typeof insertGoalSubtopicSchema>;
+export type GoalSubtopic = typeof goalSubtopics.$inferSelect;

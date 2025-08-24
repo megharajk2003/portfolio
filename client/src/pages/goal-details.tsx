@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,29 +6,50 @@ import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { 
-  ArrowLeft,
   Target,
-  TrendingUp,
-  CheckCircle,
-  Circle,
+  CheckCircle2,
   Clock,
-  ChevronDown,
+  AlertCircle,
+  Plus,
+  Trash2,
+  Edit,
   ChevronRight,
+  BookOpen,
+  Flag,
   Calendar,
+  ArrowLeft,
+  TrendingUp,
   FileText
 } from "lucide-react";
+import Sidebar from "@/components/sidebar";
 import { Link } from "wouter";
 
-interface GoalTopic {
+interface GoalSubtopic {
   id: string;
-  categoryId: string;
+  topicId: string;
   name: string;
+  description?: string;
   status: "pending" | "in_progress" | "completed";
+  priority: "low" | "medium" | "high";
   notes?: string;
   dueDate?: string;
   completedAt?: string;
@@ -36,12 +57,26 @@ interface GoalTopic {
   updatedAt: string;
 }
 
+interface GoalTopic {
+  id: string;
+  categoryId: string;
+  name: string;
+  description?: string;
+  totalSubtopics: number;
+  completedSubtopics: number;
+  createdAt: string;
+  updatedAt: string;
+  subtopics: GoalSubtopic[];
+}
+
 interface GoalCategory {
   id: string;
   goalId: string;
   name: string;
+  description?: string;
   totalTopics: number;
   completedTopics: number;
+  createdAt: string;
   topics: GoalTopic[];
 }
 
@@ -57,97 +92,162 @@ interface Goal {
   categories: GoalCategory[];
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    case 'in_progress':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+  }
+};
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'high':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    case 'medium':
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+    case 'low':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+  }
+};
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+    case 'in_progress':
+      return <Clock className="h-4 w-4 text-yellow-600" />;
+    default:
+      return <AlertCircle className="h-4 w-4 text-gray-400" />;
+  }
+};
+
 export default function GoalDetails() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, params] = useRoute("/goal-tracker/:id");
   const goalId = params?.id;
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
-  // Fetch specific goal with categories and topics
-  const { data: goal, isLoading } = useQuery<Goal>({
-    queryKey: ["/api/goals", goalId],
-    enabled: !!goalId && !!user
+  const [newSubtopicData, setNewSubtopicData] = useState({
+    name: "",
+    description: "",
+    priority: "medium" as "low" | "medium" | "high",
+    dueDate: ""
   });
 
-  // Topic status update mutation
-  const updateTopicStatusMutation = useMutation({
-    mutationFn: async (data: { topicId: string; status: string; notes?: string }) => {
-      const response = await fetch(`/api/topics/${data.topicId}/status`, {
+  // Fetch goal with categories, topics, and subtopics
+  const { data: goal, isLoading } = useQuery<Goal>({
+    queryKey: [`/api/goals/${goalId}`],
+    enabled: !!user && !!goalId
+  });
+
+  // Update subtopic status mutation
+  const updateSubtopicStatusMutation = useMutation({
+    mutationFn: async ({ subtopicId, status, notes }: { 
+      subtopicId: string; 
+      status: "pending" | "in_progress" | "completed"; 
+      notes?: string;
+    }) => {
+      const response = await fetch(`/api/subtopics/${subtopicId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ status: data.status, notes: data.notes })
+        body: JSON.stringify({ status, notes })
       });
+      
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to update topic");
+        throw new Error(error.message || "Failed to update subtopic status");
       }
+      
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/goals", goalId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       toast({
-        title: "Status updated",
-        description: "Topic status has been updated successfully"
+        title: "Success!",
+        description: "Subtopic status updated successfully"
       });
+      queryClient.invalidateQueries({ queryKey: [`/api/goals/${goalId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
     },
     onError: (error: any) => {
       toast({
         title: "Update failed",
-        description: error.message || "Failed to update topic status",
+        description: error.message || "Failed to update subtopic status",
         variant: "destructive"
       });
     }
   });
 
-  const handleTopicStatusChange = (topicId: string, newStatus: string, notes?: string) => {
-    updateTopicStatusMutation.mutate({
-      topicId,
-      status: newStatus,
-      notes
-    });
-  };
-
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
+  // Create subtopic mutation
+  const createSubtopicMutation = useMutation({
+    mutationFn: async ({ topicId, subtopicData }: { 
+      topicId: string; 
+      subtopicData: typeof newSubtopicData;
+    }) => {
+      const response = await fetch(`/api/topics/${topicId}/subtopics`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(subtopicData)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create subtopic");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Subtopic created successfully"
+      });
+      setNewSubtopicData({ name: "", description: "", priority: "medium", dueDate: "" });
+      queryClient.invalidateQueries({ queryKey: [`/api/goals/${goalId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Creation failed",
+        description: error.message || "Failed to create subtopic",
+        variant: "destructive"
+      });
     }
-    setExpandedCategories(newExpanded);
-  };
+  });
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in_progress':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      default:
-        return <Circle className="h-4 w-4 text-gray-400" />;
-    }
-  };
+  const handleStatusChange = useCallback((subtopicId: string, status: "pending" | "in_progress" | "completed") => {
+    updateSubtopicStatusMutation.mutate({ subtopicId, status });
+  }, [updateSubtopicStatusMutation]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+  const handleCreateSubtopic = useCallback((topicId: string) => {
+    if (!newSubtopicData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Subtopic name is required",
+        variant: "destructive"
+      });
+      return;
     }
-  };
+    
+    createSubtopicMutation.mutate({ topicId, subtopicData: newSubtopicData });
+  }, [newSubtopicData, createSubtopicMutation, toast]);
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6" data-testid="loading-goal-details">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="text-gray-600 mt-2">Loading goal details...</p>
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="text-gray-600 mt-2">Loading goal details...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -155,230 +255,448 @@ export default function GoalDetails() {
 
   if (!goal) {
     return (
-      <div className="container mx-auto p-6" data-testid="goal-not-found">
-        <div className="text-center py-8">
-          <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Goal not found
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            The goal you're looking for doesn't exist or you don't have access to it.
-          </p>
-          <Link href="/goal-tracker">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Goal Tracker
-            </Button>
-          </Link>
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <Card>
+              <CardContent className="text-center py-12">
+                <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Goal not found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  The goal you're looking for doesn't exist or you don't have access to it.
+                </p>
+                <Link href="/goal-tracker">
+                  <Button>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Goals
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
   }
 
+  const overallProgress = goal.totalTopics > 0 ? (goal.completedTopics / goal.totalTopics) * 100 : 0;
+
   return (
-    <div className="container mx-auto p-6 space-y-6" data-testid="goal-details-page">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/goal-tracker">
-          <Button variant="outline" size="sm" data-testid="button-back">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Goals
-          </Button>
-        </Link>
-        
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <Target className="h-6 w-6 text-blue-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100" data-testid="goal-title">
-              {goal.name}
-            </h1>
+    <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto p-6 space-y-6" data-testid="goal-details-page">
+          {/* Goal Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Link href="/goal-tracker">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-blue-600 hover:text-blue-700"
+                    data-testid="button-back"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Back to Goals
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex items-center gap-3">
+                <Target className="h-8 w-8 text-blue-500" />
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100" data-testid="goal-title">
+                    {goal.name}
+                  </h1>
+                  {goal.description && (
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                      {goal.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-right">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Overall Progress
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {Math.round(overallProgress)}%
+                </div>
+                <div className="w-32">
+                  <Progress value={overallProgress} className="h-3" data-testid="overall-progress" />
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {goal.completedTopics} of {goal.totalTopics} completed
+              </div>
+            </div>
           </div>
-          {goal.description && (
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {goal.description}
-            </p>
-          )}
-        </div>
-      </div>
 
-      {/* Goal Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card data-testid="goal-progress-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-500" />
-              Overall Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">
-                  {Math.round((goal.completedTopics / goal.totalTopics) * 100)}%
-                </span>
-                <span className="text-sm text-gray-600">
-                  {goal.completedTopics} / {goal.totalTopics}
-                </span>
-              </div>
-              <Progress 
-                value={(goal.completedTopics / goal.totalTopics) * 100} 
-                className="h-3"
-                data-testid="overall-progress"
-              />
-              <p className="text-sm text-gray-600">
-                {goal.completedTopics} topics completed
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          <Separator />
 
-        <Card data-testid="goal-categories-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-500" />
-              Categories
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">
-                  {goal.categories.length}
-                </span>
-                <span className="text-sm text-gray-600">Total</span>
-              </div>
-              <p className="text-sm text-gray-600">
-                Organized into {goal.categories.length} categories
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Goal Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card data-testid="goal-progress-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  Progress Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold">
+                      {Math.round(overallProgress)}%
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {goal.completedTopics} / {goal.totalTopics}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={overallProgress} 
+                    className="h-3"
+                  />
+                  <p className="text-sm text-gray-600">
+                    {goal.completedTopics} topics completed
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card data-testid="goal-dates-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-purple-500" />
-              Timeline
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs text-gray-500">Created</p>
-                <p className="text-sm font-medium">
-                  {new Date(goal.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Last Updated</p>
-                <p className="text-sm font-medium">
-                  {new Date(goal.updatedAt).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card data-testid="goal-categories-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  Categories
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold">
+                      {goal.categories.length}
+                    </span>
+                    <span className="text-sm text-gray-600">Total</span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Organized into {goal.categories.length} categories
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Categories and Topics */}
-      <Card data-testid="categories-topics-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-500" />
-            Categories & Topics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+            <Card data-testid="goal-dates-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-purple-500" />
+                  Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Created</p>
+                    <p className="text-sm font-medium">
+                      {new Date(goal.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Last Updated</p>
+                    <p className="text-sm font-medium">
+                      {new Date(goal.updatedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Categories with Topics and Subtopics */}
           <div className="space-y-4">
-            {goal.categories.map((category) => (
-              <div key={category.id} className="border rounded-lg">
-                <Collapsible
-                  open={expandedCategories.has(category.id)}
-                  onOpenChange={() => toggleCategory(category.id)}
-                >
-                  <CollapsibleTrigger asChild>
-                    <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-lg">
-                      <div className="flex items-center gap-3">
-                        {expandedCategories.has(category.id) ? 
-                          <ChevronDown className="h-4 w-4" /> : 
-                          <ChevronRight className="h-4 w-4" />
-                        }
-                        <h5 className="font-medium text-lg">{category.name}</h5>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-gray-600">
-                          {category.completedTopics} / {category.totalTopics}
-                        </span>
-                        <div className="w-24">
-                          <Progress 
-                            value={(category.completedTopics / category.totalTopics) * 100} 
-                            className="h-2"
-                          />
-                        </div>
-                        <Badge className={getStatusColor(
-                          category.completedTopics === category.totalTopics ? 'completed' : 
-                          category.completedTopics > 0 ? 'in_progress' : 'pending'
-                        )}>
-                          {Math.round((category.completedTopics / category.totalTopics) * 100)}%
-                        </Badge>
-                      </div>
-                    </div>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent>
-                    <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
-                      <div className="space-y-3 pt-4">
-                        {category.topics.map((topic) => (
-                          <div key={topic.id} className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <Checkbox
-                              checked={topic.status === 'completed'}
-                              onCheckedChange={(checked) => {
-                                handleTopicStatusChange(
-                                  topic.id,
-                                  checked ? 'completed' : 'pending'
-                                );
-                              }}
-                              data-testid={`checkbox-topic-${topic.id}`}
-                            />
-                            
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                {getStatusIcon(topic.status)}
-                                <span className={`font-medium ${
-                                  topic.status === 'completed' ? 'line-through text-gray-500' : ''
-                                }`}>
-                                  {topic.name}
-                                </span>
+            {goal.categories.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No categories yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    This goal doesn't have any categories or topics yet.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Accordion type="multiple" className="space-y-4" data-testid="categories-accordion">
+                {goal.categories.map((category) => {
+                  const categoryProgress = category.totalTopics > 0 
+                    ? (category.completedTopics / category.totalTopics) * 100 
+                    : 0;
+
+                  return (
+                    <AccordionItem key={category.id} value={category.id} className="border-0">
+                      <Card className="shadow-sm hover:shadow-md transition-shadow">
+                        <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                          <div className="flex items-center justify-between w-full mr-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                                <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                               </div>
-                              
-                              {topic.notes && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {topic.notes}
-                                </p>
-                              )}
-                              
-                              <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                                <span>Created: {new Date(topic.createdAt).toLocaleDateString()}</span>
-                                {topic.completedAt && (
-                                  <span>Completed: {new Date(topic.completedAt).toLocaleDateString()}</span>
+                              <div className="text-left">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                  {category.name}
+                                </h3>
+                                {category.description && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {category.description}
+                                  </p>
                                 )}
                               </div>
                             </div>
                             
-                            <Badge className={getStatusColor(topic.status)}>
-                              {topic.status.replace('_', ' ')}
-                            </Badge>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  {Math.round(categoryProgress)}% Complete
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {category.completedTopics} of {category.totalTopics} topics
+                                </div>
+                              </div>
+                              <div className="w-24">
+                                <Progress value={categoryProgress} className="h-2" />
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            ))}
+                        </AccordionTrigger>
+                        
+                        <AccordionContent className="px-6 pb-6">
+                          <div className="space-y-4">
+                            {category.topics.length === 0 ? (
+                              <div className="text-center py-8 text-gray-500">
+                                No topics in this category yet
+                              </div>
+                            ) : (
+                              category.topics.map((topic) => {
+                                const topicProgress = topic.totalSubtopics > 0 
+                                  ? (topic.completedSubtopics / topic.totalSubtopics) * 100 
+                                  : 0;
+
+                                return (
+                                  <Card key={topic.id} className="border border-gray-200 dark:border-gray-700">
+                                    <CardHeader className="pb-3">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                          <ChevronRight className="h-5 w-5 text-gray-400" />
+                                          <div>
+                                            <CardTitle className="text-base text-gray-900 dark:text-gray-100">
+                                              {topic.name}
+                                            </CardTitle>
+                                            {topic.description && (
+                                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                {topic.description}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-3">
+                                          <div className="text-right">
+                                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                              {Math.round(topicProgress)}%
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                              {topic.completedSubtopics} / {topic.totalSubtopics}
+                                            </div>
+                                          </div>
+                                          <div className="w-20">
+                                            <Progress value={topicProgress} className="h-2" />
+                                          </div>
+                                          
+                                          <Dialog>
+                                            <DialogTrigger asChild>
+                                              <Button size="sm" variant="outline" data-testid={`button-add-subtopic-${topic.id}`}>
+                                                <Plus className="h-4 w-4 mr-1" />
+                                                Add Subtopic
+                                              </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                              <DialogHeader>
+                                                <DialogTitle>Add New Subtopic</DialogTitle>
+                                              </DialogHeader>
+                                              <div className="space-y-4">
+                                                <div>
+                                                  <label className="text-sm font-medium">Name</label>
+                                                  <Input
+                                                    value={newSubtopicData.name}
+                                                    onChange={(e) => setNewSubtopicData(prev => ({
+                                                      ...prev,
+                                                      name: e.target.value
+                                                    }))}
+                                                    placeholder="Enter subtopic name"
+                                                    data-testid="input-subtopic-name"
+                                                  />
+                                                </div>
+                                                <div>
+                                                  <label className="text-sm font-medium">Description</label>
+                                                  <Textarea
+                                                    value={newSubtopicData.description}
+                                                    onChange={(e) => setNewSubtopicData(prev => ({
+                                                      ...prev,
+                                                      description: e.target.value
+                                                    }))}
+                                                    placeholder="Optional description"
+                                                    data-testid="input-subtopic-description"
+                                                  />
+                                                </div>
+                                                <div>
+                                                  <label className="text-sm font-medium">Priority</label>
+                                                  <select
+                                                    value={newSubtopicData.priority}
+                                                    onChange={(e) => setNewSubtopicData(prev => ({
+                                                      ...prev,
+                                                      priority: e.target.value as "low" | "medium" | "high"
+                                                    }))}
+                                                    className="w-full p-2 border rounded-md"
+                                                    data-testid="select-subtopic-priority"
+                                                  >
+                                                    <option value="low">Low</option>
+                                                    <option value="medium">Medium</option>
+                                                    <option value="high">High</option>
+                                                  </select>
+                                                </div>
+                                                <div>
+                                                  <label className="text-sm font-medium">Due Date</label>
+                                                  <Input
+                                                    type="date"
+                                                    value={newSubtopicData.dueDate}
+                                                    onChange={(e) => setNewSubtopicData(prev => ({
+                                                      ...prev,
+                                                      dueDate: e.target.value
+                                                    }))}
+                                                    data-testid="input-subtopic-due-date"
+                                                  />
+                                                </div>
+                                                <Button
+                                                  onClick={() => handleCreateSubtopic(topic.id)}
+                                                  disabled={createSubtopicMutation.isPending}
+                                                  className="w-full"
+                                                  data-testid="button-create-subtopic"
+                                                >
+                                                  {createSubtopicMutation.isPending ? "Creating..." : "Create Subtopic"}
+                                                </Button>
+                                              </div>
+                                            </DialogContent>
+                                          </Dialog>
+                                        </div>
+                                      </div>
+                                    </CardHeader>
+                                    
+                                    <CardContent>
+                                      {topic.subtopics.length === 0 ? (
+                                        <div className="text-center py-6 text-gray-500">
+                                          No subtopics yet. Click "Add Subtopic" to get started.
+                                        </div>
+                                      ) : (
+                                        <div className="space-y-3">
+                                          {topic.subtopics.map((subtopic) => (
+                                            <div
+                                              key={subtopic.id}
+                                              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                              data-testid={`subtopic-${subtopic.id}`}
+                                            >
+                                              <div className="flex items-center gap-3">
+                                                {getStatusIcon(subtopic.status)}
+                                                <div className="flex-1">
+                                                  <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                                      {subtopic.name}
+                                                    </span>
+                                                    <Badge className={getPriorityColor(subtopic.priority)}>
+                                                      <Flag className="h-3 w-3 mr-1" />
+                                                      {subtopic.priority}
+                                                    </Badge>
+                                                  </div>
+                                                  {subtopic.description && (
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                      {subtopic.description}
+                                                    </p>
+                                                  )}
+                                                  {subtopic.dueDate && (
+                                                    <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                                                      <Calendar className="h-3 w-3" />
+                                                      Due: {new Date(subtopic.dueDate).toLocaleDateString()}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              
+                                              <div className="flex items-center gap-2">
+                                                <Badge className={getStatusColor(subtopic.status)}>
+                                                  {subtopic.status.replace('_', ' ')}
+                                                </Badge>
+                                                
+                                                <div className="flex gap-1">
+                                                  {subtopic.status !== 'pending' && (
+                                                    <Button
+                                                      size="sm"
+                                                      variant="outline"
+                                                      onClick={() => handleStatusChange(subtopic.id, 'pending')}
+                                                      disabled={updateSubtopicStatusMutation.isPending}
+                                                      data-testid={`button-reset-${subtopic.id}`}
+                                                    >
+                                                      Reset
+                                                    </Button>
+                                                  )}
+                                                  {subtopic.status !== 'in_progress' && (
+                                                    <Button
+                                                      size="sm"
+                                                      variant="outline"
+                                                      onClick={() => handleStatusChange(subtopic.id, 'in_progress')}
+                                                      disabled={updateSubtopicStatusMutation.isPending}
+                                                      data-testid={`button-start-${subtopic.id}`}
+                                                    >
+                                                      Start
+                                                    </Button>
+                                                  )}
+                                                  {subtopic.status !== 'completed' && (
+                                                    <Button
+                                                      size="sm"
+                                                      onClick={() => handleStatusChange(subtopic.id, 'completed')}
+                                                      disabled={updateSubtopicStatusMutation.isPending}
+                                                      data-testid={`button-complete-${subtopic.id}`}
+                                                    >
+                                                      Complete
+                                                    </Button>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </CardContent>
+                                  </Card>
+                                );
+                              })
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </Card>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
