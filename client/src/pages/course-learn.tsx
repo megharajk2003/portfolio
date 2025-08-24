@@ -218,7 +218,15 @@ export default function CourseLearn() {
     }
   };
 
-  // Lesson completion mutation
+  // Check if current lesson is the last lesson of the last module
+  const isLastLessonOfCourse = () => {
+    const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+    const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
+    const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
+    return isLastLessonInModule && isLastModuleInCourse;
+  };
+
+  // Regular lesson completion mutation (does not complete course)
   const completeLessonMutation = useMutation({
     mutationFn: async (lessonIndex: number) => {
       return apiRequest(`/api/lesson-progress/complete`, "POST", {
@@ -245,25 +253,19 @@ export default function CourseLearn() {
         queryKey: ["/api/user-stats", user?.id],
       });
       
-      // Check if this was the last lesson in the module
+      // Only show lesson/module completion messages, not course completion
       const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
       const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
       const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
       
-      if (isLastLessonInModule && isLastModuleInCourse) {
-        // Course completed
-        toast({
-          title: "🎉 Course Completed!",
-          description: "Congratulations! You've completed the entire course and earned +5 XP!",
-        });
-      } else if (isLastLessonInModule) {
-        // Module completed
+      if (isLastLessonInModule && !isLastModuleInCourse) {
+        // Module completed (but not course)
         toast({
           title: "Module Completed!",
           description: "Congratulations! You've completed this module and unlocked the next one.",
         });
-      } else {
-        // Lesson completed
+      } else if (!isLastLessonInModule) {
+        // Regular lesson completed
         toast({
           title: "Lesson Completed!",
           description: "Great job! You've unlocked the next lesson.",
@@ -274,6 +276,51 @@ export default function CourseLearn() {
       toast({
         title: "Error",
         description: "Failed to mark lesson as complete. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Course completion mutation (for the final lesson)
+  const finishCourseMutation = useMutation({
+    mutationFn: async (lessonIndex: number) => {
+      // First complete the lesson
+      await apiRequest(`/api/lesson-progress/complete`, "POST", {
+        userId: user?.id,
+        moduleId: selectedModuleId,
+        lessonIndex,
+      });
+      // Then check course completion status to trigger badges and XP
+      return apiRequest(`/api/course-completion/${user?.id}/${courseId}`);
+    },
+    onSuccess: (data) => {
+      // Invalidate all related queries to ensure fresh data
+      queryClient.invalidateQueries({
+        queryKey: ["/api/lesson-progress", user?.id, selectedModuleId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/lesson-progress"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/all-modules-data", user?.id, courseId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/user-progress", user?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/user-stats", user?.id],
+      });
+      
+      // Show course completion celebration
+      toast({
+        title: "🎉 Congratulations!",
+        description: "You've successfully completed the entire course! You've earned +5 XP and unlocked achievement badges!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to finish course. Please try again.",
         variant: "destructive",
       });
     },
@@ -513,19 +560,35 @@ export default function CourseLearn() {
                   {/* Lesson Completion */}
                   {!isLessonCompleted(currentLessonIndex) && (
                     <div className="flex justify-center pt-6 border-t">
-                      <Button
-                        onClick={() =>
-                          completeLessonMutation.mutate(currentLessonIndex)
-                        }
-                        disabled={completeLessonMutation.isPending}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        data-testid="button-complete-lesson"
-                      >
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        {completeLessonMutation.isPending
-                          ? "Marking Complete..."
-                          : "Mark as Complete"}
-                      </Button>
+                      {isLastLessonOfCourse() ? (
+                        <Button
+                          onClick={() =>
+                            finishCourseMutation.mutate(currentLessonIndex)
+                          }
+                          disabled={finishCourseMutation.isPending}
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+                          data-testid="button-finish-course"
+                        >
+                          <CheckCircle className="mr-2 h-5 w-5" />
+                          {finishCourseMutation.isPending
+                            ? "Finishing Course..."
+                            : "🎉 Finish Course"}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() =>
+                            completeLessonMutation.mutate(currentLessonIndex)
+                          }
+                          disabled={completeLessonMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          data-testid="button-complete-lesson"
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          {completeLessonMutation.isPending
+                            ? "Marking Complete..."
+                            : "Mark as Complete"}
+                        </Button>
+                      )}
                     </div>
                   )}
 
