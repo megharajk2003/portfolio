@@ -38,6 +38,9 @@ import {
   Link,
   CircleCheckBig,
   Menu,
+  History,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import ProfileCompletionNotification from "@/components/profile-completion-notification";
 import ActivityCalendar from "@/components/activity-calendar";
@@ -54,6 +57,7 @@ export default function Home() {
   const { user } = useAuth();
   const { handleLogout } = useLogout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showCheckInHistory, setShowCheckInHistory] = useState(false);
 
   const userId = user?.id?.toString() ?? "1"; // Fallback for demo
   console.log("Dashboard - userId:", userId);
@@ -83,6 +87,21 @@ export default function Home() {
   });
 
   const hasCheckedInToday = todayActivity && todayActivity.length > 0;
+
+  // Fetch check-in history for the past 30 days
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+  
+  const { data: checkInHistory } = useQuery({
+    queryKey: ["/api/daily-activity", userId, "history"],
+    queryFn: async () => {
+      const response = await fetch(`/api/daily-activity/${userId}?startDate=${startDate}&endDate=${today}`);
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    },
+  });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -122,6 +141,7 @@ export default function Home() {
       queryClient.invalidateQueries({ queryKey: ["/api/user-stats", userId] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId, today] });
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-activity", userId, "history"] });
     },
     onError: (error: Error) => {
       toast({
@@ -224,6 +244,33 @@ export default function Home() {
                 <CircleCheckBig className="h-4 w-4" />
               </Button>
 
+              {/* Check-in History Button */}
+              <Button
+                onClick={() => setShowCheckInHistory(!showCheckInHistory)}
+                variant="outline"
+                size="sm"
+                className="hidden sm:flex"
+              >
+                <History className="mr-2 h-4 w-4" />
+                History
+                {showCheckInHistory ? (
+                  <ChevronUp className="ml-1 h-3 w-3" />
+                ) : (
+                  <ChevronDown className="ml-1 h-3 w-3" />
+                )}
+              </Button>
+
+              {/* Mobile History Button */}
+              <Button
+                onClick={() => setShowCheckInHistory(!showCheckInHistory)}
+                variant="ghost"
+                size="icon"
+                className="sm:hidden"
+                title="Check-in History"
+              >
+                <History className="h-4 w-4" />
+              </Button>
+
               {/* Notifications */}
               <div className="relative">
                 <Button
@@ -240,6 +287,64 @@ export default function Home() {
             </div>
           </div>
         </header>
+
+        {/* Check-in History Panel */}
+        {showCheckInHistory && (
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Check-in History
+                </h3>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  Last 30 days
+                </span>
+              </div>
+              
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {checkInHistory && checkInHistory.length > 0 ? (
+                  checkInHistory.map((activity: any) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {new Date(activity.date).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                            +{activity.xpEarned} XP
+                          </div>
+                          {activity.lessonsCompleted > 0 && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {activity.lessonsCompleted} lessons
+                            </div>
+                          )}
+                        </div>
+                        <CircleCheckBig className="h-5 w-5 text-green-500" />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No check-in history yet</p>
+                    <p className="text-sm">Start your daily check-in streak today!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
           {/* Profile Completion Notification */}
