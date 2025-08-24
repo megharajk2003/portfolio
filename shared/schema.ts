@@ -1273,7 +1273,7 @@ export const goalSubtopics = pgTable("goal_subtopics", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   status: varchar("status", { length: 20 })
-    .$type<"pending" | "in_progress" | "completed">()
+    .$type<"pending" | "start" | "completed">()
     .default("pending")
     .notNull(),
   priority: varchar("priority", { length: 10 })

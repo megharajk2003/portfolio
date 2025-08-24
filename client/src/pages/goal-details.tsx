@@ -59,7 +59,7 @@ interface GoalSubtopic {
   topicId: string;
   name: string;
   description?: string;
-  status: "pending" | "in_progress" | "completed";
+  status: "pending" | "start" | "completed";
   priority: "low" | "medium" | "high";
   notes?: string;
   dueDate?: string;
@@ -107,7 +107,7 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'completed':
       return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    case 'in_progress':
+    case 'start':
       return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
@@ -131,7 +131,7 @@ const getStatusIcon = (status: string) => {
   switch (status) {
     case 'completed':
       return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    case 'in_progress':
+    case 'start':
       return <Clock className="h-4 w-4 text-yellow-600" />;
     default:
       return <AlertCircle className="h-4 w-4 text-gray-400" />;
@@ -192,7 +192,7 @@ export default function GoalDetails() {
   const updateSubtopicStatusMutation = useMutation({
     mutationFn: async ({ subtopicId, status, notes }: { 
       subtopicId: string; 
-      status: "pending" | "in_progress" | "completed"; 
+      status: "pending" | "start" | "completed"; 
       notes?: string;
     }) => {
       const response = await fetch(`/api/subtopics/${subtopicId}/status`, {
@@ -263,8 +263,23 @@ export default function GoalDetails() {
     }
   });
 
-  const handleStatusChange = useCallback((subtopicId: string, status: "pending" | "in_progress" | "completed") => {
-    updateSubtopicStatusMutation.mutate({ subtopicId, status });
+  const handleStatusChange = useCallback((subtopicId: string, currentStatus: "pending" | "start" | "completed") => {
+    // Cycle through the 3 states: pending -> start -> completed -> pending
+    let nextStatus: "pending" | "start" | "completed";
+    switch (currentStatus) {
+      case 'pending':
+        nextStatus = 'start';
+        break;
+      case 'start':
+        nextStatus = 'completed';
+        break;
+      case 'completed':
+        nextStatus = 'pending';
+        break;
+      default:
+        nextStatus = 'pending';
+    }
+    updateSubtopicStatusMutation.mutate({ subtopicId, status: nextStatus });
   }, [updateSubtopicStatusMutation]);
 
   const handleCreateSubtopic = useCallback((topicId: string) => {
@@ -727,40 +742,19 @@ export default function GoalDetails() {
                                                   {subtopic.status.replace('_', ' ')}
                                                 </Badge>
                                                 
-                                                <div className="flex gap-1">
-                                                  {subtopic.status !== 'pending' && (
-                                                    <Button
-                                                      size="sm"
-                                                      variant="outline"
-                                                      onClick={() => handleStatusChange(subtopic.id, 'pending')}
-                                                      disabled={updateSubtopicStatusMutation.isPending}
-                                                      data-testid={`button-reset-${subtopic.id}`}
-                                                    >
-                                                      Reset
-                                                    </Button>
-                                                  )}
-                                                  {subtopic.status !== 'in_progress' && (
-                                                    <Button
-                                                      size="sm"
-                                                      variant="outline"
-                                                      onClick={() => handleStatusChange(subtopic.id, 'in_progress')}
-                                                      disabled={updateSubtopicStatusMutation.isPending}
-                                                      data-testid={`button-start-${subtopic.id}`}
-                                                    >
-                                                      Start
-                                                    </Button>
-                                                  )}
-                                                  {subtopic.status !== 'completed' && (
-                                                    <Button
-                                                      size="sm"
-                                                      onClick={() => handleStatusChange(subtopic.id, 'completed')}
-                                                      disabled={updateSubtopicStatusMutation.isPending}
-                                                      data-testid={`button-complete-${subtopic.id}`}
-                                                    >
-                                                      Complete
-                                                    </Button>
-                                                  )}
-                                                </div>
+                                                <Button
+                                                  size="sm"
+                                                  variant={subtopic.status === 'completed' ? 'default' : 'outline'}
+                                                  onClick={() => handleStatusChange(subtopic.id, subtopic.status)}
+                                                  disabled={updateSubtopicStatusMutation.isPending}
+                                                  data-testid={`button-toggle-status-${subtopic.id}`}
+                                                  className={subtopic.status === 'completed' ? 'bg-green-600 hover:bg-green-700' : 
+                                                           subtopic.status === 'start' ? 'border-yellow-500 text-yellow-700 hover:bg-yellow-50' : ''}
+                                                >
+                                                  {subtopic.status === 'pending' ? 'Start' : 
+                                                   subtopic.status === 'start' ? 'Complete' : 
+                                                   'Pending'}
+                                                </Button>
                                               </div>
                                             </div>
                                           ))}

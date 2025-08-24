@@ -3413,7 +3413,7 @@ export class PgStorage implements IStorage {
     return await db.select().from(goalSubtopics).where(eq(goalSubtopics.topicId, topicId));
   }
 
-  async updateSubtopicStatus(subtopicId: string, status: "pending" | "in_progress" | "completed", notes?: string): Promise<GoalSubtopic | undefined> {
+  async updateSubtopicStatus(subtopicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalSubtopic | undefined> {
     const updateData = {
       status,
       notes,
