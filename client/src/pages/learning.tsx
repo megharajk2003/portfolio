@@ -40,8 +40,9 @@ import {
   Award,
   ExternalLink,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
-const CURRENT_USER_ID = 1; // Changed to number to match database schema
+// Changed to number to match database schema
 
 const categoryIcons = {
   "AI & Machine Learning": { icon: Cpu, color: "text-purple-600" },
@@ -77,7 +78,9 @@ export default function Learning() {
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
-
+  const { user } = useAuth();
+  const CURRENT_USER_ID = user?.id || "";
+  console.log("Current User ID:", CURRENT_USER_ID); // Debugging line
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -481,33 +484,53 @@ export default function Learning() {
                       <div className="w-10 h-10 bg-purple-500 rounded-full mx-auto mb-2 flex items-center justify-center">
                         <Zap className="h-5 w-5 text-white" />
                       </div>
-                      <h4 className="font-semibold text-purple-800 text-sm">AI Pioneer</h4>
-                      <p className="text-xs text-purple-600">Complete AI course</p>
-                      <Badge className="mt-2 bg-purple-500 text-white text-xs">+100 XP</Badge>
+                      <h4 className="font-semibold text-purple-800 text-sm">
+                        AI Pioneer
+                      </h4>
+                      <p className="text-xs text-purple-600">
+                        Complete AI course
+                      </p>
+                      <Badge className="mt-2 bg-purple-500 text-white text-xs">
+                        +100 XP
+                      </Badge>
                     </div>
                     <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-lg text-center border border-blue-300 shadow-md hover:scale-105 transition-all duration-200">
                       <div className="w-10 h-10 bg-blue-500 rounded-full mx-auto mb-2 flex items-center justify-center">
                         <Trophy className="h-5 w-5 text-white" />
                       </div>
-                      <h4 className="font-semibold text-blue-800 text-sm">Data Scientist</h4>
-                      <p className="text-xs text-blue-600">Master Data Science</p>
-                      <Badge className="mt-2 bg-blue-500 text-white text-xs">+150 XP</Badge>
+                      <h4 className="font-semibold text-blue-800 text-sm">
+                        Data Scientist
+                      </h4>
+                      <p className="text-xs text-blue-600">
+                        Master Data Science
+                      </p>
+                      <Badge className="mt-2 bg-blue-500 text-white text-xs">
+                        +150 XP
+                      </Badge>
                     </div>
                     <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-4 rounded-lg text-center border border-yellow-300 shadow-md hover:scale-105 transition-all duration-200">
                       <div className="w-10 h-10 bg-yellow-500 rounded-full mx-auto mb-2 flex items-center justify-center">
                         <Star className="h-5 w-5 text-white" />
                       </div>
-                      <h4 className="font-semibold text-yellow-800 text-sm">Perfect Score</h4>
+                      <h4 className="font-semibold text-yellow-800 text-sm">
+                        Perfect Score
+                      </h4>
                       <p className="text-xs text-yellow-600">100% on exam</p>
-                      <Badge className="mt-2 bg-yellow-500 text-white text-xs">+100 XP</Badge>
+                      <Badge className="mt-2 bg-yellow-500 text-white text-xs">
+                        +100 XP
+                      </Badge>
                     </div>
                     <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 p-4 rounded-lg text-center border border-emerald-300 shadow-md hover:scale-105 transition-all duration-200">
                       <div className="w-10 h-10 bg-emerald-500 rounded-full mx-auto mb-2 flex items-center justify-center">
                         <Calendar className="h-5 w-5 text-white" />
                       </div>
-                      <h4 className="font-semibold text-emerald-800 text-sm">Streak Master</h4>
+                      <h4 className="font-semibold text-emerald-800 text-sm">
+                        Streak Master
+                      </h4>
                       <p className="text-xs text-emerald-600">7-day streak</p>
-                      <Badge className="mt-2 bg-emerald-500 text-white text-xs">+50 XP</Badge>
+                      <Badge className="mt-2 bg-emerald-500 text-white text-xs">
+                        +50 XP
+                      </Badge>
                     </div>
                   </div>
                 </CardContent>

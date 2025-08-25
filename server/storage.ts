@@ -93,6 +93,7 @@ import {
   goalSubtopics,
   notifications,
 } from "@shared/schema";
+import { getTableColumns } from "drizzle-orm";
 import { db } from "./db";
 import { eq, and, gte, lte, sql, desc, ne, or, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -201,41 +202,64 @@ export interface IStorage {
   // AI Career Features
   getCareerAdvisories(userId: number): Promise<CareerAdvisory[]>;
   createCareerAdvisory(data: InsertCareerAdvisory): Promise<CareerAdvisory>;
-  
+
   getCareerTimelines(userId: number): Promise<CareerTimeline[]>;
   createCareerTimeline(data: InsertCareerTimeline): Promise<CareerTimeline>;
   deleteCareerTimeline(id: string): Promise<boolean>;
-  
+
   getGeneratedResumes(userId: number): Promise<GeneratedResume[]>;
   createGeneratedResume(data: InsertGeneratedResume): Promise<GeneratedResume>;
-  updateGeneratedResume(id: string, data: Partial<InsertGeneratedResume>): Promise<GeneratedResume | undefined>;
+  updateGeneratedResume(
+    id: string,
+    data: Partial<InsertGeneratedResume>
+  ): Promise<GeneratedResume | undefined>;
   deleteGeneratedResume(id: string): Promise<boolean>;
-  
+
   getChatSessions(userId: number): Promise<ChatSession[]>;
   getChatSession(id: string): Promise<ChatSession | undefined>;
   createChatSession(data: InsertChatSession): Promise<ChatSession>;
-  updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession | undefined>;
+  updateChatSession(
+    id: string,
+    data: Partial<InsertChatSession>
+  ): Promise<ChatSession | undefined>;
 
   // Forum methods
-  getForumPosts(): Promise<(ForumPost & { user: User; repliesCount: number })[]>;
+  getForumPosts(): Promise<
+    (ForumPost & { user: User; repliesCount: number })[]
+  >;
   getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined>;
   createForumPost(data: InsertForumPost): Promise<ForumPost>;
-  updateForumPost(id: string, data: Partial<InsertForumPost>): Promise<ForumPost | undefined>;
+  updateForumPost(
+    id: string,
+    data: Partial<InsertForumPost>
+  ): Promise<ForumPost | undefined>;
   deleteForumPost(id: string): Promise<boolean>;
-  
+
   getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
   createForumReply(data: InsertForumReply): Promise<ForumReply>;
-  updateForumReply(id: string, data: Partial<InsertForumReply>): Promise<ForumReply | undefined>;
+  updateForumReply(
+    id: string,
+    data: Partial<InsertForumReply>
+  ): Promise<ForumReply | undefined>;
   deleteForumReply(id: string): Promise<boolean>;
-  
-  toggleForumLike(data: InsertForumLike): Promise<{ liked: boolean; likesCount: number }>;
-  getForumLike(userId: number, postId?: string, replyId?: string): Promise<ForumLike | undefined>;
+
+  toggleForumLike(
+    data: InsertForumLike
+  ): Promise<{ liked: boolean; likesCount: number }>;
+  getForumLike(
+    userId: number,
+    postId?: string,
+    replyId?: string
+  ): Promise<ForumLike | undefined>;
 
   // New learning platform methods
   getCourses(): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
-  updateCourse(id: string, course: Partial<InsertCourse>): Promise<Course | undefined>;
+  updateCourse(
+    id: string,
+    course: Partial<InsertCourse>
+  ): Promise<Course | undefined>;
   deleteCourse(id: string): Promise<boolean>;
 
   getCategories(): Promise<Category[]>;
@@ -257,26 +281,47 @@ export interface IStorage {
   getUserEnrollments(userId: number): Promise<Enrollment[]>;
   getCourseEnrollments(courseId: string): Promise<Enrollment[]>;
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
-  updateEnrollment(id: string, enrollment: Partial<InsertEnrollment>): Promise<Enrollment | undefined>;
+  updateEnrollment(
+    id: string,
+    enrollment: Partial<InsertEnrollment>
+  ): Promise<Enrollment | undefined>;
 
   getCourseReviews(courseId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
 
   // Lesson Progress methods
-  getLessonProgress(userId: number, moduleId: string): Promise<LessonProgress[]>;
-  getLessonProgressByIndex(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress | undefined>;
+  getLessonProgress(
+    userId: number,
+    moduleId: string
+  ): Promise<LessonProgress[]>;
+  getLessonProgressByIndex(
+    userId: number,
+    moduleId: string,
+    lessonIndex: number
+  ): Promise<LessonProgress | undefined>;
   createLessonProgress(progress: InsertLessonProgress): Promise<LessonProgress>;
-  completeLessonProgress(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress>;
+  completeLessonProgress(
+    userId: number,
+    moduleId: string,
+    lessonIndex: number
+  ): Promise<LessonProgress>;
 
   // Badge system methods
   getBadges(): Promise<Badge[]>;
   createBadge(badge: InsertBadge): Promise<Badge>;
   getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]>;
   awardBadge(userBadge: InsertUserBadge): Promise<UserBadge>;
-  checkAndAwardBadges(userId: number, type: string, relatedId?: string): Promise<UserBadge[]>;
-  
+  checkAndAwardBadges(
+    userId: number,
+    type: string,
+    relatedId?: string
+  ): Promise<UserBadge[]>;
+
   // Course completion checking
-  checkCourseCompletion(userId: number, courseId: string): Promise<{
+  checkCourseCompletion(
+    userId: number,
+    courseId: string
+  ): Promise<{
     isCompleted: boolean;
     completedAt?: Date;
     totalLessons: number;
@@ -287,15 +332,39 @@ export interface IStorage {
   createGoal(goalData: InsertGoal): Promise<Goal>;
   getUserGoals(userId: number): Promise<Goal[]>;
   getGoal(id: string): Promise<Goal | undefined>;
-  updateGoal(id: string, goalData: Partial<InsertGoal>): Promise<Goal | undefined>;
+  updateGoal(
+    id: string,
+    goalData: Partial<InsertGoal>
+  ): Promise<Goal | undefined>;
   deleteGoal(id: string): Promise<boolean>;
-  createGoalFromCSV(userId: number, goalName: string, csvData: any[]): Promise<Goal>;
-  getGoalWithCategories(goalId: string): Promise<Goal & { categories: (GoalCategory & { topics: (GoalTopic & { subtopics: GoalSubtopic[] })[] })[] } | undefined>;
-  updateTopicStatus(topicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalTopic | undefined>;
+  createGoalFromCSV(
+    userId: number,
+    goalName: string,
+    csvData: any[]
+  ): Promise<Goal>;
+  getGoalWithCategories(
+    goalId: string
+  ): Promise<
+    | (Goal & {
+        categories: (GoalCategory & {
+          topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+        })[];
+      })
+    | undefined
+  >;
+  updateTopicStatus(
+    topicId: string,
+    status: "pending" | "start" | "completed",
+    notes?: string
+  ): Promise<GoalTopic | undefined>;
   // Subtopic methods
   createGoalSubtopic(subtopicData: InsertGoalSubtopic): Promise<GoalSubtopic>;
   getTopicSubtopics(topicId: string): Promise<GoalSubtopic[]>;
-  updateSubtopicStatus(subtopicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalSubtopic | undefined>;
+  updateSubtopicStatus(
+    subtopicId: string,
+    status: "pending" | "start" | "completed",
+    notes?: string
+  ): Promise<GoalSubtopic | undefined>;
   deleteSubtopic(subtopicId: string): Promise<boolean>;
 
   // Notifications methods
@@ -362,7 +431,7 @@ export class PgStorage implements IStorage {
         rarity: "epic",
         createdAt: new Date(),
       },
-      
+
       // Milestone Badges
       {
         id: "badge-fast-learner",
@@ -400,7 +469,7 @@ export class PgStorage implements IStorage {
         rarity: "epic",
         createdAt: new Date(),
       },
-      
+
       // Achievement Badges
       {
         id: "badge-perfect-score",
@@ -437,10 +506,10 @@ export class PgStorage implements IStorage {
         xpReward: 25,
         rarity: "common",
         createdAt: new Date(),
-      }
+      },
     ];
 
-    this.fallbackData.set('badges', badgeData);
+    this.fallbackData.set("badges", badgeData);
     console.log(`✅ Seeded ${badgeData.length} badges in fallback storage`);
   }
 
@@ -672,10 +741,13 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       const key = `dailyActivity_${userId}`;
       const activities = this.fallbackData.get(key) || [];
-      // Filter by date range  
-      return activities.filter((activity: any) => 
-        activity.date >= startDate && activity.date <= endDate
-      ).sort((a: any, b: any) => a.date.localeCompare(b.date));
+      // Filter by date range
+      return activities
+        .filter(
+          (activity: any) =>
+            activity.date >= startDate && activity.date <= endDate
+        )
+        .sort((a: any, b: any) => a.date.localeCompare(b.date));
     }
     try {
       return await db
@@ -805,9 +877,15 @@ export class PgStorage implements IStorage {
     const { userId, ...updateData } = data;
 
     try {
-      console.log(`💼 STORAGE updateWorkExperience - Received data for ID ${id}:`, data);
-      console.log(`💼 STORAGE updateWorkExperience - UpdateData after removing userId:`, updateData);
-      
+      console.log(
+        `💼 STORAGE updateWorkExperience - Received data for ID ${id}:`,
+        data
+      );
+      console.log(
+        `💼 STORAGE updateWorkExperience - UpdateData after removing userId:`,
+        updateData
+      );
+
       const [updatedExperience] = await db
         .update(workExperience)
         .set({ ...updateData, updatedAt: new Date() })
@@ -891,22 +969,25 @@ export class PgStorage implements IStorage {
         .select()
         .from(education)
         .where(eq(education.userId, parseInt(userId)));
-      
+
       console.log(
         `Retrieved ${educationRecords.length} education records from dedicated table`
       );
-      
+
       // If no records in dedicated table, try to get from profile's otherDetails
       if (educationRecords.length === 0) {
         const profile = await this.getProfile(userId);
-        if (profile?.otherDetails?.education && Array.isArray(profile.otherDetails.education)) {
+        if (
+          profile?.otherDetails?.education &&
+          Array.isArray(profile.otherDetails.education)
+        ) {
           console.log(
             `Retrieved ${profile.otherDetails.education.length} education records from profile JSONB`
           );
           return profile.otherDetails.education;
         }
       }
-      
+
       return educationRecords;
     } catch (error) {
       console.log("Database error, using fallback storage for getEducation");
@@ -1712,14 +1793,14 @@ export class PgStorage implements IStorage {
   // New learning platform implementations
   async getCourses(): Promise<Course[]> {
     if (!this.isDbConnected) {
-      return this.fallbackData.get('courses') || [];
+      return this.fallbackData.get("courses") || [];
     }
     return await db.select().from(courses);
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
     if (!this.isDbConnected) {
-      const allCourses = this.fallbackData.get('courses') || [];
+      const allCourses = this.fallbackData.get("courses") || [];
       return allCourses.find((c: any) => c.id === id);
     }
     const result = await db.select().from(courses).where(eq(courses.id, id));
@@ -1729,37 +1810,44 @@ export class PgStorage implements IStorage {
   async createCourse(courseData: InsertCourse): Promise<Course> {
     if (!this.isDbConnected) {
       const course = { ...courseData, id: randomUUID() };
-      const allCourses = this.fallbackData.get('courses') || [];
+      const allCourses = this.fallbackData.get("courses") || [];
       allCourses.push(course);
-      this.fallbackData.set('courses', allCourses);
+      this.fallbackData.set("courses", allCourses);
       return course as Course;
     }
     const [course] = await db.insert(courses).values(courseData).returning();
     return course;
   }
 
-  async updateCourse(id: string, courseData: Partial<InsertCourse>): Promise<Course | undefined> {
+  async updateCourse(
+    id: string,
+    courseData: Partial<InsertCourse>
+  ): Promise<Course | undefined> {
     if (!this.isDbConnected) {
-      const allCourses = this.fallbackData.get('courses') || [];
+      const allCourses = this.fallbackData.get("courses") || [];
       const index = allCourses.findIndex((c: any) => c.id === id);
       if (index !== -1) {
         allCourses[index] = { ...allCourses[index], ...courseData };
-        this.fallbackData.set('courses', allCourses);
+        this.fallbackData.set("courses", allCourses);
         return allCourses[index];
       }
       return undefined;
     }
-    const [course] = await db.update(courses).set(courseData).where(eq(courses.id, id)).returning();
+    const [course] = await db
+      .update(courses)
+      .set(courseData)
+      .where(eq(courses.id, id))
+      .returning();
     return course;
   }
 
   async deleteCourse(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
-      const allCourses = this.fallbackData.get('courses') || [];
+      const allCourses = this.fallbackData.get("courses") || [];
       const index = allCourses.findIndex((c: any) => c.id === id);
       if (index !== -1) {
         allCourses.splice(index, 1);
-        this.fallbackData.set('courses', allCourses);
+        this.fallbackData.set("courses", allCourses);
         return true;
       }
       return false;
@@ -1770,71 +1858,91 @@ export class PgStorage implements IStorage {
 
   async getCategories(): Promise<Category[]> {
     if (!this.isDbConnected) {
-      return this.fallbackData.get('categories') || [];
+      return this.fallbackData.get("categories") || [];
     }
     return await db.select().from(categories);
   }
 
   async getCategory(id: number): Promise<Category | undefined> {
     if (!this.isDbConnected) {
-      const allCategories = this.fallbackData.get('categories') || [];
+      const allCategories = this.fallbackData.get("categories") || [];
       return allCategories.find((c: any) => c.id === id);
     }
-    const result = await db.select().from(categories).where(eq(categories.id, id));
+    const result = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, id));
     return result[0];
   }
 
   async createCategory(categoryData: InsertCategory): Promise<Category> {
     if (!this.isDbConnected) {
-      const category = { ...categoryData, id: Math.floor(Math.random() * 10000) };
-      const allCategories = this.fallbackData.get('categories') || [];
+      const category = {
+        ...categoryData,
+        id: Math.floor(Math.random() * 10000),
+      };
+      const allCategories = this.fallbackData.get("categories") || [];
       allCategories.push(category);
-      this.fallbackData.set('categories', allCategories);
+      this.fallbackData.set("categories", allCategories);
       return category as Category;
     }
-    const [category] = await db.insert(categories).values(categoryData).returning();
+    const [category] = await db
+      .insert(categories)
+      .values(categoryData)
+      .returning();
     return category;
   }
 
   async getInstructors(): Promise<Instructor[]> {
     if (!this.isDbConnected) {
-      return this.fallbackData.get('instructors') || [];
+      return this.fallbackData.get("instructors") || [];
     }
     return await db.select().from(instructors);
   }
 
   async getInstructor(id: string): Promise<Instructor | undefined> {
     if (!this.isDbConnected) {
-      const allInstructors = this.fallbackData.get('instructors') || [];
+      const allInstructors = this.fallbackData.get("instructors") || [];
       return allInstructors.find((i: any) => i.id === id);
     }
-    const result = await db.select().from(instructors).where(eq(instructors.id, id));
+    const result = await db
+      .select()
+      .from(instructors)
+      .where(eq(instructors.id, id));
     return result[0];
   }
 
-  async createInstructor(instructorData: InsertInstructor): Promise<Instructor> {
+  async createInstructor(
+    instructorData: InsertInstructor
+  ): Promise<Instructor> {
     if (!this.isDbConnected) {
       const instructor = { ...instructorData, id: randomUUID() };
-      const allInstructors = this.fallbackData.get('instructors') || [];
+      const allInstructors = this.fallbackData.get("instructors") || [];
       allInstructors.push(instructor);
-      this.fallbackData.set('instructors', allInstructors);
+      this.fallbackData.set("instructors", allInstructors);
       return instructor as Instructor;
     }
-    const [instructor] = await db.insert(instructors).values(instructorData).returning();
+    const [instructor] = await db
+      .insert(instructors)
+      .values(instructorData)
+      .returning();
     return instructor;
   }
 
   async getCourseModules(courseId: string): Promise<Module[]> {
     if (!this.isDbConnected) {
-      const allModules = this.fallbackData.get('modules') || [];
+      const allModules = this.fallbackData.get("modules") || [];
       return allModules.filter((m: any) => m.courseId === courseId);
     }
-    return await db.select().from(modules).where(eq(modules.courseId, courseId));
+    return await db
+      .select()
+      .from(modules)
+      .where(eq(modules.courseId, courseId));
   }
 
   async getModule(id: string): Promise<Module | undefined> {
     if (!this.isDbConnected) {
-      const allModules = this.fallbackData.get('modules') || [];
+      const allModules = this.fallbackData.get("modules") || [];
       return allModules.find((m: any) => m.id === id);
     }
     const result = await db.select().from(modules).where(eq(modules.id, id));
@@ -1844,9 +1952,9 @@ export class PgStorage implements IStorage {
   async createModule(moduleData: InsertModule): Promise<Module> {
     if (!this.isDbConnected) {
       const module = { ...moduleData, id: randomUUID() };
-      const allModules = this.fallbackData.get('modules') || [];
+      const allModules = this.fallbackData.get("modules") || [];
       allModules.push(module);
-      this.fallbackData.set('modules', allModules);
+      this.fallbackData.set("modules", allModules);
       return module as Module;
     }
     const [module] = await db.insert(modules).values(moduleData).returning();
@@ -1855,15 +1963,18 @@ export class PgStorage implements IStorage {
 
   async getModuleLessons(moduleId: string): Promise<Lesson[]> {
     if (!this.isDbConnected) {
-      const allLessons = this.fallbackData.get('lessons') || [];
+      const allLessons = this.fallbackData.get("lessons") || [];
       return allLessons.filter((l: any) => l.moduleId === moduleId);
     }
-    return await db.select().from(lessons).where(eq(lessons.moduleId, moduleId));
+    return await db
+      .select()
+      .from(lessons)
+      .where(eq(lessons.moduleId, moduleId));
   }
 
   async getLesson(id: string): Promise<Lesson | undefined> {
     if (!this.isDbConnected) {
-      const allLessons = this.fallbackData.get('lessons') || [];
+      const allLessons = this.fallbackData.get("lessons") || [];
       return allLessons.find((l: any) => l.id === id);
     }
     const result = await db.select().from(lessons).where(eq(lessons.id, id));
@@ -1873,72 +1984,102 @@ export class PgStorage implements IStorage {
   async createLesson(lessonData: InsertLesson): Promise<Lesson> {
     if (!this.isDbConnected) {
       const lesson = { ...lessonData, id: randomUUID() };
-      const allLessons = this.fallbackData.get('lessons') || [];
+      const allLessons = this.fallbackData.get("lessons") || [];
       allLessons.push(lesson);
-      this.fallbackData.set('lessons', allLessons);
+      this.fallbackData.set("lessons", allLessons);
       return lesson as Lesson;
     }
     const [lesson] = await db.insert(lessons).values(lessonData).returning();
     return lesson;
   }
 
-  async getUserEnrollments(userId: number): Promise<Enrollment[]> {
+  // Import the Course type if you haven't already
+
+  // 👇 Update the return type here
+  async getUserEnrollments(
+    userId: number
+  ): Promise<(Enrollment & { course: Course })[]> {
     if (!this.isDbConnected) {
-      const allEnrollments = this.fallbackData.get('enrollments') || [];
-      return allEnrollments.filter((e: any) => e.userId === userId);
+      // ... your fallback logic
+      // Note: You may need to adjust the fallback logic to also return this nested shape
     }
-    return await db.select().from(enrollments).where(eq(enrollments.userId, userId));
+    return await db
+      .select({
+        ...getTableColumns(enrollments),
+        course: courses,
+      })
+      .from(enrollments)
+      .innerJoin(courses, eq(enrollments.courseId, courses.id))
+      .where(eq(enrollments.userId, userId));
   }
 
   async getCourseEnrollments(courseId: string): Promise<Enrollment[]> {
     if (!this.isDbConnected) {
-      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      const allEnrollments = this.fallbackData.get("enrollments") || [];
       return allEnrollments.filter((e: any) => e.courseId === courseId);
     }
-    return await db.select().from(enrollments).where(eq(enrollments.courseId, courseId));
+    return await db
+      .select()
+      .from(enrollments)
+      .where(eq(enrollments.courseId, courseId));
   }
 
-  async createEnrollment(enrollmentData: InsertEnrollment): Promise<Enrollment> {
+  async createEnrollment(
+    enrollmentData: InsertEnrollment
+  ): Promise<Enrollment> {
     if (!this.isDbConnected) {
       const enrollment = { ...enrollmentData, id: randomUUID() };
-      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      const allEnrollments = this.fallbackData.get("enrollments") || [];
       allEnrollments.push(enrollment);
-      this.fallbackData.set('enrollments', allEnrollments);
+      this.fallbackData.set("enrollments", allEnrollments);
       return enrollment as Enrollment;
     }
-    const [enrollment] = await db.insert(enrollments).values(enrollmentData).returning();
+    const [enrollment] = await db
+      .insert(enrollments)
+      .values(enrollmentData)
+      .returning();
     return enrollment;
   }
 
-  async updateEnrollment(id: string, enrollmentData: Partial<InsertEnrollment>): Promise<Enrollment | undefined> {
+  async updateEnrollment(
+    id: string,
+    enrollmentData: Partial<InsertEnrollment>
+  ): Promise<Enrollment | undefined> {
     if (!this.isDbConnected) {
-      const allEnrollments = this.fallbackData.get('enrollments') || [];
+      const allEnrollments = this.fallbackData.get("enrollments") || [];
       const index = allEnrollments.findIndex((e: any) => e.id === id);
       if (index !== -1) {
         allEnrollments[index] = { ...allEnrollments[index], ...enrollmentData };
-        this.fallbackData.set('enrollments', allEnrollments);
+        this.fallbackData.set("enrollments", allEnrollments);
         return allEnrollments[index];
       }
       return undefined;
     }
-    const [enrollment] = await db.update(enrollments).set(enrollmentData).where(eq(enrollments.id, id)).returning();
+    const [enrollment] = await db
+      .update(enrollments)
+      .set(enrollmentData)
+      .where(eq(enrollments.id, id))
+      .returning();
     return enrollment;
   }
 
   async getCourseReviews(courseId: string): Promise<Review[]> {
     if (!this.isDbConnected) {
-      const allReviews = this.fallbackData.get('reviews') || [];
+      const allReviews = this.fallbackData.get("reviews") || [];
       return allReviews.filter((r: any) => r.courseId === courseId);
     }
-    return await db.select().from(reviews).where(eq(reviews.courseId, courseId));
+    return await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.courseId, courseId));
   }
 
   async createReview(reviewData: InsertReview): Promise<Review> {
     if (!this.isDbConnected) {
       const review = { ...reviewData, id: randomUUID() };
-      const allReviews = this.fallbackData.get('reviews') || [];
+      const allReviews = this.fallbackData.get("reviews") || [];
       allReviews.push(review);
-      this.fallbackData.set('reviews', allReviews);
+      this.fallbackData.set("reviews", allReviews);
       return review as Review;
     }
     const [review] = await db.insert(reviews).values(reviewData).returning();
@@ -1946,7 +2087,10 @@ export class PgStorage implements IStorage {
   }
 
   // Lesson Progress implementations
-  async getLessonProgress(userId: number, moduleId: string): Promise<LessonProgress[]> {
+  async getLessonProgress(
+    userId: number,
+    moduleId: string
+  ): Promise<LessonProgress[]> {
     if (!this.isDbConnected) {
       const key = `lessonProgress_${userId}_${moduleId}`;
       return this.fallbackData.get(key) || [];
@@ -1962,7 +2106,11 @@ export class PgStorage implements IStorage {
       );
   }
 
-  async getLessonProgressByIndex(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress | undefined> {
+  async getLessonProgressByIndex(
+    userId: number,
+    moduleId: string,
+    lessonIndex: number
+  ): Promise<LessonProgress | undefined> {
     if (!this.isDbConnected) {
       const key = `lessonProgress_${userId}_${moduleId}`;
       const progressList = this.fallbackData.get(key) || [];
@@ -1981,12 +2129,14 @@ export class PgStorage implements IStorage {
     return result[0];
   }
 
-  async createLessonProgress(progressData: InsertLessonProgress): Promise<LessonProgress> {
+  async createLessonProgress(
+    progressData: InsertLessonProgress
+  ): Promise<LessonProgress> {
     if (!this.isDbConnected) {
-      const progress = { 
-        ...progressData, 
+      const progress = {
+        ...progressData,
         id: randomUUID(),
-        completedAt: progressData.isCompleted ? new Date() : null
+        completedAt: progressData.isCompleted ? new Date() : null,
       };
       const key = `lessonProgress_${progressData.userId}_${progressData.moduleId}`;
       const progressList = this.fallbackData.get(key) || [];
@@ -2001,29 +2151,39 @@ export class PgStorage implements IStorage {
     return progress;
   }
 
-  async completeLessonProgress(userId: number, moduleId: string, lessonIndex: number): Promise<LessonProgress> {
-    const existing = await this.getLessonProgressByIndex(userId, moduleId, lessonIndex);
-    
+  async completeLessonProgress(
+    userId: number,
+    moduleId: string,
+    lessonIndex: number
+  ): Promise<LessonProgress> {
+    const existing = await this.getLessonProgressByIndex(
+      userId,
+      moduleId,
+      lessonIndex
+    );
+
     let completedProgress: LessonProgress;
-    
+
     if (existing) {
       // Update existing progress
       if (!this.isDbConnected) {
         const key = `lessonProgress_${userId}_${moduleId}`;
         const progressList = this.fallbackData.get(key) || [];
-        const updatedList = progressList.map((p: any) => 
-          p.lessonIndex === lessonIndex 
+        const updatedList = progressList.map((p: any) =>
+          p.lessonIndex === lessonIndex
             ? { ...p, isCompleted: true, completedAt: new Date() }
             : p
         );
         this.fallbackData.set(key, updatedList);
-        completedProgress = updatedList.find((p: any) => p.lessonIndex === lessonIndex);
+        completedProgress = updatedList.find(
+          (p: any) => p.lessonIndex === lessonIndex
+        );
       } else {
         const [updated] = await db
           .update(lessonProgress)
-          .set({ 
-            isCompleted: true, 
-            completedAt: new Date() 
+          .set({
+            isCompleted: true,
+            completedAt: new Date(),
           })
           .where(eq(lessonProgress.id, existing.id))
           .returning();
@@ -2040,40 +2200,48 @@ export class PgStorage implements IStorage {
         quizScore: null,
         quizAttempts: 0,
         xpEarned: 10, // Default XP for lesson completion
-        completedAt: new Date()
+        completedAt: new Date(),
       };
       completedProgress = await this.createLessonProgress(progressData);
     }
 
     // Update daily activity with real XP
-    await this.updateDailyActivityForLessonCompletion(userId, completedProgress.xpEarned || 10);
+    await this.updateDailyActivityForLessonCompletion(
+      userId,
+      completedProgress.xpEarned || 10
+    );
 
     // Check if all lessons in the module are completed
     await this.checkAndCompleteModule(userId, moduleId);
-    
+
     return completedProgress;
   }
 
   // Helper method to update daily activity when lessons are completed
-  private async updateDailyActivityForLessonCompletion(userId: number, xpEarned: number): Promise<void> {
+  private async updateDailyActivityForLessonCompletion(
+    userId: number,
+    xpEarned: number
+  ): Promise<void> {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
+      const today = new Date().toISOString().split("T")[0];
+
       if (!this.isDbConnected) {
         const key = `dailyActivity_${userId}`;
         const activities = this.fallbackData.get(key) || [];
         const existingActivity = activities.find((a: any) => a.date === today);
-        
+
         if (existingActivity) {
-          existingActivity.xpEarned = (existingActivity.xpEarned || 0) + xpEarned;
-          existingActivity.lessonsCompleted = (existingActivity.lessonsCompleted || 0) + 1;
+          existingActivity.xpEarned =
+            (existingActivity.xpEarned || 0) + xpEarned;
+          existingActivity.lessonsCompleted =
+            (existingActivity.lessonsCompleted || 0) + 1;
         } else {
           activities.push({
             userId,
             date: today,
             xpEarned,
             lessonsCompleted: 1,
-            timeSpent: 30 // Default 30 minutes per lesson
+            timeSpent: 30, // Default 30 minutes per lesson
           });
         }
         this.fallbackData.set(key, activities);
@@ -2085,23 +2253,26 @@ export class PgStorage implements IStorage {
             date: today,
             userId,
             xpEarned,
-            lessonsCompleted: 1
+            lessonsCompleted: 1,
           })
           .onConflictDoUpdate({
             target: [dailyActivity.userId, dailyActivity.date],
             set: {
               xpEarned: sql`${dailyActivity.xpEarned} + ${xpEarned}`,
-              lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`
-            }
+              lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`,
+            },
           });
       }
     } catch (error) {
-      console.error('Error updating daily activity:', error);
+      console.error("Error updating daily activity:", error);
     }
   }
 
   // Helper method to check if all lessons are completed and mark module as completed
-  private async checkAndCompleteModule(userId: number, moduleId: string): Promise<void> {
+  private async checkAndCompleteModule(
+    userId: number,
+    moduleId: string
+  ): Promise<void> {
     try {
       // Get lessons for this module from the courses/modules endpoint
       const lessons = await this.getModuleLessons(moduleId);
@@ -2111,25 +2282,37 @@ export class PgStorage implements IStorage {
 
       // Get all lesson progress for this module
       const allProgress = await this.getLessonProgress(userId, moduleId);
-      const completedLessons = allProgress.filter(p => p.isCompleted).length;
+      const completedLessons = allProgress.filter((p) => p.isCompleted).length;
 
-      console.log(`Checking module completion: ${completedLessons}/${totalLessons} lessons completed`);
+      console.log(
+        `Checking module completion: ${completedLessons}/${totalLessons} lessons completed`
+      );
 
       // If all lessons are completed, mark the module as completed
       if (completedLessons >= totalLessons) {
-        console.log(`All lessons completed, marking module ${moduleId} as completed for user ${userId}`);
-        
+        console.log(
+          `All lessons completed, marking module ${moduleId} as completed for user ${userId}`
+        );
+
         // Get or create module progress
-        let moduleProgress = await this.getUserProgressForModule(userId, moduleId);
-        
+        let moduleProgress = await this.getUserProgressForModule(
+          userId,
+          moduleId
+        );
+
         if (moduleProgress) {
           // Update existing progress to mark as completed
           if (!this.isDbConnected) {
             const key = `userProgress_${userId}`;
             const progressList = this.fallbackData.get(key) || [];
-            const updatedList = progressList.map((p: any) => 
-              p.moduleId === moduleId 
-                ? { ...p, isCompleted: true, completedAt: new Date(), currentLesson: totalLessons }
+            const updatedList = progressList.map((p: any) =>
+              p.moduleId === moduleId
+                ? {
+                    ...p,
+                    isCompleted: true,
+                    completedAt: new Date(),
+                    currentLesson: totalLessons,
+                  }
                 : p
             );
             this.fallbackData.set(key, updatedList);
@@ -2137,15 +2320,17 @@ export class PgStorage implements IStorage {
           } else {
             await db
               .update(userProgress)
-              .set({ 
-                isCompleted: true, 
+              .set({
+                isCompleted: true,
                 completedAt: new Date(),
-                currentLesson: totalLessons
+                currentLesson: totalLessons,
               })
-              .where(and(
-                eq(userProgress.userId, userId),
-                eq(userProgress.moduleId, moduleId)
-              ));
+              .where(
+                and(
+                  eq(userProgress.userId, userId),
+                  eq(userProgress.moduleId, moduleId)
+                )
+              );
             console.log(`Updated module progress in database`);
           }
         } else {
@@ -2156,7 +2341,7 @@ export class PgStorage implements IStorage {
             currentLesson: totalLessons,
             isCompleted: true,
             xpEarned: 0, // Will be set based on module data if available
-            completedAt: new Date()
+            completedAt: new Date(),
           };
           await this.createUserProgress(progressData);
           console.log(`Created new completed module progress`);
@@ -2171,7 +2356,10 @@ export class PgStorage implements IStorage {
   }
 
   // Helper method to check if all modules are completed and mark course as completed
-  private async checkAndCompleteCourse(userId: number, moduleId: string): Promise<void> {
+  private async checkAndCompleteCourse(
+    userId: number,
+    moduleId: string
+  ): Promise<void> {
     try {
       // Get the module to find the courseId
       const module = await this.getModule(moduleId);
@@ -2185,27 +2373,35 @@ export class PgStorage implements IStorage {
 
       // Check if all modules are completed
       const allUserProgress = await this.getUserProgress(userId);
-      const courseModuleProgress = allUserProgress.filter(p => 
-        allModules.some(m => m.id === p.moduleId)
+      const courseModuleProgress = allUserProgress.filter((p) =>
+        allModules.some((m) => m.id === p.moduleId)
       );
 
-      const completedModules = courseModuleProgress.filter(p => p.isCompleted).length;
+      const completedModules = courseModuleProgress.filter(
+        (p) => p.isCompleted
+      ).length;
       const totalModules = allModules.length;
 
-      console.log(`Checking course completion: ${completedModules}/${totalModules} modules completed`);
+      console.log(
+        `Checking course completion: ${completedModules}/${totalModules} modules completed`
+      );
 
       // If all modules are completed, mark course as completed and award XP
       if (completedModules >= totalModules) {
-        console.log(`All modules completed, marking course ${courseId} as completed for user ${userId}`);
+        console.log(
+          `All modules completed, marking course ${courseId} as completed for user ${userId}`
+        );
 
         // Get or create enrollment record and mark as completed
         const enrollments = await this.getUserEnrollments(userId);
-        const courseEnrollment = enrollments.find(e => e.courseId === courseId);
+        const courseEnrollment = enrollments.find(
+          (e) => e.courseId === courseId
+        );
 
         if (courseEnrollment) {
           await this.updateEnrollment(courseEnrollment.id, {
             completedAt: new Date(),
-            progress: '100'
+            progress: "100",
           });
         }
 
@@ -2214,20 +2410,25 @@ export class PgStorage implements IStorage {
         const currentStats = await this.getUserStats(userId);
         const newXp = (currentStats?.totalXp || 0) + courseCompletionXP;
         await this.updateUserStats(userId, {
-          totalXp: newXp
+          totalXp: newXp,
         });
 
-        console.log(`Awarded ${courseCompletionXP} XP for course completion to user ${userId}`);
+        console.log(
+          `Awarded ${courseCompletionXP} XP for course completion to user ${userId}`
+        );
 
         // Check and award course completion badge if available
-        await this.checkAndAwardBadges(userId, 'course_completion', courseId);
+        await this.checkAndAwardBadges(userId, "course_completion", courseId);
       }
     } catch (error) {
       console.error("Error checking course completion:", error);
     }
   }
 
-  async checkCourseCompletion(userId: number, courseId: string): Promise<{
+  async checkCourseCompletion(
+    userId: number,
+    courseId: string
+  ): Promise<{
     isCompleted: boolean;
     completedAt?: Date;
     totalLessons: number;
@@ -2236,8 +2437,8 @@ export class PgStorage implements IStorage {
     try {
       // First check if the enrollment is officially completed
       const enrollments = await this.getUserEnrollments(userId);
-      const enrollment = enrollments.find(e => e.courseId === courseId);
-      
+      const enrollment = enrollments.find((e) => e.courseId === courseId);
+
       // Get all modules for the course
       const modules = await this.getCourseModules(courseId);
       if (!modules || modules.length === 0) {
@@ -2246,31 +2447,33 @@ export class PgStorage implements IStorage {
 
       let totalLessons = 0;
       let completedLessons = 0;
-      
+
       // Check each module's lesson completion status
       for (const module of modules) {
         const lessons = await this.getModuleLessons(module.id);
         if (!lessons || lessons.length === 0) continue;
-        
+
         totalLessons += lessons.length;
-        
+
         // Get lesson progress for this module
         const lessonProgress = await this.getLessonProgress(userId, module.id);
-        completedLessons += lessonProgress.filter(p => p.isCompleted).length;
+        completedLessons += lessonProgress.filter((p) => p.isCompleted).length;
       }
 
       // A course is only completed if:
       // 1. All lessons are completed AND
       // 2. The enrollment is marked as completed (progress = '100' and completedAt exists)
-      const allLessonsCompleted = totalLessons > 0 && completedLessons >= totalLessons;
-      const enrollmentCompleted = enrollment?.completedAt != null && enrollment?.progress === '100';
+      const allLessonsCompleted =
+        totalLessons > 0 && completedLessons >= totalLessons;
+      const enrollmentCompleted =
+        enrollment?.completedAt != null && enrollment?.progress === "100";
       const isCompleted = allLessonsCompleted && enrollmentCompleted;
 
       return {
         isCompleted,
         completedAt: enrollment?.completedAt || undefined,
         totalLessons,
-        completedLessons
+        completedLessons,
       };
     } catch (error) {
       console.error("Error checking course completion status:", error);
@@ -2284,7 +2487,10 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`careerAdvisories_${userId}`) || [];
     }
     try {
-      const result = await db.select().from(careerAdvisories).where(eq(careerAdvisories.userId, userId));
+      const result = await db
+        .select()
+        .from(careerAdvisories)
+        .where(eq(careerAdvisories.userId, userId));
       return result;
     } catch (error) {
       console.error("Error fetching career advisories:", error);
@@ -2292,12 +2498,18 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async createCareerAdvisory(data: InsertCareerAdvisory): Promise<CareerAdvisory> {
+  async createCareerAdvisory(
+    data: InsertCareerAdvisory
+  ): Promise<CareerAdvisory> {
     if (!this.isDbConnected) {
       const id = randomUUID();
       const advisory = { id, ...data, createdAt: new Date() };
-      const existing = this.fallbackData.get(`careerAdvisories_${data.userId}`) || [];
-      this.fallbackData.set(`careerAdvisories_${data.userId}`, [...existing, advisory]);
+      const existing =
+        this.fallbackData.get(`careerAdvisories_${data.userId}`) || [];
+      this.fallbackData.set(`careerAdvisories_${data.userId}`, [
+        ...existing,
+        advisory,
+      ]);
       return advisory as CareerAdvisory;
     }
     try {
@@ -2314,7 +2526,10 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`careerTimelines_${userId}`) || [];
     }
     try {
-      const result = await db.select().from(careerTimelines).where(eq(careerTimelines.userId, userId));
+      const result = await db
+        .select()
+        .from(careerTimelines)
+        .where(eq(careerTimelines.userId, userId));
       return result;
     } catch (error) {
       console.error("Error fetching career timelines:", error);
@@ -2322,12 +2537,18 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async createCareerTimeline(data: InsertCareerTimeline): Promise<CareerTimeline> {
+  async createCareerTimeline(
+    data: InsertCareerTimeline
+  ): Promise<CareerTimeline> {
     if (!this.isDbConnected) {
       const id = randomUUID();
       const timeline = { id, ...data, createdAt: new Date() };
-      const existing = this.fallbackData.get(`careerTimelines_${data.userId}`) || [];
-      this.fallbackData.set(`careerTimelines_${data.userId}`, [...existing, timeline]);
+      const existing =
+        this.fallbackData.get(`careerTimelines_${data.userId}`) || [];
+      this.fallbackData.set(`careerTimelines_${data.userId}`, [
+        ...existing,
+        timeline,
+      ]);
       return timeline as CareerTimeline;
     }
     try {
@@ -2342,7 +2563,7 @@ export class PgStorage implements IStorage {
   async deleteCareerTimeline(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('careerTimelines_')) {
+        if (key.startsWith("careerTimelines_")) {
           const timelines = this.fallbackData.get(key) || [];
           const filtered = timelines.filter((t: any) => t.id !== id);
           this.fallbackData.set(key, filtered);
@@ -2364,7 +2585,10 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`generatedResumes_${userId}`) || [];
     }
     try {
-      const result = await db.select().from(generatedResumes).where(eq(generatedResumes.userId, userId));
+      const result = await db
+        .select()
+        .from(generatedResumes)
+        .where(eq(generatedResumes.userId, userId));
       return result;
     } catch (error) {
       console.error("Error fetching generated resumes:", error);
@@ -2372,12 +2596,23 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async createGeneratedResume(data: InsertGeneratedResume): Promise<GeneratedResume> {
+  async createGeneratedResume(
+    data: InsertGeneratedResume
+  ): Promise<GeneratedResume> {
     if (!this.isDbConnected) {
       const id = randomUUID();
-      const resume = { id, ...data, createdAt: new Date(), updatedAt: new Date() };
-      const existing = this.fallbackData.get(`generatedResumes_${data.userId}`) || [];
-      this.fallbackData.set(`generatedResumes_${data.userId}`, [...existing, resume]);
+      const resume = {
+        id,
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const existing =
+        this.fallbackData.get(`generatedResumes_${data.userId}`) || [];
+      this.fallbackData.set(`generatedResumes_${data.userId}`, [
+        ...existing,
+        resume,
+      ]);
       return resume as GeneratedResume;
     }
     try {
@@ -2389,14 +2624,21 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async updateGeneratedResume(id: string, data: Partial<InsertGeneratedResume>): Promise<GeneratedResume | undefined> {
+  async updateGeneratedResume(
+    id: string,
+    data: Partial<InsertGeneratedResume>
+  ): Promise<GeneratedResume | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('generatedResumes_')) {
+        if (key.startsWith("generatedResumes_")) {
           const resumes = this.fallbackData.get(key) || [];
           const index = resumes.findIndex((r: any) => r.id === id);
           if (index !== -1) {
-            resumes[index] = { ...resumes[index], ...data, updatedAt: new Date() };
+            resumes[index] = {
+              ...resumes[index],
+              ...data,
+              updatedAt: new Date(),
+            };
             this.fallbackData.set(key, resumes);
             return resumes[index];
           }
@@ -2420,7 +2662,7 @@ export class PgStorage implements IStorage {
   async deleteGeneratedResume(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('generatedResumes_')) {
+        if (key.startsWith("generatedResumes_")) {
           const resumes = this.fallbackData.get(key) || [];
           const filtered = resumes.filter((r: any) => r.id !== id);
           this.fallbackData.set(key, filtered);
@@ -2442,7 +2684,10 @@ export class PgStorage implements IStorage {
       return this.fallbackData.get(`chatSessions_${userId}`) || [];
     }
     try {
-      const result = await db.select().from(chatSessions).where(eq(chatSessions.userId, userId));
+      const result = await db
+        .select()
+        .from(chatSessions)
+        .where(eq(chatSessions.userId, userId));
       return result;
     } catch (error) {
       console.error("Error fetching chat sessions:", error);
@@ -2453,7 +2698,7 @@ export class PgStorage implements IStorage {
   async getChatSession(id: string): Promise<ChatSession | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('chatSessions_')) {
+        if (key.startsWith("chatSessions_")) {
           const sessions = this.fallbackData.get(key) || [];
           const session = sessions.find((s: any) => s.id === id);
           if (session) return session;
@@ -2462,7 +2707,10 @@ export class PgStorage implements IStorage {
       return undefined;
     }
     try {
-      const result = await db.select().from(chatSessions).where(eq(chatSessions.id, id));
+      const result = await db
+        .select()
+        .from(chatSessions)
+        .where(eq(chatSessions.id, id));
       return result[0] || undefined;
     } catch (error) {
       console.error("Error fetching chat session:", error);
@@ -2473,9 +2721,18 @@ export class PgStorage implements IStorage {
   async createChatSession(data: InsertChatSession): Promise<ChatSession> {
     if (!this.isDbConnected) {
       const id = randomUUID();
-      const session = { id, ...data, createdAt: new Date(), updatedAt: new Date() };
-      const existing = this.fallbackData.get(`chatSessions_${data.userId}`) || [];
-      this.fallbackData.set(`chatSessions_${data.userId}`, [...existing, session]);
+      const session = {
+        id,
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const existing =
+        this.fallbackData.get(`chatSessions_${data.userId}`) || [];
+      this.fallbackData.set(`chatSessions_${data.userId}`, [
+        ...existing,
+        session,
+      ]);
       return session as ChatSession;
     }
     try {
@@ -2487,14 +2744,21 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession | undefined> {
+  async updateChatSession(
+    id: string,
+    data: Partial<InsertChatSession>
+  ): Promise<ChatSession | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('chatSessions_')) {
+        if (key.startsWith("chatSessions_")) {
           const sessions = this.fallbackData.get(key) || [];
           const index = sessions.findIndex((s: any) => s.id === id);
           if (index !== -1) {
-            sessions[index] = { ...sessions[index], ...data, updatedAt: new Date() };
+            sessions[index] = {
+              ...sessions[index],
+              ...data,
+              updatedAt: new Date(),
+            };
             this.fallbackData.set(key, sessions);
             return sessions[index];
           }
@@ -2516,9 +2780,11 @@ export class PgStorage implements IStorage {
   }
 
   // Forum methods implementation
-  async getForumPosts(): Promise<(ForumPost & { user: User; repliesCount: number })[]> {
+  async getForumPosts(): Promise<
+    (ForumPost & { user: User; repliesCount: number })[]
+  > {
     if (!this.isDbConnected) {
-      return this.fallbackData.get('forumPosts') || [];
+      return this.fallbackData.get("forumPosts") || [];
     }
     try {
       const result = await db
@@ -2527,21 +2793,23 @@ export class PgStorage implements IStorage {
         .innerJoin(users, eq(forumPosts.userId, users.id))
         .where(eq(forumPosts.isActive, true))
         .orderBy(desc(forumPosts.createdAt));
-      
-      return result.map(row => ({
+
+      return result.map((row) => ({
         ...row.forum_posts,
         user: row.users,
-        repliesCount: row.forum_posts.repliesCount || 0
+        repliesCount: row.forum_posts.repliesCount || 0,
       }));
     } catch (error) {
       console.error("Error fetching forum posts:", error);
-      return this.fallbackData.get('forumPosts') || [];
+      return this.fallbackData.get("forumPosts") || [];
     }
   }
 
-  async getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined> {
+  async getForumPost(
+    id: string
+  ): Promise<(ForumPost & { user: User }) | undefined> {
     if (!this.isDbConnected) {
-      const posts = this.fallbackData.get('forumPosts') || [];
+      const posts = this.fallbackData.get("forumPosts") || [];
       return posts.find((p: any) => p.id === id);
     }
     try {
@@ -2550,11 +2818,11 @@ export class PgStorage implements IStorage {
         .from(forumPosts)
         .innerJoin(users, eq(forumPosts.userId, users.id))
         .where(and(eq(forumPosts.id, id), eq(forumPosts.isActive, true)));
-      
+
       if (result.length === 0) return undefined;
       return {
         ...result[0].forum_posts,
-        user: result[0].users
+        user: result[0].users,
       };
     } catch (error) {
       console.error("Error fetching forum post:", error);
@@ -2573,16 +2841,13 @@ export class PgStorage implements IStorage {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const posts = this.fallbackData.get('forumPosts') || [];
+      const posts = this.fallbackData.get("forumPosts") || [];
       posts.push(newPost);
-      this.fallbackData.set('forumPosts', posts);
+      this.fallbackData.set("forumPosts", posts);
       return newPost;
     }
     try {
-      const result = await db
-        .insert(forumPosts)
-        .values(data)
-        .returning();
+      const result = await db.insert(forumPosts).values(data).returning();
       return result[0];
     } catch (error) {
       console.error("Error creating forum post:", error);
@@ -2590,13 +2855,16 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async updateForumPost(id: string, data: Partial<InsertForumPost>): Promise<ForumPost | undefined> {
+  async updateForumPost(
+    id: string,
+    data: Partial<InsertForumPost>
+  ): Promise<ForumPost | undefined> {
     if (!this.isDbConnected) {
-      const posts = this.fallbackData.get('forumPosts') || [];
+      const posts = this.fallbackData.get("forumPosts") || [];
       const index = posts.findIndex((p: any) => p.id === id);
       if (index !== -1) {
         posts[index] = { ...posts[index], ...data, updatedAt: new Date() };
-        this.fallbackData.set('forumPosts', posts);
+        this.fallbackData.set("forumPosts", posts);
         return posts[index];
       }
       return undefined;
@@ -2616,11 +2884,11 @@ export class PgStorage implements IStorage {
 
   async deleteForumPost(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
-      const posts = this.fallbackData.get('forumPosts') || [];
+      const posts = this.fallbackData.get("forumPosts") || [];
       const index = posts.findIndex((p: any) => p.id === id);
       if (index !== -1) {
         posts[index] = { ...posts[index], isActive: false };
-        this.fallbackData.set('forumPosts', posts);
+        this.fallbackData.set("forumPosts", posts);
         return true;
       }
       return false;
@@ -2637,7 +2905,9 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]> {
+  async getForumReplies(
+    postId: string
+  ): Promise<(ForumReply & { user: User })[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`forumReplies_${postId}`) || [];
     }
@@ -2646,12 +2916,14 @@ export class PgStorage implements IStorage {
         .select()
         .from(forumReplies)
         .innerJoin(users, eq(forumReplies.userId, users.id))
-        .where(and(eq(forumReplies.postId, postId), eq(forumReplies.isActive, true)))
+        .where(
+          and(eq(forumReplies.postId, postId), eq(forumReplies.isActive, true))
+        )
         .orderBy(forumReplies.createdAt);
-      
-      return result.map(row => ({
+
+      return result.map((row) => ({
         ...row.forum_replies,
-        user: row.users
+        user: row.users,
       }));
     } catch (error) {
       console.error("Error fetching forum replies:", error);
@@ -2670,18 +2942,20 @@ export class PgStorage implements IStorage {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const replies = this.fallbackData.get(`forumReplies_${data.postId}`) || [];
+      const replies =
+        this.fallbackData.get(`forumReplies_${data.postId}`) || [];
       replies.push(newReply);
       this.fallbackData.set(`forumReplies_${data.postId}`, replies);
-      
+
       // Update reply count
-      const posts = this.fallbackData.get('forumPosts') || [];
+      const posts = this.fallbackData.get("forumPosts") || [];
       const postIndex = posts.findIndex((p: any) => p.id === data.postId);
       if (postIndex !== -1) {
-        posts[postIndex].repliesCount = (posts[postIndex].repliesCount || 0) + 1;
-        this.fallbackData.set('forumPosts', posts);
+        posts[postIndex].repliesCount =
+          (posts[postIndex].repliesCount || 0) + 1;
+        this.fallbackData.set("forumPosts", posts);
       }
-      
+
       return newReply;
     }
     try {
@@ -2689,19 +2963,19 @@ export class PgStorage implements IStorage {
         .insert(forumReplies)
         .values({
           ...data,
-          parentReplyId: data.parentReplyId || null
+          parentReplyId: data.parentReplyId || null,
         })
         .returning();
-      
+
       // Update reply count in the post
       await db
         .update(forumPosts)
-        .set({ 
+        .set({
           repliesCount: sql`COALESCE(${forumPosts.repliesCount}, 0) + 1`,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(forumPosts.id, data.postId));
-      
+
       return result[0];
     } catch (error) {
       console.error("Error creating forum reply:", error);
@@ -2709,14 +2983,21 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async updateForumReply(id: string, data: Partial<InsertForumReply>): Promise<ForumReply | undefined> {
+  async updateForumReply(
+    id: string,
+    data: Partial<InsertForumReply>
+  ): Promise<ForumReply | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('forumReplies_')) {
+        if (key.startsWith("forumReplies_")) {
           const replies = this.fallbackData.get(key) || [];
           const index = replies.findIndex((r: any) => r.id === id);
           if (index !== -1) {
-            replies[index] = { ...replies[index], ...data, updatedAt: new Date() };
+            replies[index] = {
+              ...replies[index],
+              ...data,
+              updatedAt: new Date(),
+            };
             this.fallbackData.set(key, replies);
             return replies[index];
           }
@@ -2740,20 +3021,25 @@ export class PgStorage implements IStorage {
   async deleteForumReply(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('forumReplies_')) {
+        if (key.startsWith("forumReplies_")) {
           const replies = this.fallbackData.get(key) || [];
           const index = replies.findIndex((r: any) => r.id === id);
           if (index !== -1) {
             const reply = replies[index];
             replies[index] = { ...reply, isActive: false };
             this.fallbackData.set(key, replies);
-            
+
             // Update reply count
-            const posts = this.fallbackData.get('forumPosts') || [];
-            const postIndex = posts.findIndex((p: any) => p.id === reply.postId);
+            const posts = this.fallbackData.get("forumPosts") || [];
+            const postIndex = posts.findIndex(
+              (p: any) => p.id === reply.postId
+            );
             if (postIndex !== -1) {
-              posts[postIndex].repliesCount = Math.max(0, (posts[postIndex].repliesCount || 0) - 1);
-              this.fallbackData.set('forumPosts', posts);
+              posts[postIndex].repliesCount = Math.max(
+                0,
+                (posts[postIndex].repliesCount || 0) - 1
+              );
+              this.fallbackData.set("forumPosts", posts);
             }
             return true;
           }
@@ -2767,20 +3053,20 @@ export class PgStorage implements IStorage {
         .from(forumReplies)
         .where(eq(forumReplies.id, id))
         .limit(1);
-      
+
       if (reply.length === 0) return false;
-      
+
       await db
         .update(forumReplies)
         .set({ isActive: false })
         .where(eq(forumReplies.id, id));
-      
+
       // Update reply count
       await db
         .update(forumPosts)
         .set({ repliesCount: sql`${forumPosts.repliesCount} - 1` })
         .where(eq(forumPosts.id, reply[0].postId));
-      
+
       return true;
     } catch (error) {
       console.error("Error deleting forum reply:", error);
@@ -2788,7 +3074,9 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async toggleForumLike(data: InsertForumLike): Promise<{ liked: boolean; likesCount: number }> {
+  async toggleForumLike(
+    data: InsertForumLike
+  ): Promise<{ liked: boolean; likesCount: number }> {
     if (!this.isDbConnected) {
       // Simplified in-memory implementation
       return { liked: true, likesCount: 1 };
@@ -2800,8 +3088,12 @@ export class PgStorage implements IStorage {
         .where(
           and(
             eq(forumLikes.userId, data.userId),
-            data.postId ? eq(forumLikes.postId, data.postId) : sql`${forumLikes.postId} IS NULL`,
-            data.replyId ? eq(forumLikes.replyId, data.replyId) : sql`${forumLikes.replyId} IS NULL`
+            data.postId
+              ? eq(forumLikes.postId, data.postId)
+              : sql`${forumLikes.postId} IS NULL`,
+            data.replyId
+              ? eq(forumLikes.replyId, data.replyId)
+              : sql`${forumLikes.replyId} IS NULL`
           )
         );
 
@@ -2810,67 +3102,65 @@ export class PgStorage implements IStorage {
         await db
           .delete(forumLikes)
           .where(eq(forumLikes.id, existingLike[0].id));
-        
+
         // Update count
         if (data.postId) {
           await db
             .update(forumPosts)
             .set({ likesCount: sql`${forumPosts.likesCount} - 1` })
             .where(eq(forumPosts.id, data.postId));
-          
+
           const updatedPost = await db
             .select({ likesCount: forumPosts.likesCount })
             .from(forumPosts)
             .where(eq(forumPosts.id, data.postId));
-          
+
           return { liked: false, likesCount: updatedPost[0]?.likesCount || 0 };
         } else if (data.replyId) {
           await db
             .update(forumReplies)
             .set({ likesCount: sql`${forumReplies.likesCount} - 1` })
             .where(eq(forumReplies.id, data.replyId));
-          
+
           const updatedReply = await db
             .select({ likesCount: forumReplies.likesCount })
             .from(forumReplies)
             .where(eq(forumReplies.id, data.replyId));
-          
+
           return { liked: false, likesCount: updatedReply[0]?.likesCount || 0 };
         }
       } else {
         // Add like
-        await db
-          .insert(forumLikes)
-          .values(data);
-        
+        await db.insert(forumLikes).values(data);
+
         // Update count
         if (data.postId) {
           await db
             .update(forumPosts)
             .set({ likesCount: sql`${forumPosts.likesCount} + 1` })
             .where(eq(forumPosts.id, data.postId));
-          
+
           const updatedPost = await db
             .select({ likesCount: forumPosts.likesCount })
             .from(forumPosts)
             .where(eq(forumPosts.id, data.postId));
-          
+
           return { liked: true, likesCount: updatedPost[0]?.likesCount || 1 };
         } else if (data.replyId) {
           await db
             .update(forumReplies)
             .set({ likesCount: sql`${forumReplies.likesCount} + 1` })
             .where(eq(forumReplies.id, data.replyId));
-          
+
           const updatedReply = await db
             .select({ likesCount: forumReplies.likesCount })
             .from(forumReplies)
             .where(eq(forumReplies.id, data.replyId));
-          
+
           return { liked: true, likesCount: updatedReply[0]?.likesCount || 1 };
         }
       }
-      
+
       return { liked: false, likesCount: 0 };
     } catch (error) {
       console.error("Error toggling forum like:", error);
@@ -2878,7 +3168,11 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getForumLike(userId: number, postId?: string, replyId?: string): Promise<ForumLike | undefined> {
+  async getForumLike(
+    userId: number,
+    postId?: string,
+    replyId?: string
+  ): Promise<ForumLike | undefined> {
     if (!this.isDbConnected) {
       return undefined;
     }
@@ -2889,11 +3183,15 @@ export class PgStorage implements IStorage {
         .where(
           and(
             eq(forumLikes.userId, userId),
-            postId ? eq(forumLikes.postId, postId) : sql`${forumLikes.postId} IS NULL`,
-            replyId ? eq(forumLikes.replyId, replyId) : sql`${forumLikes.replyId} IS NULL`
+            postId
+              ? eq(forumLikes.postId, postId)
+              : sql`${forumLikes.postId} IS NULL`,
+            replyId
+              ? eq(forumLikes.replyId, replyId)
+              : sql`${forumLikes.replyId} IS NULL`
           )
         );
-      
+
       return result[0] || undefined;
     } catch (error) {
       console.error("Error fetching forum like:", error);
@@ -2904,22 +3202,27 @@ export class PgStorage implements IStorage {
   // Badge system implementation
   async getBadges(): Promise<Badge[]> {
     if (!this.isDbConnected) {
-      return this.fallbackData.get('badges') || [];
+      return this.fallbackData.get("badges") || [];
     }
     try {
       return await db.select().from(badges);
     } catch (error) {
       console.error("Error fetching badges:", error);
-      return this.fallbackData.get('badges') || [];
+      return this.fallbackData.get("badges") || [];
     }
   }
 
   async createBadge(badge: InsertBadge): Promise<Badge> {
     if (!this.isDbConnected) {
-      const newBadge = { ...badge, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() };
-      const allBadges = this.fallbackData.get('badges') || [];
+      const newBadge = {
+        ...badge,
+        id: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const allBadges = this.fallbackData.get("badges") || [];
       allBadges.push(newBadge);
-      this.fallbackData.set('badges', allBadges);
+      this.fallbackData.set("badges", allBadges);
       return newBadge as Badge;
     }
     try {
@@ -2931,13 +3234,15 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]> {
+  async getUserBadges(
+    userId: number
+  ): Promise<(UserBadge & { badge: Badge })[]> {
     if (!this.isDbConnected) {
       const userBadges = this.fallbackData.get(`userBadges_${userId}`) || [];
-      const allBadges = this.fallbackData.get('badges') || [];
+      const allBadges = this.fallbackData.get("badges") || [];
       return userBadges.map((ub: any) => ({
         ...ub,
-        badge: allBadges.find((b: any) => b.id === ub.badgeId) || {}
+        badge: allBadges.find((b: any) => b.id === ub.badgeId) || {},
       }));
     }
     try {
@@ -2948,7 +3253,7 @@ export class PgStorage implements IStorage {
           badgeId: userBadges.badgeId,
           earnedAt: userBadges.earnedAt,
           relatedId: userBadges.relatedId,
-          badge: badges
+          badge: badges,
         })
         .from(userBadges)
         .innerJoin(badges, eq(userBadges.badgeId, badges.id))
@@ -2962,14 +3267,22 @@ export class PgStorage implements IStorage {
 
   async awardBadge(userBadge: InsertUserBadge): Promise<UserBadge> {
     if (!this.isDbConnected) {
-      const newUserBadge = { ...userBadge, id: randomUUID(), awardedAt: new Date() };
-      const allUserBadges = this.fallbackData.get(`userBadges_${userBadge.userId}`) || [];
+      const newUserBadge = {
+        ...userBadge,
+        id: randomUUID(),
+        awardedAt: new Date(),
+      };
+      const allUserBadges =
+        this.fallbackData.get(`userBadges_${userBadge.userId}`) || [];
       allUserBadges.push(newUserBadge);
       this.fallbackData.set(`userBadges_${userBadge.userId}`, allUserBadges);
       return newUserBadge as UserBadge;
     }
     try {
-      const [awarded] = await db.insert(userBadges).values(userBadge).returning();
+      const [awarded] = await db
+        .insert(userBadges)
+        .values(userBadge)
+        .returning();
       return awarded;
     } catch (error) {
       console.error("Error awarding badge:", error);
@@ -2977,35 +3290,43 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async checkAndAwardBadges(userId: number, type: string, relatedId?: string): Promise<UserBadge[]> {
+  async checkAndAwardBadges(
+    userId: number,
+    type: string,
+    relatedId?: string
+  ): Promise<UserBadge[]> {
     try {
       // Get available badges for the given type
       const availableBadges = await this.getBadges();
-      const typeBadges = availableBadges.filter(badge => badge.type === type);
-      
+      const typeBadges = availableBadges.filter((badge) => badge.type === type);
+
       if (typeBadges.length === 0) return [];
 
       // Get user's current badges to avoid duplicates
       const currentUserBadges = await this.getUserBadges(userId);
-      const currentBadgeIds = currentUserBadges.map(ub => ub.badgeId);
-      
+      const currentBadgeIds = currentUserBadges.map((ub) => ub.badgeId);
+
       const newBadges: UserBadge[] = [];
-      
+
       for (const badge of typeBadges) {
         if (currentBadgeIds.includes(badge.id)) continue; // Already has this badge
-        
+
         // Check if user meets criteria for this badge
-        const meetsRequirement = await this.checkBadgeRequirement(userId, badge, relatedId);
+        const meetsRequirement = await this.checkBadgeRequirement(
+          userId,
+          badge,
+          relatedId
+        );
         if (meetsRequirement) {
           const userBadge = await this.awardBadge({
             userId,
             badgeId: badge.id,
-            relatedId: relatedId || null
+            relatedId: relatedId || null,
           });
           newBadges.push(userBadge);
         }
       }
-      
+
       return newBadges;
     } catch (error) {
       console.error("Error checking and awarding badges:", error);
@@ -3013,22 +3334,31 @@ export class PgStorage implements IStorage {
     }
   }
 
-  private async checkBadgeRequirement(userId: number, badge: Badge, relatedId?: string): Promise<boolean> {
+  private async checkBadgeRequirement(
+    userId: number,
+    badge: Badge,
+    relatedId?: string
+  ): Promise<boolean> {
     try {
       const criteria = badge.criteria as any;
-      
+
       switch (badge.type) {
-        case 'course_completion':
+        case "course_completion":
           if (criteria?.courseType && relatedId) {
             const course = await this.getCourse(relatedId);
-            return !!(course?.title?.includes(criteria.courseType) || course?.description?.includes(criteria.courseType));
+            return !!(
+              course?.title?.includes(criteria.courseType) ||
+              course?.description?.includes(criteria.courseType)
+            );
           }
           return true; // Award badge for completing any course
-          
-        case 'milestone':
+
+        case "milestone":
           if (criteria?.coursesCompleted) {
             const userProgress = await this.getUserProgress(userId);
-            const completedCourses = userProgress.filter(p => p.isCompleted).length;
+            const completedCourses = userProgress.filter(
+              (p) => p.isCompleted
+            ).length;
             return completedCourses >= criteria.coursesCompleted;
           }
           if (criteria?.totalXp) {
@@ -3039,21 +3369,21 @@ export class PgStorage implements IStorage {
             return true; // Assume this is checked on first login
           }
           return true;
-          
-        case 'streak':
+
+        case "streak":
           if (criteria?.streakDays) {
             const userStats = await this.getUserStats(userId);
             return (userStats?.currentStreak || 0) >= criteria.streakDays;
           }
           return true;
-          
-        case 'achievement':
+
+        case "achievement":
           if (criteria?.examScore) {
             // Check for perfect scores or high achievements
             return true; // Placeholder for now
           }
           return true;
-          
+
         default:
           return false;
       }
@@ -3072,14 +3402,14 @@ export class PgStorage implements IStorage {
         createdAt: new Date(),
         updatedAt: new Date(),
         totalTopics: 0,
-        completedTopics: 0
+        completedTopics: 0,
       };
       const userGoals = this.fallbackData.get(`goals_${goalData.userId}`) || [];
       userGoals.push(newGoal);
       this.fallbackData.set(`goals_${goalData.userId}`, userGoals);
       return newGoal as Goal;
     }
-    
+
     try {
       const [goal] = await db.insert(goals).values(goalData).returning();
       return goal;
@@ -3093,22 +3423,27 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`goals_${userId}`) || [];
     }
-    
+
     try {
-      const userGoals = await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
-      
+      const userGoals = await db
+        .select()
+        .from(goals)
+        .where(eq(goals.userId, userId))
+        .orderBy(desc(goals.createdAt));
+
       // Calculate subtopic totals for each goal
       const goalsWithSubtopicTotals = await Promise.all(
         userGoals.map(async (goal) => {
-          const { totalSubtopics, completedSubtopics } = await this.calculateGoalSubtopicTotals(goal.id);
+          const { totalSubtopics, completedSubtopics } =
+            await this.calculateGoalSubtopicTotals(goal.id);
           return {
             ...goal,
             totalSubtopics,
-            completedSubtopics
+            completedSubtopics,
           };
         })
       );
-      
+
       return goalsWithSubtopicTotals;
     } catch (error) {
       console.error("Error fetching user goals:", error);
@@ -3117,21 +3452,25 @@ export class PgStorage implements IStorage {
   }
 
   // Helper method to calculate subtopic totals for a goal
-  private async calculateGoalSubtopicTotals(goalId: string): Promise<{ totalSubtopics: number; completedSubtopics: number }> {
+  private async calculateGoalSubtopicTotals(
+    goalId: string
+  ): Promise<{ totalSubtopics: number; completedSubtopics: number }> {
     try {
       const categories = await this.getGoalCategories(goalId);
       let totalSubtopics = 0;
       let completedSubtopics = 0;
-      
+
       for (const category of categories) {
         const topics = await this.getCategoryTopics(category.id);
         for (const topic of topics) {
           const subtopics = await this.getTopicSubtopics(topic.id);
           totalSubtopics += subtopics.length;
-          completedSubtopics += subtopics.filter(s => s.status === 'completed').length;
+          completedSubtopics += subtopics.filter(
+            (s) => s.status === "completed"
+          ).length;
         }
       }
-      
+
       return { totalSubtopics, completedSubtopics };
     } catch (error) {
       console.error("Error calculating subtopic totals:", error);
@@ -3142,7 +3481,7 @@ export class PgStorage implements IStorage {
   async getGoal(id: string): Promise<Goal | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('goals_')) {
+        if (key.startsWith("goals_")) {
           const goals = this.fallbackData.get(key) || [];
           const goal = goals.find((g: any) => g.id === id);
           if (goal) return goal;
@@ -3150,7 +3489,7 @@ export class PgStorage implements IStorage {
       }
       return undefined;
     }
-    
+
     try {
       const result = await db.select().from(goals).where(eq(goals.id, id));
       return result[0];
@@ -3160,14 +3499,21 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async updateGoal(id: string, goalData: Partial<InsertGoal>): Promise<Goal | undefined> {
+  async updateGoal(
+    id: string,
+    goalData: Partial<InsertGoal>
+  ): Promise<Goal | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('goals_')) {
+        if (key.startsWith("goals_")) {
           const goals = this.fallbackData.get(key) || [];
           const index = goals.findIndex((g: any) => g.id === id);
           if (index !== -1) {
-            goals[index] = { ...goals[index], ...goalData, updatedAt: new Date() };
+            goals[index] = {
+              ...goals[index],
+              ...goalData,
+              updatedAt: new Date(),
+            };
             this.fallbackData.set(key, goals);
             return goals[index];
           }
@@ -3175,7 +3521,7 @@ export class PgStorage implements IStorage {
       }
       return undefined;
     }
-    
+
     try {
       const [goal] = await db
         .update(goals)
@@ -3192,7 +3538,7 @@ export class PgStorage implements IStorage {
   async deleteGoal(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('goals_')) {
+        if (key.startsWith("goals_")) {
           const goals = this.fallbackData.get(key) || [];
           const index = goals.findIndex((g: any) => g.id === id);
           if (index !== -1) {
@@ -3207,7 +3553,7 @@ export class PgStorage implements IStorage {
       }
       return false;
     }
-    
+
     try {
       const result = await db.delete(goals).where(eq(goals.id, id));
       return result.length > 0;
@@ -3217,7 +3563,11 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async createGoalFromCSV(userId: number, goalName: string, csvData: any[]): Promise<Goal> {
+  async createGoalFromCSV(
+    userId: number,
+    goalName: string,
+    csvData: any[]
+  ): Promise<Goal> {
     try {
       // Create the main goal
       const goalData: InsertGoal = {
@@ -3226,21 +3576,23 @@ export class PgStorage implements IStorage {
         description: `Goal created from CSV with ${csvData.length} subtopics`,
         csvData,
         totalTopics: 0, // Will be calculated after processing
-        completedTopics: 0
+        completedTopics: 0,
       };
-      
+
       const goal = await this.createGoal(goalData);
-      
+
       // Process CSV data and create categories, topics, and subtopics
       const categoryMap = new Map<string, string>();
       const topicMap = new Map<string, string>();
-      
+
       for (const row of csvData) {
-        const categoryName = row.Category || row.category || 'General';
-        const topicName = row.Topics || row.Topic || row.topic || 'Untitled Topic';
-        const subtopicName = row['Sub-topics'] || row.Subtopic || row.subtopic || topicName;
-        const status = (row.Status || row.status || 'pending').toLowerCase();
-        
+        const categoryName = row.Category || row.category || "General";
+        const topicName =
+          row.Topics || row.Topic || row.topic || "Untitled Topic";
+        const subtopicName =
+          row["Sub-topics"] || row.Subtopic || row.subtopic || topicName;
+        const status = (row.Status || row.status || "pending").toLowerCase();
+
         // Create or get category
         let categoryId = categoryMap.get(categoryName);
         if (!categoryId) {
@@ -3249,14 +3601,14 @@ export class PgStorage implements IStorage {
             name: categoryName,
             description: `Category for ${categoryName}`,
             totalTopics: 0,
-            completedTopics: 0
+            completedTopics: 0,
           };
-          
+
           const category = await this.createGoalCategory(categoryData);
           categoryId = category.id;
           categoryMap.set(categoryName, categoryId);
         }
-        
+
         // Create or get topic
         const topicKey = `${categoryId}-${topicName}`;
         let topicId = topicMap.get(topicKey);
@@ -3266,74 +3618,93 @@ export class PgStorage implements IStorage {
             name: topicName,
             description: `Topic for ${topicName}`,
             totalSubtopics: 0,
-            completedSubtopics: 0
+            completedSubtopics: 0,
           };
-          
+
           const topic = await this.createGoalTopic(topicData);
           topicId = topic.id;
           topicMap.set(topicKey, topicId);
         }
-        
+
         // Create subtopic with the status
-        const priority = (row.priority || row.Priority || 'medium').toLowerCase();
+        const priority = (
+          row.priority ||
+          row.Priority ||
+          "medium"
+        ).toLowerCase();
         const subtopicData: InsertGoalSubtopic = {
           topicId,
           name: subtopicName.trim(),
           description: row.description || row.Description || null,
-          status: ['pending', 'start', 'completed'].includes(status) 
-            ? status as "pending" | "start" | "completed" 
-            : 'pending',
-          priority: ['low', 'medium', 'high'].includes(priority) 
-            ? priority as "low" | "medium" | "high" 
-            : 'medium',
+          status: ["pending", "start", "completed"].includes(status)
+            ? (status as "pending" | "start" | "completed")
+            : "pending",
+          priority: ["low", "medium", "high"].includes(priority)
+            ? (priority as "low" | "medium" | "high")
+            : "medium",
           notes: row.notes || row.Notes || null,
-          dueDate: row.dueDate || row.DueDate ? new Date(row.dueDate || row.DueDate) : null
+          dueDate:
+            row.dueDate || row.DueDate
+              ? new Date(row.dueDate || row.DueDate)
+              : null,
         };
-        
+
         await this.createGoalSubtopic(subtopicData);
       }
-      
+
       // Update all counters after processing all data
       for (const [topicKey, topicId] of topicMap) {
         const subtopics = await this.getTopicSubtopics(topicId);
-        const completedSubtopics = subtopics.filter(s => s.status === 'completed').length;
-        
+        const completedSubtopics = subtopics.filter(
+          (s) => s.status === "completed"
+        ).length;
+
         if (this.isDbConnected) {
           await db
             .update(goalTopics)
-            .set({ 
+            .set({
               totalSubtopics: subtopics.length,
               completedSubtopics,
-              updatedAt: new Date()
+              updatedAt: new Date(),
             })
             .where(eq(goalTopics.id, topicId));
         }
       }
-      
+
       // Update category topic counts
       for (const [categoryName, categoryId] of categoryMap) {
         const topics = await this.getCategoryTopics(categoryId);
-        const totalSubtopics = topics.reduce((sum, topic) => sum + (topic.totalSubtopics || 0), 0);
-        const completedSubtopics = topics.reduce((sum, topic) => sum + (topic.completedSubtopics || 0), 0);
-        
+        const totalSubtopics = topics.reduce(
+          (sum, topic) => sum + (topic.totalSubtopics || 0),
+          0
+        );
+        const completedSubtopics = topics.reduce(
+          (sum, topic) => sum + (topic.completedSubtopics || 0),
+          0
+        );
+
         await this.updateGoalCategory(categoryId, {
           totalTopics: topics.length,
-          completedTopics: completedSubtopics // Total completed subtopics in category
+          completedTopics: completedSubtopics, // Total completed subtopics in category
         });
       }
-      
+
       // Update goal counts
       const allCategories = await this.getGoalCategories(goal.id);
-      const totalSubtopicsInGoal = allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0);
-      const completedSubtopicsInGoal = csvData.filter(row => 
-        (row.Status || row.status || 'pending').toLowerCase() === 'completed'
+      const totalSubtopicsInGoal = allCategories.reduce(
+        (sum, cat) => sum + (cat.completedTopics || 0),
+        0
+      );
+      const completedSubtopicsInGoal = csvData.filter(
+        (row) =>
+          (row.Status || row.status || "pending").toLowerCase() === "completed"
       ).length;
-      
-      await this.updateGoal(goal.id, { 
+
+      await this.updateGoal(goal.id, {
         totalTopics: totalSubtopicsInGoal, // Actually tracking total subtopics
-        completedTopics: completedSubtopicsInGoal 
+        completedTopics: completedSubtopicsInGoal,
       });
-      
+
       return goal;
     } catch (error) {
       console.error("Error creating goal from CSV:", error);
@@ -3341,10 +3712,19 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getGoalWithCategories(goalId: string): Promise<Goal & { categories: (GoalCategory & { topics: (GoalTopic & { subtopics: GoalSubtopic[] })[] })[] } | undefined> {
+  async getGoalWithCategories(
+    goalId: string
+  ): Promise<
+    | (Goal & {
+        categories: (GoalCategory & {
+          topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+        })[];
+      })
+    | undefined
+  > {
     const goal = await this.getGoal(goalId);
     if (!goal) return undefined;
-    
+
     const categories = await this.getGoalCategories(goalId);
     const categoriesWithTopics = await Promise.all(
       categories.map(async (category) => {
@@ -3358,20 +3738,24 @@ export class PgStorage implements IStorage {
         return { ...category, topics: topicsWithSubtopics };
       })
     );
-    
+
     return { ...goal, categories: categoriesWithTopics };
   }
 
-  async updateTopicStatus(topicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalTopic | undefined> {
+  async updateTopicStatus(
+    topicId: string,
+    status: "pending" | "start" | "completed",
+    notes?: string
+  ): Promise<GoalTopic | undefined> {
     // This method is deprecated - status is now managed at subtopic level
     // Return the topic for compatibility
     return await this.getTopic(topicId);
   }
-  
+
   private async getTopic(topicId: string): Promise<GoalTopic | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('topics_')) {
+        if (key.startsWith("topics_")) {
           const topics = this.fallbackData.get(key) || [];
           const topic = topics.find((t: any) => t.id === topicId);
           if (topic) return topic;
@@ -3379,9 +3763,12 @@ export class PgStorage implements IStorage {
       }
       return undefined;
     }
-    
+
     try {
-      const result = await db.select().from(goalTopics).where(eq(goalTopics.id, topicId));
+      const result = await db
+        .select()
+        .from(goalTopics)
+        .where(eq(goalTopics.id, topicId));
       return result[0];
     } catch (error) {
       console.error("Error fetching topic:", error);
@@ -3390,20 +3777,26 @@ export class PgStorage implements IStorage {
   }
 
   // Helper methods for goal management
-  private async createGoalCategory(categoryData: InsertGoalCategory): Promise<GoalCategory> {
+  private async createGoalCategory(
+    categoryData: InsertGoalCategory
+  ): Promise<GoalCategory> {
     if (!this.isDbConnected) {
       const newCategory = {
         ...categoryData,
         id: randomUUID(),
-        createdAt: new Date()
+        createdAt: new Date(),
       };
-      const categories = this.fallbackData.get(`categories_${categoryData.goalId}`) || [];
+      const categories =
+        this.fallbackData.get(`categories_${categoryData.goalId}`) || [];
       categories.push(newCategory);
       this.fallbackData.set(`categories_${categoryData.goalId}`, categories);
       return newCategory as GoalCategory;
     }
-    
-    const [category] = await db.insert(goalCategories).values(categoryData).returning();
+
+    const [category] = await db
+      .insert(goalCategories)
+      .values(categoryData)
+      .returning();
     return category;
   }
 
@@ -3411,39 +3804,49 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`categories_${goalId}`) || [];
     }
-    
-    return await db.select().from(goalCategories).where(eq(goalCategories.goalId, goalId)).orderBy(goalCategories.createdAt);
+
+    return await db
+      .select()
+      .from(goalCategories)
+      .where(eq(goalCategories.goalId, goalId))
+      .orderBy(goalCategories.createdAt);
   }
 
-  private async updateGoalCategory(id: string, data: Partial<InsertGoalCategory>): Promise<GoalCategory | undefined> {
+  private async updateGoalCategory(
+    id: string,
+    data: Partial<InsertGoalCategory>
+  ): Promise<GoalCategory | undefined> {
     if (!this.isDbConnected) {
       // Implementation for fallback storage
       return undefined;
     }
-    
+
     const [category] = await db
       .update(goalCategories)
       .set(data)
       .where(eq(goalCategories.id, id))
       .returning();
-    
+
     return category;
   }
 
-  private async createGoalTopic(topicData: InsertGoalTopic): Promise<GoalTopic> {
+  private async createGoalTopic(
+    topicData: InsertGoalTopic
+  ): Promise<GoalTopic> {
     if (!this.isDbConnected) {
       const newTopic = {
         ...topicData,
         id: randomUUID(),
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
-      const topics = this.fallbackData.get(`topics_${topicData.categoryId}`) || [];
+      const topics =
+        this.fallbackData.get(`topics_${topicData.categoryId}`) || [];
       topics.push(newTopic);
       this.fallbackData.set(`topics_${topicData.categoryId}`, topics);
       return newTopic as GoalTopic;
     }
-    
+
     const [topic] = await db.insert(goalTopics).values(topicData).returning();
     return topic;
   }
@@ -3452,34 +3855,50 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`topics_${categoryId}`) || [];
     }
-    
-    return await db.select().from(goalTopics).where(eq(goalTopics.categoryId, categoryId)).orderBy(goalTopics.createdAt);
+
+    return await db
+      .select()
+      .from(goalTopics)
+      .where(eq(goalTopics.categoryId, categoryId))
+      .orderBy(goalTopics.createdAt);
   }
 
   private async updateProgressCounters(categoryId: string): Promise<void> {
     try {
       const topics = await this.getCategoryTopics(categoryId);
-      const completedTopics = topics.reduce((sum, topic) => sum + (topic.completedSubtopics || 0), 0);
-      const totalTopics = topics.reduce((sum, topic) => sum + (topic.totalSubtopics || 0), 0);
-      
+      const completedTopics = topics.reduce(
+        (sum, topic) => sum + (topic.completedSubtopics || 0),
+        0
+      );
+      const totalTopics = topics.reduce(
+        (sum, topic) => sum + (topic.totalSubtopics || 0),
+        0
+      );
+
       // Update category counters
       await this.updateGoalCategory(categoryId, {
         totalTopics: topics.length,
-        completedTopics: completedTopics
+        completedTopics: completedTopics,
       });
-      
+
       // Get category to find goal ID and update goal counters
       const category = await this.getGoalCategory(categoryId);
       if (category) {
         const allCategories = await this.getGoalCategories(category.goalId);
-        const totalSubtopics = allCategories.reduce((sum, cat) => sum + (cat.totalTopics || 0), 0);
-        const completedSubtopics = allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0);
-        
+        const totalSubtopics = allCategories.reduce(
+          (sum, cat) => sum + (cat.totalTopics || 0),
+          0
+        );
+        const completedSubtopics = allCategories.reduce(
+          (sum, cat) => sum + (cat.completedTopics || 0),
+          0
+        );
+
         await this.updateGoal(category.goalId, {
           totalTopics: allCategories.length,
           completedTopics: completedSubtopics,
           totalSubtopics: totalSubtopics,
-          completedSubtopics: completedSubtopics
+          completedSubtopics: completedSubtopics,
         });
       }
     } catch (error) {
@@ -3491,31 +3910,42 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       return undefined;
     }
-    
-    const result = await db.select().from(goalCategories).where(eq(goalCategories.id, id));
+
+    const result = await db
+      .select()
+      .from(goalCategories)
+      .where(eq(goalCategories.id, id));
     return result[0];
   }
 
   // Subtopic management methods
-  async createGoalSubtopic(subtopicData: InsertGoalSubtopic): Promise<GoalSubtopic> {
+  async createGoalSubtopic(
+    subtopicData: InsertGoalSubtopic
+  ): Promise<GoalSubtopic> {
     if (!this.isDbConnected) {
       const newSubtopic = {
         ...subtopicData,
         id: randomUUID(),
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
-      const subtopics = this.fallbackData.get(`subtopics_${subtopicData.topicId}`) || [];
+      const subtopics =
+        this.fallbackData.get(`subtopics_${subtopicData.topicId}`) || [];
       subtopics.push(newSubtopic);
       this.fallbackData.set(`subtopics_${subtopicData.topicId}`, subtopics);
       return newSubtopic as GoalSubtopic;
     }
-    
-    const [subtopic] = await db.insert(goalSubtopics).values([{
-      ...subtopicData,
-      status: subtopicData.status as "pending" | "start" | "completed",
-      priority: subtopicData.priority as "low" | "medium" | "high"
-    }]).returning();
+
+    const [subtopic] = await db
+      .insert(goalSubtopics)
+      .values([
+        {
+          ...subtopicData,
+          status: subtopicData.status as "pending" | "start" | "completed",
+          priority: subtopicData.priority as "low" | "medium" | "high",
+        },
+      ])
+      .returning();
     return subtopic;
   }
 
@@ -3523,21 +3953,29 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`subtopics_${topicId}`) || [];
     }
-    
-    return await db.select().from(goalSubtopics).where(eq(goalSubtopics.topicId, topicId)).orderBy(goalSubtopics.createdAt);
+
+    return await db
+      .select()
+      .from(goalSubtopics)
+      .where(eq(goalSubtopics.topicId, topicId))
+      .orderBy(goalSubtopics.createdAt);
   }
 
-  async updateSubtopicStatus(subtopicId: string, status: "pending" | "start" | "completed", notes?: string): Promise<GoalSubtopic | undefined> {
+  async updateSubtopicStatus(
+    subtopicId: string,
+    status: "pending" | "start" | "completed",
+    notes?: string
+  ): Promise<GoalSubtopic | undefined> {
     const updateData = {
       status,
       notes,
-      ...(status === 'completed' && { completedAt: new Date() }),
-      updatedAt: new Date()
+      ...(status === "completed" && { completedAt: new Date() }),
+      updatedAt: new Date(),
     };
-    
+
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('subtopics_')) {
+        if (key.startsWith("subtopics_")) {
           const subtopics = this.fallbackData.get(key) || [];
           const index = subtopics.findIndex((s: any) => s.id === subtopicId);
           if (index !== -1) {
@@ -3549,19 +3987,19 @@ export class PgStorage implements IStorage {
       }
       return undefined;
     }
-    
+
     try {
       const [subtopic] = await db
         .update(goalSubtopics)
         .set(updateData)
         .where(eq(goalSubtopics.id, subtopicId))
         .returning();
-      
+
       if (subtopic) {
         // Update topic and category counters
         await this.updateTopicProgressCounters(subtopic.topicId);
       }
-      
+
       return subtopic;
     } catch (error) {
       console.error("Error updating subtopic status:", error);
@@ -3572,7 +4010,7 @@ export class PgStorage implements IStorage {
   async deleteSubtopic(subtopicId: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
-        if (key.startsWith('subtopics_')) {
+        if (key.startsWith("subtopics_")) {
           const subtopics = this.fallbackData.get(key) || [];
           const index = subtopics.findIndex((s: any) => s.id === subtopicId);
           if (index !== -1) {
@@ -3584,9 +4022,11 @@ export class PgStorage implements IStorage {
       }
       return false;
     }
-    
+
     try {
-      const result = await db.delete(goalSubtopics).where(eq(goalSubtopics.id, subtopicId));
+      const result = await db
+        .delete(goalSubtopics)
+        .where(eq(goalSubtopics.id, subtopicId));
       return result.length > 0;
     } catch (error) {
       console.error("Error deleting subtopic:", error);
@@ -3597,20 +4037,25 @@ export class PgStorage implements IStorage {
   private async updateTopicProgressCounters(topicId: string): Promise<void> {
     try {
       const subtopics = await this.getTopicSubtopics(topicId);
-      const completedSubtopics = subtopics.filter(s => s.status === 'completed').length;
-      
+      const completedSubtopics = subtopics.filter(
+        (s) => s.status === "completed"
+      ).length;
+
       // Update topic counters
       await db
         .update(goalTopics)
-        .set({ 
+        .set({
           totalSubtopics: subtopics.length,
           completedSubtopics,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(goalTopics.id, topicId));
-      
+
       // Get topic to find category ID and update category counters
-      const [topic] = await db.select().from(goalTopics).where(eq(goalTopics.id, topicId));
+      const [topic] = await db
+        .select()
+        .from(goalTopics)
+        .where(eq(goalTopics.id, topicId));
       if (topic) {
         await this.updateProgressCounters(topic.categoryId);
       }
@@ -3620,7 +4065,10 @@ export class PgStorage implements IStorage {
   }
 
   // Notifications implementation
-  async getNotifications(userId: number, limit: number = 50): Promise<Notification[]> {
+  async getNotifications(
+    userId: number,
+    limit: number = 50
+  ): Promise<Notification[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`notifications_${userId}`) || [];
     }
@@ -3640,14 +4088,17 @@ export class PgStorage implements IStorage {
 
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
     if (!this.isDbConnected) {
-      const allNotifications = this.fallbackData.get(`notifications_${userId}`) || [];
+      const allNotifications =
+        this.fallbackData.get(`notifications_${userId}`) || [];
       return allNotifications.filter((n: Notification) => !n.isRead);
     }
     try {
       const result = await db
         .select()
         .from(notifications)
-        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)))
+        .where(
+          and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+        )
         .orderBy(desc(notifications.createdAt));
       return result;
     } catch (error) {
@@ -3656,19 +4107,28 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async createNotification(notification: InsertNotification): Promise<Notification> {
+  async createNotification(
+    notification: InsertNotification
+  ): Promise<Notification> {
     if (!this.isDbConnected) {
       const newNotification = {
         ...notification,
         id: randomUUID(),
         createdAt: new Date(),
       } as Notification;
-      const existing = this.fallbackData.get(`notifications_${notification.userId}`) || [];
-      this.fallbackData.set(`notifications_${notification.userId}`, [newNotification, ...existing]);
+      const existing =
+        this.fallbackData.get(`notifications_${notification.userId}`) || [];
+      this.fallbackData.set(`notifications_${notification.userId}`, [
+        newNotification,
+        ...existing,
+      ]);
       return newNotification;
     }
     try {
-      const result = await db.insert(notifications).values(notification).returning();
+      const result = await db
+        .insert(notifications)
+        .values(notification)
+        .returning();
       return result[0];
     } catch (error) {
       console.error("Error creating notification:", error);
@@ -3679,9 +4139,9 @@ export class PgStorage implements IStorage {
   async markNotificationAsRead(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const [key, notifications] of this.fallbackData.entries()) {
-        if (key.startsWith('notifications_')) {
+        if (key.startsWith("notifications_")) {
           const notificationList = notifications as Notification[];
-          const notification = notificationList.find(n => n.id === id);
+          const notification = notificationList.find((n) => n.id === id);
           if (notification) {
             notification.isRead = true;
             return true;
@@ -3704,15 +4164,18 @@ export class PgStorage implements IStorage {
 
   async markAllNotificationsAsRead(userId: number): Promise<boolean> {
     if (!this.isDbConnected) {
-      const userNotifications = this.fallbackData.get(`notifications_${userId}`) || [];
-      userNotifications.forEach((n: Notification) => n.isRead = true);
+      const userNotifications =
+        this.fallbackData.get(`notifications_${userId}`) || [];
+      userNotifications.forEach((n: Notification) => (n.isRead = true));
       return true;
     }
     try {
       await db
         .update(notifications)
         .set({ isRead: true })
-        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+        .where(
+          and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+        );
       return true;
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
@@ -3723,9 +4186,9 @@ export class PgStorage implements IStorage {
   async deleteNotification(id: string): Promise<boolean> {
     if (!this.isDbConnected) {
       for (const [key, notifications] of this.fallbackData.entries()) {
-        if (key.startsWith('notifications_')) {
+        if (key.startsWith("notifications_")) {
           const notificationList = notifications as Notification[];
-          const index = notificationList.findIndex(n => n.id === id);
+          const index = notificationList.findIndex((n) => n.id === id);
           if (index !== -1) {
             notificationList.splice(index, 1);
             return true;
@@ -3735,7 +4198,9 @@ export class PgStorage implements IStorage {
       return false;
     }
     try {
-      const result = await db.delete(notifications).where(eq(notifications.id, id));
+      const result = await db
+        .delete(notifications)
+        .where(eq(notifications.id, id));
       return result.rowCount > 0;
     } catch (error) {
       console.error("Error deleting notification:", error);
@@ -3743,10 +4208,14 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getNotificationCount(userId: number, unreadOnly: boolean = false): Promise<number> {
+  async getNotificationCount(
+    userId: number,
+    unreadOnly: boolean = false
+  ): Promise<number> {
     if (!this.isDbConnected) {
-      const userNotifications = this.fallbackData.get(`notifications_${userId}`) || [];
-      return unreadOnly 
+      const userNotifications =
+        this.fallbackData.get(`notifications_${userId}`) || [];
+      return unreadOnly
         ? userNotifications.filter((n: Notification) => !n.isRead).length
         : userNotifications.length;
     }
@@ -3754,12 +4223,12 @@ export class PgStorage implements IStorage {
       const whereCondition = unreadOnly
         ? and(eq(notifications.userId, userId), eq(notifications.isRead, false))
         : eq(notifications.userId, userId);
-      
+
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(notifications)
         .where(whereCondition);
-      
+
       return result[0]?.count || 0;
     } catch (error) {
       console.error("Error getting notification count:", error);

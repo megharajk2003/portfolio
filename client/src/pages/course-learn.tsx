@@ -95,7 +95,9 @@ export default function CourseLearn() {
           ? await progressResponse.json()
           : [];
 
-        const completedLessons = progress.filter((p: any) => p.isCompleted).length;
+        const completedLessons = progress.filter(
+          (p: any) => p.isCompleted
+        ).length;
         const totalLessons = lessons.length;
 
         return {
@@ -104,7 +106,8 @@ export default function CourseLearn() {
           progress,
           totalLessons,
           completedLessons,
-          isFullyCompleted: totalLessons > 0 && completedLessons >= totalLessons,
+          isFullyCompleted:
+            totalLessons > 0 && completedLessons >= totalLessons,
         };
       });
 
@@ -123,7 +126,10 @@ export default function CourseLearn() {
   }, [modules, selectedModuleId]);
 
   React.useEffect(() => {
-    if (lessons.length > 0 && (!selectedLessonId || !lessons.find(l => l.id === selectedLessonId))) {
+    if (
+      lessons.length > 0 &&
+      (!selectedLessonId || !lessons.find((l) => l.id === selectedLessonId))
+    ) {
       setSelectedLessonId(lessons[0].id);
     }
   }, [lessons, selectedLessonId]);
@@ -199,7 +205,9 @@ export default function CourseLearn() {
       }
     } else {
       // Last lesson of current module - try to move to next module
-      const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+      const currentModuleIndex = modules.findIndex(
+        (m) => m.id === selectedModuleId
+      );
       if (currentModuleIndex < modules.length - 1) {
         const nextModule = modules[currentModuleIndex + 1];
         // Check if next module is unlocked (sequential unlocking)
@@ -220,7 +228,9 @@ export default function CourseLearn() {
 
   // Check if current lesson is the last lesson of the last module
   const isLastLessonOfCourse = () => {
-    const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+    const currentModuleIndex = modules.findIndex(
+      (m) => m.id === selectedModuleId
+    );
     const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
     const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
     return isLastLessonInModule && isLastModuleInCourse;
@@ -252,17 +262,20 @@ export default function CourseLearn() {
       queryClient.invalidateQueries({
         queryKey: ["/api/user-stats", user?.id],
       });
-      
+
       // Only show lesson/module completion messages, not course completion
-      const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+      const currentModuleIndex = modules.findIndex(
+        (m) => m.id === selectedModuleId
+      );
       const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
       const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
-      
+
       if (isLastLessonInModule && !isLastModuleInCourse) {
         // Module completed (but not course)
         toast({
           title: "Module Completed!",
-          description: "Congratulations! You've completed this module and unlocked the next one.",
+          description:
+            "Congratulations! You've completed this module and unlocked the next one.",
         });
       } else if (!isLastLessonInModule) {
         // Regular lesson completed
@@ -280,20 +293,62 @@ export default function CourseLearn() {
       });
     },
   });
+  const isCourseCompleted = React.useMemo(() => {
+    if (!userProgress || !courseId) return false;
+    console.log("c:", userProgress);
+    console.log("Course ID:", courseId);
 
+    // Find the enrollment/progress record for the current course
+    const courseEnrollment = userProgress.find(
+      (enrollment: any) => enrollment.courseId === courseId
+    );
+
+    // The course is completed if the record exists and has a completion date
+    return !!courseEnrollment?.completedAt;
+  }, [userProgress, courseId]);
   // Course completion mutation (for the final lesson)
   const finishCourseMutation = useMutation({
     mutationFn: async (lessonIndex: number) => {
-      // Complete the lesson and officially finish the course
-      return apiRequest(`/api/course-completion/finish`, "POST", {
+      // --- DEBUG: Log the data being sent to the API ---
+      const payload = {
         userId: user?.id,
         moduleId: selectedModuleId,
         lessonIndex,
         courseId,
-      });
+      };
+      console.log(
+        "🚀 [finishCourseMutation] Attempting to finish course with payload:",
+        payload
+      ); // Complete the lesson and officially finish the course
+
+      try {
+        const response = await apiRequest(
+          `/api/course-completion/finish`,
+          "POST",
+          payload
+        );
+        // --- DEBUG: Log the successful response from the API ---
+        console.log(
+          "✅ [finishCourseMutation] API call successful, response:",
+          response
+        );
+        return response;
+      } catch (error) {
+        // --- DEBUG: Log any error during the API request itself ---
+        console.error(
+          "🔥 [finishCourseMutation] API request failed inside mutationFn:",
+          error
+        );
+        throw error; // It's important to re-throw the error so onError is triggered
+      }
     },
     onSuccess: (data) => {
-      // Invalidate all related queries to ensure fresh data
+      // --- DEBUG: This runs if the mutationFn promise resolves successfully ---
+      console.log(
+        "🎉 [finishCourseMutation] onSuccess callback triggered with data:",
+        data
+      ); // Invalidate all related queries to ensure fresh data
+
       queryClient.invalidateQueries({
         queryKey: ["/api/lesson-progress", user?.id, selectedModuleId],
       });
@@ -308,15 +363,20 @@ export default function CourseLearn() {
       });
       queryClient.invalidateQueries({
         queryKey: ["/api/user-stats", user?.id],
-      });
-      
-      // Show course completion celebration
+      }); // Show course completion celebration
       toast({
         title: "🎉 Congratulations!",
-        description: "You've successfully completed the entire course! You've earned +5 XP and unlocked achievement badges!",
+        description:
+          "You've successfully completed the entire course! You've earned +5 XP and unlocked achievement badges!",
       });
     },
     onError: (error: Error) => {
+      // --- DEBUG: This runs if the mutationFn promise rejects (fails) ---
+      console.error(
+        "❌ [finishCourseMutation] onError callback triggered with error:",
+        error
+      );
+
       toast({
         title: "Error",
         description: "Failed to finish course. Please try again.",
@@ -562,14 +622,23 @@ export default function CourseLearn() {
                       isLastLessonOfCourse() ? (
                         <Button
                           onClick={() =>
+                            !isCourseCompleted &&
                             finishCourseMutation.mutate(currentLessonIndex)
                           }
-                          disabled={finishCourseMutation.isPending}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+                          disabled={
+                            isCourseCompleted || finishCourseMutation.isPending
+                          }
+                          className={`px-8 py-3 text-lg font-semibold shadow-lg ${
+                            isCourseCompleted
+                              ? "bg-gray-400 cursor-not-allowed" // Style for completed state
+                              : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          }`}
                           data-testid="button-finish-course"
                         >
                           <CheckCircle className="mr-2 h-5 w-5" />
-                          {finishCourseMutation.isPending
+                          {isCourseCompleted
+                            ? "Course Completed"
+                            : finishCourseMutation.isPending
                             ? "Finishing Course..."
                             : "🎉 Finish Course"}
                         </Button>
@@ -596,19 +665,30 @@ export default function CourseLearn() {
                             Final Lesson Complete!
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Ready to finish the entire course?
+                            {isCourseCompleted
+                              ? "You have already completed this course."
+                              : "Ready to finish the entire course?"}
                           </p>
                         </div>
                         <Button
                           onClick={() =>
+                            !isCourseCompleted &&
                             finishCourseMutation.mutate(currentLessonIndex)
                           }
-                          disabled={finishCourseMutation.isPending}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+                          disabled={
+                            isCourseCompleted || finishCourseMutation.isPending
+                          }
+                          className={`px-8 py-3 text-lg font-semibold shadow-lg ${
+                            isCourseCompleted
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          }`}
                           data-testid="button-finish-course"
                         >
                           <CheckCircle className="mr-2 h-5 w-5" />
-                          {finishCourseMutation.isPending
+                          {isCourseCompleted
+                            ? "Course Completed"
+                            : finishCourseMutation.isPending
                             ? "Finishing Course..."
                             : "🎉 Finish Course"}
                         </Button>
@@ -646,20 +726,23 @@ export default function CourseLearn() {
                         if (currentLessonIndex < lessons.length - 1) {
                           return !isLessonUnlocked(currentLessonIndex + 1);
                         }
-                        
+
                         // If last lesson in module, check if next module is available
-                        const currentModuleIndex = modules.findIndex(m => m.id === selectedModuleId);
+                        const currentModuleIndex = modules.findIndex(
+                          (m) => m.id === selectedModuleId
+                        );
                         if (currentModuleIndex < modules.length - 1) {
                           return !isModuleUnlocked(currentModuleIndex + 1);
                         }
-                        
+
                         // If last lesson of last module, disable
                         return true;
                       })()}
                       data-testid="button-next-lesson"
                     >
-                      {currentLessonIndex === lessons.length - 1 && 
-                       modules.findIndex(m => m.id === selectedModuleId) < modules.length - 1
+                      {currentLessonIndex === lessons.length - 1 &&
+                      modules.findIndex((m) => m.id === selectedModuleId) <
+                        modules.length - 1
                         ? "Next Module"
                         : "Next"}
                       <ChevronRight className="ml-2 h-4 w-4" />

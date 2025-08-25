@@ -5,36 +5,39 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Check, Lock, Play, RotateCcw } from "lucide-react";
+import {
+  LearningModule,
+  UserProgress,
+  Course,
+  Enrollment,
+} from "../../../shared/schema";
 
 interface LearningModulesProps {
   userId: string;
 }
 
 export default function LearningModules({ userId }: LearningModulesProps) {
-  const { data: modules = [] } = useQuery({
+  const { data: modules = [] } = useQuery<LearningModule[]>({
     queryKey: ["/api/learning-modules"],
   });
 
-  const { data: userProgress = [] } = useQuery({
+  const { data: userProgress = [] } = useQuery<UserProgress[]>({
     queryKey: ["/api/user-progress", userId],
   });
 
   // Get user enrollments for courses
-  const { data: userEnrollments = [] } = useQuery({
+  const { data: userEnrollments = [] } = useQuery<Enrollment[]>({
     queryKey: ["/api/users", userId, "enrollments"],
   });
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
-  // Get completed courses to filter them out from enrolled courses
-  const { data: completedCourses = [] } = useQuery({
-    queryKey: ["/api/users", userId, "completed-courses"],
-  });
-
   const getModuleProgress = (moduleId: string) => {
-    const progress = userProgress.find(p => p.moduleId === moduleId);
+    const progress = userProgress.find(
+      (p: UserProgress) => p.moduleId === moduleId
+    );
     return progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 };
   };
 
@@ -42,7 +45,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
   const isModuleUnlocked = (moduleIndex: number) => {
     // First module is always unlocked
     if (moduleIndex === 0) return true;
-    
+
     // Check if all previous modules are completed
     for (let i = 0; i < moduleIndex; i++) {
       const previousModule = modules[i];
@@ -54,31 +57,48 @@ export default function LearningModules({ userId }: LearningModulesProps) {
     return true;
   };
 
-  const currentModule = modules.find((module, index) => {
-    const progress = getModuleProgress(module.id);
-    return !progress.isCompleted && progress.currentLesson > 0 && isModuleUnlocked(index);
-  });
+  const currentModule = modules.find(
+    (module: LearningModule, index: number) => {
+      const progress = getModuleProgress(module.id);
+      return (
+        !progress.isCompleted &&
+        (progress.currentLesson ?? 0) > 0 &&
+        isModuleUnlocked(index)
+      );
+    }
+  );
 
-  const completedModules = modules.filter(module => {
+  const completedModules = modules.filter((module: LearningModule) => {
     const progress = getModuleProgress(module.id);
     return progress.isCompleted;
   });
 
-  const availableModules = modules.filter((module, index) => {
-    const progress = getModuleProgress(module.id);
-    return !progress.isCompleted && progress.currentLesson === 0 && isModuleUnlocked(index);
-  });
+  const availableModules = modules.filter(
+    (module: LearningModule, index: number) => {
+      const progress = getModuleProgress(module.id);
+      return (
+        !progress.isCompleted &&
+        progress.currentLesson === 0 &&
+        isModuleUnlocked(index)
+      );
+    }
+  );
 
-  const lockedModules = modules.filter((module, index) => {
-    const progress = getModuleProgress(module.id);
-    return !progress.isCompleted && !isModuleUnlocked(index);
-  });
+  const lockedModules = modules.filter(
+    (module: LearningModule, index: number) => {
+      const progress = getModuleProgress(module.id);
+      return !progress.isCompleted && !isModuleUnlocked(index);
+    }
+  );
 
   // Get enrolled courses (only pending ones, not completed)
-  const enrolledCourses = courses.filter(course => {
-    const isEnrolled = userEnrollments.some((enrollment: any) => enrollment.courseId === course.id);
-    const isCompleted = completedCourses.some((completedCourse: any) => completedCourse.id === course.id);
-    return isEnrolled && !isCompleted;
+  // Get enrolled courses (only pending ones, not completed)
+  const enrolledCourses = courses.filter((course: Course) => {
+    const enrollment = userEnrollments.find(
+      (e: Enrollment) => e.courseId === course.id
+    );
+    // A course is "enrolled and in-progress" if an enrollment exists AND it is NOT completed.
+    return enrollment && !enrollment.completedAt;
   });
 
   return (
@@ -96,11 +116,13 @@ export default function LearningModules({ userId }: LearningModulesProps) {
       <CardContent>
         {/* Enrolled Courses */}
         <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-3">My Enrolled Courses</h4>
+          <h4 className="font-semibold text-gray-900 mb-3">
+            My Enrolled Courses
+          </h4>
           {enrolledCourses.length > 0 ? (
             <>
               <div className="space-y-3">
-                {enrolledCourses.slice(0, 3).map((course) => (
+                {enrolledCourses.slice(0, 3).map((course: Course) => (
                   <div
                     key={course.id}
                     className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -110,14 +132,19 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                         <Play className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <h5 className="font-medium text-gray-900">{course.title}</h5>
+                        <h5 className="font-medium text-gray-900">
+                          {course.title}
+                        </h5>
                         <p className="text-sm text-gray-500">
-                          {course.provider || 'Course Provider'}
+                          {"Course Provider"}
                         </p>
                       </div>
                     </div>
                     <Link href={`/course/${course.id}/learn`}>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
                         <Play className="mr-1 h-3 w-3" />
                         Resume
                       </Button>
@@ -140,7 +167,9 @@ export default function LearningModules({ userId }: LearningModulesProps) {
               <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <BookOpen className="h-8 w-8 text-blue-600" />
               </div>
-              <h5 className="font-semibold text-gray-900 mb-2">No enrolled courses yet</h5>
+              <h5 className="font-semibold text-gray-900 mb-2">
+                No enrolled courses yet
+              </h5>
               <p className="text-sm text-gray-600 mb-4">
                 Discover and enroll in courses to start your learning journey
               </p>
@@ -158,21 +187,28 @@ export default function LearningModules({ userId }: LearningModulesProps) {
         {currentModule && (
           <div className="border-2 border-primary rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold text-gray-900">{currentModule.title}</h4>
+              <h4 className="font-semibold text-gray-900">
+                {currentModule.title}
+              </h4>
               <Badge>In Progress</Badge>
             </div>
-            <p className="text-sm text-gray-600 mb-4">{currentModule.description}</p>
-            
+            <p className="text-sm text-gray-600 mb-4">
+              {currentModule.description}
+            </p>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="w-32 bg-gray-200 rounded-full h-2">
                   {(() => {
                     const progress = getModuleProgress(currentModule.id);
-                    const totalLessons = Array.isArray(currentModule.lessons) ? currentModule.lessons.length : 1;
-                    const progressPercentage = (progress.currentLesson / totalLessons) * 100;
+                    const totalLessons = Array.isArray(currentModule.lessons)
+                      ? currentModule.lessons.length
+                      : 1;
+                    const progressPercentage =
+                      ((progress.currentLesson ?? 0) / totalLessons) * 100;
                     return (
-                      <div 
-                        className="bg-primary h-2 rounded-full" 
+                      <div
+                        className="bg-primary h-2 rounded-full"
                         style={{ width: `${progressPercentage}%` }}
                       />
                     );
@@ -181,9 +217,14 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                 <span className="text-sm text-gray-600">
                   {(() => {
                     const progress = getModuleProgress(currentModule.id);
-                    const totalLessons = Array.isArray(currentModule.lessons) ? currentModule.lessons.length : 1;
-                    return Math.round((progress.currentLesson / totalLessons) * 100);
-                  })()}%
+                    const totalLessons = Array.isArray(currentModule.lessons)
+                      ? currentModule.lessons.length
+                      : 1;
+                    return Math.round(
+                      ((progress.currentLesson ?? 0) / totalLessons) * 100
+                    );
+                  })()}
+                  %
                 </span>
               </div>
               <Link href={`/module/${currentModule.id}`}>
@@ -199,7 +240,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
         {/* Module List */}
         <div className="space-y-3">
           {/* Completed Modules */}
-          {completedModules.slice(0, 2).map((module) => (
+          {completedModules.slice(0, 2).map((module: LearningModule) => (
             <div
               key={module.id}
               className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -222,7 +263,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
           ))}
 
           {/* Available Modules */}
-          {availableModules.slice(0, 2).map((module) => (
+          {availableModules.slice(0, 2).map((module: LearningModule) => (
             <Link key={module.id} href={`/module/${module.id}`}>
               <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="flex items-center space-x-3">
@@ -230,7 +271,9 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                     <Play className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h5 className="font-medium text-gray-900">{module.title}</h5>
+                    <h5 className="font-medium text-gray-900">
+                      {module.title}
+                    </h5>
                     <p className="text-sm text-gray-500">
                       Click to start learning
                     </p>
@@ -242,8 +285,11 @@ export default function LearningModules({ userId }: LearningModulesProps) {
           ))}
 
           {/* Locked Modules */}
-          {lockedModules.slice(0, 2).map((module) => (
-            <div key={module.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 opacity-60">
+          {lockedModules.slice(0, 2).map((module: LearningModule) => (
+            <div
+              key={module.id}
+              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 opacity-60"
+            >
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -255,7 +301,10 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-gray-400 border-gray-300">
+              <Badge
+                variant="outline"
+                className="text-gray-400 border-gray-300"
+              >
                 +{module.xpReward} XP
               </Badge>
             </div>

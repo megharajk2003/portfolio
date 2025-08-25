@@ -32,8 +32,10 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import Footer from "@/components/ui/footer";
+import { useAuth } from "@/hooks/useAuth";
+import React from "react";
 
-const CURRENT_USER_ID = 1; // Changed to number to match database schema
+// Changed to number to match database schema
 
 // Mock course data based on the images
 const courseDetails = {
@@ -172,6 +174,9 @@ const courseDetails = {
 
 export default function CourseDetail() {
   const [, params] = useRoute("/course/:id");
+  const { user } = useAuth();
+  const CURRENT_USER_ID = user?.id || "";
+  console.log("Current User ID:", CURRENT_USER_ID); // Debugging line
   const [activeTab, setActiveTab] = useState("about");
   const courseId = params?.id || "1";
   const course =
@@ -183,25 +188,22 @@ export default function CourseDetail() {
   // Get user enrollments to check enrollment status
   const { data: userEnrollments = [] } = useQuery<any[]>({
     queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
+    // Add this line to wait for the user object
+    enabled: !!CURRENT_USER_ID,
   });
 
-  // Check if user is enrolled in a course - moved here to avoid initialization issues
-  const isEnrolled = (courseId: string) => {
-    return userEnrollments.some(
+  // Find the specific enrollment record for the current course
+  const courseEnrollment = React.useMemo(() => {
+    return userEnrollments.find(
       (enrollment: any) => enrollment.courseId === courseId
     );
-  };
+  }, [userEnrollments, courseId]);
 
-  // Check course completion status
-  const { data: courseCompletion } = useQuery<{
-    isCompleted: boolean;
-    completedModules: number;
-    totalModules: number;
-    progress: number;
-  }>({
-    queryKey: ["/api/course-completion", CURRENT_USER_ID, courseId],
-    enabled: isEnrolled(courseId),
-  });
+  // The user is enrolled if that record exists
+  const isEnrolled = !!courseEnrollment;
+
+  // The course is completed if the record exists AND has a completion date
+  const isCourseCompleted = !!courseEnrollment?.completedAt;
 
   // Enrollment mutation
   const enrollMutation = useMutation({
@@ -230,11 +232,6 @@ export default function CourseDetail() {
       });
     },
   });
-
-  // Check if course is completed
-  const isCourseCompleted = () => {
-    return courseCompletion?.isCompleted || false;
-  };
 
   // Handle enrollment
   const handleEnrollment = (courseId: string) => {
@@ -355,21 +352,22 @@ export default function CourseDetail() {
               <div className="lg:col-span-1">
                 <Card>
                   <CardContent className="p-6">
-                    {isCourseCompleted() ? (
+                    {isCourseCompleted ? (
                       <div className="text-center space-y-2">
-                        <Button
-                          className="w-full mb-4 bg-green-600 hover:bg-green-700 text-white"
-                          size="lg"
-                          disabled
-                        >
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Course Completed
-                        </Button>
+                        <Link href={`/course/${courseId}/learn`}>
+                          <Button
+                            className="w-full mb-4 bg-green-600 hover:bg-green-700 text-white"
+                            size="lg"
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Course Completed
+                          </Button>
+                        </Link>
                         <p className="text-sm text-green-600 font-medium">
                           Congratulations! You've completed this course.
                         </p>
                       </div>
-                    ) : isEnrolled(courseId) ? (
+                    ) : isEnrolled ? (
                       <Link href={`/course/${courseId}/learn`}>
                         <Button className="w-full mb-4" size="lg">
                           Continue Learning

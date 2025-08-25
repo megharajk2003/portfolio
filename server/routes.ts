@@ -51,20 +51,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If not found, try to find by various username patterns
       if (!user) {
         const users = await storage.getAllUsers();
-        user = users.find(u => {
+        user = users.find((u) => {
           // Check email prefix (part before @)
-          const emailPrefix = u.email.split('@')[0].toLowerCase();
+          const emailPrefix = u.email.split("@")[0].toLowerCase();
           if (emailPrefix === username) return true;
 
           // Check firstName (case insensitive)
-          if (u.firstName && u.firstName.toLowerCase() === username) return true;
+          if (u.firstName && u.firstName.toLowerCase() === username)
+            return true;
 
           // Check lastName (case insensitive)
           if (u.lastName && u.lastName.toLowerCase() === username) return true;
 
           // Check full name combination (firstName + lastName)
           if (u.firstName && u.lastName) {
-            const fullName = (u.firstName + u.lastName).toLowerCase().replace(/\s+/g, '');
+            const fullName = (u.firstName + u.lastName)
+              .toLowerCase()
+              .replace(/\s+/g, "");
             if (fullName === username) return true;
           }
 
@@ -1465,9 +1468,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User progress routes
   app.get("/api/user-progress/:userId", async (req, res) => {
     try {
-      const progress = await storage.getUserProgress(
+      console.log(`Fetching progress for userId: ${req.params.userId}`);
+      const progress = await storage.getUserEnrollments(
         parseInt(req.params.userId)
       );
+      console.log("Progress fetched:", progress);
       res.json(progress);
     } catch (error) {
       console.error("Error fetching user progress:", error);
@@ -1599,35 +1604,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/daily-activity", async (req, res) => {
     try {
       const activityData = insertDailyActivitySchema.parse(req.body);
-      
+
       // Check if user already checked in today
       const today = activityData.date;
       const existingActivity = await storage.getDailyActivity(
-        activityData.userId, 
-        today, 
+        activityData.userId,
+        today,
         today
       );
-      
+
       if (existingActivity.length > 0) {
-        return res.status(400).json({ 
-          message: "You have already checked in today!" 
+        return res.status(400).json({
+          message: "You have already checked in today!",
         });
       }
-      
+
       // Create daily activity record
       const activity = await storage.createDailyActivity(activityData);
-      
+
       // Update user stats with streak calculation
-      await updateUserStreakStats(activityData.userId, today, activityData.xpEarned || 0);
-      
+      await updateUserStreakStats(
+        activityData.userId,
+        today,
+        activityData.xpEarned || 0
+      );
+
       // Create check-in notification
       await createNotificationHelper(activityData.userId, {
         type: "goal_progress",
         title: "Daily Check-in Complete! 🎉",
-        message: `You earned ${activityData.xpEarned || 10} XP for checking in today. Keep your streak going!`,
-        actionUrl: "/dashboard"
+        message: `You earned ${
+          activityData.xpEarned || 10
+        } XP for checking in today. Keep your streak going!`,
+        actionUrl: "/dashboard",
       });
-      
+
       res.json(activity);
     } catch (error) {
       console.error("Error creating daily activity:", error);
@@ -1636,17 +1647,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Helper function to create notifications
-  async function createNotificationHelper(userId: number, notificationData: {
-    type: "goal_progress" | "goal_deadline" | "goal_completed" | "new_content" | "badge_unlock" | "forum_message" | "forum_reply";
-    title: string;
-    message: string;
-    actionUrl?: string;
-    metadata?: any;
-  }) {
+  async function createNotificationHelper(
+    userId: number,
+    notificationData: {
+      type:
+        | "goal_progress"
+        | "goal_deadline"
+        | "goal_completed"
+        | "new_content"
+        | "badge_unlock"
+        | "forum_message"
+        | "forum_reply";
+      title: string;
+      message: string;
+      actionUrl?: string;
+      metadata?: any;
+    }
+  ) {
     try {
       await storage.createNotification({
         userId,
-        ...notificationData
+        ...notificationData,
       });
     } catch (error) {
       console.error("Error creating notification:", error);
@@ -1654,23 +1675,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Helper function to calculate and update streak
-  async function updateUserStreakStats(userId: number, todayDate: string, xpEarned: number) {
+  async function updateUserStreakStats(
+    userId: number,
+    todayDate: string,
+    xpEarned: number
+  ) {
     try {
       const currentStats = await storage.getUserStats(userId);
       const today = new Date(todayDate);
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-      
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+
       let newStreak = 1;
       let newLongestStreak = 1;
-      
+
       if (currentStats) {
         const lastActivityDate = currentStats.lastActivityDate;
-        
+
         if (lastActivityDate) {
-          const lastActivity = lastActivityDate.toISOString().split('T')[0];
-          
+          const lastActivity = lastActivityDate.toISOString().split("T")[0];
+
           // If last activity was yesterday, increment streak
           if (lastActivity === yesterdayStr) {
             newStreak = (currentStats.currentStreak || 0) + 1;
@@ -1678,16 +1703,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // If last activity was today, this shouldn't happen due to our check above
           // If last activity was before yesterday, reset streak to 1
         }
-        
+
         newLongestStreak = Math.max(newStreak, currentStats.longestStreak || 0);
       }
-      
+
       // Update user stats
       await storage.updateUserStats(userId, {
         totalXp: (currentStats?.totalXp || 0) + xpEarned,
         currentStreak: newStreak,
         longestStreak: newLongestStreak,
-        lastActivityDate: today
+        lastActivityDate: today,
       });
 
       // Check for streak milestone notifications
@@ -1696,10 +1721,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: "goal_progress",
           title: `${newStreak} Day Streak! 🔥`,
           message: `Amazing! You've maintained a ${newStreak}-day learning streak. Keep it going!`,
-          actionUrl: "/dashboard"
+          actionUrl: "/dashboard",
         });
       }
-      
     } catch (error) {
       console.error("Error updating user streak stats:", error);
     }
@@ -1740,20 +1764,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId, moduleId, lessonIndex } = req.body;
       const userIdInt = parseInt(userId);
-      
+
       // Complete the lesson and award XP
-      const progress = await storage.completeLessonProgress(userIdInt, moduleId, lessonIndex);
-      
+      const progress = await storage.completeLessonProgress(
+        userIdInt,
+        moduleId,
+        lessonIndex
+      );
+
       // Check for milestone badges
-      await storage.checkAndAwardBadges(userIdInt, 'milestone');
-      
+      await storage.checkAndAwardBadges(userIdInt, "milestone");
+
       // Check if module is now complete and award course completion badges
-      const moduleProgress = await storage.getUserProgressForModule(userIdInt, moduleId);
+      const moduleProgress = await storage.getUserProgressForModule(
+        userIdInt,
+        moduleId
+      );
       if (moduleProgress?.isCompleted) {
         // Award course completion badge for the completed module
-        await storage.checkAndAwardBadges(userIdInt, 'course_completion', moduleId);
+        await storage.checkAndAwardBadges(
+          userIdInt,
+          "course_completion",
+          moduleId
+        );
       }
-      
+
       res.json(progress);
     } catch (error) {
       console.error("Error completing lesson:", error);
@@ -1769,114 +1804,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const completedCourses = [];
 
       for (const enrollment of enrollments) {
-        const courseCompletion = await storage.checkCourseCompletion(userId, enrollment.courseId);
+        const courseCompletion = await storage.checkCourseCompletion(
+          userId,
+          enrollment.courseId
+        );
         if (courseCompletion.isCompleted) {
           const course = await storage.getCourse(enrollment.courseId);
           completedCourses.push({
             ...course,
             completionDate: courseCompletion.completedAt,
             totalLessons: courseCompletion.totalLessons,
-            completedLessons: courseCompletion.completedLessons
+            completedLessons: courseCompletion.completedLessons,
           });
         }
       }
 
       res.json(completedCourses);
     } catch (error) {
-      console.error('Error fetching completed courses:', error);
-      res.status(500).json({ error: 'Failed to fetch completed courses' });
+      console.error("Error fetching completed courses:", error);
+      res.status(500).json({ error: "Failed to fetch completed courses" });
     }
   });
 
   // Complete course (for the finish course button)
-  app.post('/api/course-completion/finish', async (req, res) => {
+  app.post("/api/course-completion/finish", async (req, res) => {
+    console.log("--- [/api/course-completion/finish] Received request ---");
+    console.log("Request Body:", req.body);
+
     try {
       const { userId, moduleId, lessonIndex, courseId } = req.body;
+
+      // --- 1. Check User ID ---
+      if (!userId) {
+        console.error("Error: userId is missing from the request body.");
+        return res.status(400).json({ error: "User ID is required." });
+      }
       const userIdInt = parseInt(userId);
-      
-      // First complete the final lesson
+      console.log(`Parsed userId: ${userId} -> ${userIdInt}`);
+      if (isNaN(userIdInt)) {
+        console.error(
+          "Error: Parsing userId resulted in NaN. Check the user ID format."
+        );
+        return res.status(400).json({ error: "Invalid User ID format." });
+      }
+
+      // --- 2. Complete the final lesson ---
+      console.log(
+        `Attempting to complete lesson for userId: ${userIdInt}, moduleId: ${moduleId}, lessonIndex: ${lessonIndex}`
+      );
       await storage.completeLessonProgress(userIdInt, moduleId, lessonIndex);
-      
-      // Get the course to find all modules and verify all lessons are completed
+      console.log("Final lesson marked as complete.");
+
+      // --- 3. Verify all lessons in the course are completed ---
+      console.log(`Verifying all lessons for courseId: ${courseId}`);
       const modules = await storage.getCourseModules(courseId);
       let allLessonsCompleted = true;
-      
+
       for (const module of modules) {
         const lessons = await storage.getModuleLessons(module.id);
         if (!lessons || lessons.length === 0) continue;
-        
-        const lessonProgress = await storage.getLessonProgress(userIdInt, module.id);
-        const completedLessons = lessonProgress.filter(p => p.isCompleted).length;
-        
-        if (completedLessons < lessons.length) {
+
+        const lessonProgress = await storage.getLessonProgress(
+          userIdInt,
+          module.id
+        );
+        const completedCount = lessonProgress.filter(
+          (p) => p.isCompleted
+        ).length;
+
+        console.log(
+          `Module ${module.id}: ${completedCount}/${lessons.length} lessons completed.`
+        );
+        if (completedCount < lessons.length) {
           allLessonsCompleted = false;
           break;
         }
       }
-      
+
+      console.log(
+        `Verification result: allLessonsCompleted = ${allLessonsCompleted}`
+      );
+
+      // --- 4. Update enrollment if all lessons are complete ---
       if (allLessonsCompleted) {
-        // Mark the enrollment as completed
+        console.log("All lessons are complete. Checking for user enrollment.");
         const enrollments = await storage.getUserEnrollments(userIdInt);
-        const courseEnrollment = enrollments.find(e => e.courseId === courseId);
-        
-        if (courseEnrollment && !courseEnrollment.completedAt) {
-          await storage.updateEnrollment(courseEnrollment.id, {
-            completedAt: new Date(),
-            progress: '100'
-          });
-          
-          // Award course completion XP
-          const courseCompletionXP = 5;
-          const currentStats = await storage.getUserStats(userIdInt);
-          const newXp = (currentStats?.totalXp || 0) + courseCompletionXP;
-          await storage.updateUserStats(userIdInt, {
-            totalXp: newXp
-          });
-          
-          // Award course completion badges
-          await storage.checkAndAwardBadges(userIdInt, 'course_completion', courseId);
-          
-          res.json({ 
-            success: true, 
-            message: 'Course completed successfully!',
-            xpAwarded: courseCompletionXP 
-          });
+        const courseEnrollment = enrollments.find(
+          (e) => e.courseId === courseId
+        );
+
+        if (courseEnrollment) {
+          console.log("Found course enrollment:", courseEnrollment);
+          if (!courseEnrollment.completedAt) {
+            console.log("Enrollment is not yet completed. Updating now...");
+            // Mark the enrollment as completed
+            await storage.updateEnrollment(courseEnrollment.id, {
+              completedAt: new Date(),
+              progress: "100",
+            });
+
+            // Award course completion XP
+            const courseCompletionXP = 5;
+            const currentStats = await storage.getUserStats(userIdInt);
+            const newXp = (currentStats?.totalXp || 0) + courseCompletionXP;
+
+            await storage.updateUserStats(userIdInt, {
+              totalXp: newXp,
+            });
+            // Award badges
+            await storage.checkAndAwardBadges(
+              userIdInt,
+              "course_completion",
+              courseId
+            );
+
+            console.log(
+              "Course completion successful! Sending success response."
+            );
+            res.json({
+              success: true,
+              message: "Course completed successfully!",
+              xpAwarded: courseCompletionXP,
+            });
+          } else {
+            console.log(
+              'Course was already marked as complete. Sending "already completed" message.'
+            );
+            res.json({
+              success: true,
+              message: "Course already completed",
+              xpAwarded: 0,
+            });
+          }
         } else {
-          res.json({ 
-            success: true, 
-            message: 'Course already completed',
-            xpAwarded: 0 
+          console.error(
+            "Error: Could not find an enrollment for this user and course."
+          );
+          res.status(404).json({
+            success: false,
+            message: "Cannot complete course: enrollment not found.",
           });
         }
       } else {
-        res.status(400).json({ 
-          success: false, 
-          message: 'Cannot complete course: not all lessons are finished' 
+        console.log("Not all lessons are finished. Sending error response.");
+        res.status(400).json({
+          success: false,
+          message: "Cannot complete course: not all lessons are finished",
         });
       }
     } catch (error) {
-      console.error('Error finishing course:', error);
-      res.status(500).json({ error: 'Failed to finish course' });
+      console.error(
+        "--- CRITICAL ERROR in /api/course-completion/finish ---:",
+        error
+      );
+      res
+        .status(500)
+        .json({ error: "Failed to finish course due to a server error." });
     }
   });
 
   // Check course completion status
-  app.get('/api/course-completion/:userId/:courseId', async (req, res) => {
+  app.get("/api/course-completion/:userId/:courseId", async (req, res) => {
     try {
       const { userId, courseId } = req.params;
       const userIdInt = parseInt(userId);
 
       // Use the corrected checkCourseCompletion method that checks both lessons and enrollment
-      const courseCompletion = await storage.checkCourseCompletion(userIdInt, courseId);
-      
+      const courseCompletion = await storage.checkCourseCompletion(
+        userIdInt,
+        courseId
+      );
+
       // Get all modules for the course to calculate module progress
       const modules = await storage.getCourseModules(courseId);
       if (!modules || modules.length === 0) {
-        return res.json({ isCompleted: false, completedModules: 0, totalModules: 0, progress: 0 });
+        return res.json({
+          isCompleted: false,
+          completedModules: 0,
+          totalModules: 0,
+          progress: 0,
+        });
       }
 
       let completedModules = 0;
-      
+
       // Check each module's completion status based on lesson progress
       for (const module of modules) {
         // Get all lessons for this module
@@ -1884,9 +1995,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!lessons || lessons.length === 0) continue;
 
         // Get lesson progress for this module
-        const lessonProgress = await storage.getLessonProgress(userIdInt, module.id);
-        const completedLessons = lessonProgress.filter(p => p.isCompleted).length;
-        
+        const lessonProgress = await storage.getLessonProgress(
+          userIdInt,
+          module.id
+        );
+        const completedLessons = lessonProgress.filter(
+          (p) => p.isCompleted
+        ).length;
+
         // Module is completed if all lessons are completed
         if (completedLessons >= lessons.length) {
           completedModules++;
@@ -1897,18 +2013,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Award badges only if the course is officially completed (enrollment marked as completed)
       if (courseCompletion.isCompleted) {
-        await storage.checkAndAwardBadges(userIdInt, 'course_completion', courseId);
+        await storage.checkAndAwardBadges(
+          userIdInt,
+          "course_completion",
+          courseId
+        );
       }
 
       res.json({
         isCompleted: courseCompletion.isCompleted,
         completedModules,
         totalModules,
-        progress: totalModules > 0 ? (completedModules / totalModules) * 100 : 0
+        progress:
+          totalModules > 0 ? (completedModules / totalModules) * 100 : 0,
       });
     } catch (error) {
-      console.error('Error checking course completion:', error);
-      res.status(500).json({ error: 'Failed to check course completion' });
+      console.error("Error checking course completion:", error);
+      res.status(500).json({ error: "Failed to check course completion" });
     }
   });
 
@@ -2047,12 +2168,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "❌ [SERVER] Error stack:",
         error instanceof Error ? error.stack : "No stack trace"
       );
-      res
-        .status(500)
-        .json({
-          message: "Failed to generate career advice",
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
+      res.status(500).json({
+        message: "Failed to generate career advice",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   });
 
@@ -2213,12 +2332,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "❌ [SERVER] Error stack:",
         error instanceof Error ? error.stack : "No stack trace"
       );
-      res
-        .status(500)
-        .json({
-          message: "Failed to generate resume",
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
+      res.status(500).json({
+        message: "Failed to generate resume",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   });
 
@@ -2522,7 +2639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const goalData = insertGoalSchema.parse({
         ...req.body,
-        userId: req.user.id
+        userId: req.user.id,
       });
 
       const goal = await storage.createGoal(goalData);
@@ -2543,26 +2660,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { goalName, csvData } = req.body;
 
       if (!goalName || !Array.isArray(csvData) || csvData.length === 0) {
-        return res.status(400).json({ 
-          message: "Goal name and CSV data are required" 
+        return res.status(400).json({
+          message: "Goal name and CSV data are required",
         });
       }
 
       // Validate CSV data structure
-      const requiredFields = ['category', 'topic', 'status'];
-      const hasValidStructure = csvData.every(row => 
-        requiredFields.some(field => 
-          row[field] || row[field.charAt(0).toUpperCase() + field.slice(1)]
+      const requiredFields = ["category", "topic", "status"];
+      const hasValidStructure = csvData.every((row) =>
+        requiredFields.some(
+          (field) =>
+            row[field] || row[field.charAt(0).toUpperCase() + field.slice(1)]
         )
       );
 
       if (!hasValidStructure) {
-        return res.status(400).json({ 
-          message: "CSV must contain Category, Topic, and Status columns" 
+        return res.status(400).json({
+          message: "CSV must contain Category, Topic, and Status columns",
         });
       }
 
-      const goal = await storage.createGoalFromCSV(req.user.id, goalName, csvData);
+      const goal = await storage.createGoalFromCSV(
+        req.user.id,
+        goalName,
+        csvData
+      );
       res.status(201).json(goal);
     } catch (error) {
       console.error("Error creating goal from CSV:", error);
@@ -2628,15 +2750,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes } = req.body;
 
       // Validate status
-      const validStatuses = ['pending', 'start', 'completed'];
+      const validStatuses = ["pending", "start", "completed"];
       if (!validStatuses.includes(status)) {
-        return res.status(400).json({ 
-          message: "Invalid status. Must be pending, start, or completed" 
+        return res.status(400).json({
+          message: "Invalid status. Must be pending, start, or completed",
         });
       }
 
       const updatedTopic = await storage.updateTopicStatus(
-        topicId, 
+        topicId,
         status as "pending" | "start" | "completed",
         notes
       );
@@ -2663,15 +2785,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes } = req.body;
 
       // Validate status
-      const validStatuses = ['pending', 'start', 'completed'];
+      const validStatuses = ["pending", "start", "completed"];
       if (!validStatuses.includes(status)) {
-        return res.status(400).json({ 
-          message: "Invalid status. Must be pending, start, or completed" 
+        return res.status(400).json({
+          message: "Invalid status. Must be pending, start, or completed",
         });
       }
 
       const updatedSubtopic = await storage.updateSubtopicStatus(
-        subtopicId, 
+        subtopicId,
         status as "pending" | "start" | "completed",
         notes
       );
@@ -2682,21 +2804,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if goal is completed after this subtopic update
       if (status === "completed") {
-        const goal = await storage.getGoalWithCategories(updatedSubtopic.topicId);
+        const goal = await storage.getGoalWithCategories(
+          updatedSubtopic.topicId
+        );
         if (goal) {
-          const isCompleted = goal.categories.every(cat => 
-            cat.topics.every(topic => 
-              topic.subtopics.every(sub => sub.status === "completed")
+          const isCompleted = goal.categories.every((cat) =>
+            cat.topics.every((topic) =>
+              topic.subtopics.every((sub) => sub.status === "completed")
             )
           );
-          
+
           if (isCompleted) {
             await createNotificationHelper(req.user.id, {
               type: "goal_completed",
               title: "Goal Completed! 🎯",
               message: `Congratulations! You've completed your goal: "${goal.name}". Time to set your next challenge!`,
               actionUrl: "/goal-tracker",
-              metadata: { goalId: goal.id }
+              metadata: { goalId: goal.id },
             });
           }
         }
@@ -2733,7 +2857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const topicId = req.params.id;
       const subtopicData = {
         ...req.body,
-        topicId
+        topicId,
       };
 
       const newSubtopic = await storage.createGoalSubtopic(subtopicData);
@@ -2791,7 +2915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { unreadOnly } = req.query;
       const count = await storage.getNotificationCount(
         parseInt(req.params.userId),
-        unreadOnly === 'true'
+        unreadOnly === "true"
       );
       res.json({ count });
     } catch (error) {
@@ -2832,7 +2956,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success });
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
-      res.status(500).json({ message: "Failed to mark all notifications as read" });
+      res
+        .status(500)
+        .json({ message: "Failed to mark all notifications as read" });
     }
   });
 

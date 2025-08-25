@@ -180,40 +180,65 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
   });
 
   // Fetch user's earned badges
-  const { data: userBadges = [], isLoading: userBadgesLoading } = useQuery<UserBadge[]>({
-    queryKey: [`/api/users/${userId}/badges`],
+  const { data: userBadges = [], isLoading: userBadgesLoading } = useQuery<
+    UserBadge[]
+  >({
+    queryKey: ["/api/users", userId, "badges"],
   });
-
+  console.log("userBadges:", userBadges);
   const isLoading = badgesLoading || userBadgesLoading;
 
   // Create a set of earned badge IDs for quick lookup
-  const earnedBadgeIds = new Set(userBadges.map(ub => ub.badgeId));
+  const earnedBadgeIds = new Set(userBadges.map((ub) => ub.badgeId));
 
   // Group badges by category
   const groupedBadges = allBadges.reduce((acc, badge) => {
     let category = "Other";
-    
+
     // Categorize badges based on title keywords and type
-    if (badge.title.includes("Profile") || badge.title.includes("Welcome") || 
-        badge.title.includes("Bio") || badge.title.includes("Picture") ||
-        badge.title.includes("Experience") || badge.title.includes("Education")) {
+    if (
+      badge.title.includes("Profile") ||
+      badge.title.includes("Welcome") ||
+      badge.title.includes("Bio") ||
+      badge.title.includes("Picture") ||
+      badge.title.includes("Experience") ||
+      badge.title.includes("Education")
+    ) {
       category = "Onboarding & Profile";
-    } else if (badge.title.includes("Course") || badge.title.includes("Lesson") || 
-               badge.title.includes("Learning") || badge.title.includes("Module") ||
-               badge.type === "course_completion") {
+    } else if (
+      badge.title.includes("Course") ||
+      badge.title.includes("Lesson") ||
+      badge.title.includes("Learning") ||
+      badge.title.includes("Module") ||
+      badge.type === "course_completion"
+    ) {
       category = "Learning & Courses";
     } else if (badge.title.includes("Goal")) {
       category = "Goals & Milestones";
-    } else if (badge.type === "streak" || badge.title.includes("Streak") || 
-               badge.title.includes("Daily") || badge.title.includes("Weekly")) {
+    } else if (
+      badge.type === "streak" ||
+      badge.title.includes("Streak") ||
+      badge.title.includes("Daily") ||
+      badge.title.includes("Weekly")
+    ) {
       category = "Streaks & Consistency";
-    } else if (badge.title.includes("Forum") || badge.title.includes("Community")) {
+    } else if (
+      badge.title.includes("Forum") ||
+      badge.title.includes("Community")
+    ) {
       category = "Community & Engagement";
-    } else if (badge.title.includes("Badge") || badge.title.includes("Superstar") ||
-               badge.title.includes("Career") || badge.title.includes("Resume")) {
+    } else if (
+      badge.title.includes("Badge") ||
+      badge.title.includes("Superstar") ||
+      badge.title.includes("Career") ||
+      badge.title.includes("Resume")
+    ) {
       category = "Special Achievements";
-    } else if (badge.title.includes("Skill") || badge.title.includes("Project") ||
-               badge.title.includes("Portfolio")) {
+    } else if (
+      badge.title.includes("Skill") ||
+      badge.title.includes("Project") ||
+      badge.title.includes("Portfolio")
+    ) {
       category = "Skills & Projects";
     }
 
@@ -223,7 +248,7 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
   }, {} as Record<string, Badge[]>);
 
   // Sort badges within each category by rarity and then by name
-  Object.keys(groupedBadges).forEach(category => {
+  Object.keys(groupedBadges).forEach((category) => {
     groupedBadges[category].sort((a, b) => {
       const rarityOrder = { legendary: 4, epic: 3, rare: 2, common: 1 };
       const rarityDiff = rarityOrder[b.rarity] - rarityOrder[a.rarity];
@@ -234,7 +259,8 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
 
   const earnedCount = userBadges.length;
   const totalCount = allBadges.length;
-  const completionPercentage = totalCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0;
+  const completionPercentage =
+    totalCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0;
 
   if (isLoading) {
     return (
@@ -260,11 +286,15 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
             <Badge variant="outline" className="text-lg px-3 py-1">
               {earnedCount}/{totalCount}
             </Badge>
-            <Badge 
+            <Badge
               className={`px-3 py-1 ${
-                completionPercentage >= 75 ? 'bg-green-500' :
-                completionPercentage >= 50 ? 'bg-yellow-500' :
-                completionPercentage >= 25 ? 'bg-orange-500' : 'bg-gray-500'
+                completionPercentage >= 75
+                  ? "bg-green-500"
+                  : completionPercentage >= 50
+                  ? "bg-yellow-500"
+                  : completionPercentage >= 25
+                  ? "bg-orange-500"
+                  : "bg-gray-500"
               } text-white`}
             >
               {completionPercentage}%
@@ -275,9 +305,11 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
       <CardContent>
         <div className="space-y-6">
           {Object.entries(groupedBadges).map(([category, badges]) => {
-            const categoryEarned = badges.filter(badge => earnedBadgeIds.has(badge.id)).length;
+            const categoryEarned = badges.filter((badge) =>
+              earnedBadgeIds.has(badge.id)
+            ).length;
             const categoryTotal = badges.length;
-            
+
             return (
               <div key={category} className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -288,15 +320,16 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
                     {categoryEarned}/{categoryTotal}
                   </Badge>
                 </div>
-                
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {badges.map((badge, index) => {
                     const isEarned = earnedBadgeIds.has(badge.id);
-                    const IconComponent = iconMap[badge.icon as keyof typeof iconMap] || Trophy;
-                    const rarityStyle = isEarned 
-                      ? rarityColors[badge.rarity].achieved 
+                    const IconComponent =
+                      iconMap[badge.icon as keyof typeof iconMap] || Trophy;
+                    const rarityStyle = isEarned
+                      ? rarityColors[badge.rarity].achieved
                       : rarityColors[badge.rarity].unachieved;
-                    
+
                     return (
                       <motion.div
                         key={badge.id}
@@ -304,46 +337,59 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
                         className={`
-                          relative p-3 rounded-xl border-2 ${rarityStyle.border} ${rarityStyle.bg} 
-                          ${rarityStyle.glow} hover:scale-105 transition-all duration-200 cursor-pointer
-                          ${!isEarned ? 'opacity-60' : ''}
+                          relative p-3 rounded-xl border-2 ${
+                            rarityStyle.border
+                          } ${rarityStyle.bg} 
+                          ${
+                            rarityStyle.glow
+                          } hover:scale-105 transition-all duration-200 cursor-pointer
+                          ${!isEarned ? "opacity-60" : ""}
                         `}
                         whileHover={{ scale: 1.05 }}
-                        title={`${badge.title}: ${badge.description}${isEarned ? '' : ' (Not earned yet)'}`}
+                        title={`${badge.title}: ${badge.description}${
+                          isEarned ? "" : " (Not earned yet)"
+                        }`}
                       >
                         {/* Rarity indicator */}
                         <div className="absolute top-1 right-1">
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={`text-xs px-1 py-0.5 ${rarityStyle.text} border-current`}
                           >
                             {badge.rarity.charAt(0).toUpperCase()}
                           </Badge>
                         </div>
-                        
+
                         {/* Badge icon */}
                         <div className="flex justify-center mb-2">
-                          <div className={`
+                          <div
+                            className={`
                             w-10 h-10 rounded-full ${rarityStyle.bg} border-2 ${rarityStyle.border}
                             flex items-center justify-center
-                          `}>
-                            <IconComponent className={`h-5 w-5 ${rarityStyle.text}`} />
+                          `}
+                          >
+                            <IconComponent
+                              className={`h-5 w-5 ${rarityStyle.text}`}
+                            />
                           </div>
                         </div>
-                        
+
                         {/* Badge info */}
                         <div className="text-center">
-                          <h4 className={`text-xs font-semibold ${rarityStyle.text} mb-1 line-clamp-2`}>
+                          <h4
+                            className={`text-xs font-semibold ${rarityStyle.text} mb-1 line-clamp-2`}
+                          >
                             {badge.title}
                           </h4>
-                          
+
                           {/* XP reward */}
                           {badge.xpReward > 0 && (
-                            <div className={`flex items-center justify-center text-xs font-medium ${
-                              isEarned ? 'text-emerald-600' : 'text-gray-400'
-                            }`}>
-                              <Star className="h-2 w-2 mr-1" />
-                              +{badge.xpReward}
+                            <div
+                              className={`flex items-center justify-center text-xs font-medium ${
+                                isEarned ? "text-emerald-600" : "text-gray-400"
+                              }`}
+                            >
+                              <Star className="h-2 w-2 mr-1" />+{badge.xpReward}
                             </div>
                           )}
                         </div>
