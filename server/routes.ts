@@ -449,6 +449,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🎓 POST /api/education - Parsed data:", educationData);
       const education = await storage.createEducation(educationData);
       console.log("🎓 POST /api/education - Created record:", education);
+      
+      // Check for achievement badges after education creation
+      if (educationData.userId) {
+        const userIdInt = parseInt(educationData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
+      }
+      
       res.json(education);
     } catch (error) {
       console.error("Error creating education:", error);
@@ -815,6 +824,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certification = await storage.createCertification(
         certificationData
       );
+      
+      // Check for achievement badges after certification creation
+      if (certificationData.userId) {
+        const userIdInt = parseInt(certificationData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
+      }
+      
       res.json(certification);
     } catch (error) {
       console.error("Error creating certification:", error);
@@ -930,6 +948,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const achievementData = insertAchievementSchema.parse(req.body);
       const achievement = await storage.createAchievement(achievementData);
+      
+      // Check for achievement badges after achievement creation
+      if (achievementData.userId) {
+        const userIdInt = parseInt(achievementData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
+      }
+      
       res.json(achievement);
     } catch (error) {
       console.error("Error creating achievement:", error);
