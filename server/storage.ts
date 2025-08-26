@@ -4109,7 +4109,6 @@ export class PgStorage implements IStorage {
         }
       }
 
-      console.log(`🎯 [DEBUG] Goal totals calculated - Total: ${totalSubtopicsInGoal}, Completed: ${completedSubtopicsInGoal}`);
 
       await this.updateGoal(goal.id, {
         totalSubtopics: totalSubtopicsInGoal,

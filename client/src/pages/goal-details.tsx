@@ -159,26 +159,6 @@ export default function GoalDetails() {
     enabled: !!user && !!goalId,
   });
 
-  // Debug logging for frontend
-  console.log(`🎯 [FRONTEND DEBUG] Goal data received:`, goal);
-  console.log(`🎯 [FRONTEND DEBUG] Goal categories length:`, goal?.categories?.length);
-  console.log(`🎯 [FRONTEND DEBUG] Goal categories:`, goal?.categories);
-  console.log(`🎯 [FRONTEND DEBUG] Goal csvData length:`, goal?.csvData?.length);
-  console.log(`🎯 [FRONTEND DEBUG] Goal totals - total: ${goal?.totalSubtopics}, completed: ${goal?.completedSubtopics}`);
-  
-  if (goal?.categories && goal.categories.length > 0) {
-    goal.categories.forEach((category, catIndex) => {
-      console.log(`🎯 [FRONTEND DEBUG] Category ${catIndex}: ${category.name} with ${category.topics?.length || 0} topics`);
-      category.topics?.forEach((topic, topicIndex) => {
-        console.log(`🎯 [FRONTEND DEBUG] Topic ${topicIndex}: ${topic.name} with ${topic.subtopics?.length || 0} subtopics`);
-        if (topic.subtopics && topic.subtopics.length > 0) {
-          console.log(`🎯 [FRONTEND DEBUG] First few subtopics:`, topic.subtopics.slice(0, 3));
-        }
-      });
-    });
-  } else {
-    console.log(`🎯 [FRONTEND DEBUG] ❌ NO CATEGORIES FOUND! This means the structured data isn't being retrieved properly.`);
-  }
 
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
@@ -725,53 +705,7 @@ export default function GoalDetails() {
                                                       className="h-2"
                                                     />
                                                   </div>
-
-                                                  <Dialog>
-                                                    <DialogTrigger asChild>
-                                                      <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        data-testid={`button-add-subtopic-${topic.id}`}
-                                                        onClick={(e) =>
-                                                          e.stopPropagation()
-                                                        }
-                                                      >
-                                                        <Plus className="h-4 w-4 mr-1" />
-                                                        Add Subtopic
-                                                      </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                      <DialogHeader>
-                                                        <DialogTitle>
-                                                          Add New Subtopic
-                                                        </DialogTitle>
-                                                      </DialogHeader>
-                                                      <div className="space-y-4">
-                                                        <div>
-                                                          <label className="text-sm font-medium">
-                                                            Name
-                                                          </label>
-                                                          <Input
-                                                            value={
-                                                              newSubtopicData.name
-                                                            }
-                                                            onChange={(e) =>
-                                                              setNewSubtopicData(
-                                                                (prev) => ({
-                                                                  ...prev,
-                                                                  name: e.target
-                                                                    .value,
-                                                                })
-                                                              )
-                                                            }
-                                                            placeholder="Enter subtopic name"
-                                                            data-testid="input-subtopic-name"
-                                                          />
-                                                        </div>
-                                                        <div>
-                                                          <label className="text-sm font-medium">
-                                                            Description
-                                                          </label>
+                                                </div>
                                                           <Textarea
                                                             value={
                                                               newSubtopicData.description
