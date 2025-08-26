@@ -50,8 +50,14 @@ export default function CompactGoalHeatMap() {
 
     // Calculate cumulative progress for all goals combined
     goals.forEach(goal => {
+      // Debug: Log the original date strings and parsed dates
+      console.log('Compact - Goal:', goal.name, 'Created:', goal.createdAt, 'Updated:', goal.updatedAt);
+      
       const createdDate = new Date(goal.createdAt);
       const updatedDate = new Date(goal.updatedAt);
+      
+      console.log('Compact - Parsed Created:', createdDate, 'Valid:', !isNaN(createdDate.getTime()));
+      console.log('Compact - Parsed Updated:', updatedDate, 'Valid:', !isNaN(updatedDate.getTime()));
 
       // Find the month when the goal was created
       const createdMonthIndex = monthsData.findIndex(month => {

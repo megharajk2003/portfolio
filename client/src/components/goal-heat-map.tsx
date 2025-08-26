@@ -77,8 +77,14 @@ export default function GoalHeatMap() {
 
     // Process each goal and calculate cumulative progress
     goals.forEach(goal => {
+      // Debug: Log the original date strings and parsed dates
+      console.log('Goal:', goal.name, 'Created:', goal.createdAt, 'Updated:', goal.updatedAt);
+      
       const createdDate = new Date(goal.createdAt);
       const updatedDate = new Date(goal.updatedAt);
+      
+      console.log('Parsed Created:', createdDate, 'Valid:', !isNaN(createdDate.getTime()));
+      console.log('Parsed Updated:', updatedDate, 'Valid:', !isNaN(updatedDate.getTime()));
 
       // Find the month when the goal was created
       const createdMonthIndex = monthsData.findIndex(month => {
