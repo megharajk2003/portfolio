@@ -77,27 +77,26 @@ export default function GoalHeatMap() {
 
     // Process each goal and calculate cumulative progress
     goals.forEach(goal => {
-      // Debug: Log the original date strings and parsed dates
-      console.log('Goal:', goal.name, 'Created:', goal.createdAt, 'Updated:', goal.updatedAt);
-      
+      // Parse dates and use UTC to avoid timezone issues
       const createdDate = new Date(goal.createdAt);
       const updatedDate = new Date(goal.updatedAt);
       
-      console.log('Parsed Created:', createdDate, 'Valid:', !isNaN(createdDate.getTime()));
-      console.log('Parsed Updated:', updatedDate, 'Valid:', !isNaN(updatedDate.getTime()));
+      // Create UTC dates for comparison to avoid timezone shifts
+      const createdUTC = new Date(createdDate.getUTCFullYear(), createdDate.getUTCMonth(), createdDate.getUTCDate());
+      const updatedUTC = new Date(updatedDate.getUTCFullYear(), updatedDate.getUTCMonth(), updatedDate.getUTCDate());
 
-      // Find the month when the goal was created
+      // Find the month when the goal was created (using UTC dates)
       const createdMonthIndex = monthsData.findIndex(month => {
         const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === createdDate.getFullYear() && 
-               monthDate.getMonth() === createdDate.getMonth();
+        return monthDate.getFullYear() === createdUTC.getFullYear() && 
+               monthDate.getMonth() === createdUTC.getMonth();
       });
 
-      // Find the month when the goal was last updated
+      // Find the month when the goal was last updated (using UTC dates)
       const updatedMonthIndex = monthsData.findIndex(month => {
         const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === updatedDate.getFullYear() && 
-               monthDate.getMonth() === updatedDate.getMonth();
+        return monthDate.getFullYear() === updatedUTC.getFullYear() && 
+               monthDate.getMonth() === updatedUTC.getMonth();
       });
 
       if (createdMonthIndex !== -1) {
