@@ -20,8 +20,8 @@ export const users = pgTable("users", {
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
   profileImageUrl: varchar("profile_image_url", { length: 500 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Comprehensive Profile Schema matching the provided structure
@@ -158,8 +158,8 @@ export const profiles = pgTable("profiles", {
   isPublic: boolean("is_public").default(false),
 
   // Timestamps
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Learning and Gamification Tables (unchanged)
@@ -188,7 +188,7 @@ export const userProgress = pgTable("user_progress", {
   currentLesson: integer("current_lesson").default(0),
   isCompleted: boolean("is_completed").default(false),
   xpEarned: integer("xp_earned").default(0),
-  completedAt: timestamp("completed_at"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
   finalExamPassed: boolean("final_exam_passed").default(false),
   finalExamScore: integer("final_exam_score"),
   finalExamAttempts: integer("final_exam_attempts").default(0),
@@ -211,7 +211,7 @@ export const lessonProgress = pgTable("lesson_progress", {
   quizScore: integer("quiz_score"),
   quizAttempts: integer("quiz_attempts").default(0),
   xpEarned: integer("xp_earned").default(0),
-  completedAt: timestamp("completed_at"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
 });
 
 // Table for storing quiz questions and answers
@@ -245,7 +245,7 @@ export const quizAttempts = pgTable("quiz_attempts", {
   score: integer("score").notNull(),
   totalQuestions: integer("total_questions").notNull(),
   passed: boolean("passed").notNull(),
-  completedAt: timestamp("completed_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Badge system for achievements
@@ -261,7 +261,7 @@ export const badges = pgTable("badges", {
   criteria: jsonb("criteria"), // JSON object with completion criteria
   xpReward: integer("xp_reward").default(0),
   rarity: varchar("rarity", { length: 20 }).$type<"common" | "rare" | "epic" | "legendary">().default("common"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 export const userBadges = pgTable("user_badges", {
@@ -274,7 +274,7 @@ export const userBadges = pgTable("user_badges", {
   badgeId: varchar("badge_id")
     .notNull()
     .references(() => badges.id, { onDelete: "cascade" }),
-  earnedAt: timestamp("earned_at").defaultNow(),
+  earnedAt: timestamp("earned_at", { withTimezone: true }).defaultNow(),
   relatedId: varchar("related_id"), // Course ID, module ID, etc.
 }, (table) => ({
   unique: { columns: [table.userId, table.badgeId] },
@@ -290,7 +290,7 @@ export const userStats = pgTable("user_stats", {
   totalXp: integer("total_xp").default(0),
   currentStreak: integer("current_streak").default(0),
   longestStreak: integer("longest_streak").default(0),
-  lastActivityDate: timestamp("last_activity_date"),
+  lastActivityDate: timestamp("last_activity_date", { withTimezone: true }),
   portfolioViews: integer("portfolio_views").default(0),
 });
 
@@ -456,8 +456,8 @@ export const education = pgTable("education", {
   gradeOrScore: text("grade_or_score"),
   description: text("description"),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Dedicated Skills Table
@@ -472,8 +472,8 @@ export const skills = pgTable("skills", {
   name: text("name").notNull(),
   level: integer("level").default(5), // 1-10 scale
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Dedicated Projects Table
@@ -494,8 +494,8 @@ export const projects = pgTable("projects", {
   startDate: text("start_date"), // YYYY-MM format
   endDate: text("end_date"), // YYYY-MM format
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Dedicated Certifications Table
@@ -512,8 +512,8 @@ export const certifications = pgTable("certifications", {
   url: text("url"),
   description: text("description"),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Dedicated Achievements Table
@@ -528,8 +528,8 @@ export const achievements = pgTable("achievements", {
   description: text("description"),
   year: text("year"),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Portfolio Tables for Individual Items
@@ -547,8 +547,8 @@ export const workExperience = pgTable("work_experience", {
   endDate: text("end_date"),
   description: text("description"),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const volunteerExperience = pgTable("volunteer_experience", {
@@ -563,8 +563,8 @@ export const volunteerExperience = pgTable("volunteer_experience", {
   description: text("description").notNull(),
   year: text("year").notNull(),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const publications = pgTable("publications", {
@@ -580,8 +580,8 @@ export const publications = pgTable("publications", {
   year: text("year").notNull(),
   url: text("url"),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const organizations = pgTable("organizations", {
@@ -596,8 +596,8 @@ export const organizations = pgTable("organizations", {
   year: text("year").notNull(),
   contribution: text("contribution").notNull(),
   isVisible: boolean("is_visible").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // AI Career Features Tables
@@ -615,7 +615,7 @@ export const careerAdvisories = pgTable("career_advisories", {
   targetRole: text("target_role"),
   skillGaps: jsonb("skill_gaps").$type<string[]>(),
   nextSteps: jsonb("next_steps").$type<string[]>(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const careerTimelines = pgTable("career_timelines", {
@@ -635,7 +635,7 @@ export const careerTimelines = pgTable("career_timelines", {
   }[]>(),
   targetRole: text("target_role"),
   estimatedDuration: text("estimated_duration"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const generatedResumes = pgTable("generated_resumes", {
@@ -657,8 +657,8 @@ export const generatedResumes = pgTable("generated_resumes", {
   }>(),
   template: text("template").default("professional"),
   targetRole: text("target_role"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const chatSessions = pgTable("chat_sessions", {
@@ -675,8 +675,8 @@ export const chatSessions = pgTable("chat_sessions", {
     timestamp: string;
   }[]>(),
   isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Forum Tables
@@ -692,8 +692,8 @@ export const forumPosts = pgTable("forum_posts", {
   likesCount: integer("likes_count").default(0),
   repliesCount: integer("replies_count").default(0),
   isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const forumReplies = pgTable("forum_replies", {
@@ -710,8 +710,8 @@ export const forumReplies = pgTable("forum_replies", {
   likesCount: integer("likes_count").default(0),
   parentReplyId: varchar("parent_reply_id"),
   isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const forumLikes = pgTable("forum_likes", {
@@ -723,7 +723,7 @@ export const forumLikes = pgTable("forum_likes", {
     .references(() => users.id, { onDelete: "cascade" }),
   postId: varchar("post_id").references(() => forumPosts.id, { onDelete: "cascade" }),
   replyId: varchar("reply_id").references(() => forumReplies.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Types for AI Career Features
@@ -1233,9 +1233,9 @@ export const goals = pgTable("goals", {
   totalSubtopics: integer("total_subtopics").default(0),
   completedSubtopics: integer("completed_subtopics").default(0),
   isCompleted: boolean("is_completed").default(false),
-  completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const goalCategories = pgTable("goal_categories", {
@@ -1249,7 +1249,7 @@ export const goalCategories = pgTable("goal_categories", {
   description: text("description"),
   totalTopics: integer("total_topics").default(0),
   completedTopics: integer("completed_topics").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const goalTopics = pgTable("goal_topics", {
@@ -1263,8 +1263,8 @@ export const goalTopics = pgTable("goal_topics", {
   description: text("description"),
   totalSubtopics: integer("total_subtopics").default(0),
   completedSubtopics: integer("completed_subtopics").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const goalSubtopics = pgTable("goal_subtopics", {
@@ -1285,10 +1285,10 @@ export const goalSubtopics = pgTable("goal_subtopics", {
     .default("medium")
     .notNull(),
   notes: text("notes"),
-  dueDate: timestamp("due_date"),
-  completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  dueDate: timestamp("due_date", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Goal tracking insert schemas and types
@@ -1341,7 +1341,7 @@ export const notifications = pgTable("notifications", {
   isRead: boolean("is_read").default(false),
   actionUrl: varchar("action_url", { length: 500 }), // Optional URL for notification action
   metadata: jsonb("metadata"), // Store related IDs, progress data, etc.
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
