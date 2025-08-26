@@ -397,6 +397,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Full error:", error);
         return res.status(500).json({
           message: "Failed to delete work experience",
+
+
+  // Update subtopic
+  app.put("/api/subtopics/:id", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const subtopicId = req.params.id;
+      const { name, description, priority, dueDate, notes } = req.body;
+
+      const updateData: any = {};
+      if (name !== undefined) updateData.name = name;
+      if (description !== undefined) updateData.description = description;
+      if (priority !== undefined) updateData.priority = priority;
+      if (dueDate !== undefined) updateData.dueDate = dueDate;
+      if (notes !== undefined) updateData.notes = notes;
+
+      const updatedSubtopic = await storage.updateGoalSubtopic(subtopicId, updateData);
+
+      if (!updatedSubtopic) {
+        return res.status(404).json({ message: "Subtopic not found" });
+      }
+
+      res.json(updatedSubtopic);
+    } catch (error) {
+      console.error("Error updating subtopic:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Delete subtopic
+  app.delete("/api/subtopics/:id", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const subtopicId = req.params.id;
+      const deleted = await storage.deleteGoalSubtopic(subtopicId);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Subtopic not found" });
+      }
+
+      res.json({ message: "Subtopic deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting subtopic:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
           error: error.message,
           stack: error.stack,
         });

@@ -497,6 +497,106 @@ export class PgStorage implements IStorage {
       },
       {
         id: "badge-first-steps",
+
+
+  async updateGoalSubtopic(
+    subtopicId: string,
+    updateData: Partial<InsertGoalSubtopic>
+  ): Promise<GoalSubtopic | undefined> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith("subtopics_")) {
+          const subtopics = this.fallbackData.get(key) || [];
+          const index = subtopics.findIndex((s: any) => s.id === subtopicId);
+          if (index !== -1) {
+            subtopics[index] = {
+              ...subtopics[index],
+              ...updateData,
+              dueDate: updateData.dueDate ? new Date(updateData.dueDate) : subtopics[index].dueDate,
+              updatedAt: new Date(),
+            };
+            this.fallbackData.set(key, subtopics);
+            return subtopics[index];
+          }
+        }
+      }
+      return undefined;
+    }
+
+    try {
+      const updatePayload = {
+        ...updateData,
+        dueDate: updateData.dueDate ? new Date(updateData.dueDate) : undefined,
+        updatedAt: new Date(),
+      };
+
+      // Remove undefined values
+      Object.keys(updatePayload).forEach(key => {
+        if (updatePayload[key as keyof typeof updatePayload] === undefined) {
+          delete updatePayload[key as keyof typeof updatePayload];
+        }
+      });
+
+      const [subtopic] = await db
+        .update(goalSubtopics)
+        .set(updatePayload)
+        .where(eq(goalSubtopics.id, subtopicId))
+        .returning();
+
+      if (subtopic) {
+        // Update topic progress counters
+        await this.updateTopicProgressCounters(subtopic.topicId);
+      }
+
+      return subtopic;
+    } catch (error) {
+      console.error("Error updating subtopic:", error);
+      return undefined;
+    }
+  }
+
+  async deleteGoalSubtopic(subtopicId: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith("subtopics_")) {
+          const subtopics = this.fallbackData.get(key) || [];
+          const index = subtopics.findIndex((s: any) => s.id === subtopicId);
+          if (index !== -1) {
+            subtopics.splice(index, 1);
+            this.fallbackData.set(key, subtopics);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    try {
+      // Get the subtopic first to know which topic to update
+      const subtopic = await db
+        .select()
+        .from(goalSubtopics)
+        .where(eq(goalSubtopics.id, subtopicId))
+        .limit(1);
+
+      if (subtopic.length === 0) {
+        return false;
+      }
+
+      const topicId = subtopic[0].topicId;
+
+      await db.delete(goalSubtopics).where(eq(goalSubtopics.id, subtopicId));
+
+      // Update topic progress counters
+      await this.updateTopicProgressCounters(topicId);
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting subtopic:", error);
+      return false;
+    }
+  }
+
         title: "First Steps",
         description: "Welcome to your learning journey!",
         icon: "Star",
@@ -4359,6 +4459,7 @@ export class PgStorage implements IStorage {
         id: randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
+        dueDate: subtopicData.dueDate ? new Date(subtopicData.dueDate) : null,
       };
       const subtopics =
         this.fallbackData.get(`subtopics_${subtopicData.topicId}`) || [];
@@ -4374,6 +4475,7 @@ export class PgStorage implements IStorage {
           ...subtopicData,
           status: subtopicData.status as "pending" | "start" | "completed",
           priority: subtopicData.priority as "low" | "medium" | "high",
+          dueDate: subtopicData.dueDate ? new Date(subtopicData.dueDate) : null,
         },
       ])
       .returning();

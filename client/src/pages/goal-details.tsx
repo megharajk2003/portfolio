@@ -153,6 +153,15 @@ export default function GoalDetails() {
     dueDate: "",
   });
 
+  const [editingSubtopic, setEditingSubtopic] = useState<GoalSubtopic | null>(null);
+  const [editSubtopicData, setEditSubtopicData] = useState({
+    name: "",
+    description: "",
+    priority: "medium" as "low" | "medium" | "high",
+    dueDate: "",
+    notes: "",
+  });
+
   // Fetch goal with categories, topics, and subtopics
   const { data: goal, isLoading } = useQuery<Goal>({
     queryKey: [`/api/goals/${goalId}`],
@@ -277,6 +286,77 @@ export default function GoalDetails() {
     },
   });
 
+  // Update subtopic mutation
+  const updateSubtopicMutation = useMutation({
+    mutationFn: async ({
+      subtopicId,
+      subtopicData,
+    }: {
+      subtopicId: string;
+      subtopicData: typeof editSubtopicData;
+    }) => {
+      const response = await fetch(`/api/subtopics/${subtopicId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(subtopicData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update subtopic");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Subtopic updated successfully",
+      });
+      setEditingSubtopic(null);
+      queryClient.invalidateQueries({ queryKey: [`/api/goals/${goalId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update subtopic",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete subtopic mutation
+  const deleteSubtopicMutation = useMutation({
+    mutationFn: async (subtopicId: string) => {
+      const response = await fetch(`/api/subtopics/${subtopicId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete subtopic");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Subtopic deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/goals/${goalId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete subtopic",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStatusChange = useCallback(
     (subtopicId: string, currentStatus: "pending" | "start" | "completed") => {
       // Cycle through the 3 states: pending -> start -> completed -> pending
@@ -314,6 +394,37 @@ export default function GoalDetails() {
     },
     [newSubtopicData, createSubtopicMutation, toast]
   );
+
+  const handleEditSubtopic = useCallback((subtopic: GoalSubtopic) => {
+    setEditingSubtopic(subtopic);
+    setEditSubtopicData({
+      name: subtopic.name,
+      description: subtopic.description || "",
+      priority: subtopic.priority,
+      dueDate: subtopic.dueDate ? new Date(subtopic.dueDate).toISOString().split('T')[0] : "",
+      notes: subtopic.notes || "",
+    });
+  }, []);
+
+  const handleUpdateSubtopic = useCallback(() => {
+    if (!editingSubtopic || !editSubtopicData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Subtopic name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateSubtopicMutation.mutate({
+      subtopicId: editingSubtopic.id,
+      subtopicData: editSubtopicData,
+    });
+  }, [editingSubtopic, editSubtopicData, updateSubtopicMutation, toast]);
+
+  const handleDeleteSubtopic = useCallback((subtopicId: string) => {
+    deleteSubtopicMutation.mutate(subtopicId);
+  }, [deleteSubtopicMutation]);
 
   if (isLoading) {
     return (
@@ -923,6 +1034,45 @@ export default function GoalDetails() {
 
                                                           <Button
                                                             size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => handleEditSubtopic(subtopic)}
+                                                            data-testid={`button-edit-${subtopic.id}`}
+                                                          >
+                                                            <Edit className="h-4 w-4" />
+                                                          </Button>
+
+                                                          <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                              <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="text-red-600 hover:text-red-700"
+                                                                data-testid={`button-delete-${subtopic.id}`}
+                                                              >
+                                                                <Trash2 className="h-4 w-4" />
+                                                              </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                              <AlertDialogHeader>
+                                                                <AlertDialogTitle>Delete Subtopic</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                  Are you sure you want to delete "{subtopic.name}"? This action cannot be undone.
+                                                                </AlertDialogDescription>
+                                                              </AlertDialogHeader>
+                                                              <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                  onClick={() => handleDeleteSubtopic(subtopic.id)}
+                                                                  className="bg-red-600 hover:bg-red-700"
+                                                                >
+                                                                  Delete
+                                                                </AlertDialogAction>
+                                                              </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                          </AlertDialog>
+
+                                                          <Button
+                                                            size="sm"
                                                             variant={
                                                               subtopic.status ===
                                                               "completed"
@@ -978,6 +1128,108 @@ export default function GoalDetails() {
               </Accordion>
             )}
           </div>
+
+          {/* Edit Subtopic Dialog */}
+          <Dialog open={!!editingSubtopic} onOpenChange={(open) => !open && setEditingSubtopic(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Subtopic</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Name</label>
+                  <Input
+                    value={editSubtopicData.name}
+                    onChange={(e) =>
+                      setEditSubtopicData((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter subtopic name"
+                    data-testid="input-edit-subtopic-name"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Textarea
+                    value={editSubtopicData.description}
+                    onChange={(e) =>
+                      setEditSubtopicData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
+                    placeholder="Optional description"
+                    data-testid="input-edit-subtopic-description"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Priority</label>
+                  <select
+                    value={editSubtopicData.priority}
+                    onChange={(e) =>
+                      setEditSubtopicData((prev) => ({
+                        ...prev,
+                        priority: e.target.value as "low" | "medium" | "high",
+                      }))
+                    }
+                    className="w-full p-2 border rounded-md"
+                    data-testid="select-edit-subtopic-priority"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Due Date</label>
+                  <Input
+                    type="date"
+                    value={editSubtopicData.dueDate}
+                    onChange={(e) =>
+                      setEditSubtopicData((prev) => ({
+                        ...prev,
+                        dueDate: e.target.value,
+                      }))
+                    }
+                    data-testid="input-edit-subtopic-due-date"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Notes</label>
+                  <Textarea
+                    value={editSubtopicData.notes}
+                    onChange={(e) =>
+                      setEditSubtopicData((prev) => ({
+                        ...prev,
+                        notes: e.target.value,
+                      }))
+                    }
+                    placeholder="Optional notes"
+                    data-testid="input-edit-subtopic-notes"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleUpdateSubtopic}
+                    disabled={updateSubtopicMutation.isPending}
+                    className="flex-1"
+                    data-testid="button-update-subtopic"
+                  >
+                    {updateSubtopicMutation.isPending ? "Updating..." : "Update Subtopic"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditingSubtopic(null)}
+                    data-testid="button-cancel-edit"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
