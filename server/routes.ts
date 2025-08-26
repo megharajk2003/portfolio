@@ -2696,6 +2696,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
+      console.log(`🎯 [BACKEND DEBUG] Returning goal with ${goal.categories?.length || 0} categories for goalId: ${goalId}`);
+      if (goal.categories && goal.categories.length > 0) {
+        console.log(`🎯 [BACKEND DEBUG] Categories being returned:`, goal.categories.map(c => `${c.name} (${c.topics?.length || 0} topics)`));
+      } else {
+        console.log(`🎯 [BACKEND DEBUG] ❌ NO CATEGORIES in goal data being returned!`);
+      }
+
       res.json(goal);
     } catch (error) {
       console.error("Error fetching goal:", error);

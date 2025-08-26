@@ -161,8 +161,12 @@ export default function GoalDetails() {
 
   // Debug logging for frontend
   console.log(`🎯 [FRONTEND DEBUG] Goal data received:`, goal);
+  console.log(`🎯 [FRONTEND DEBUG] Goal categories length:`, goal?.categories?.length);
   console.log(`🎯 [FRONTEND DEBUG] Goal categories:`, goal?.categories);
-  if (goal?.categories) {
+  console.log(`🎯 [FRONTEND DEBUG] Goal csvData length:`, goal?.csvData?.length);
+  console.log(`🎯 [FRONTEND DEBUG] Goal totals - total: ${goal?.totalSubtopics}, completed: ${goal?.completedSubtopics}`);
+  
+  if (goal?.categories && goal.categories.length > 0) {
     goal.categories.forEach((category, catIndex) => {
       console.log(`🎯 [FRONTEND DEBUG] Category ${catIndex}: ${category.name} with ${category.topics?.length || 0} topics`);
       category.topics?.forEach((topic, topicIndex) => {
@@ -172,6 +176,8 @@ export default function GoalDetails() {
         }
       });
     });
+  } else {
+    console.log(`🎯 [FRONTEND DEBUG] ❌ NO CATEGORIES FOUND! This means the structured data isn't being retrieved properly.`);
   }
 
   // Delete goal mutation
