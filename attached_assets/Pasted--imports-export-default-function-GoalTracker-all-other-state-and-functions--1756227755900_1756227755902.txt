@@ -1,0 +1,382 @@
+// ... imports
+
+export default function GoalTracker() {
+  // ... all other state and functions
+
+  // Generate cumulative progress data for the line chart based on real dates
+  const cumulativeProgressData = useMemo(() => {
+    if (!goals.length) return [];
+
+    // Filter goals based on selected year and month
+    const filteredGoals = goals.filter((goal) => {
+      const goalDate = new Date(goal.createdAt);
+      const goalYear = goalDate.getFullYear();
+      const goalMonth = String(goalDate.getMonth() + 1).padStart(2, "0");
+
+      const yearMatch = goalYear <= selectedYear;
+      const monthMatch = selectedMonth === "all" || goalMonth === selectedMonth;
+
+      return (
+        yearMatch &&
+        (selectedMonth === "all" || goalYear === selectedYear) &&
+        monthMatch
+      );
+    });
+
+    if (!filteredGoals.length) return [];
+
+    // Generate date range based on selected filters
+    let startDate: Date;
+    let endDate: Date;
+
+    if (selectedMonth === "all") {
+      startDate = new Date(selectedYear, 0, 1);
+      endDate = new Date(selectedYear, 11, 31);
+    } else {
+      const monthIndex = parseInt(selectedMonth) - 1;
+      startDate = new Date(selectedYear, monthIndex, 1);
+      endDate = new Date(selectedYear, monthIndex + 1, 0);
+    }
+
+    const dataPoints: GoalProgressData[] = [];
+    const current = new Date(startDate);
+
+    const isMonthView = selectedMonth !== "all";
+    const intervalDays = isMonthView ? 1 : 7;
+
+    while (current <= endDate) {
+      const dateStr = isMonthView
+        ? current.toLocaleDateString("en-US", { day: "2-digit" })
+        : current.toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+          });
+
+      const progressPoint: GoalProgressData = { date: dateStr };
+
+      filteredGoals.forEach((goal) => {
+        // --- START OF FIX ---
+        // Normalize goal dates to the beginning of the day (midnight) for accurate day-by-day comparison.
+        // This prevents time-of-day from pushing the progress to the next day on the chart.
+        const goalCreated = new Date(goal.createdAt);
+        goalCreated.setHours(0, 0, 0, 0);
+
+        const goalUpdated = new Date(goal.updatedAt);
+        goalUpdated.setHours(0, 0, 0, 0);
+        // --- END OF FIX ---
+
+        if (current >= goalCreated) {
+          const totalTimespan = goalUpdated.getTime() - goalCreated.getTime();
+          const currentTimespan = current.getTime() - goalCreated.getTime();
+
+          let cumulativeProgress = 0;
+          if (totalTimespan > 0) {
+            const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
+            cumulativeProgress = Math.floor(
+              goal.completedSubtopics * progressRatio
+            );
+          } else if (current >= goalUpdated) {
+            cumulativeProgress = goal.completedSubtopics;
+          }
+
+          progressPoint[goal.name] = Math.max(0, cumulativeProgress);
+        } else {
+          progressPoint[goal.name] = 0;
+        }
+      });
+
+      dataPoints.push(progressPoint);
+      current.setDate(current.getDate() + intervalDays);
+    }
+
+    return dataPoints;
+  }, [goals, selectedYear, selectedMonth]);
+
+  // ... return statement and the rest of the component
+  return (
+    <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <div
+          className="container mx-auto p-6 space-y-6"
+          data-testid="goal-tracker-page"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h1
+                className="text-3xl font-bold text-gray-900 dark:text-gray-100  dark:text-white"
+                data-testid="page-title"
+              >
+                Goal Tracker
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Upload CSV files and track your progress with interactive
+                visualizations
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-upload-csv">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload CSV
+                  </Button>
+                </DialogTrigger>
+                <DialogContent data-testid="dialog-upload-csv">
+                  <DialogHeader>
+                    <DialogTitle>Upload Goal from CSV</DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="goalName">Goal Name</Label>
+                      <Input
+                        id="goalName"
+                        placeholder="Enter a name for your goal"
+                        value={goalName}
+                        onChange={(e) => setGoalName(e.target.value)}
+                        data-testid="input-goal-name"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="csvFile">CSV File</Label>
+                      <Input
+                        id="csvFile"
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) =>
+                          setCsvFile(e.target.files?.[0] || null)
+                        }
+                        data-testid="input-csv-file"
+                      />
+                      <p className="text-sm text-gray-600 mt-2">
+                        CSV should contain columns: Category, Topic, Status
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={handleCSVUpload}
+                      disabled={isUploading || !csvFile || !goalName.trim()}
+                      className="w-full"
+                      data-testid="button-submit-csv"
+                    >
+                      {isUploading ? "Uploading..." : "Create Goal"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
+          {/* Goals Overview */}
+          {goalsLoading ? (
+            <div className="text-center py-8" data-testid="loading-goals">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="text-gray-600 mt-2">Loading your goals...</p>
+            </div>
+          ) : goals.length === 0 ? (
+            <Card data-testid="empty-state">
+              <CardContent className="text-center py-12">
+                <FileSpreadsheet className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  No goals yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Upload a CSV file to create your first goal and start tracking
+                  your progress
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {goals.map((goal) => (
+                <Card
+                  key={goal.id}
+                  className="cursor-pointer transition-all hover:shadow-lg"
+                  onClick={() => navigate(`/goal-tracker/${goal.id}`)}
+                  data-testid={`card-goal-${goal.id}`}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-500" />
+                      {goal.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">Progress</span>
+                          <span className="text-sm text-gray-600">
+                            {goal.completedSubtopics} / {goal.totalSubtopics}
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            (goal.completedSubtopics / goal.totalSubtopics) *
+                            100
+                          }
+                          className="h-2"
+                          data-testid={`progress-goal-${goal.id}`}
+                        />
+                      </div>
+
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">
+                          {goal.totalSubtopics > 0 ? Math.round(
+                            (goal.completedSubtopics / goal.totalSubtopics) *
+                              100
+                          ) : 0}
+                          % Complete
+                        </span>
+                        <Badge
+                          className={getStatusColor(
+                            goal.completedSubtopics === goal.totalSubtopics
+                              ? "completed"
+                              : goal.completedSubtopics > 0
+                              ? "in_progress"
+                              : "pending"
+                          )}
+                        >
+                          {goal.completedSubtopics === goal.totalSubtopics
+                            ? "Completed"
+                            : goal.completedSubtopics > 0
+                            ? "In Progress"
+                            : "Not Started"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Study Performance Chart */}
+          {goals.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                    Study Performance
+                  </CardTitle>
+
+                  <div className="flex gap-4 items-center">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="year-select">Year:</Label>
+                      <Select
+                        value={selectedYear.toString()}
+                        onValueChange={(value) =>
+                          setSelectedYear(parseInt(value))
+                        }
+                      >
+                        <SelectTrigger className="w-32" id="year-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(
+                            { length: 5 },
+                            (_, i) => currentYear - i
+                          ).map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="month-select">Month:</Label>
+                      <Select
+                        value={selectedMonth}
+                        onValueChange={setSelectedMonth}
+                      >
+                        <SelectTrigger className="w-40" id="month-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {months.map((month) => (
+                            <SelectItem key={month.value} value={month.value}>
+                              {month.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
+                  This chart shows the cumulative number of subtopics you've
+                  completed for each goal{" "}
+                  {selectedMonth !== "all"
+                    ? `in ${
+                        months.find((m) => m.value === selectedMonth)?.label
+                      } ${selectedYear}`
+                    : `in ${selectedYear}`}
+                  .
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div style={{ width: "100%", height: "320px" }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={cumulativeProgressData}
+                      margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fontSize: 11, fill: "#6b7280" }}
+                        stroke="#9ca3af"
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: "#6b7280" }}
+                        stroke="#9ca3af"
+                        domain={[0, "dataMax + 2"]}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
+                        labelStyle={{ color: "#1f2937", fontWeight: "bold" }}
+                      />
+                      <Legend wrapperStyle={{ paddingTop: "20px" }} />
+                      {goals.map((goal, index) => (
+                        <Line
+                          key={goal.id}
+                          type="monotone"
+                          dataKey={goal.name}
+                          stroke={GOAL_COLORS[index % GOAL_COLORS.length]}
+                          strokeWidth={2}
+                          dot={{
+                            r: 3,
+                            fill: GOAL_COLORS[index % GOAL_COLORS.length],
+                          }}
+                          activeDot={{
+                            r: 5,
+                            fill: GOAL_COLORS[index % GOAL_COLORS.length],
+                          }}
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

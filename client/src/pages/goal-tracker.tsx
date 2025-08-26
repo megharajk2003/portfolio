@@ -273,8 +273,15 @@ export default function GoalTracker() {
       const progressPoint: GoalProgressData = { date: dateStr };
 
       filteredGoals.forEach((goal) => {
+        // --- START OF FIX ---
+        // Normalize goal dates to the beginning of the day (midnight) for accurate day-by-day comparison.
+        // This prevents time-of-day from pushing the progress to the next day on the chart.
         const goalCreated = new Date(goal.createdAt);
+        goalCreated.setHours(0, 0, 0, 0);
+
         const goalUpdated = new Date(goal.updatedAt);
+        goalUpdated.setHours(0, 0, 0, 0);
+        // --- END OF FIX ---
 
         if (current >= goalCreated) {
           // Calculate actual progress based on time elapsed
