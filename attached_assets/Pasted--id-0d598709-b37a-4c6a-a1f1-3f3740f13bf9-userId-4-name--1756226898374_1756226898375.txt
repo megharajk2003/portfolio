@@ -1,0 +1,528 @@
+[
+    {
+        "id": "0d598709-b37a-4c6a-a1f1-3f3740f13bf9",
+        "userId": 4,
+        "name": "ssc",
+        "description": "Goal created from CSV with 85 subtopics",
+        "csvData": [
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "Symbolic/Number",
+                "category": "SSC CGL",
+                "subtopic": "\"Analogies (Semantic"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "Symbolic/Number",
+                "category": "SSC CGL",
+                "subtopic": "\"Classification (Semantic"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "Alphabet",
+                "category": "SSC CGL",
+                "subtopic": "\"Series (Number"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Coding-Decoding"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Blood Relations"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Direction Sense Test"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Logical Venn Diagrams"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Syllogism"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Statement & Conclusions"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Statement & Assumptions"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Critical Thinking"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Emotional Intelligence"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Social Intelligence"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Word Building"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Numerical Operations"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Symbolic Operations"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Puzzles"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Space Visualization"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Space Orientation"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Problem Solving"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "Judgment",
+                "category": "SSC CGL",
+                "subtopic": "\"Analysis"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Visual Memory"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "Observation\"",
+                "category": "SSC CGL",
+                "subtopic": "\"Discrimination"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Relationship Concepts"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Arithmetical Reasoning and Figural Classification"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Embedded Figures"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Pattern Completion"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Figure Classification"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Odd One Out"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Punched hole/pattern-folding & unfolding"
+            },
+            {
+                "topic": "General Intelligence & Reasoning",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Figural Pattern-folding and completion"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "Medieval",
+                "category": "SSC CGL",
+                "subtopic": "\"Indian History (Ancient"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Culture"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Geography (India and the World)"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Economic Scene"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "General Policy"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "Chemistry",
+                "category": "SSC CGL",
+                "subtopic": "\"Scientific Research (Physics"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Environmental Issues"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Science & Technology"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Indian Constitution and Polity"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Current Affairs (last 6-8 months)"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Books and Authors"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Awards and Honors"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Important Days and Dates"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Sports Affairs & Personalities"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Government Schemes & Policies"
+            },
+            {
+                "topic": "General Awareness",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "India and its neighboring countries"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "Decimals",
+                "category": "SSC CGL",
+                "subtopic": "\"Number Systems (Whole Numbers"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "on progress",
+                "category": "SSC CGL",
+                "subtopic": "Percentages"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "Completed",
+                "category": "SSC CGL",
+                "subtopic": "Ratio and Proportion"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Square Roots"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Averages"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "on progress",
+                "category": "SSC CGL",
+                "subtopic": "Interest (Simple and Compound)"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Profit and Loss"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Discount"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Partnership Business"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Mixture and Alligation"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "Completed",
+                "category": "SSC CGL",
+                "subtopic": "Time and Distance"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Time and Work"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Basic Algebraic Identities"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Elementary Surds (simple problems)"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Graphs of Linear Equations"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "Circles",
+                "category": "SSC CGL",
+                "subtopic": "\"Geometry (Triangles"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Mensuration (Area/Volume 2D/3D shapes)"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Trigonometric Ratios"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Degree and Radian Measures"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "sin²θ + cos²θ = 1)\"",
+                "category": "SSC CGL",
+                "subtopic": "\"Standard Identities (e.g."
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Complementary Angles"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Heights and Distances (simple problems)"
+            },
+            {
+                "topic": "Quantitative Aptitude",
+                "status": "Graphs",
+                "category": "SSC CGL",
+                "subtopic": "\"Data Interpretation (Tables"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Synonyms"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Antonyms"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Homonyms"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "One Word Substitution"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Idioms & Phrases"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Spotting Errors"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Sentence Structure"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Sentence Correction/Improvement"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Fill in the Blanks"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Active/Passive Voice of Verbs"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Conversion into Direct/Indirect Narration"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Reading Comprehension Passages"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Cloze Test"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Shuffling of Sentence parts"
+            },
+            {
+                "topic": "English Comprehension",
+                "status": "pending",
+                "category": "SSC CGL",
+                "subtopic": "Shuffling of Sentences in a passage (Para Jumbles)"
+            }
+        ],
+        "totalTopics": 4,
+        "completedTopics": 2,
+        "totalSubtopics": 85,
+        "completedSubtopics": 2,
+        "isCompleted": false,
+        "completedAt": null,
+        "createdAt": "2025-08-26T16:45:45.754Z",
+        "updatedAt": "2025-08-26T16:45:46.038Z"
+    }
+]
