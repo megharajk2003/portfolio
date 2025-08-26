@@ -225,6 +225,8 @@ export default function GoalTracker() {
     // Filter goals based on selected year and month
     const filteredGoals = goals.filter((goal) => {
       const goalDate = new Date(goal.createdAt);
+      goalDate.setHours(0, 0, 0, 0); // Normalize to start of day
+      
       const goalYear = goalDate.getFullYear();
       const goalMonth = String(goalDate.getMonth() + 1).padStart(2, "0");
 
@@ -273,20 +275,21 @@ export default function GoalTracker() {
       const progressPoint: GoalProgressData = { date: dateStr };
 
       filteredGoals.forEach((goal) => {
-        // --- START OF FIX ---
-        // Normalize goal dates to the beginning of the day (midnight) for accurate day-by-day comparison.
-        // This prevents time-of-day from pushing the progress to the next day on the chart.
+        // Normalize goal dates to the beginning of the day (midnight) for accurate day-by-day comparison
         const goalCreated = new Date(goal.createdAt);
         goalCreated.setHours(0, 0, 0, 0);
 
         const goalUpdated = new Date(goal.updatedAt);
         goalUpdated.setHours(0, 0, 0, 0);
-        // --- END OF FIX ---
 
-        if (current >= goalCreated) {
+        // Also normalize the current date for consistent comparison
+        const currentNormalized = new Date(current);
+        currentNormalized.setHours(0, 0, 0, 0);
+
+        if (currentNormalized >= goalCreated) {
           // Calculate actual progress based on time elapsed
           const totalTimespan = goalUpdated.getTime() - goalCreated.getTime();
-          const currentTimespan = current.getTime() - goalCreated.getTime();
+          const currentTimespan = currentNormalized.getTime() - goalCreated.getTime();
 
           let cumulativeProgress = 0;
           if (totalTimespan > 0) {
@@ -294,7 +297,7 @@ export default function GoalTracker() {
             cumulativeProgress = Math.round(
               goal.completedSubtopics * progressRatio
             );
-          } else if (current >= goalUpdated) {
+          } else if (currentNormalized >= goalUpdated) {
             cumulativeProgress = goal.completedSubtopics;
           }
 
