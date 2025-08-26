@@ -3365,6 +3365,35 @@ export class PgStorage implements IStorage {
             const userStats = await this.getUserStats(userId);
             return (userStats?.totalXp || 0) >= criteria.totalXp;
           }
+          if (criteria?.skillsAdded) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const otherDetails = profile.otherDetails as any;
+            if (!otherDetails?.skills) return false;
+            
+            const totalSkills = Object.values(otherDetails.skills).reduce((total: number, skillArray: any) => {
+              return total + (Array.isArray(skillArray) ? skillArray.length : 0);
+            }, 0);
+            return totalSkills >= criteria.skillsAdded;
+          }
+          if (criteria?.lessonsCompleted) {
+            // Count completed lessons from user progress
+            const userProgress = await this.getUserProgress(userId);
+            const totalLessonsCompleted = userProgress.reduce((total, progress) => {
+              return total + (progress.currentLesson || 0);
+            }, 0);
+            return totalLessonsCompleted >= criteria.lessonsCompleted;
+          }
+          if (criteria?.modulesCompleted) {
+            const userProgress = await this.getUserProgress(userId);
+            const completedModules = userProgress.filter(p => p.isCompleted).length;
+            return completedModules >= criteria.modulesCompleted;
+          }
+          if (criteria?.goalsCompleted) {
+            const userGoals = await this.getUserGoals(userId);
+            const completedGoals = userGoals.filter((g: any) => g.isCompleted === true).length;
+            return completedGoals >= criteria.goalsCompleted;
+          }
           if (criteria?.firstLogin) {
             return true; // Assume this is checked on first login
           }
@@ -3381,6 +3410,83 @@ export class PgStorage implements IStorage {
           if (criteria?.examScore) {
             // Check for perfect scores or high achievements
             return true; // Placeholder for now
+          }
+          if (criteria?.profileCompleted) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            
+            // Calculate profile completion percentage
+            let completionScore = 0;
+            const personalDetails = profile.personalDetails as any;
+            const contactDetails = profile.contactDetails as any;
+            const otherDetails = profile.otherDetails as any;
+            
+            // Personal details (40 points max)
+            if (personalDetails?.fullName) completionScore += 10;
+            if (personalDetails?.photo) completionScore += 10;
+            if (personalDetails?.summary) completionScore += 10;
+            if (personalDetails?.location?.city) completionScore += 5;
+            if (personalDetails?.roleOrTitle) completionScore += 5;
+            
+            // Contact details (20 points max)
+            if (contactDetails?.email) completionScore += 10;
+            if (contactDetails?.linkedin || contactDetails?.githubOrPortfolio) completionScore += 10;
+            
+            // Other details (40 points max)
+            if (otherDetails?.education && otherDetails.education.length > 0) completionScore += 10;
+            if (otherDetails?.workExperience && otherDetails.workExperience.length > 0) completionScore += 10;
+            if (otherDetails?.skills && Object.keys(otherDetails.skills).some(key => otherDetails.skills[key]?.length > 0)) completionScore += 10;
+            if (otherDetails?.projects && otherDetails.projects.length > 0) completionScore += 10;
+            
+            return completionScore >= criteria.profileCompleted;
+          }
+          if (criteria?.skillsAdded) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const otherDetails = profile.otherDetails as any;
+            if (!otherDetails?.skills) return false;
+            
+            const totalSkills = Object.values(otherDetails.skills).reduce((total: number, skillArray: any) => {
+              return total + (Array.isArray(skillArray) ? skillArray.length : 0);
+            }, 0);
+            return totalSkills >= criteria.skillsAdded;
+          }
+          if (criteria?.projectsAdded) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const otherDetails = profile.otherDetails as any;
+            return (otherDetails?.projects?.length || 0) >= criteria.projectsAdded;
+          }
+          if (criteria?.workExperienceAdded) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const otherDetails = profile.otherDetails as any;
+            return (otherDetails?.workExperience?.length || 0) >= criteria.workExperienceAdded;
+          }
+          if (criteria?.educationAdded) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const otherDetails = profile.otherDetails as any;
+            return (otherDetails?.education?.length || 0) >= criteria.educationAdded;
+          }
+          if (criteria?.bioAdded) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const personalDetails = profile.personalDetails as any;
+            return !!(personalDetails?.summary && personalDetails.summary.length > 10);
+          }
+          if (criteria?.profilePicture) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const personalDetails = profile.personalDetails as any;
+            return !!(personalDetails?.photo);
+          }
+          if (criteria?.goalsCreated) {
+            const userGoals = await this.getUserGoals(userId);
+            return userGoals.length >= criteria.goalsCreated;
+          }
+          if (criteria?.firstLogin) {
+            return true; // This should be checked on actual first login
           }
           return true;
 

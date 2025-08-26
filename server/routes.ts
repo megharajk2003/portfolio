@@ -135,6 +135,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profileData = insertProfileSchema.parse(req.body);
       const profile = await storage.createProfile(profileData);
+      
+      // Check for achievement badges after profile creation
+      if (profileData.userId) {
+        await storage.checkAndAwardBadges(profileData.userId, "achievement");
+      }
+      
       res.json(profile);
     } catch (error) {
       console.error("Error creating profile:", error);
@@ -160,6 +166,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profileData = insertProfileSchema.parse(req.body);
       const profile = await storage.createProfile(profileData);
+      
+      // Check for achievement badges after profile upsert
+      if (profileData.userId) {
+        await storage.checkAndAwardBadges(profileData.userId, "achievement");
+      }
+      
       res.json(profile);
     } catch (error) {
       console.error("Error upserting profile:", error);
@@ -187,6 +199,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
+      
+      // Check for achievement badges after profile update
+      const userIdInt = parseInt(userId);
+      if (!isNaN(userIdInt)) {
+        await storage.checkAndAwardBadges(userIdInt, "achievement");
+      }
+      
       res.json(profile);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -275,6 +294,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const experience = await storage.createWorkExperience(experienceData);
       console.log("💼 POST /api/work-experience - Created record:", experience);
+      
+      // Check for achievement badges after work experience creation
+      if (experienceData.userId) {
+        const userIdInt = parseInt(experienceData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
+      }
+      
       res.json(experience);
     } catch (error) {
       console.error("Error creating work experience:", error);
@@ -554,6 +582,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🎨 POST /api/skills - Parsed data:", skillData);
       const skill = await storage.createSkill(skillData);
       console.log("🎨 POST /api/skills - Created record:", skill);
+      
+      // Check for achievement badges after skill creation
+      if (skillData.userId) {
+        const userIdInt = parseInt(skillData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
+      }
+      
       res.json(skill);
     } catch (error) {
       console.error("Error creating skill:", error);
@@ -667,6 +704,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const projectData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(projectData);
+      
+      // Check for achievement badges after project creation
+      if (projectData.userId) {
+        const userIdInt = parseInt(projectData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
+      }
+      
       res.json(project);
     } catch (error) {
       console.error("Error creating project:", error);
@@ -2643,6 +2689,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const goal = await storage.createGoal(goalData);
+      
+      // Check for achievement badges after goal creation
+      await storage.checkAndAwardBadges(req.user.id, "achievement");
+      
       res.status(201).json(goal);
     } catch (error) {
       console.error("Error creating goal:", error);
