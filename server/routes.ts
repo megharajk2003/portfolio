@@ -397,7 +397,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Full error:", error);
         return res.status(500).json({
           message: "Failed to delete work experience",
+          error: error.message,
+          stack: error.stack,
+        });
+      }
 
+      return res.status(500).json({
+        message: "Unknown error occurred",
+        error: JSON.stringify(error),
+      });
+    }
+  });
 
   // Update subtopic
   app.put("/api/subtopics/:id", async (req, res) => {
@@ -437,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const subtopicId = req.params.id;
-      const deleted = await storage.deleteGoalSubtopic(subtopicId);
+      const deleted = await storage.deleteSubtopic(subtopicId);
 
       if (!deleted) {
         return res.status(404).json({ message: "Subtopic not found" });
@@ -447,18 +457,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting subtopic:", error);
       res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-          error: error.message,
-          stack: error.stack,
-        });
-      }
-
-      return res.status(500).json({
-        message: "Unknown error occurred",
-        error: JSON.stringify(error),
-      });
     }
   });
 
@@ -1003,11 +1001,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const achievement = await storage.createAchievement(achievementData);
       
       // Check for achievement badges after achievement creation
-      if (achievementData.userId) {
-        const userIdInt = parseInt(achievementData.userId.toString());
-        if (!isNaN(userIdInt)) {
-          await storage.checkAndAwardBadges(userIdInt, "achievement");
-        }
+      if (req.user?.id) {
+        await storage.checkAndAwardBadges(req.user.id, "achievement");
       }
       
       res.json(achievement);

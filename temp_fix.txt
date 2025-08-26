@@ -1,0 +1,10 @@
+  async createProfile(profileData: InsertProfile): Promise<Profile> {
+    const [profile] = await db
+      .insert(profiles)
+      .values({
+        ...profileData,
+        userId: parseInt(profileData.userId.toString()),
+      })
+      .returning();
+    return profile;
+  }
