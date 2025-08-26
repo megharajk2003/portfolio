@@ -77,26 +77,25 @@ export default function GoalHeatMap() {
 
     // Process each goal and calculate cumulative progress
     goals.forEach(goal => {
-      // Parse dates and use UTC to avoid timezone issues
-      const createdDate = new Date(goal.createdAt);
-      const updatedDate = new Date(goal.updatedAt);
+      // Parse the ISO string and extract date components directly from the string to avoid timezone issues
+      const createdDateStr = goal.createdAt.split('T')[0]; // Get just the date part (YYYY-MM-DD)
+      const updatedDateStr = goal.updatedAt.split('T')[0]; // Get just the date part (YYYY-MM-DD)
       
-      // Create UTC dates for comparison to avoid timezone shifts
-      const createdUTC = new Date(createdDate.getUTCFullYear(), createdDate.getUTCMonth(), createdDate.getUTCDate());
-      const updatedUTC = new Date(updatedDate.getUTCFullYear(), updatedDate.getUTCMonth(), updatedDate.getUTCDate());
+      const createdDate = new Date(createdDateStr + 'T00:00:00'); // Local midnight
+      const updatedDate = new Date(updatedDateStr + 'T00:00:00'); // Local midnight
 
-      // Find the month when the goal was created (using UTC dates)
+      // Find the month when the goal was created
       const createdMonthIndex = monthsData.findIndex(month => {
         const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === createdUTC.getFullYear() && 
-               monthDate.getMonth() === createdUTC.getMonth();
+        return monthDate.getFullYear() === createdDate.getFullYear() && 
+               monthDate.getMonth() === createdDate.getMonth();
       });
 
-      // Find the month when the goal was last updated (using UTC dates)
+      // Find the month when the goal was last updated
       const updatedMonthIndex = monthsData.findIndex(month => {
         const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === updatedUTC.getFullYear() && 
-               monthDate.getMonth() === updatedUTC.getMonth();
+        return monthDate.getFullYear() === updatedDate.getFullYear() && 
+               monthDate.getMonth() === updatedDate.getMonth();
       });
 
       if (createdMonthIndex !== -1) {
