@@ -52,71 +52,64 @@ export default function GoalHeatMap() {
   const chartData = useMemo(() => {
     if (goals.length === 0) return [];
 
-    // Get the last 12 months
+    // Get the last 14 days
     const today = new Date();
-    const monthsData: ChartDataPoint[] = [];
+    const daysData: ChartDataPoint[] = [];
 
-    // Initialize the last 12 months
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    // Initialize the last 14 days
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+      const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
 
       const dataPoint: ChartDataPoint = {
-        date: monthKey,
+        date: dateKey,
         month: monthName
       };
 
-      // Initialize all goals with 0 completed topics for this month
+      // Initialize all goals with 0 completed topics for this day
       goals.forEach(goal => {
         dataPoint[goal.name] = 0;
       });
 
-      monthsData.push(dataPoint);
+      daysData.push(dataPoint);
     }
 
-    // Process each goal and calculate cumulative progress
+    // Process each goal to populate the chart data
     goals.forEach(goal => {
-      // Normalize dates to just the calendar day (ignore time)
-      const createdDate = new Date(goal.createdAt);
-      const updatedDate = new Date(goal.updatedAt);
-      
-      // Normalize both dates to start of day for proper comparison
-      const createdNormalized = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate());
-      const updatedNormalized = new Date(updatedDate.getFullYear(), updatedDate.getMonth(), updatedDate.getDate());
+      // Normalize goal dates to start of day for accurate comparison
+      const createdNormalized = new Date(goal.createdAt);
+      createdNormalized.setHours(0, 0, 0, 0);
 
-      // Find the month when the goal was created (using normalized dates)
-      const createdMonthIndex = monthsData.findIndex(month => {
-        const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === createdNormalized.getFullYear() && 
-               monthDate.getMonth() === createdNormalized.getMonth();
-      });
+      const updatedNormalized = new Date(goal.updatedAt);
+      updatedNormalized.setHours(0, 0, 0, 0);
 
-      // Find the month when the goal was last updated (using normalized dates)
-      const updatedMonthIndex = monthsData.findIndex(month => {
-        const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === updatedNormalized.getFullYear() && 
-               monthDate.getMonth() === updatedNormalized.getMonth();
-      });
+      // Calculate daily progress for each day in the 2-week period
+      daysData.forEach(dayData => {
+        const dayDate = new Date(dayData.date);
+        dayDate.setHours(0, 0, 0, 0);
 
-      if (createdMonthIndex !== -1) {
-        // Set cumulative progress for each month
-        for (let i = 0; i < monthsData.length; i++) {
-          if (i < createdMonthIndex) {
-            // Before creation, no progress
-            monthsData[i][goal.name] = 0;
-          } else if (i <= updatedMonthIndex) {
-            // During active period, show current completed topics
-            monthsData[i][goal.name] = goal.completedTopics;
-          } else {
-            // After last update, maintain the same progress
-            monthsData[i][goal.name] = goal.completedTopics;
+        if (dayDate >= createdNormalized) {
+          // Calculate progress based on time elapsed
+          const totalTimespan = updatedNormalized.getTime() - createdNormalized.getTime();
+          const currentTimespan = dayDate.getTime() - createdNormalized.getTime();
+
+          let cumulativeProgress = 0;
+          if (totalTimespan > 0) {
+            const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
+            cumulativeProgress = Math.round(goal.completedTopics * progressRatio);
+          } else if (dayDate >= updatedNormalized) {
+            cumulativeProgress = goal.completedTopics;
           }
+
+          dayData[goal.name] = Math.max(0, cumulativeProgress);
+        } else {
+          dayData[goal.name] = 0;
         }
-      }
+      });
     });
 
-    return monthsData;
+    return daysData;
   }, [goals]);
 
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -129,7 +122,7 @@ export default function GoalHeatMap() {
           Study Performance
         </CardTitle>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          This chart shows the cumulative number of topics you've completed for each goal over the past 12 months.
+          This chart shows the cumulative number of topics you've completed for each goal over the past 2 weeks.
         </p>
       </CardHeader>
       <CardContent>
