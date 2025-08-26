@@ -706,205 +706,151 @@ export default function GoalDetails() {
                                                   </div>
                                                 </div>
                                               </div>
-                                              <div>
-                                                <label className="text-sm font-medium">
-                                                  Priority
-                                                </label>
-                                                <select
-                                                  value={
-                                                    newSubtopicData.priority
-                                                  }
-                                                  onChange={(e) =>
-                                                    setNewSubtopicData(
-                                                      (prev) => ({
-                                                        ...prev,
-                                                        priority: e.target
-                                                          .value as
-                                                          | "low"
-                                                          | "medium"
-                                                          | "high",
-                                                      })
-                                                    )
-                                                  }
-                                                  className="w-full p-2 border rounded-md"
-                                                  data-testid="select-subtopic-priority"
-                                                >
-                                                  <option value="low">
-                                                    Low
-                                                  </option>
-                                                  <option value="medium">
-                                                    Medium
-                                                  </option>
-                                                  <option value="high">
-                                                    High
-                                                  </option>
-                                                </select>
-                                              </div>
-                                              <div>
-                                                <label className="text-sm font-medium">
-                                                  Due Date
-                                                </label>
-                                                <Input
-                                                  type="date"
-                                                  value={
-                                                    newSubtopicData.dueDate
-                                                  }
-                                                  onChange={(e) =>
-                                                    setNewSubtopicData(
-                                                      (prev) => ({
-                                                        ...prev,
-                                                        dueDate: e.target.value,
-                                                      })
-                                                    )
-                                                  }
-                                                  data-testid="input-subtopic-due-date"
-                                                />
-                                              </div>
 
-                                              <Dialog>
-                                                <DialogTrigger asChild>
-                                                  <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    data-testid={`button-add-subtopic-${topic.id}`}
-                                                    onClick={(e) =>
-                                                      e.stopPropagation()
-                                                    }
-                                                  >
-                                                    <Plus className="h-4 w-4 mr-1" />
-                                                    Add Subtopic
-                                                  </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                  <DialogHeader>
-                                                    <DialogTitle>
-                                                      Add New Subtopic
-                                                    </DialogTitle>
-                                                  </DialogHeader>
-                                                  <div className="space-y-4">
-                                                    <div>
-                                                      <label className="text-sm font-medium">
-                                                        Name
-                                                      </label>
-                                                      <Input
-                                                        value={
-                                                          newSubtopicData.name
-                                                        }
-                                                        onChange={(e) =>
-                                                          setNewSubtopicData(
-                                                            (prev) => ({
-                                                              ...prev,
-                                                              name: e.target
-                                                                .value,
-                                                            })
-                                                          )
-                                                        }
-                                                        placeholder="Enter subtopic name"
-                                                        data-testid="input-subtopic-name"
-                                                      />
-                                                    </div>
-                                                    <div>
-                                                      <label className="text-sm font-medium">
-                                                        Description
-                                                      </label>
-                                                      <Textarea
-                                                        value={
-                                                          newSubtopicData.description
-                                                        }
-                                                        onChange={(e) =>
-                                                          setNewSubtopicData(
-                                                            (prev) => ({
-                                                              ...prev,
-                                                              description:
-                                                                e.target.value,
-                                                            })
-                                                          )
-                                                        }
-                                                        placeholder="Optional description"
-                                                        data-testid="input-subtopic-description"
-                                                      />
-                                                    </div>
-                                                    <div>
-                                                      <label className="text-sm font-medium">
-                                                        Priority
-                                                      </label>
-                                                      <select
-                                                        value={
-                                                          newSubtopicData.priority
-                                                        }
-                                                        onChange={(e) =>
-                                                          setNewSubtopicData(
-                                                            (prev) => ({
-                                                              ...prev,
-                                                              priority: e.target
-                                                                .value as
-                                                                | "low"
-                                                                | "medium"
-                                                                | "high",
-                                                            })
-                                                          )
-                                                        }
-                                                        className="w-full p-2 border rounded-md"
-                                                        data-testid="select-subtopic-priority"
-                                                      >
-                                                        <option value="low">
-                                                          Low
-                                                        </option>
-                                                        <option value="medium">
-                                                          Medium
-                                                        </option>
-                                                        <option value="high">
-                                                          High
-                                                        </option>
-                                                      </select>
-                                                    </div>
-                                                    <div>
-                                                      <label className="text-sm font-medium">
-                                                        Due Date
-                                                      </label>
-                                                      <Input
-                                                        type="date"
-                                                        value={
-                                                          newSubtopicData.dueDate
-                                                        }
-                                                        onChange={(e) =>
-                                                          setNewSubtopicData(
-                                                            (prev) => ({
-                                                              ...prev,
-                                                              dueDate:
-                                                                e.target.value,
-                                                            })
-                                                          )
-                                                        }
-                                                        data-testid="input-subtopic-due-date"
-                                                      />
-                                                    </div>
-                                                    <Button
-                                                      onClick={() =>
-                                                        handleCreateSubtopic(
-                                                          topic.id
-                                                        )
-                                                      }
-                                                      disabled={
-                                                        createSubtopicMutation.isPending
-                                                      }
-                                                      className="w-full"
-                                                      data-testid="button-create-subtopic"
-                                                    >
-                                                      {createSubtopicMutation.isPending
-                                                        ? "Creating..."
-                                                        : "Create Subtopic"}
-                                                    </Button>
-                                                  </div>
-                                                </DialogContent>
-                                              </Dialog>
+                                              
                                             </AccordionTrigger>
 
                                             <AccordionContent className="px-4 pb-4">
+                                              <div className="mb-4">
+                                                <Dialog>
+                                                  <DialogTrigger asChild>
+                                                    <Button
+                                                      size="sm"
+                                                      variant="outline"
+                                                      data-testid={`button-add-subtopic-${topic.id}`}
+                                                    >
+                                                      <Plus className="h-4 w-4 mr-1" />
+                                                      Add Subtopic
+                                                    </Button>
+                                                  </DialogTrigger>
+                                                  <DialogContent>
+                                                    <DialogHeader>
+                                                      <DialogTitle>
+                                                        Add New Subtopic to {topic.name}
+                                                      </DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="space-y-4">
+                                                      <div>
+                                                        <label className="text-sm font-medium">
+                                                          Name
+                                                        </label>
+                                                        <Input
+                                                          value={
+                                                            newSubtopicData.name
+                                                          }
+                                                          onChange={(e) =>
+                                                            setNewSubtopicData(
+                                                              (prev) => ({
+                                                                ...prev,
+                                                                name: e.target
+                                                                  .value,
+                                                              })
+                                                            )
+                                                          }
+                                                          placeholder="Enter subtopic name"
+                                                          data-testid="input-subtopic-name"
+                                                        />
+                                                      </div>
+                                                      <div>
+                                                        <label className="text-sm font-medium">
+                                                          Description
+                                                        </label>
+                                                        <Textarea
+                                                          value={
+                                                            newSubtopicData.description
+                                                          }
+                                                          onChange={(e) =>
+                                                            setNewSubtopicData(
+                                                              (prev) => ({
+                                                                ...prev,
+                                                                description:
+                                                                  e.target.value,
+                                                              })
+                                                            )
+                                                          }
+                                                          placeholder="Optional description"
+                                                          data-testid="input-subtopic-description"
+                                                        />
+                                                      </div>
+                                                      <div>
+                                                        <label className="text-sm font-medium">
+                                                          Priority
+                                                        </label>
+                                                        <select
+                                                          value={
+                                                            newSubtopicData.priority
+                                                          }
+                                                          onChange={(e) =>
+                                                            setNewSubtopicData(
+                                                              (prev) => ({
+                                                                ...prev,
+                                                                priority: e.target
+                                                                  .value as
+                                                                  | "low"
+                                                                  | "medium"
+                                                                  | "high",
+                                                              })
+                                                            )
+                                                          }
+                                                          className="w-full p-2 border rounded-md"
+                                                          data-testid="select-subtopic-priority"
+                                                        >
+                                                          <option value="low">
+                                                            Low
+                                                          </option>
+                                                          <option value="medium">
+                                                            Medium
+                                                          </option>
+                                                          <option value="high">
+                                                            High
+                                                          </option>
+                                                        </select>
+                                                      </div>
+                                                      <div>
+                                                        <label className="text-sm font-medium">
+                                                          Due Date
+                                                        </label>
+                                                        <Input
+                                                          type="date"
+                                                          value={
+                                                            newSubtopicData.dueDate
+                                                          }
+                                                          onChange={(e) =>
+                                                            setNewSubtopicData(
+                                                              (prev) => ({
+                                                                ...prev,
+                                                                dueDate:
+                                                                  e.target.value,
+                                                              })
+                                                            )
+                                                          }
+                                                          data-testid="input-subtopic-due-date"
+                                                        />
+                                                      </div>
+                                                      <Button
+                                                        onClick={() =>
+                                                          handleCreateSubtopic(
+                                                            topic.id
+                                                          )
+                                                        }
+                                                        disabled={
+                                                          createSubtopicMutation.isPending
+                                                        }
+                                                        className="w-full"
+                                                        data-testid="button-create-subtopic"
+                                                      >
+                                                        {createSubtopicMutation.isPending
+                                                          ? "Creating..."
+                                                          : "Create Subtopic"}
+                                                      </Button>
+                                                    </div>
+                                                  </DialogContent>
+                                                </Dialog>
+                                              </div>
+                                              
                                               {topic.subtopics.length === 0 ? (
                                                 <div className="text-center py-6 text-gray-500">
-                                                  No subtopics yet. Click "Add
-                                                  Subtopic" to get started.
+                                                  No subtopics yet. Click "Add Subtopic" above to get started.
                                                 </div>
                                               ) : (
                                                 <div className="space-y-3">
