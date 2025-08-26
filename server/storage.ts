@@ -4127,7 +4127,7 @@ export class PgStorage implements IStorage {
     try {
       const result = await db
         .insert(notifications)
-        .values(notification)
+        .values([notification as any])
         .returning();
       return result[0];
     } catch (error) {
@@ -4155,7 +4155,7 @@ export class PgStorage implements IStorage {
         .update(notifications)
         .set({ isRead: true })
         .where(eq(notifications.id, id));
-      return result.rowCount > 0;
+      return result.length > 0;
     } catch (error) {
       console.error("Error marking notification as read:", error);
       return false;
@@ -4201,7 +4201,7 @@ export class PgStorage implements IStorage {
       const result = await db
         .delete(notifications)
         .where(eq(notifications.id, id));
-      return result.rowCount > 0;
+      return result.length > 0;
     } catch (error) {
       console.error("Error deleting notification:", error);
       return false;
