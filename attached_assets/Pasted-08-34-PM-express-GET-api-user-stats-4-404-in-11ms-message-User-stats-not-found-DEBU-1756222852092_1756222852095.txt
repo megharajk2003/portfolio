@@ -1,0 +1,3790 @@
+08:34 PM [express] GET /api/user-stats/4 404 in 11ms :: {"message":"User stats not found"}
+🎯 [DEBUG] Goal found: {
+  id: 'fad4c6e9-51ed-4db6-a03f-0f63ad85dd03',
+  userId: 4,
+  name: 'tnpsc',
+  description: 'Goal created from CSV with 111 subtopics',
+  csvData: [
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Power of reasoning "',
+      category: 'Part A: General Studies',
+      subtopic: '"Scientific knowledge and scientific temper'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Rote learning vs conceptual learning'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'present',
+      category: 'Part A: General Studies',
+      subtopic: '"Science as a tool to understand the past'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'General scientific laws "',
+      category: 'Part A: General Studies',
+      subtopic: '"Nature of universe'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Properties of matter',
+      category: 'Part A: General Studies',
+      subtopic: '"Mechanics'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Electricity',
+      category: 'Part A: General Studies',
+      subtopic: '"Everyday application of Mechanics'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Laser',
+      category: 'Part A: General Studies',
+      subtopic: '"Everyday application of Nuclear Physics'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'acids',
+      category: 'Part A: General Studies',
+      subtopic: '"Elements and compounds'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'fertilizers',
+      category: 'Part A: General Studies',
+      subtopic: '"Petroleum products'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'classification of living organisms "',
+      category: 'Part A: General Studies',
+      subtopic: '"Main concepts of life science'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'genetics',
+      category: 'Part A: General Studies',
+      subtopic: '"Evolution'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Environment and ecology'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Latest inventions in science and technology & Current affairs'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Location - Physical features'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: 'rainfall',
+      category: 'Part A: General Studies',
+      subtopic: '"Monsoon'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Water resources - Rivers in India'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: 'Minerals and Natural Resources "',
+      category: 'Part A: General Studies',
+      subtopic: '"Soil'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Forest and Wildlife - Agricultural pattern'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Transport - Communication'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Social Geography: Population density and distribution'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: 'linguistic groups and major tribes "',
+      category: 'Part A: General Studies',
+      subtopic: '"Racial'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Natural calamity - Disaster management'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Environmental pollution - Reasons and preventive measures'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Climate change - Green energy'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Geographical landmarks & Current affairs'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Indus Valley Civilization'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Delhi Sultans',
+      category: 'Part A: General Studies',
+      subtopic: '"Guptas'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Age of Vijayanagaram and Bahmani Kingdoms - South Indian History'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'National Renaissance - Early uprising against British rule'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Bhagat Singh',
+      category: 'Part A: General Studies',
+      subtopic: '"Indian National Congress & Emergence of leaders (Ambedkar'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Different modes of agitation: Satyagraha and Militant Movements'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Communalism and Partition'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Change and continuity in the socio-cultural history of India'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Unity in Diversity (Race',
+      category: 'Part A: General Studies',
+      subtopic: '"Characteristics of Indian Culture'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Social harmony "',
+      category: 'Part A: General Studies',
+      subtopic: '"India as a secular state'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Science',
+      category: 'Part A: General Studies',
+      subtopic: '"Prominent personalities (Arts'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Salient features "',
+      category: 'Part A: General Studies',
+      subtopic: '"Constitution of India: Preamble'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'State and Union Territory "',
+      category: 'Part A: General Studies',
+      subtopic: '"Union'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Fundamental Rights',
+      category: 'Part A: General Studies',
+      subtopic: '"Citizenship'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Union Legislature "',
+      category: 'Part A: General Studies',
+      subtopic: '"Union Executive'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'State Legislature "',
+      category: 'Part A: General Studies',
+      subtopic: '"State Executive'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Panchayat Raj "',
+      category: 'Part A: General Studies',
+      subtopic: '"Local Governments'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Spirit of federalism: Centre-State relationships'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Judiciary in India',
+      category: 'Part A: General Studies',
+      subtopic: '"Election'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Anti-corruption measures (Lokpal',
+      category: 'Part A: General Studies',
+      subtopic: '"Corruption in public life'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Empowerment of Women "',
+      category: 'Part A: General Studies',
+      subtopic: '"Right to Information'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Human Rights Charter "',
+      category: 'Part A: General Studies',
+      subtopic: '"Consumer Protection Forums'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Political parties and political system in India & Current affairs'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Five-year plan models',
+      category: 'Part A: General Studies',
+      subtopic: '"Nature of Indian Economy'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'RBI',
+      category: 'Part A: General Studies',
+      subtopic: '"Sources of revenue'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Resource sharing (Union-State)',
+      category: 'Part A: General Studies',
+      subtopic: '"Finance Commission'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Employment Generation',
+      category: 'Part A: General Studies',
+      subtopic: '"Structure of Indian Economy'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Industrial growth "',
+      category: 'Part A: General Studies',
+      subtopic: '"Application of Science and Technology in Agriculture'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Social problems (Population',
+      category: 'Part A: General Studies',
+      subtopic: '"Rural welfare oriented programmes'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Human Development Indicators in Tamil Nadu (comparative)'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: "Impact of social reform movements on TN's socio-economic development"
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'and welfare schemes in TN "',
+      category: 'Part A: General Studies',
+      subtopic: '"Political parties'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Economic trends in Tamil Nadu "',
+      category: 'Part A: General Studies',
+      subtopic: '"Reservation policy'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: "Role of social welfare schemes in TN's socio-economic development"
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Social Justice and social harmony as cornerstones of development'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Education and health systems in Tamil Nadu'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Geography of Tamil Nadu and its impact on economic growth'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Achievements of Tamil Nadu in various fields & e-Governance'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'General administration',
+      category: 'Part A: General Studies',
+      subtopic: '"Public awareness'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Problems in public delivery systems'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Current socio-economic issues & Current affairs'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'archaeological discoveries "',
+      category: 'Part A: General Studies',
+      subtopic: '"History of Tamil Society'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Tamil literature from Sangam age till contemporary times'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'Relevance',
+      category: 'Part A: General Studies',
+      subtopic: '"Thirukkural: Significance'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Role of Tamil Nadu in freedom struggle & Early agitations'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Role of women in freedom struggle'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Evolution of 19th & 20th century socio-political movements in TN'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'Growth of Rationalism "',
+      category: 'Part A: General Studies',
+      subtopic: '"Justice Party'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'Dravidian Movement',
+      category: 'Part A: General Studies',
+      subtopic: '"Self Respect Movement'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Contributions of Thanthai Periyar and Perarignar Anna'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Percentage "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Simplification'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Lowest Common Multiple (LCM) "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Highest Common Factor (HCF)'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Ratio and Proportion'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Compound interest "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Simple interest'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Volume "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Area'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Time and Work'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Logical reasoning'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: 'Dice "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Puzzles'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Visual reasoning'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Alpha numeric reasoning'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Number series'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'சேர்த்து எழுதுதல்',
+      category: 'Part C: General Tamil',
+      subtopic: '"பிரித்து எழுதுதல்'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'னகர/ணகர',
+      category: 'Part C: General Tamil',
+      subtopic: '"லகர/ளகர/ழகர'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'வினைமுற்று',
+      category: 'Part C: General Tamil',
+      subtopic: '"வேர்ச்சொல் அறிதல்'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'எதிர்ச்சொல்',
+      category: 'Part C: General Tamil',
+      subtopic: '"அயற்சொல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'ஓரெழுத்து ஒரு மொழி',
+      category: 'Part C: General Tamil',
+      subtopic: '"எதிர்ச்சொல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'அகர வரிசைப்படி சீர்செய்தல் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பொருந்தாச் சொல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'சொல்லும் பொருளும் அறிதல் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பேச்சு வழக்கு/எழுத்து வழக்கு'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: '',
+      category: 'Part C: General Tamil',
+      subtopic: 'கோடிட்ட இடத்தில் சரியான சொல்லைத் தேர்ந்தெடுத்தல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'ஊர்ப் பெயர்களின் மரூஉவை எழுதுக "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பொருத்தமான பொருளைத் தெரிவு செய்தல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'தூய தமிழ்ச் சொற்கள் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பிழை திருத்துக (ஒரு/ஓர்)'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'அடைப்புக்குள் உள்ள சொல்லைச் சேர்த்தல் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"சொற்களை இணைத்துப் புதிய சொல் உருவாக்குதல்'
+    },
+    {
+      topic: 'அலகு III: எழுதும் திறன்',
+      status: '',
+      category: 'Part C: General Tamil',
+      subtopic: 'சொற்களை ஒழுங்குபடுத்திச் சொற்றொடர் அமைத்தல்'
+    },
+    {
+      topic: 'அலகு III: எழுதும் திறன்',
+      status: 'செயப்பாட்டு வினை',
+      category: 'Part C: General Tamil',
+      subtopic: '"தொடர் வகைகள் (செய்வினை'
+    },
+    {
+      topic: 'அலகு III: எழுதும் திறன்',
+      status: 'பால்',
+      category: 'Part C: General Tamil',
+      subtopic: '"மரபுத் தமிழ் (திணை'
+    },
+    ... 11 more items
+  ],
+  totalTopics: 3,
+  completedTopics: 1,
+  totalSubtopics: 15,
+  completedSubtopics: 1,
+  isCompleted: false,
+  completedAt: null,
+  createdAt: 2025-08-26T15:25:06.857Z,
+  updatedAt: 2025-08-26T15:25:17.566Z
+}
+🎯 [DEBUG] Categories found: 3 [
+  {
+    id: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    goalId: 'fad4c6e9-51ed-4db6-a03f-0f63ad85dd03',
+    name: 'Part A: General Studies',
+    description: 'Category for Part A: General Studies',
+    totalTopics: 6,
+    completedTopics: 1,
+    createdAt: 2025-08-26T15:25:06.873Z
+  },
+  {
+    id: '32734632-fdaa-4b3d-bbaa-0914a37bfb4f',
+    goalId: 'fad4c6e9-51ed-4db6-a03f-0f63ad85dd03',
+    name: 'Part B: Aptitude & Mental Ability',
+    description: 'Category for Part B: Aptitude & Mental Ability',
+    totalTopics: 2,
+    completedTopics: 0,
+    createdAt: 2025-08-26T15:25:07.140Z
+  },
+  {
+    id: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    goalId: 'fad4c6e9-51ed-4db6-a03f-0f63ad85dd03',
+    name: 'Part C: General Tamil',
+    description: 'Category for Part C: General Tamil',
+    totalTopics: 7,
+    completedTopics: 0,
+    createdAt: 2025-08-26T15:25:07.180Z
+  }
+]
+🎯 [DEBUG] Topics for category Part A: General Studies: 6 [
+  {
+    id: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    categoryId: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    name: 'Unit 1: General Science',
+    description: 'Topic for Unit 1: General Science',
+    totalSubtopics: 13,
+    completedSubtopics: 1,
+    createdAt: 2025-08-26T15:25:06.886Z,
+    updatedAt: 2025-08-26T15:25:17.538Z
+  },
+  {
+    id: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    categoryId: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    name: 'Unit II: Geography of India',
+    description: 'Topic for Unit II: Geography of India',
+    totalSubtopics: 12,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:06.964Z,
+    updatedAt: 2025-08-26T15:25:07.396Z
+  },
+  {
+    id: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    categoryId: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    name: 'Unit III: History & Culture',
+    description: 'Topic for Unit III: History & Culture',
+    totalSubtopics: 11,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.000Z,
+    updatedAt: 2025-08-26T15:25:07.433Z
+  },
+  {
+    id: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    categoryId: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    name: 'Unit IV: Indian Polity',
+    description: 'Topic for Unit IV: Indian Polity',
+    totalSubtopics: 12,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.031Z,
+    updatedAt: 2025-08-26T15:25:07.473Z
+  },
+  {
+    id: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    categoryId: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    name: 'Unit V: Economy & TN Admin',
+    description: 'Topic for Unit V: Economy & TN Admin',
+    totalSubtopics: 18,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.066Z,
+    updatedAt: 2025-08-26T15:25:07.514Z
+  },
+  {
+    id: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    categoryId: 'eb0dd45c-162c-46a8-84da-de68c5459b5a',
+    name: 'Unit VI: TN History & Culture',
+    description: 'Topic for Unit VI: TN History & Culture',
+    totalSubtopics: 9,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.117Z,
+    updatedAt: 2025-08-26T15:25:07.549Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit IV: Indian Polity: 12 [
+  {
+    id: '02ea92aa-ccf0-46f9-9562-fe80c5ced0a6',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Constitution of India: Preamble',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.033Z,
+    updatedAt: 2025-08-26T15:25:07.033Z
+  },
+  {
+    id: 'd45465be-de21-4b23-90cd-1fd07b0ae5a7',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Union',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.036Z,
+    updatedAt: 2025-08-26T15:25:07.036Z
+  },
+  {
+    id: 'a0c4c538-b638-49c1-a8f2-81f4cb8b76aa',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Citizenship',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.039Z,
+    updatedAt: 2025-08-26T15:25:07.039Z
+  },
+  {
+    id: '9ce33f0a-a6f3-4d16-90da-4a5064828321',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Union Executive',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.041Z,
+    updatedAt: 2025-08-26T15:25:07.041Z
+  },
+  {
+    id: '32646e05-8b5b-4e70-925a-791858cdfeba',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"State Executive',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.043Z,
+    updatedAt: 2025-08-26T15:25:07.043Z
+  },
+  {
+    id: '5b1015f2-636c-4af1-a575-7dd8d4873d88',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Local Governments',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.046Z,
+    updatedAt: 2025-08-26T15:25:07.046Z
+  },
+  {
+    id: '65c13633-d219-4f3c-84da-9740b11ed6aa',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: 'Spirit of federalism: Centre-State relationships',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.049Z,
+    updatedAt: 2025-08-26T15:25:07.049Z
+  },
+  {
+    id: 'ae7b5159-2407-4118-84d9-473c9e0607f8',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Election',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.051Z,
+    updatedAt: 2025-08-26T15:25:07.051Z
+  },
+  {
+    id: 'b5c19005-175f-4996-9152-8c3f439e7745',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Corruption in public life',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.054Z,
+    updatedAt: 2025-08-26T15:25:07.054Z
+  },
+  {
+    id: '69d2f8ce-1df5-4ad0-9b73-b14ec6475492',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Right to Information',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.056Z,
+    updatedAt: 2025-08-26T15:25:07.056Z
+  },
+  {
+    id: '5740a70e-2278-4413-8288-55f0a4a79779',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: '"Consumer Protection Forums',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.059Z,
+    updatedAt: 2025-08-26T15:25:07.059Z
+  },
+  {
+    id: '3d800c5a-488b-4dca-990a-800faa9d7e2c',
+    topicId: '35b51bc5-b355-412b-acdc-6b62373a340b',
+    name: 'Political parties and political system in India & Current affairs',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.063Z,
+    updatedAt: 2025-08-26T15:25:07.063Z
+  }
+]
+🎯 [DEBUG] Topics for category Part B: Aptitude & Mental Ability: 2 [
+  {
+    id: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    categoryId: '32734632-fdaa-4b3d-bbaa-0914a37bfb4f',
+    name: 'Unit I: Aptitude',
+    description: 'Topic for Unit I: Aptitude',
+    totalSubtopics: 6,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.147Z,
+    updatedAt: 2025-08-26T15:25:07.598Z
+  },
+  {
+    id: '19e7d146-2129-4b65-a6c0-cedd6ed232fe',
+    categoryId: '32734632-fdaa-4b3d-bbaa-0914a37bfb4f',
+    name: 'Unit II: Reasoning',
+    description: 'Topic for Unit II: Reasoning',
+    totalSubtopics: 5,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.164Z,
+    updatedAt: 2025-08-26T15:25:07.639Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit III: History & Culture: 11 [
+  {
+    id: '25ec5c5c-8dfc-427b-ad88-71c7fa19a0b0',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: 'Indus Valley Civilization',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.004Z,
+    updatedAt: 2025-08-26T15:25:07.004Z
+  },
+  {
+    id: 'baf87844-b2a2-49fc-8347-8ddee5040449',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: '"Guptas',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.006Z,
+    updatedAt: 2025-08-26T15:25:07.006Z
+  },
+  {
+    id: '7be433d1-75e0-47fc-b3a5-715c47efaf89',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: 'Age of Vijayanagaram and Bahmani Kingdoms - South Indian History',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.009Z,
+    updatedAt: 2025-08-26T15:25:07.009Z
+  },
+  {
+    id: '8f996709-7a54-4603-ad54-30ae2e228a3f',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: 'National Renaissance - Early uprising against British rule',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.011Z,
+    updatedAt: 2025-08-26T15:25:07.011Z
+  },
+  {
+    id: 'af8e74c3-cc31-4647-baa2-bbdc8556a11f',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: '"Indian National Congress & Emergence of leaders (Ambedkar',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.014Z,
+    updatedAt: 2025-08-26T15:25:07.014Z
+  },
+  {
+    id: '0593c84d-bfe1-4fa7-b3f4-dd0421f4a1cb',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: 'Different modes of agitation: Satyagraha and Militant Movements',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.016Z,
+    updatedAt: 2025-08-26T15:25:07.016Z
+  },
+  {
+    id: '11fcce48-43c9-496b-b422-1399c0ac6ecc',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: 'Communalism and Partition',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.019Z,
+    updatedAt: 2025-08-26T15:25:07.019Z
+  },
+  {
+    id: '895ba447-8d4a-4fa9-862a-f09bfceaf840',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: 'Change and continuity in the socio-cultural history of India',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.021Z,
+    updatedAt: 2025-08-26T15:25:07.021Z
+  },
+  {
+    id: 'f3a3f823-1dcb-40e9-9ba3-d36a058fa81d',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: '"Characteristics of Indian Culture',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.023Z,
+    updatedAt: 2025-08-26T15:25:07.023Z
+  },
+  {
+    id: '2a1127e4-5773-47f8-9c38-bafff47da0d1',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: '"India as a secular state',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.026Z,
+    updatedAt: 2025-08-26T15:25:07.026Z
+  },
+  {
+    id: 'efbe065a-2576-4d52-bcfc-d87c1a40757a',
+    topicId: 'c5fc8d85-7a8e-4d0b-989c-67ac8355d630',
+    name: '"Prominent personalities (Arts',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.029Z,
+    updatedAt: 2025-08-26T15:25:07.029Z
+  }
+]
+🎯 [DEBUG] Topics for category Part C: General Tamil: 7 [
+  {
+    id: 'e149fe26-e78e-4998-b5bc-3971c583f9c9',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு I: இலக்கணம்',
+    description: 'Topic for அலகு I: இலக்கணம்',
+    totalSubtopics: 4,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.183Z,
+    updatedAt: 2025-08-26T15:25:07.672Z
+  },
+  {
+    id: 'bcae7889-632d-4118-953a-31419930fca0',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு II: சொல்லகராதி',
+    description: 'Topic for அலகு II: சொல்லகராதி',
+    totalSubtopics: 7,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.200Z,
+    updatedAt: 2025-08-26T15:25:07.706Z
+  },
+  {
+    id: '3e0e0578-8f5e-43c0-a066-44b96a000ec7',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு III: எழுதும் திறன்',
+    description: 'Topic for அலகு III: எழுதும் திறன்',
+    totalSubtopics: 4,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.228Z,
+    updatedAt: 2025-08-26T15:25:07.737Z
+  },
+  {
+    id: '3e39dca6-b156-4f76-9af7-a4e649626812',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு IV: கலைச் சொற்கள்',
+    description: 'Topic for அலகு IV: கலைச் சொற்கள்',
+    totalSubtopics: 1,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.244Z,
+    updatedAt: 2025-08-26T15:25:07.753Z
+  },
+  {
+    id: '3a083670-ee0a-4525-9b23-2d16c7204470',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு V: வாசித்தல்',
+    description: 'Topic for அலகு V: வாசித்தல்',
+    totalSubtopics: 2,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.250Z,
+    updatedAt: 2025-08-26T15:25:07.761Z
+  },
+  {
+    id: 'ea883336-35b2-430b-bd47-1e03c882b503',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு VI: எளிய மொழி பெயர்ப்பு',
+    description: 'Topic for அலகு VI: எளிய மொழி பெயர்ப்பு',
+    totalSubtopics: 2,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.262Z,
+    updatedAt: 2025-08-26T15:25:07.765Z
+  },
+  {
+    id: 'f9abe079-6c60-4bed-a2aa-6b9cd9df46f6',
+    categoryId: 'cf519102-2754-4bd7-a79a-ca096497a7ca',
+    name: 'அலகு VII: இலக்கியம்',
+    description: 'Topic for அலகு VII: இலக்கியம்',
+    totalSubtopics: 5,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:25:07.271Z,
+    updatedAt: 2025-08-26T15:25:07.769Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit II: Geography of India: 12 [
+  {
+    id: '2722d1bb-f541-4da8-9457-94b5c73269f0',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Location - Physical features',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.969Z,
+    updatedAt: 2025-08-26T15:25:06.969Z
+  },
+  {
+    id: 'be3a452a-be14-4022-9d03-a9143a097aa9',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: '"Monsoon',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.972Z,
+    updatedAt: 2025-08-26T15:25:06.972Z
+  },
+  {
+    id: '01db3f8a-4cd2-4312-a879-f960f5f42363',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Water resources - Rivers in India',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.974Z,
+    updatedAt: 2025-08-26T15:25:06.974Z
+  },
+  {
+    id: '423e844e-368f-40f0-b995-53dfbab2e162',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: '"Soil',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.977Z,
+    updatedAt: 2025-08-26T15:25:06.977Z
+  },
+  {
+    id: '3480f1ce-5c97-418c-83dd-3fc1e044ee8c',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Forest and Wildlife - Agricultural pattern',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.980Z,
+    updatedAt: 2025-08-26T15:25:06.980Z
+  },
+  {
+    id: 'b1114ae2-d8d9-40e9-aba7-833a54dd801b',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Transport - Communication',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.983Z,
+    updatedAt: 2025-08-26T15:25:06.983Z
+  },
+  {
+    id: 'da023281-8881-4e6b-b618-e4fdcde33fe8',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Social Geography: Population density and distribution',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.985Z,
+    updatedAt: 2025-08-26T15:25:06.985Z
+  },
+  {
+    id: 'a448d2d2-e0b5-4524-af17-5475b030a1eb',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: '"Racial',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.987Z,
+    updatedAt: 2025-08-26T15:25:06.987Z
+  },
+  {
+    id: '5c31bae4-b2e7-48a0-9fc5-fb3809f6ac30',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Natural calamity - Disaster management',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.990Z,
+    updatedAt: 2025-08-26T15:25:06.990Z
+  },
+  {
+    id: '16fb8cb0-816d-4faf-a91b-4083c7cf46e7',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Environmental pollution - Reasons and preventive measures',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.992Z,
+    updatedAt: 2025-08-26T15:25:06.992Z
+  },
+  {
+    id: '00cfe1a6-776f-4337-907e-eb58e7d60a45',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Climate change - Green energy',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.995Z,
+    updatedAt: 2025-08-26T15:25:06.995Z
+  },
+  {
+    id: '622ca3ed-4e24-4b9b-a8c6-5b01eb5e14da',
+    topicId: '0daa9288-63cb-4a95-84bb-0f31388eead9',
+    name: 'Geographical landmarks & Current affairs',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.998Z,
+    updatedAt: 2025-08-26T15:25:06.998Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit 1: General Science: 13 [
+  {
+    id: 'd69ce825-9ed8-4f81-8f29-1def544f9705',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Scientific knowledge and scientific temper',
+    description: null,
+    status: 'completed',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: 2025-08-26T15:25:17.526Z,
+    createdAt: 2025-08-26T15:25:06.897Z,
+    updatedAt: 2025-08-26T15:25:17.526Z
+  },
+  {
+    id: 'dd782905-a9c8-4162-8304-41015cf12ab8',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: 'Rote learning vs conceptual learning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.909Z,
+    updatedAt: 2025-08-26T15:25:06.909Z
+  },
+  {
+    id: '99f6a2ef-76bb-4ee0-ad2a-92b95ac89ede',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Science as a tool to understand the past',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.921Z,
+    updatedAt: 2025-08-26T15:25:06.921Z
+  },
+  {
+    id: '111905d4-bb7f-4ee4-9f1a-09731d88d005',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Nature of universe',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.931Z,
+    updatedAt: 2025-08-26T15:25:06.931Z
+  },
+  {
+    id: '84fcec3d-c580-489c-91ff-8a31f1b14a2c',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Mechanics',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.938Z,
+    updatedAt: 2025-08-26T15:25:06.938Z
+  },
+  {
+    id: 'ada5a850-6c1c-44b2-b031-e7b7af8900d4',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Everyday application of Mechanics',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.943Z,
+    updatedAt: 2025-08-26T15:25:06.943Z
+  },
+  {
+    id: '740ddc6b-e5ea-4125-84a9-80df9962af15',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Everyday application of Nuclear Physics',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.945Z,
+    updatedAt: 2025-08-26T15:25:06.945Z
+  },
+  {
+    id: 'd8fe9f5a-b9a9-4a58-957e-de7806e764ee',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Elements and compounds',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.948Z,
+    updatedAt: 2025-08-26T15:25:06.948Z
+  },
+  {
+    id: 'dee82229-dd3c-4fa8-8dee-f22a4c86940d',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Petroleum products',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.951Z,
+    updatedAt: 2025-08-26T15:25:06.951Z
+  },
+  {
+    id: '3c457fd0-9152-42bd-aead-24984c6a57af',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Main concepts of life science',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.954Z,
+    updatedAt: 2025-08-26T15:25:06.954Z
+  },
+  {
+    id: 'a59ea147-b8ba-4638-b7f1-570a7c7cbad8',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: '"Evolution',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.957Z,
+    updatedAt: 2025-08-26T15:25:06.957Z
+  },
+  {
+    id: 'ec7d404c-72ad-4130-8934-b608cc5b14c0',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: 'Environment and ecology',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.959Z,
+    updatedAt: 2025-08-26T15:25:06.959Z
+  },
+  {
+    id: 'dcfc7622-fadb-4666-b1a5-0e9a216377b0',
+    topicId: '7c286067-958b-4820-8dfa-14c4ea268a61',
+    name: 'Latest inventions in science and technology & Current affairs',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:06.962Z,
+    updatedAt: 2025-08-26T15:25:06.962Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு I: இலக்கணம்: 4 [
+  {
+    id: '57fe4b14-cf1d-4fd1-a608-3d46467d7ab6',
+    topicId: 'e149fe26-e78e-4998-b5bc-3971c583f9c9',
+    name: '"பிரித்து எழுதுதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.185Z,
+    updatedAt: 2025-08-26T15:25:07.185Z
+  },
+  {
+    id: '997c8403-436b-4de1-a6cf-dff80e7ae394',
+    topicId: 'e149fe26-e78e-4998-b5bc-3971c583f9c9',
+    name: '"லகர/ளகர/ழகர',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.188Z,
+    updatedAt: 2025-08-26T15:25:07.188Z
+  },
+  {
+    id: '36cffba5-35df-4836-8008-2636faf6aedc',
+    topicId: 'e149fe26-e78e-4998-b5bc-3971c583f9c9',
+    name: '"வேர்ச்சொல் அறிதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.192Z,
+    updatedAt: 2025-08-26T15:25:07.192Z
+  },
+  {
+    id: '50966eec-76f1-4267-b509-ebf2b062b8da',
+    topicId: 'e149fe26-e78e-4998-b5bc-3971c583f9c9',
+    name: '"அயற்சொல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.196Z,
+    updatedAt: 2025-08-26T15:25:07.196Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit I: Aptitude: 6 [
+  {
+    id: 'aed1f6c2-7e64-4094-96e2-a8196b06bc31',
+    topicId: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    name: '"Simplification',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.150Z,
+    updatedAt: 2025-08-26T15:25:07.150Z
+  },
+  {
+    id: '4f283b7a-9a84-4cb8-b188-5fd82088bd7b',
+    topicId: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    name: '"Highest Common Factor (HCF)',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.152Z,
+    updatedAt: 2025-08-26T15:25:07.152Z
+  },
+  {
+    id: 'f18480b1-f0c6-43ed-a470-6ba7c333d464',
+    topicId: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    name: 'Ratio and Proportion',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.155Z,
+    updatedAt: 2025-08-26T15:25:07.155Z
+  },
+  {
+    id: '211005b5-1477-4677-8090-cca18ca88055',
+    topicId: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    name: '"Simple interest',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.157Z,
+    updatedAt: 2025-08-26T15:25:07.157Z
+  },
+  {
+    id: 'c254fb1e-3061-46b3-ab62-17256596a429',
+    topicId: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    name: '"Area',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.159Z,
+    updatedAt: 2025-08-26T15:25:07.159Z
+  },
+  {
+    id: '26668347-f6e4-4aea-8368-5ebd27387d15',
+    topicId: 'a75288c4-6876-48e4-bd1a-f036c8dd2d37',
+    name: 'Time and Work',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.161Z,
+    updatedAt: 2025-08-26T15:25:07.161Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு V: வாசித்தல்: 2 [
+  {
+    id: '76dc99c0-252c-48c2-9dc5-396eb04ff31d',
+    topicId: '3a083670-ee0a-4525-9b23-2d16c7204470',
+    name: 'பத்தியிலிருந்து வினாக்களுக்கு விடையளித்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.254Z,
+    updatedAt: 2025-08-26T15:25:07.254Z
+  },
+  {
+    id: '57b6b74f-b43d-4b85-869c-41a8bf8783bb',
+    topicId: '3a083670-ee0a-4525-9b23-2d16c7204470',
+    name: '"உவமைத் தொடர்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.257Z,
+    updatedAt: 2025-08-26T15:25:07.257Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு VI: எளிய மொழி பெயர்ப்பு: 2 [
+  {
+    id: '4762f45d-e6ed-4b35-8286-5dc080e14d0d',
+    topicId: 'ea883336-35b2-430b-bd47-1e03c882b503',
+    name: 'ஆங்கிலச் சொற்களுக்கு இணையான தமிழ்ச் சொற்கள் அறிதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.265Z,
+    updatedAt: 2025-08-26T15:25:07.265Z
+  },
+  {
+    id: 'ddfe7771-bd19-4215-a7cd-048fd6461e49',
+    topicId: 'ea883336-35b2-430b-bd47-1e03c882b503',
+    name: '"கோப்புகள்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.269Z,
+    updatedAt: 2025-08-26T15:25:07.269Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு II: சொல்லகராதி: 7 [
+  {
+    id: '9d445109-3018-47cf-8589-19c82040d383',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: '"எதிர்ச்சொல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.204Z,
+    updatedAt: 2025-08-26T15:25:07.204Z
+  },
+  {
+    id: 'd5961a81-248d-408f-9af3-7f8732017384',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: '"பொருந்தாச் சொல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.207Z,
+    updatedAt: 2025-08-26T15:25:07.207Z
+  },
+  {
+    id: 'f5457f93-1365-4df4-8189-2d37c2d16ae0',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: '"பேச்சு வழக்கு/எழுத்து வழக்கு',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.211Z,
+    updatedAt: 2025-08-26T15:25:07.211Z
+  },
+  {
+    id: '6edb6f87-1a8e-471c-8035-efbd754dfbee',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: 'கோடிட்ட இடத்தில் சரியான சொல்லைத் தேர்ந்தெடுத்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.214Z,
+    updatedAt: 2025-08-26T15:25:07.214Z
+  },
+  {
+    id: '2c7e4199-a92d-4ce3-b0d1-b46601a37a2c',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: '"பொருத்தமான பொருளைத் தெரிவு செய்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.219Z,
+    updatedAt: 2025-08-26T15:25:07.219Z
+  },
+  {
+    id: 'ce01811b-00c5-4afe-b25f-ab1f83fd26b8',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: '"பிழை திருத்துக (ஒரு/ஓர்)',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.222Z,
+    updatedAt: 2025-08-26T15:25:07.222Z
+  },
+  {
+    id: 'eb841eda-53c0-4913-96e5-01b154e69675',
+    topicId: 'bcae7889-632d-4118-953a-31419930fca0',
+    name: '"சொற்களை இணைத்துப் புதிய சொல் உருவாக்குதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.225Z,
+    updatedAt: 2025-08-26T15:25:07.225Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit II: Reasoning: 5 [
+  {
+    id: '664ff991-5766-4b95-a89b-67999c6eca7d',
+    topicId: '19e7d146-2129-4b65-a6c0-cedd6ed232fe',
+    name: 'Logical reasoning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.167Z,
+    updatedAt: 2025-08-26T15:25:07.167Z
+  },
+  {
+    id: '234df109-43c1-43f2-a785-86b7eeb5e3ff',
+    topicId: '19e7d146-2129-4b65-a6c0-cedd6ed232fe',
+    name: '"Puzzles',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.170Z,
+    updatedAt: 2025-08-26T15:25:07.170Z
+  },
+  {
+    id: 'c972d910-0503-4218-8425-ed3d6601e579',
+    topicId: '19e7d146-2129-4b65-a6c0-cedd6ed232fe',
+    name: 'Visual reasoning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.173Z,
+    updatedAt: 2025-08-26T15:25:07.173Z
+  },
+  {
+    id: '4ccb891a-3f73-42d7-b170-930bcf0e11b1',
+    topicId: '19e7d146-2129-4b65-a6c0-cedd6ed232fe',
+    name: 'Alpha numeric reasoning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.175Z,
+    updatedAt: 2025-08-26T15:25:07.175Z
+  },
+  {
+    id: 'bfd8d748-aa6e-4286-9734-66fdd5f82bd3',
+    topicId: '19e7d146-2129-4b65-a6c0-cedd6ed232fe',
+    name: 'Number series',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.178Z,
+    updatedAt: 2025-08-26T15:25:07.178Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு VII: இலக்கியம்: 5 [
+  {
+    id: '2c639c30-a04b-4ee7-bec2-43066f9ca0fb',
+    topicId: 'f9abe079-6c60-4bed-a2aa-6b9cd9df46f6',
+    name: 'திருக்குறள் தொடர்பான செய்திகள் (20 அதிகாரங்கள்)',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.276Z,
+    updatedAt: 2025-08-26T15:25:07.276Z
+  },
+  {
+    id: '6bd42e19-6b60-4954-a850-76a3ffd031b3',
+    topicId: 'f9abe079-6c60-4bed-a2aa-6b9cd9df46f6',
+    name: '"அறநூல் தொடர்பான செய்திகள் (நாலடியார்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.280Z,
+    updatedAt: 2025-08-26T15:25:07.280Z
+  },
+  {
+    id: 'dec800fa-9611-4cc2-9a92-1aff8e3e679e',
+    topicId: 'f9abe079-6c60-4bed-a2aa-6b9cd9df46f6',
+    name: '"தமிழின் தொன்மை',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.284Z,
+    updatedAt: 2025-08-26T15:25:07.284Z
+  },
+  {
+    id: '8383fbd3-e677-400e-91a9-f4e591359033',
+    topicId: 'f9abe079-6c60-4bed-a2aa-6b9cd9df46f6',
+    name: '"தமிழறிஞர்கள் & தமிழ்த்தொண்டு (உ.வே.சா',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.288Z,
+    updatedAt: 2025-08-26T15:25:07.288Z
+  },
+  {
+    id: 'fcfb9676-9408-423b-82f3-1090a67333d4',
+    topicId: 'f9abe079-6c60-4bed-a2aa-6b9cd9df46f6',
+    name: '"தமிழ்ச் சான்றோர் (பாவேந்தர்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.294Z,
+    updatedAt: 2025-08-26T15:25:07.294Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit VI: TN History & Culture: 9 [
+  {
+    id: 'f21fe821-5e18-4202-8768-dc0e461cb7ab',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: '"History of Tamil Society',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.120Z,
+    updatedAt: 2025-08-26T15:25:07.120Z
+  },
+  {
+    id: '958aea32-f9f9-4fee-8f5d-28bb22ecda35',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: 'Tamil literature from Sangam age till contemporary times',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.123Z,
+    updatedAt: 2025-08-26T15:25:07.123Z
+  },
+  {
+    id: '23b4b1ce-fcde-4c1a-bd02-1799a25d0cf3',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: '"Thirukkural: Significance',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.125Z,
+    updatedAt: 2025-08-26T15:25:07.125Z
+  },
+  {
+    id: '86797cdf-a4b6-40bb-b4a3-145c18df6e06',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: 'Role of Tamil Nadu in freedom struggle & Early agitations',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.127Z,
+    updatedAt: 2025-08-26T15:25:07.127Z
+  },
+  {
+    id: '69b49318-0f73-41b2-802a-c67e2fe01501',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: 'Role of women in freedom struggle',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.129Z,
+    updatedAt: 2025-08-26T15:25:07.129Z
+  },
+  {
+    id: 'e40e3b9f-316f-4a8c-9094-9cf04461b6c5',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: 'Evolution of 19th & 20th century socio-political movements in TN',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.132Z,
+    updatedAt: 2025-08-26T15:25:07.132Z
+  },
+  {
+    id: '88527894-7abc-4286-8a72-34c71dba1e28',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: '"Justice Party',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.134Z,
+    updatedAt: 2025-08-26T15:25:07.134Z
+  },
+  {
+    id: '6a9263d5-e390-434e-8332-b6ce7dc7dff9',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: '"Self Respect Movement',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.136Z,
+    updatedAt: 2025-08-26T15:25:07.136Z
+  },
+  {
+    id: 'c906334b-7c27-49a2-b65b-b0971f548dc4',
+    topicId: '388cf45e-63fa-4d1b-b783-57f5e8c55ac8',
+    name: 'Contributions of Thanthai Periyar and Perarignar Anna',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.138Z,
+    updatedAt: 2025-08-26T15:25:07.138Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit V: Economy & TN Admin: 18 [
+  {
+    id: 'f844c39f-3c59-4c2f-af93-11d26b5844b3',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Nature of Indian Economy',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.069Z,
+    updatedAt: 2025-08-26T15:25:07.069Z
+  },
+  {
+    id: 'da9e200a-0034-435d-a28c-541676ec3b7b',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Sources of revenue',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.073Z,
+    updatedAt: 2025-08-26T15:25:07.073Z
+  },
+  {
+    id: 'ac58d669-8e79-433d-9eb4-53a687db1879',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Finance Commission',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.076Z,
+    updatedAt: 2025-08-26T15:25:07.076Z
+  },
+  {
+    id: 'e91ab9f9-826b-4107-9c3e-e0572e2a9de1',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Structure of Indian Economy',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.079Z,
+    updatedAt: 2025-08-26T15:25:07.079Z
+  },
+  {
+    id: '9a9e9f23-c1e5-486f-a530-ce9aaaef2c9b',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Application of Science and Technology in Agriculture',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.082Z,
+    updatedAt: 2025-08-26T15:25:07.082Z
+  },
+  {
+    id: 'b45d3bb7-96a0-4d0a-8fb7-50a35c22dd2f',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Rural welfare oriented programmes',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.085Z,
+    updatedAt: 2025-08-26T15:25:07.085Z
+  },
+  {
+    id: 'edf9c0c5-1c99-4861-9283-5b18052b0e62',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Human Development Indicators in Tamil Nadu (comparative)',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.087Z,
+    updatedAt: 2025-08-26T15:25:07.087Z
+  },
+  {
+    id: '2ad8ebb4-75f1-48b0-8b2a-d1460ba92625',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: "Impact of social reform movements on TN's socio-economic development",
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.090Z,
+    updatedAt: 2025-08-26T15:25:07.090Z
+  },
+  {
+    id: '942b17e8-7692-4b80-892f-7d20b6375532',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Political parties',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.092Z,
+    updatedAt: 2025-08-26T15:25:07.092Z
+  },
+  {
+    id: 'be428c02-5901-4112-93c5-a16459e0f688',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Reservation policy',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.095Z,
+    updatedAt: 2025-08-26T15:25:07.095Z
+  },
+  {
+    id: 'f200bfe2-e985-44fa-b175-2a3804c4e37a',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: "Role of social welfare schemes in TN's socio-economic development",
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.097Z,
+    updatedAt: 2025-08-26T15:25:07.097Z
+  },
+  {
+    id: '09ff8273-95cf-43df-b90c-3ab0bce3429e',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Social Justice and social harmony as cornerstones of development',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.101Z,
+    updatedAt: 2025-08-26T15:25:07.101Z
+  },
+  {
+    id: 'a640eb02-d7fe-498d-8fc6-f2605cf797a6',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Education and health systems in Tamil Nadu',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.103Z,
+    updatedAt: 2025-08-26T15:25:07.103Z
+  },
+  {
+    id: 'd957163f-71b4-48ff-824f-614765eb138e',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Geography of Tamil Nadu and its impact on economic growth',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.106Z,
+    updatedAt: 2025-08-26T15:25:07.106Z
+  },
+  {
+    id: 'a7005443-4904-4417-942e-8263a40ffe09',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Achievements of Tamil Nadu in various fields & e-Governance',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.108Z,
+    updatedAt: 2025-08-26T15:25:07.108Z
+  },
+  {
+    id: 'fbb5de30-4581-41d2-827b-6cf4070f8af0',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: '"Public awareness',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.111Z,
+    updatedAt: 2025-08-26T15:25:07.111Z
+  },
+  {
+    id: '7aa731da-edec-4b40-a671-6af76d27460a',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Problems in public delivery systems',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.113Z,
+    updatedAt: 2025-08-26T15:25:07.113Z
+  },
+  {
+    id: 'e9d0b1cd-34e1-4efe-bfa2-2446ba182ca9',
+    topicId: '83eefcfa-cf76-47fe-a874-8f6e5dd6e6b0',
+    name: 'Current socio-economic issues & Current affairs',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.115Z,
+    updatedAt: 2025-08-26T15:25:07.115Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு IV: கலைச் சொற்கள்: 1 [
+  {
+    id: '156b0b87-6deb-4071-89ab-8d4938c48090',
+    topicId: '3e39dca6-b156-4f76-9af7-a4e649626812',
+    name: '"பல்துறை சார்ந்த கலைச் சொற்கள் (அறிவியல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.247Z,
+    updatedAt: 2025-08-26T15:25:07.247Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு III: எழுதும் திறன்: 4 [
+  {
+    id: 'a0c6117f-c18d-4948-90ea-854829271d22',
+    topicId: '3e0e0578-8f5e-43c0-a066-44b96a000ec7',
+    name: 'சொற்களை ஒழுங்குபடுத்திச் சொற்றொடர் அமைத்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.232Z,
+    updatedAt: 2025-08-26T15:25:07.232Z
+  },
+  {
+    id: 'fcf35bc8-82a9-445e-92bc-c5d67961e23f',
+    topicId: '3e0e0578-8f5e-43c0-a066-44b96a000ec7',
+    name: '"தொடர் வகைகள் (செய்வினை',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.235Z,
+    updatedAt: 2025-08-26T15:25:07.235Z
+  },
+  {
+    id: 'f460cfcc-4088-4cb0-95ac-a51d9002be7e',
+    topicId: '3e0e0578-8f5e-43c0-a066-44b96a000ec7',
+    name: '"மரபுத் தமிழ் (திணை',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.238Z,
+    updatedAt: 2025-08-26T15:25:07.238Z
+  },
+  {
+    id: '1ff0f66e-c702-48d1-8ac5-2d34a8fc4010',
+    topicId: '3e0e0578-8f5e-43c0-a066-44b96a000ec7',
+    name: 'நிறுத்தல் குறியீடுகள்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:25:07.241Z,
+    updatedAt: 2025-08-26T15:25:07.241Z
+  }
+]
+9:08:35 PM [express] GET /api/goals/fad4c6e9-51ed-4db6-a03f-0f63ad85dd03 304 in 347ms :: {"id":"fad4…
+9:08:37 PM [express] DELETE /api/goals/fad4c6e9-51ed-4db6-a03f-0f63ad85dd03 200 in 30ms :: {"success…
+9:08:37 PM [express] GET /api/user-stats/4 404 in 8ms :: {"message":"User stats not found"}
+9:08:40 PM [express] GET /api/user 304 in 4ms :: {"id":4,"email":"akashk2003@email.com","firstName":…
+9:08:40 PM [express] GET /api/user-stats/4 404 in 24ms :: {"message":"User stats not found"}
+9:08:40 PM [express] GET /api/goals 200 in 29ms :: []
+🎯 [DEBUG] createGoalFromCSV called with 111 rows
+🎯 [DEBUG] Sample csvData row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Scientific knowledge and scientific temper',
+  status: 'Power of reasoning "'
+}
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Scientific knowledge and scientific temper',
+  status: 'Power of reasoning "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Scientific knowledge and scientific temper, Status: power of reasoning "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: 'Rote learning vs conceptual learning',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: Rote learning vs conceptual learning, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Science as a tool to understand the past',
+  status: 'present'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Science as a tool to understand the past, Status: present
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Nature of universe',
+  status: 'General scientific laws "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Nature of universe, Status: general scientific laws "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Mechanics',
+  status: 'Properties of matter'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Mechanics, Status: properties of matter
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Everyday application of Mechanics',
+  status: 'Electricity'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Everyday application of Mechanics, Status: electricity
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Everyday application of Nuclear Physics',
+  status: 'Laser'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Everyday application of Nuclear Physics, Status: laser
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Elements and compounds',
+  status: 'acids'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Elements and compounds, Status: acids
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Petroleum products',
+  status: 'fertilizers'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Petroleum products, Status: fertilizers
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Main concepts of life science',
+  status: 'classification of living organisms "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Main concepts of life science, Status: classification of living organisms "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: '"Evolution',
+  status: 'genetics'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: "Evolution, Status: genetics    
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: 'Environment and ecology',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: Environment and ecology, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit 1: General Science',
+  subtopic: 'Latest inventions in science and technology & Current affairs',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit 1: General Science, Subtopic: Latest inventions in science and technology & Current affairs, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Location - Physical features',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Location - Physical features, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: '"Monsoon',
+  status: 'rainfall'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: "Monsoon, Status: rainfall  
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Water resources - Rivers in India',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Water resources - Rivers in India, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: '"Soil',
+  status: 'Minerals and Natural Resources "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: "Soil, Status: minerals and natural resources "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Forest and Wildlife - Agricultural pattern',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Forest and Wildlife - Agricultural pattern, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Transport - Communication',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Transport - Communication, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Social Geography: Population density and distribution',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Social Geography: Population density and distribution, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: '"Racial',
+  status: 'linguistic groups and major tribes "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: "Racial, Status: linguistic groups and major tribes "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Natural calamity - Disaster management',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Natural calamity - Disaster management, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Environmental pollution - Reasons and preventive measures',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Environmental pollution - Reasons and preventive measures, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Climate change - Green energy',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Climate change - Green energy, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit II: Geography of India',
+  subtopic: 'Geographical landmarks & Current affairs',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit II: Geography of India, Subtopic: Geographical landmarks & Current affairs, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: 'Indus Valley Civilization',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: Indus Valley Civilization, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: '"Guptas',
+  status: 'Delhi Sultans'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: "Guptas, Status: delhi sultans
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: 'Age of Vijayanagaram and Bahmani Kingdoms - South Indian History',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: Age of Vijayanagaram and Bahmani Kingdoms - South Indian History, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: 'National Renaissance - Early uprising against British rule',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: National Renaissance - Early uprising against British rule, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: '"Indian National Congress & Emergence of leaders (Ambedkar',
+  status: 'Bhagat Singh'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: "Indian National Congress & Emergence of leaders (Ambedkar, Status: bhagat singh
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: 'Different modes of agitation: Satyagraha and Militant Movements',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: Different modes of agitation: Satyagraha and Militant Movements, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: 'Communalism and Partition',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: Communalism and Partition, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: 'Change and continuity in the socio-cultural history of India',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: Change and continuity in the socio-cultural history of India, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: '"Characteristics of Indian Culture',
+  status: 'Unity in Diversity (Race'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: "Characteristics of Indian Culture, Status: unity in diversity (race
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: '"India as a secular state',
+  status: 'Social harmony "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: "India as a secular state, Status: social harmony "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit III: History & Culture',
+  subtopic: '"Prominent personalities (Arts',
+  status: 'Science'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit III: History & Culture, Subtopic: "Prominent personalities (Arts, Status: science
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Constitution of India: Preamble',
+  status: 'Salient features "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Constitution of India: Preamble, Status: salient features "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Union',
+  status: 'State and Union Territory "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Union, Status: state and union territory "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Citizenship',
+  status: 'Fundamental Rights'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Citizenship, Status: fundamental rights
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Union Executive',
+  status: 'Union Legislature "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Union Executive, Status: union legislature "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"State Executive',
+  status: 'State Legislature "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "State Executive, Status: state legislature "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Local Governments',
+  status: 'Panchayat Raj "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Local Governments, Status: panchayat raj "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: 'Spirit of federalism: Centre-State relationships',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: Spirit of federalism: Centre-State relationships, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Election',
+  status: 'Judiciary in India'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Election, Status: judiciary in india
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Corruption in public life',
+  status: 'Anti-corruption measures (Lokpal'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Corruption in public life, Status: anti-corruption measures (lokpal
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Right to Information',
+  status: 'Empowerment of Women "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Right to Information, Status: empowerment of women "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: '"Consumer Protection Forums',
+  status: 'Human Rights Charter "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: "Consumer Protection Forums, Status: human rights charter "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit IV: Indian Polity',
+  subtopic: 'Political parties and political system in India & Current affairs',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit IV: Indian Polity, Subtopic: Political parties and political system in India & Current affairs, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Nature of Indian Economy',
+  status: 'Five-year plan models'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Nature of Indian Economy, Status: five-year plan models
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Sources of revenue',
+  status: 'RBI'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Sources of revenue, Status: rbi
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Finance Commission',
+  status: 'Resource sharing (Union-State)'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Finance Commission, Status: resource sharing (union-state)
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Structure of Indian Economy',
+  status: 'Employment Generation'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Structure of Indian Economy, Status: employment generation
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Application of Science and Technology in Agriculture',
+  status: 'Industrial growth "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Application of Science and Technology in Agriculture, Status: industrial growth "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Rural welfare oriented programmes',
+  status: 'Social problems (Population'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Rural welfare oriented programmes, Status: social problems (population
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Human Development Indicators in Tamil Nadu (comparative)',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Human Development Indicators in Tamil Nadu (comparative), Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: "Impact of social reform movements on TN's socio-economic development",
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Impact of social reform movements on TN's socio-economic development, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Political parties',
+  status: 'and welfare schemes in TN "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Political parties, Status: and welfare schemes in tn "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Reservation policy',
+  status: 'Economic trends in Tamil Nadu "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Reservation policy, Status: economic trends in tamil nadu "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: "Role of social welfare schemes in TN's socio-economic development",
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Role of social welfare schemes in TN's socio-economic development, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Social Justice and social harmony as cornerstones of development',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Social Justice and social harmony as cornerstones of development, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Education and health systems in Tamil Nadu',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Education and health systems in Tamil Nadu, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Geography of Tamil Nadu and its impact on economic growth',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Geography of Tamil Nadu and its impact on economic growth, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Achievements of Tamil Nadu in various fields & e-Governance',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Achievements of Tamil Nadu in various fields & e-Governance, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: '"Public awareness',
+  status: 'General administration'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: "Public awareness, Status: general administration
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Problems in public delivery systems',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Problems in public delivery systems, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit V: Economy & TN Admin',
+  subtopic: 'Current socio-economic issues & Current affairs',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit V: Economy & TN Admin, Subtopic: Current socio-economic issues & Current affairs, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: '"History of Tamil Society',
+  status: 'archaeological discoveries "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: "History of Tamil Society, Status: archaeological discoveries "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: 'Tamil literature from Sangam age till contemporary times',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: Tamil literature from Sangam age till contemporary times, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: '"Thirukkural: Significance',
+  status: 'Relevance'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: "Thirukkural: Significance, Status: relevance
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: 'Role of Tamil Nadu in freedom struggle & Early agitations',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: Role of Tamil Nadu in freedom struggle & Early agitations, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: 'Role of women in freedom struggle',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: Role of women in freedom struggle, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: 'Evolution of 19th & 20th century socio-political movements in TN',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: Evolution of 19th & 20th century socio-political movements in TN, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: '"Justice Party',
+  status: 'Growth of Rationalism "'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: "Justice Party, Status: growth of rationalism "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: '"Self Respect Movement',
+  status: 'Dravidian Movement'
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: "Self Respect Movement, Status: dravidian movement
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part A: General Studies',
+  topic: 'Unit VI: TN History & Culture',
+  subtopic: 'Contributions of Thanthai Periyar and Perarignar Anna',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part A: General Studies, Topic: Unit VI: TN History & Culture, Subtopic: Contributions of Thanthai Periyar and Perarignar Anna, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit I: Aptitude',
+  subtopic: '"Simplification',
+  status: 'Percentage "'
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit I: Aptitude, Subtopic: "Simplification, Status: percentage "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit I: Aptitude',
+  subtopic: '"Highest Common Factor (HCF)',
+  status: 'Lowest Common Multiple (LCM) "'
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit I: Aptitude, Subtopic: "Highest Common Factor (HCF), Status: lowest common multiple (lcm) "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit I: Aptitude',
+  subtopic: 'Ratio and Proportion',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit I: Aptitude, Subtopic: Ratio and Proportion, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit I: Aptitude',
+  subtopic: '"Simple interest',
+  status: 'Compound interest "'
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit I: Aptitude, Subtopic: "Simple interest, Status: compound interest "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit I: Aptitude',
+  subtopic: '"Area',
+  status: 'Volume "'
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit I: Aptitude, Subtopic: "Area, Status: volume "      
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit I: Aptitude',
+  subtopic: 'Time and Work',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit I: Aptitude, Subtopic: Time and Work, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit II: Reasoning',
+  subtopic: 'Logical reasoning',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit II: Reasoning, Subtopic: Logical reasoning, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit II: Reasoning',
+  subtopic: '"Puzzles',
+  status: 'Dice "'
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit II: Reasoning, Subtopic: "Puzzles, Status: dice "   
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit II: Reasoning',
+  subtopic: 'Visual reasoning',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit II: Reasoning, Subtopic: Visual reasoning, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit II: Reasoning',
+  subtopic: 'Alpha numeric reasoning',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit II: Reasoning, Subtopic: Alpha numeric reasoning, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part B: Aptitude & Mental Ability',
+  topic: 'Unit II: Reasoning',
+  subtopic: 'Number series',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part B: Aptitude & Mental Ability, Topic: Unit II: Reasoning, Subtopic: Number series, Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு I: இலக்கணம்',
+  subtopic: '"பிரித்து எழுதுதல்',
+  status: 'சேர்த்து எழுதுதல்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு I: இலக்கணம், Subtopic: "பிரித்து எழுதுதல், Status: சேர்த்து எழுத     துதல்
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு I: இலக்கணம்',
+  subtopic: '"லகர/ளகர/ழகர',
+  status: 'னகர/ணகர'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு I: இலக்கணம், Subtopic: "லகர/ளகர/ழகர, Status: னகர/ணகர
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு I: இலக்கணம்',
+  subtopic: '"வேர்ச்சொல் அறிதல்',
+  status: 'வினைமுற்று'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு I: இலக்கணம், Subtopic: "வேர்ச்சொல் அறிதல், Status: வினைமுற்று   
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு I: இலக்கணம்',
+  subtopic: '"அயற்சொல்',
+  status: 'எதிர்ச்சொல்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு I: இலக்கணம், Subtopic: "அயற்சொல், Status: எதிர்ச்சொல்
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: '"எதிர்ச்சொல்',
+  status: 'ஓரெழுத்து ஒரு மொழி'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: "எதிர்ச்சொல், Status: ஓரெழுத்து ஒரு மொ    ொழி
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: '"பொருந்தாச் சொல்',
+  status: 'அகர வரிசைப்படி சீர்செய்தல் "'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: "பொருந்தாச் சொல், Status: அகர வரிசைப்ப    படி சீர்செய்தல் "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: '"பேச்சு வழக்கு/எழுத்து வழக்கு',
+  status: 'சொல்லும் பொருளும் அறிதல் "'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: "பேச்சு வழக்கு/எழுத்து வழக்கு, Status:    : சொல்லும் பொருளும் அறிதல் "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: 'கோடிட்ட இடத்தில் சரியான சொல்லைத் தேர்ந்தெடுத்தல்',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: கோடிட்ட இடத்தில் சரியான சொல்லைத் தேர்ந      ந்தெடுத்தல், Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: '"பொருத்தமான பொருளைத் தெரிவு செய்தல்',
+  status: 'ஊர்ப் பெயர்களின் மரூஉவை எழுதுக "'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: "பொருத்தமான பொருளைத் தெரிவு செய்தல், S    Status: ஊர்ப் பெயர்களின் மரூஉவை எழுதுக "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: '"பிழை திருத்துக (ஒரு/ஓர்)',
+  status: 'தூய தமிழ்ச் சொற்கள் "'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: "பிழை திருத்துக (ஒரு/ஓர்), Status: தூய  ய தமிழ்ச் சொற்கள் "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு II: சொல்லகராதி',
+  subtopic: '"சொற்களை இணைத்துப் புதிய சொல் உருவாக்குதல்',
+  status: 'அடைப்புக்குள் உள்ள சொல்லைச் சேர்த்தல் "'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு II: சொல்லகராதி, Subtopic: "சொற்களை இணைத்துப் புதிய சொல் உருவாக்க     குதல், Status: அடைப்புக்குள் உள்ள சொல்லைச் சேர்த்தல் "
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு III: எழுதும் திறன்',
+  subtopic: 'சொற்களை ஒழுங்குபடுத்திச் சொற்றொடர் அமைத்தல்',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு III: எழுதும் திறன், Subtopic: சொற்களை ஒழுங்குபடுத்திச் சொற்றொடர்        அமைத்தல், Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு III: எழுதும் திறன்',
+  subtopic: '"தொடர் வகைகள் (செய்வினை',
+  status: 'செயப்பாட்டு வினை'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு III: எழுதும் திறன், Subtopic: "தொடர் வகைகள் (செய்வினை, Status: ச    செயப்பாட்டு வினை
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு III: எழுதும் திறன்',
+  subtopic: '"மரபுத் தமிழ் (திணை',
+  status: 'பால்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு III: எழுதும் திறன், Subtopic: "மரபுத் தமிழ் (திணை, Status: பால் 
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு III: எழுதும் திறன்',
+  subtopic: 'நிறுத்தல் குறியீடுகள்',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு III: எழுதும் திறன், Subtopic: நிறுத்தல் குறியீடுகள், Status: pen     nding
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு IV: கலைச் சொற்கள்',
+  subtopic: '"பல்துறை சார்ந்த கலைச் சொற்கள் (அறிவியல்',
+  status: 'கல்வி'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு IV: கலைச் சொற்கள், Subtopic: "பல்துறை சார்ந்த கலைச் சொற்கள் (அறி        ிவியல், Status: கல்வி
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு V: வாசித்தல்',
+  subtopic: 'பத்தியிலிருந்து வினாக்களுக்கு விடையளித்தல்',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு V: வாசித்தல், Subtopic: பத்தியிலிருந்து வினாக்களுக்கு விடையளித்த      தல், Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு V: வாசித்தல்',
+  subtopic: '"உவமைத் தொடர்',
+  status: 'மரபுத் தொடர்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு V: வாசித்தல், Subtopic: "உவமைத் தொடர், Status: மரபுத் தொடர்     
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VI: எளிய மொழி பெயர்ப்பு',
+  subtopic: 'ஆங்கிலச் சொற்களுக்கு இணையான தமிழ்ச் சொற்கள் அறிதல்',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VI: எளிய மொழி பெயர்ப்பு, Subtopic: ஆங்கிலச் சொற்களுக்கு இணையான த     தமிழ்ச் சொற்கள் அறிதல், Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VI: எளிய மொழி பெயர்ப்பு',
+  subtopic: '"கோப்புகள்',
+  status: 'கடிதங்கள்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VI: எளிய மொழி பெயர்ப்பு, Subtopic: "கோப்புகள், Status: கடிதங்கள்
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VII: இலக்கியம்',
+  subtopic: 'திருக்குறள் தொடர்பான செய்திகள் (20 அதிகாரங்கள்)',
+  status: ''
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VII: இலக்கியம், Subtopic: திருக்குறள் தொடர்பான செய்திகள் (20 அதி      ிகாரங்கள்), Status: pending
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VII: இலக்கியம்',
+  subtopic: '"அறநூல் தொடர்பான செய்திகள் (நாலடியார்',
+  status: 'நான்மணிக்கடிகை'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VII: இலக்கியம், Subtopic: "அறநூல் தொடர்பான செய்திகள் (நாலடியார்,      , Status: நான்மணிக்கடிகை
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VII: இலக்கியம்',
+  subtopic: '"தமிழின் தொன்மை',
+  status: 'சிறப்பு'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VII: இலக்கியம், Subtopic: "தமிழின் தொன்மை, Status: சிறப்பு      
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VII: இலக்கியம்',
+  subtopic: '"தமிழறிஞர்கள் & தமிழ்த்தொண்டு (உ.வே.சா',
+  status: 'தேவநேய பாவாணர்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VII: இலக்கியம், Subtopic: "தமிழறிஞர்கள் & தமிழ்த்தொண்டு (உ.வே.சா      ா, Status: தேவநேய பாவாணர்
+🎯 [DEBUG] Processing CSV row: {
+  category: 'Part C: General Tamil',
+  topic: 'அலகு VII: இலக்கியம்',
+  subtopic: '"தமிழ்ச் சான்றோர் (பாவேந்தர்',
+  status: 'கண்ணதாசன்'
+}
+🎯 [DEBUG] Parsed values - Category: Part C: General Tamil, Topic: அலகு VII: இலக்கியம், Subtopic: "தமிழ்ச் சான்றோர் (பாவேந்தர், Status:         கண்ணதாசன்
+9:08:56 PM [express] POST /api/goals/from-csv 201 in 1299ms :: {"id":"64ba3af4-0076-4260-b3a5-8d107f…
+9:08:56 PM [express] GET /api/goals 200 in 90ms :: [{"id":"64ba3af4-0076-4260-b3a5-8d107f38338b","us…
+9:09:03 PM [express] GET /api/user-stats/4 404 in 13ms :: {"message":"User stats not found"}
+🎯 [DEBUG] getGoalWithCategories called for goalId: 64ba3af4-0076-4260-b3a5-8d107f38338b
+🎯 [DEBUG] Goal found: {
+  id: '64ba3af4-0076-4260-b3a5-8d107f38338b',
+  userId: 4,
+  name: 'tnpsc group 2',
+  description: 'Goal created from CSV with 111 subtopics',
+  csvData: [
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Power of reasoning "',
+      category: 'Part A: General Studies',
+      subtopic: '"Scientific knowledge and scientific temper'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Rote learning vs conceptual learning'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'present',
+      category: 'Part A: General Studies',
+      subtopic: '"Science as a tool to understand the past'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'General scientific laws "',
+      category: 'Part A: General Studies',
+      subtopic: '"Nature of universe'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Properties of matter',
+      category: 'Part A: General Studies',
+      subtopic: '"Mechanics'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Electricity',
+      category: 'Part A: General Studies',
+      subtopic: '"Everyday application of Mechanics'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'Laser',
+      category: 'Part A: General Studies',
+      subtopic: '"Everyday application of Nuclear Physics'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'acids',
+      category: 'Part A: General Studies',
+      subtopic: '"Elements and compounds'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'fertilizers',
+      category: 'Part A: General Studies',
+      subtopic: '"Petroleum products'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'classification of living organisms "',
+      category: 'Part A: General Studies',
+      subtopic: '"Main concepts of life science'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: 'genetics',
+      category: 'Part A: General Studies',
+      subtopic: '"Evolution'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Environment and ecology'
+    },
+    {
+      topic: 'Unit 1: General Science',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Latest inventions in science and technology & Current affairs'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Location - Physical features'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: 'rainfall',
+      category: 'Part A: General Studies',
+      subtopic: '"Monsoon'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Water resources - Rivers in India'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: 'Minerals and Natural Resources "',
+      category: 'Part A: General Studies',
+      subtopic: '"Soil'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Forest and Wildlife - Agricultural pattern'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Transport - Communication'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Social Geography: Population density and distribution'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: 'linguistic groups and major tribes "',
+      category: 'Part A: General Studies',
+      subtopic: '"Racial'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Natural calamity - Disaster management'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Environmental pollution - Reasons and preventive measures'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Climate change - Green energy'
+    },
+    {
+      topic: 'Unit II: Geography of India',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Geographical landmarks & Current affairs'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Indus Valley Civilization'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Delhi Sultans',
+      category: 'Part A: General Studies',
+      subtopic: '"Guptas'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Age of Vijayanagaram and Bahmani Kingdoms - South Indian History'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'National Renaissance - Early uprising against British rule'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Bhagat Singh',
+      category: 'Part A: General Studies',
+      subtopic: '"Indian National Congress & Emergence of leaders (Ambedkar'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Different modes of agitation: Satyagraha and Militant Movements'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Communalism and Partition'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Change and continuity in the socio-cultural history of India'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Unity in Diversity (Race',
+      category: 'Part A: General Studies',
+      subtopic: '"Characteristics of Indian Culture'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Social harmony "',
+      category: 'Part A: General Studies',
+      subtopic: '"India as a secular state'
+    },
+    {
+      topic: 'Unit III: History & Culture',
+      status: 'Science',
+      category: 'Part A: General Studies',
+      subtopic: '"Prominent personalities (Arts'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Salient features "',
+      category: 'Part A: General Studies',
+      subtopic: '"Constitution of India: Preamble'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'State and Union Territory "',
+      category: 'Part A: General Studies',
+      subtopic: '"Union'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Fundamental Rights',
+      category: 'Part A: General Studies',
+      subtopic: '"Citizenship'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Union Legislature "',
+      category: 'Part A: General Studies',
+      subtopic: '"Union Executive'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'State Legislature "',
+      category: 'Part A: General Studies',
+      subtopic: '"State Executive'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Panchayat Raj "',
+      category: 'Part A: General Studies',
+      subtopic: '"Local Governments'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Spirit of federalism: Centre-State relationships'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Judiciary in India',
+      category: 'Part A: General Studies',
+      subtopic: '"Election'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Anti-corruption measures (Lokpal',
+      category: 'Part A: General Studies',
+      subtopic: '"Corruption in public life'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Empowerment of Women "',
+      category: 'Part A: General Studies',
+      subtopic: '"Right to Information'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: 'Human Rights Charter "',
+      category: 'Part A: General Studies',
+      subtopic: '"Consumer Protection Forums'
+    },
+    {
+      topic: 'Unit IV: Indian Polity',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Political parties and political system in India & Current affairs'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Five-year plan models',
+      category: 'Part A: General Studies',
+      subtopic: '"Nature of Indian Economy'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'RBI',
+      category: 'Part A: General Studies',
+      subtopic: '"Sources of revenue'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Resource sharing (Union-State)',
+      category: 'Part A: General Studies',
+      subtopic: '"Finance Commission'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Employment Generation',
+      category: 'Part A: General Studies',
+      subtopic: '"Structure of Indian Economy'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Industrial growth "',
+      category: 'Part A: General Studies',
+      subtopic: '"Application of Science and Technology in Agriculture'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Social problems (Population',
+      category: 'Part A: General Studies',
+      subtopic: '"Rural welfare oriented programmes'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Human Development Indicators in Tamil Nadu (comparative)'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: "Impact of social reform movements on TN's socio-economic development"
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'and welfare schemes in TN "',
+      category: 'Part A: General Studies',
+      subtopic: '"Political parties'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'Economic trends in Tamil Nadu "',
+      category: 'Part A: General Studies',
+      subtopic: '"Reservation policy'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: "Role of social welfare schemes in TN's socio-economic development"
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Social Justice and social harmony as cornerstones of development'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Education and health systems in Tamil Nadu'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Geography of Tamil Nadu and its impact on economic growth'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Achievements of Tamil Nadu in various fields & e-Governance'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: 'General administration',
+      category: 'Part A: General Studies',
+      subtopic: '"Public awareness'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Problems in public delivery systems'
+    },
+    {
+      topic: 'Unit V: Economy & TN Admin',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Current socio-economic issues & Current affairs'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'archaeological discoveries "',
+      category: 'Part A: General Studies',
+      subtopic: '"History of Tamil Society'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Tamil literature from Sangam age till contemporary times'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'Relevance',
+      category: 'Part A: General Studies',
+      subtopic: '"Thirukkural: Significance'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Role of Tamil Nadu in freedom struggle & Early agitations'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Role of women in freedom struggle'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Evolution of 19th & 20th century socio-political movements in TN'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'Growth of Rationalism "',
+      category: 'Part A: General Studies',
+      subtopic: '"Justice Party'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: 'Dravidian Movement',
+      category: 'Part A: General Studies',
+      subtopic: '"Self Respect Movement'
+    },
+    {
+      topic: 'Unit VI: TN History & Culture',
+      status: '',
+      category: 'Part A: General Studies',
+      subtopic: 'Contributions of Thanthai Periyar and Perarignar Anna'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Percentage "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Simplification'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Lowest Common Multiple (LCM) "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Highest Common Factor (HCF)'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Ratio and Proportion'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Compound interest "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Simple interest'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: 'Volume "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Area'
+    },
+    {
+      topic: 'Unit I: Aptitude',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Time and Work'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Logical reasoning'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: 'Dice "',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: '"Puzzles'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Visual reasoning'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Alpha numeric reasoning'
+    },
+    {
+      topic: 'Unit II: Reasoning',
+      status: '',
+      category: 'Part B: Aptitude & Mental Ability',
+      subtopic: 'Number series'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'சேர்த்து எழுதுதல்',
+      category: 'Part C: General Tamil',
+      subtopic: '"பிரித்து எழுதுதல்'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'னகர/ணகர',
+      category: 'Part C: General Tamil',
+      subtopic: '"லகர/ளகர/ழகர'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'வினைமுற்று',
+      category: 'Part C: General Tamil',
+      subtopic: '"வேர்ச்சொல் அறிதல்'
+    },
+    {
+      topic: 'அலகு I: இலக்கணம்',
+      status: 'எதிர்ச்சொல்',
+      category: 'Part C: General Tamil',
+      subtopic: '"அயற்சொல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'ஓரெழுத்து ஒரு மொழி',
+      category: 'Part C: General Tamil',
+      subtopic: '"எதிர்ச்சொல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'அகர வரிசைப்படி சீர்செய்தல் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பொருந்தாச் சொல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'சொல்லும் பொருளும் அறிதல் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பேச்சு வழக்கு/எழுத்து வழக்கு'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: '',
+      category: 'Part C: General Tamil',
+      subtopic: 'கோடிட்ட இடத்தில் சரியான சொல்லைத் தேர்ந்தெடுத்தல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'ஊர்ப் பெயர்களின் மரூஉவை எழுதுக "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பொருத்தமான பொருளைத் தெரிவு செய்தல்'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'தூய தமிழ்ச் சொற்கள் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"பிழை திருத்துக (ஒரு/ஓர்)'
+    },
+    {
+      topic: 'அலகு II: சொல்லகராதி',
+      status: 'அடைப்புக்குள் உள்ள சொல்லைச் சேர்த்தல் "',
+      category: 'Part C: General Tamil',
+      subtopic: '"சொற்களை இணைத்துப் புதிய சொல் உருவாக்குதல்'
+    },
+    {
+      topic: 'அலகு III: எழுதும் திறன்',
+      status: '',
+      category: 'Part C: General Tamil',
+      subtopic: 'சொற்களை ஒழுங்குபடுத்திச் சொற்றொடர் அமைத்தல்'
+    },
+    {
+      topic: 'அலகு III: எழுதும் திறன்',
+      status: 'செயப்பாட்டு வினை',
+      category: 'Part C: General Tamil',
+      subtopic: '"தொடர் வகைகள் (செய்வினை'
+    },
+    {
+      topic: 'அலகு III: எழுதும் திறன்',
+      status: 'பால்',
+      category: 'Part C: General Tamil',
+      subtopic: '"மரபுத் தமிழ் (திணை'
+    },
+    ... 11 more items
+  ],
+  totalTopics: 0,
+  completedTopics: 0,
+  totalSubtopics: 0,
+  completedSubtopics: 0,
+  isCompleted: false,
+  completedAt: null,
+  createdAt: 2025-08-26T15:38:55.590Z,
+  updatedAt: 2025-08-26T15:38:56.867Z
+}
+🎯 [DEBUG] Categories found: 3 [
+  {
+    id: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    goalId: '64ba3af4-0076-4260-b3a5-8d107f38338b',
+    name: 'Part A: General Studies',
+    description: 'Category for Part A: General Studies',
+    totalTopics: 6,
+    completedTopics: 0,
+    createdAt: 2025-08-26T15:38:55.603Z
+  },
+  {
+    id: '1e22ce44-7b15-495c-b8fc-089ea9cf175f',
+    goalId: '64ba3af4-0076-4260-b3a5-8d107f38338b',
+    name: 'Part B: Aptitude & Mental Ability',
+    description: 'Category for Part B: Aptitude & Mental Ability',
+    totalTopics: 2,
+    completedTopics: 0,
+    createdAt: 2025-08-26T15:38:56.358Z
+  },
+  {
+    id: '55ebaa7e-9da3-493e-af1c-fad03b5cbc3c',
+    goalId: '64ba3af4-0076-4260-b3a5-8d107f38338b',
+    name: 'Part C: General Tamil',
+    description: 'Category for Part C: General Tamil',
+    totalTopics: 7,
+    completedTopics: 0,
+    createdAt: 2025-08-26T15:38:56.463Z
+  }
+]
+🎯 [DEBUG] Topics for category Part A: General Studies: 6 [
+  {
+    id: '235a6ab8-180b-4a4a-b126-f85bd0a38011',
+    categoryId: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    name: 'Unit 1: General Science',
+    description: 'Topic for Unit 1: General Science',
+    totalSubtopics: 13,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:55.614Z,
+    updatedAt: 2025-08-26T15:38:56.719Z
+  },
+  {
+    id: 'dfe53e04-c7c8-4970-bada-b2afc2154ef7',
+    categoryId: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    name: 'Unit II: Geography of India',
+    description: 'Topic for Unit II: Geography of India',
+    totalSubtopics: 12,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:55.802Z,
+    updatedAt: 2025-08-26T15:38:56.732Z
+  },
+  {
+    id: 'fb8161e3-e4f0-43a1-85f0-a989ae64bead',
+    categoryId: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    name: 'Unit III: History & Culture',
+    description: 'Topic for Unit III: History & Culture',
+    totalSubtopics: 11,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:55.914Z,
+    updatedAt: 2025-08-26T15:38:56.743Z
+  },
+  {
+    id: '1e19723b-06a6-4adb-bf27-26f30fb382a0',
+    categoryId: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    name: 'Unit IV: Indian Polity',
+    description: 'Topic for Unit IV: Indian Polity',
+    totalSubtopics: 12,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:56.021Z,
+    updatedAt: 2025-08-26T15:38:56.752Z
+  },
+  {
+    id: 'a69474d8-681f-47da-b21d-74e16a23f2c4',
+    categoryId: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    name: 'Unit V: Economy & TN Admin',
+    description: 'Topic for Unit V: Economy & TN Admin',
+    totalSubtopics: 18,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:56.118Z,
+    updatedAt: 2025-08-26T15:38:56.763Z
+  },
+  {
+    id: '09a21398-0513-4221-964b-2b5a9eb6dfb7',
+    categoryId: 'bbcb5887-8640-4388-a592-678d2aea5c69',
+    name: 'Unit VI: TN History & Culture',
+    description: 'Topic for Unit VI: TN History & Culture',
+    totalSubtopics: 9,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:56.277Z,
+    updatedAt: 2025-08-26T15:38:56.773Z
+  }
+]
+🎯 [DEBUG] Topics for category Part B: Aptitude & Mental Ability: 2 [
+  {
+    id: 'e1959a10-e52e-4cf2-b3c1-38e0d7f14340',
+    categoryId: '1e22ce44-7b15-495c-b8fc-089ea9cf175f',
+    name: 'Unit I: Aptitude',
+    description: 'Topic for Unit I: Aptitude',
+    totalSubtopics: 6,
+    completedSubtopics: 0,
+    createdAt: 2025-08-26T15:38:56.369Z,
+    updatedAt: 2025-08-26T15:38:56.783Z
+  },
+  {

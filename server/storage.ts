@@ -3955,15 +3955,11 @@ export class PgStorage implements IStorage {
     csvData: any[]
   ): Promise<Goal> {
     try {
-      console.log(`🎯 [DEBUG] createGoalFromCSV called with ${csvData.length} rows`);
-      console.log(`🎯 [DEBUG] Sample csvData row:`, csvData[0]);
-      
       // Check if csvData is already an array of parsed objects or if it needs to be parsed
       let processedData = csvData;
       
       // If the first row has a stringified JSON structure, parse it
       if (typeof csvData[0] === 'string' || (csvData[0] && typeof csvData[0] === 'object' && !csvData[0].category && !csvData[0].topic)) {
-        console.log(`🎯 [DEBUG] Detected JSON string format, attempting to parse...`);
         try {
           // Try to parse the data if it's a JSON string
           if (typeof csvData[0] === 'string') {
@@ -3972,9 +3968,7 @@ export class PgStorage implements IStorage {
             // If the data is wrapped in an object with csvData property
             processedData = JSON.parse(csvData[0].csvData);
           }
-          console.log(`🎯 [DEBUG] Parsed JSON data:`, processedData.slice(0, 3));
         } catch (parseError) {
-          console.log(`🎯 [DEBUG] JSON parsing failed, using data as-is:`, parseError);
           processedData = csvData;
         }
       }
@@ -3996,15 +3990,12 @@ export class PgStorage implements IStorage {
       const topicMap = new Map<string, string>();
 
       for (const row of processedData) {
-        console.log(`🎯 [DEBUG] Processing CSV row:`, row);
         const categoryName = row.Category || row.category || "General";
         const topicName =
           row.Topics || row.Topic || row.topic || "Untitled Topic";
         const subtopicName =
           row["Sub-topics"] || row.Subtopic || row.subtopic || row.subtopic || topicName;
         const status = (row.Status || row.status || "pending").toLowerCase();
-        
-        console.log(`🎯 [DEBUG] Parsed values - Category: ${categoryName}, Topic: ${topicName}, Subtopic: ${subtopicName}, Status: ${status}`);
 
         // Create or get category
         let categoryId = categoryMap.get(categoryName);
@@ -4135,26 +4126,16 @@ export class PgStorage implements IStorage {
       })
     | undefined
   > {
-    console.log(`🎯 [DEBUG] getGoalWithCategories called for goalId: ${goalId}`);
     const goal = await this.getGoal(goalId);
-    if (!goal) {
-      console.log(`🎯 [DEBUG] Goal not found for goalId: ${goalId}`);
-      return undefined;
-    }
+    if (!goal) return undefined;
 
-    console.log(`🎯 [DEBUG] Goal found:`, goal);
     const categories = await this.getGoalCategories(goalId);
-    console.log(`🎯 [DEBUG] Categories found: ${categories.length}`, categories);
-    
     const categoriesWithTopics = await Promise.all(
       categories.map(async (category) => {
         const topics = await this.getCategoryTopics(category.id);
-        console.log(`🎯 [DEBUG] Topics for category ${category.name}: ${topics.length}`, topics);
-        
         const topicsWithSubtopics = await Promise.all(
           topics.map(async (topic) => {
             const subtopics = await this.getTopicSubtopics(topic.id);
-            console.log(`🎯 [DEBUG] Subtopics for topic ${topic.name}: ${subtopics.length}`, subtopics);
             return { ...topic, subtopics };
           })
         );
