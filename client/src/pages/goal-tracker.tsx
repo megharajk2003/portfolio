@@ -291,7 +291,7 @@ export default function GoalTracker() {
           let cumulativeProgress = 0;
           if (totalTimespan > 0) {
             const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
-            cumulativeProgress = Math.floor(
+            cumulativeProgress = Math.round(
               goal.completedSubtopics * progressRatio
             );
           } else if (current >= goalUpdated) {
