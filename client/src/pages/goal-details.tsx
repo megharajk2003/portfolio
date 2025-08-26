@@ -159,6 +159,21 @@ export default function GoalDetails() {
     enabled: !!user && !!goalId,
   });
 
+  // Debug logging for frontend
+  console.log(`🎯 [FRONTEND DEBUG] Goal data received:`, goal);
+  console.log(`🎯 [FRONTEND DEBUG] Goal categories:`, goal?.categories);
+  if (goal?.categories) {
+    goal.categories.forEach((category, catIndex) => {
+      console.log(`🎯 [FRONTEND DEBUG] Category ${catIndex}: ${category.name} with ${category.topics?.length || 0} topics`);
+      category.topics?.forEach((topic, topicIndex) => {
+        console.log(`🎯 [FRONTEND DEBUG] Topic ${topicIndex}: ${topic.name} with ${topic.subtopics?.length || 0} subtopics`);
+        if (topic.subtopics && topic.subtopics.length > 0) {
+          console.log(`🎯 [FRONTEND DEBUG] First few subtopics:`, topic.subtopics.slice(0, 3));
+        }
+      });
+    });
+  }
+
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
     mutationFn: async (goalId: string) => {

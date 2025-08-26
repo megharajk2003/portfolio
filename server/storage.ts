@@ -4095,18 +4095,27 @@ export class PgStorage implements IStorage {
 
       // Update goal counts
       const allCategories = await this.getGoalCategories(goal.id);
-      const totalSubtopicsInGoal = allCategories.reduce(
-        (sum, cat) => sum + (cat.completedTopics || 0),
-        0
-      );
-      const completedSubtopicsInGoal = csvData.filter(
-        (row) =>
-          (row.Status || row.status || "pending").toLowerCase() === "completed"
-      ).length;
+      
+      // Calculate total subtopics from all topics in all categories
+      let totalSubtopicsInGoal = 0;
+      let completedSubtopicsInGoal = 0;
+      
+      for (const category of allCategories) {
+        const topics = await this.getCategoryTopics(category.id);
+        for (const topic of topics) {
+          const subtopics = await this.getTopicSubtopics(topic.id);
+          totalSubtopicsInGoal += subtopics.length;
+          completedSubtopicsInGoal += subtopics.filter(s => s.status === "completed").length;
+        }
+      }
+
+      console.log(`🎯 [DEBUG] Goal totals calculated - Total: ${totalSubtopicsInGoal}, Completed: ${completedSubtopicsInGoal}`);
 
       await this.updateGoal(goal.id, {
-        totalTopics: totalSubtopicsInGoal, // Actually tracking total subtopics
-        completedTopics: completedSubtopicsInGoal,
+        totalSubtopics: totalSubtopicsInGoal,
+        completedSubtopics: completedSubtopicsInGoal,
+        totalTopics: allCategories.reduce((sum, cat) => sum + (cat.totalTopics || 0), 0),
+        completedTopics: allCategories.reduce((sum, cat) => sum + (cat.completedTopics || 0), 0),
       });
 
       return goal;

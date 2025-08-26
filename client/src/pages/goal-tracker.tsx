@@ -107,6 +107,14 @@ export default function GoalTracker() {
     enabled: !!user,
   });
 
+  // Debug logging for frontend goals
+  console.log(`🎯 [FRONTEND DEBUG] Goals data received:`, goals);
+  if (goals.length > 0) {
+    goals.forEach((goal, index) => {
+      console.log(`🎯 [FRONTEND DEBUG] Goal ${index}: ${goal.name} - ${goal.completedSubtopics}/${goal.totalSubtopics} subtopics`);
+    });
+  }
+
   // CSV upload mutation
   const csvUploadMutation = useMutation({
     mutationFn: async (data: { goalName: string; csvData: any[] }) => {

@@ -1,0 +1,487 @@
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.351Z,
+    updatedAt: 2025-08-26T15:38:56.351Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic Unit II: Reasoning: 5 [
+  {
+    id: '139eb5d7-0f59-4c1c-909c-7f28b5526331',
+    topicId: '0db007a2-1c10-4184-b307-76ea79fc9a7b',
+    name: 'Logical reasoning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.425Z,
+    updatedAt: 2025-08-26T15:38:56.425Z
+  },
+  {
+    id: '37e1e9b9-3c4b-41c9-86ef-6d599ffabd1d',
+    topicId: '0db007a2-1c10-4184-b307-76ea79fc9a7b',
+    name: '"Puzzles',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.435Z,
+    updatedAt: 2025-08-26T15:38:56.435Z
+  },
+  {
+    id: '6c9b01cd-3649-4457-9dfb-74a5134fe9a9',
+    topicId: '0db007a2-1c10-4184-b307-76ea79fc9a7b',
+    name: 'Visual reasoning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.442Z,
+    updatedAt: 2025-08-26T15:38:56.442Z
+  },
+  {
+    id: '6ed15a43-1957-4462-b1db-86c760853004',
+    topicId: '0db007a2-1c10-4184-b307-76ea79fc9a7b',
+    name: 'Alpha numeric reasoning',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.448Z,
+    updatedAt: 2025-08-26T15:38:56.448Z
+  },
+  {
+    id: '7b97ef2c-76b6-4daf-9bfc-a5ba3d1b3f6b',
+    topicId: '0db007a2-1c10-4184-b307-76ea79fc9a7b',
+    name: 'Number series',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.455Z,
+    updatedAt: 2025-08-26T15:38:56.455Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு I: இலக்கணம்: 4 [
+  {
+    id: 'dfca8f58-110a-4a0c-9fc9-5c7fcaf96360',
+    topicId: 'f47cddb9-ef59-40d6-b32d-e1a63eb43c1f',
+    name: '"பிரித்து எழுதுதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.484Z,
+    updatedAt: 2025-08-26T15:38:56.484Z
+  },
+  {
+    id: '826dd80a-9aed-4297-b6d7-c665b4a93a85',
+    topicId: 'f47cddb9-ef59-40d6-b32d-e1a63eb43c1f',
+    name: '"லகர/ளகர/ழகர',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.490Z,
+    updatedAt: 2025-08-26T15:38:56.490Z
+  },
+  {
+    id: '464945d4-0779-40ba-b8fa-d33b39c5269c',
+    topicId: 'f47cddb9-ef59-40d6-b32d-e1a63eb43c1f',
+    name: '"வேர்ச்சொல் அறிதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.499Z,
+    updatedAt: 2025-08-26T15:38:56.499Z
+  },
+  {
+    id: '8259afbb-a00b-4e62-9a00-8cb50dbeb494',
+    topicId: 'f47cddb9-ef59-40d6-b32d-e1a63eb43c1f',
+    name: '"அயற்சொல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.507Z,
+    updatedAt: 2025-08-26T15:38:56.507Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு III: எழுதும் திறன்: 4 [
+  {
+    id: '3be1be42-4df8-445a-8c41-ba2507845d31',
+    topicId: '5e9d1160-9603-4cdf-909b-0fc9139afbcb',
+    name: 'சொற்களை ஒழுங்குபடுத்திச் சொற்றொடர் அமைத்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.581Z,
+    updatedAt: 2025-08-26T15:38:56.581Z
+  },
+  {
+    id: '9272d1d2-e63b-43a2-b6ed-9f6f0dfb1fb9',
+    topicId: '5e9d1160-9603-4cdf-909b-0fc9139afbcb',
+    name: '"தொடர் வகைகள் (செய்வினை',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.587Z,
+    updatedAt: 2025-08-26T15:38:56.587Z
+  },
+  {
+    id: '11001198-5021-4cda-a991-74527079caaf',
+    topicId: '5e9d1160-9603-4cdf-909b-0fc9139afbcb',
+    name: '"மரபுத் தமிழ் (திணை',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.595Z,
+    updatedAt: 2025-08-26T15:38:56.595Z
+  },
+  {
+    id: '286b8417-3815-4e7f-8788-4ec37bf6c7e0',
+    topicId: '5e9d1160-9603-4cdf-909b-0fc9139afbcb',
+    name: 'நிறுத்தல் குறியீடுகள்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.604Z,
+    updatedAt: 2025-08-26T15:38:56.604Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு II: சொல்லகராதி: 7 [
+  {
+    id: '039c965b-2086-4054-a169-9acb6afce018',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: '"எதிர்ச்சொல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.520Z,
+    updatedAt: 2025-08-26T15:38:56.520Z
+  },
+  {
+    id: 'dad10316-31e9-474b-9651-948198a28270',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: '"பொருந்தாச் சொல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.528Z,
+    updatedAt: 2025-08-26T15:38:56.528Z
+  },
+  {
+    id: '171532ce-168d-4ea8-9063-fb51c17b94de',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: '"பேச்சு வழக்கு/எழுத்து வழக்கு',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.536Z,
+    updatedAt: 2025-08-26T15:38:56.536Z
+  },
+  {
+    id: 'da3de53f-ff4f-4c8b-bf45-9ffe5213a14c',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: 'கோடிட்ட இடத்தில் சரியான சொல்லைத் தேர்ந்தெடுத்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.544Z,
+    updatedAt: 2025-08-26T15:38:56.544Z
+  },
+  {
+    id: 'b505a360-1362-43b1-8b4d-a1ea258c94a9',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: '"பொருத்தமான பொருளைத் தெரிவு செய்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.551Z,
+    updatedAt: 2025-08-26T15:38:56.551Z
+  },
+  {
+    id: '47d2d770-b1ea-4042-a1af-0448cc98cf9a',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: '"பிழை திருத்துக (ஒரு/ஓர்)',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.559Z,
+    updatedAt: 2025-08-26T15:38:56.559Z
+  },
+  {
+    id: 'fc7b3e9a-cf3a-4adc-8714-301c1f5a3278',
+    topicId: '0828b2df-bd11-45ba-844d-a06de0b79914',
+    name: '"சொற்களை இணைத்துப் புதிய சொல் உருவாக்குதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.569Z,
+    updatedAt: 2025-08-26T15:38:56.569Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு IV: கலைச் சொற்கள்: 1 [
+  {
+    id: 'c90c582b-a678-445c-8c06-c8a4d153c3ad',
+    topicId: '02248792-cc07-4108-8ca6-b78c74cd9063',
+    name: '"பல்துறை சார்ந்த கலைச் சொற்கள் (அறிவியல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.620Z,
+    updatedAt: 2025-08-26T15:38:56.620Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு V: வாசித்தல்: 2 [
+  {
+    id: 'ec1f590d-26f9-470f-9d02-c965ed0712cd',
+    topicId: '30015700-6dd3-43d2-8da3-ae5533d30bf8',
+    name: 'பத்தியிலிருந்து வினாக்களுக்கு விடையளித்தல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.635Z,
+    updatedAt: 2025-08-26T15:38:56.635Z
+  },
+  {
+    id: '944a4794-3482-4bbf-9e76-b722f8afdc16',
+    topicId: '30015700-6dd3-43d2-8da3-ae5533d30bf8',
+    name: '"உவமைத் தொடர்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.644Z,
+    updatedAt: 2025-08-26T15:38:56.644Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு VI: எளிய மொழி பெயர்ப்பு: 2 [
+  {
+    id: 'd37e8281-7fbe-4256-aa53-c6e01aa498b0',
+    topicId: '2ebbb25c-066b-422e-9501-ab27788cf24a',
+    name: 'ஆங்கிலச் சொற்களுக்கு இணையான தமிழ்ச் சொற்கள் அறிதல்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.658Z,
+    updatedAt: 2025-08-26T15:38:56.658Z
+  },
+  {
+    id: 'c0d1445f-91cf-4ddf-bf5f-7c4ea65d9b72',
+    topicId: '2ebbb25c-066b-422e-9501-ab27788cf24a',
+    name: '"கோப்புகள்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.666Z,
+    updatedAt: 2025-08-26T15:38:56.666Z
+  }
+]
+🎯 [DEBUG] Subtopics for topic அலகு VII: இலக்கியம்: 5 [
+  {
+    id: 'b435bb40-facb-493e-9542-b2a339fefb52',
+    topicId: 'af26702f-c977-4ae9-9b90-6435708197ec',
+    name: 'திருக்குறள் தொடர்பான செய்திகள் (20 அதிகாரங்கள்)',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.679Z,
+    updatedAt: 2025-08-26T15:38:56.679Z
+  },
+  {
+    id: '4a44af82-bce1-4d5f-b6ee-38d1267df4b3',
+    topicId: 'af26702f-c977-4ae9-9b90-6435708197ec',
+    name: '"அறநூல் தொடர்பான செய்திகள் (நாலடியார்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.687Z,
+    updatedAt: 2025-08-26T15:38:56.687Z
+  },
+  {
+    id: '036e886b-0e10-4c2f-b053-a93e57157e26',
+    topicId: 'af26702f-c977-4ae9-9b90-6435708197ec',
+    name: '"தமிழின் தொன்மை',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.696Z,
+    updatedAt: 2025-08-26T15:38:56.696Z
+  },
+  {
+    id: '3856a8e7-3602-4c34-94c7-fa339ec29157',
+    topicId: 'af26702f-c977-4ae9-9b90-6435708197ec',
+    name: '"தமிழறிஞர்கள் & தமிழ்த்தொண்டு (உ.வே.சா',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.706Z,
+    updatedAt: 2025-08-26T15:38:56.706Z
+  },
+  {
+    id: '65a1eeee-a1a1-42c3-8412-ad88b4489986',
+    topicId: 'af26702f-c977-4ae9-9b90-6435708197ec',
+    name: '"தமிழ்ச் சான்றோர் (பாவேந்தர்',
+    description: null,
+    status: 'pending',
+    priority: 'medium',
+    notes: null,
+    dueDate: null,
+    completedAt: null,
+    createdAt: 2025-08-26T15:38:56.713Z,
+    updatedAt: 2025-08-26T15:38:56.713Z
+  }
+]
+9:09:10 PM [express] GET /api/goals/64ba3af4-0076-4260-b3a5-8d107f38338b 200 in 172ms :: {"id":"64ba…
+9:09:10 PM [express] GET /api/goals 200 in 236ms :: [{"id":"64ba3af4-0076-4260-b3a5-8d107f38338b","u…
+9:09:14 PM [express] GET /api/user-stats/4 404 in 10ms :: {"message":"User stats not found"}
+Terminate batch job (Y/N)? y
+
+D:\react project\SkillStream>npm run dev
+
+> rest-express@1.0.0 dev
+> cross-env NODE_ENV=development tsx server/index.ts
+
+Initializing PgStorage with database connection
+Session store initialized for PgStorage
+9:13:26 PM [express] serving on port 5000
+Database connection established
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+9:13:35 PM [express] GET /api/user 401 in 3ms
+🏆 Checked login badges for user 4
+9:13:39 PM [express] POST /api/login 200 in 92ms :: {"id":4,"email":"akashk2003@email.com","firstNam…
+9:13:40 PM [express] GET /api/user-stats/4 404 in 17ms :: {"message":"User stats not found"}
+🎓 GET /api/education/4 - Starting request
+Retrieved 0 education records from dedicated table
+🎓 GET /api/education/4 - Retrieved 0 records
+9:13:40 PM [express] GET /api/education/4 304 in 29ms :: []
+9:13:40 PM [express] GET /api/daily-activity/4 304 in 13ms :: []
+Retrieved 0 learning modules from database
+9:13:40 PM [express] GET /api/learning-modules 304 in 10ms :: []
+Fetching progress for userId: 4
+Progress fetched: []
+9:13:40 PM [express] GET /api/user-progress/4 304 in 20ms :: []
+9:13:40 PM [express] GET /api/users/4/enrollments 304 in 8ms :: []
+9:13:40 PM [express] GET /api/courses 304 in 9ms :: []
+9:13:40 PM [express] GET /api/users/4/badges 304 in 16ms :: []
+9:13:40 PM [express] GET /api/daily-activity/4 304 in 11ms :: []
+9:13:40 PM [express] GET /api/notifications/4 304 in 11ms :: []
+9:13:40 PM [express] GET /api/notifications/4/count 304 in 19ms :: {"count":"0"}
+9:13:40 PM [express] GET /api/daily-activity/4 304 in 27ms :: []
+9:13:40 PM [express] GET /api/profile/4 304 in 241ms :: {"id":"effcc061-efc9-40f3-a052-92af450a8b48"…
+🎓 GET /api/education/4 - Starting request
+🎨 GET /api/skills/4 - Starting request
+API GET /api/projects/:userId - userId: 4
+💼 GET /api/work-experience/4 - Starting request
+Retrieved 0 education records from dedicated table
+Retrieved 0 projects records from database
+API GET /api/projects/:userId - projects from storage: []
+API GET /api/projects/:userId - projects count: 0
+Retrieved 0 skills records from database
+🎨 GET /api/skills/4 - Retrieved 0 records
+9:13:40 PM [express] GET /api/projects/4 304 in 274ms :: []
+9:13:40 PM [express] GET /api/skills/4 304 in 276ms :: []
+Retrieved 0 work experience records from database
+💼 GET /api/work-experience/4 - Retrieved 0 records
+9:13:40 PM [express] GET /api/work-experience/4 304 in 283ms :: []
+9:13:40 PM [express] GET /api/profile/4 304 in 38ms :: {"id":"effcc061-efc9-40f3-a052-92af450a8b48",…
+🎓 GET /api/education/4 - Retrieved 0 records
+9:13:40 PM [express] GET /api/education/4 304 in 52ms :: []
+API GET /api/projects/:userId - userId: 4
+🎨 GET /api/skills/4 - Starting request
+💼 GET /api/work-experience/4 - Starting request
+Retrieved 0 work experience records from database
+💼 GET /api/work-experience/4 - Retrieved 0 records
+Retrieved 0 skills records from database
+🎨 GET /api/skills/4 - Retrieved 0 records
+9:13:40 PM [express] GET /api/work-experience/4 304 in 17ms :: []
+9:13:40 PM [express] GET /api/skills/4 304 in 18ms :: []
+Retrieved 0 projects records from database
+API GET /api/projects/:userId - projects from storage: []
+API GET /api/projects/:userId - projects count: 0
+9:13:40 PM [express] GET /api/projects/4 304 in 42ms :: []
+9:13:40 PM [express] GET /api/goals 304 in 385ms :: [{"id":"64ba3af4-0076-4260-b3a5-8d107f38338b","u…
+9:13:41 PM [express] GET /api/user-stats/4 404 in 8ms :: {"message":"User stats not found"}
