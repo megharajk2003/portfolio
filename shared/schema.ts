@@ -1232,6 +1232,8 @@ export const goals = pgTable("goals", {
   completedTopics: integer("completed_topics").default(0),
   totalSubtopics: integer("total_subtopics").default(0),
   completedSubtopics: integer("completed_subtopics").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
