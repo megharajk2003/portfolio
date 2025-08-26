@@ -3488,7 +3488,39 @@ export class PgStorage implements IStorage {
           if (criteria?.firstLogin) {
             return true; // This should be checked on actual first login
           }
-          return true;
+          if (criteria?.coursesEnrolled) {
+            // TODO: Implement course enrollment tracking
+            return false; // User hasn't enrolled in any courses yet
+          }
+          if (criteria?.weekendCompletion) {
+            // TODO: Implement weekend course completion tracking
+            return false; // User hasn't completed any weekend courses
+          }
+          if (criteria?.publicPortfolio) {
+            const profile = await this.getProfile(userId.toString());
+            if (!profile) return false;
+            const otherDetails = profile.otherDetails as any;
+            return otherDetails?.visibility === "public";
+          }
+          if (criteria?.forumPosts) {
+            // TODO: Implement forum post tracking
+            return false; // User hasn't made any forum posts yet
+          }
+          if (criteria?.resumeGenerated) {
+            // TODO: Implement resume generation tracking
+            return false; // User hasn't generated any resumes yet
+          }
+          if (criteria?.careerAdvisorUsed) {
+            // TODO: Implement career advisor usage tracking
+            return false; // User hasn't used career advisor yet
+          }
+          if (criteria?.secretAchievement) {
+            // Secret achievements should be very rare and specific
+            return false; // User hasn't unlocked any secret achievements
+          }
+          // Only return true for badges without specific criteria requirements
+          // This prevents random badges from being awarded to new users
+          return false;
 
         default:
           return false;

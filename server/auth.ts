@@ -107,6 +107,14 @@ export function setupAuth(app: Express) {
         isPublic: false,
       });
 
+      // Award onboarding badges for new user registration
+      try {
+        await storage.checkAndAwardBadges(user.id, "achievement");
+        console.log(`🏆 Checked onboarding badges for new user ${user.id}`);
+      } catch (badgeError) {
+        console.error("Error awarding registration badges:", badgeError);
+      }
+
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(201).json({
@@ -123,8 +131,16 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
+  app.post("/api/login", passport.authenticate("local"), async (req, res) => {
     if (req.user) {
+      // Check for any missing onboarding badges on login
+      try {
+        await storage.checkAndAwardBadges(req.user.id, "achievement");
+        console.log(`🏆 Checked login badges for user ${req.user.id}`);
+      } catch (badgeError) {
+        console.error("Error awarding login badges:", badgeError);
+      }
+
       res.status(200).json({
         id: req.user.id,
         email: req.user.email,
