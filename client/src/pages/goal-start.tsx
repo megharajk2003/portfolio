@@ -17,23 +17,9 @@ import {
 } from "@/components/ui/dialog";
 import { Target, Upload, BookOpen, TrendingUp } from "lucide-react";
 import Sidebar from "@/components/sidebar";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  Legend,
-  AreaChart,
-  Area,
-} from "recharts";
+import GoalHeatMap from "@/components/goal-heat-map";
+import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
 import { navigate } from "wouter/use-browser-location";
 
 // Interfaces for the Goal tracking system
@@ -61,6 +47,125 @@ interface Goal {
   updatedAt: string;
   categories?: GoalCategory[];
 }
+
+// ApexChart Component for Goal Type Bar Chart
+const ApexGoalTypeBarChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
+    const chartData = useMemo(() => {
+        const data = Object.entries(goalsByType).map(([type, typeGoals]) => {
+            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+            
+            return {
+                x: type,
+                y: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0,
+                completed: completedSubtopics,
+                total: totalSubtopics
+            };
+        });
+        
+        return data;
+    }, [goalsByType]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'bar',
+            height: 300,
+            toolbar: { show: false }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+                columnWidth: '60%'
+            }
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, width: 2, colors: ['transparent'] },
+        xaxis: {
+            categories: chartData.map(item => item.x),
+            title: { text: 'Goal Types' }
+        },
+        yaxis: {
+            title: { text: 'Progress Percentage' },
+            max: 100,
+            min: 0
+        },
+        fill: { opacity: 1 },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex }) {
+                const data = chartData[dataPointIndex];
+                return `<div style="padding: 10px;">
+                    <strong>${data.x}</strong><br/>
+                    Progress: ${data.y}%<br/>
+                    Completed: ${data.completed}/${data.total}
+                </div>`;
+            }
+        },
+        colors: ['#3b82f6']
+    };
+
+    const series = [{
+        name: 'Progress %',
+        data: chartData.map(item => item.y)
+    }];
+
+    return <ReactApexChart options={options} series={series} type="bar" height={300} />;
+};
+
+// ApexChart Component for Goal Type Pie Chart
+const ApexGoalTypePieChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
+    const chartData = useMemo(() => {
+        const data = Object.entries(goalsByType).map(([type, typeGoals]) => {
+            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+            return {
+                name: type,
+                value: completedSubtopics
+            };
+        });
+        
+        return data.filter(item => item.value > 0); // Only show types with actual progress
+    }, [goalsByType]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'pie',
+            height: 300
+        },
+        labels: chartData.map(item => item.name),
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+        tooltip: {
+            custom: function({ series, seriesIndex }) {
+                const totalForType = Object.values(goalsByType)[seriesIndex]?.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0) || 0;
+                const completed = series[seriesIndex];
+                const percentage = totalForType > 0 ? Math.round((completed / totalForType) * 100) : 0;
+                
+                return `<div style="padding: 10px;">
+                    <strong>${chartData[seriesIndex]?.name}</strong><br/>
+                    Completed: ${completed}/${totalForType}<br/>
+                    Progress: ${percentage}%
+                </div>`;
+            }
+        },
+        legend: {
+            position: 'bottom'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: { width: 300 },
+                legend: { position: 'bottom' }
+            }
+        }]
+    };
+
+    const series = chartData.map(item => item.value);
+
+    if (series.length === 0) {
+        return <div className="h-[300px] flex items-center justify-center text-gray-500">No completed subtopics yet</div>;
+    }
+
+    return <ReactApexChart options={options} series={series} type="pie" height={300} />;
+};
 
 // API functions for goals
 const fetchUserGoals = async () => {
@@ -544,130 +649,8 @@ export default function GoalStart() {
                 })}
               </div>
 
-              {/* Study Performance Chart */}
-              <Card className="mb-8">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
-                    Study Performance
-                  </CardTitle>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    This chart shows the cumulative number of topics you've completed for each goal over the past 2 weeks.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div style={{ width: "100%", height: "300px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={(() => {
-                          // Generate data for the past 2 weeks
-                          const data = [];
-                          const today = new Date();
-                          
-                          for (let i = 13; i >= 0; i--) {
-                            const date = new Date(today);
-                            date.setDate(date.getDate() - i);
-                            const dateStr = date.toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric' 
-                            });
-                            
-                            const entry: any = { date: dateStr };
-                            
-                            // Add cumulative data for each goal type
-                            Object.entries(goalsByType).forEach(([type, typeGoals]) => {
-                              // Simulate cumulative progress (in real app, this would come from actual data)
-                              const baseProgress = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                              let cumulativeCount = 0;
-                              
-                              if (i <= 2) { // Show progress in last 2 days
-                                cumulativeCount = Math.max(0, Math.floor(baseProgress * (1 - i * 0.3)));
-                              }
-                              
-                              entry[type.toLowerCase()] = cumulativeCount;
-                            });
-                            
-                            data.push(entry);
-                          }
-                          return data;
-                        })()}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis 
-                          dataKey="date"
-                          tick={{ fontSize: 12, fill: "#6b7280" }}
-                          stroke="#d1d5db"
-                        />
-                        <YAxis 
-                          tick={{ fontSize: 12, fill: "#6b7280" }}
-                          stroke="#d1d5db"
-                        />
-                        <Tooltip 
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px"
-                          }}
-                        />
-                        <Legend />
-                        {Object.keys(goalsByType).map((type, index) => {
-                          const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
-                          return (
-                            <Line
-                              key={type}
-                              type="monotone"
-                              dataKey={type.toLowerCase()}
-                              stroke={colors[index % colors.length]}
-                              strokeWidth={2}
-                              dot={{ fill: colors[index % colors.length], r: 4 }}
-                              name={type.toLowerCase()}
-                            />
-                          );
-                        })}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                  
-                  {/* Active Goals Section */}
-                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-4 h-4 rounded-full bg-gray-800 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                      </div>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">Active Goals</span>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-3">
-                      {Object.entries(goalsByType).map(([type, typeGoals]) => {
-                        const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                        const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                        const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
-                        const colorIndex = Object.keys(goalsByType).indexOf(type);
-                        
-                        return (
-                          <div
-                            key={type}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
-                            style={{
-                              backgroundColor: `${colors[colorIndex % colors.length]}15`,
-                              borderColor: colors[colorIndex % colors.length]
-                            }}
-                          >
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: colors[colorIndex % colors.length] }}
-                            ></div>
-                            <span className="text-sm font-medium">
-                              {type.toLowerCase()} ({completedSubtopics}/{totalSubtopics})
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Import and use the existing GoalHeatMap component for real data */}
+              <GoalHeatMap />
 
               {/* Progress Summary Charts */}
               <div className="space-y-8">
@@ -685,80 +668,7 @@ export default function GoalStart() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div style={{ width: "100%", height: "300px" }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={Object.entries(goalsByType).map(
-                              ([type, typeGoals]) => {
-                                const totalSubtopics = typeGoals.reduce(
-                                  (sum, goal) =>
-                                    sum + (goal.totalSubtopics || 0),
-                                  0
-                                );
-                                const completedSubtopics = typeGoals.reduce(
-                                  (sum, goal) =>
-                                    sum + (goal.completedSubtopics || 0),
-                                  0
-                                );
-                                return {
-                                  type,
-                                  completed: completedSubtopics,
-                                  total: totalSubtopics,
-                                  percentage:
-                                    totalSubtopics > 0
-                                      ? Math.round(
-                                          (completedSubtopics /
-                                            totalSubtopics) *
-                                            100
-                                        )
-                                      : 0,
-                                };
-                              }
-                            )}
-                            margin={{
-                              top: 20,
-                              right: 30,
-                              left: 20,
-                              bottom: 20,
-                            }}
-                          >
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              stroke="#e5e7eb"
-                            />
-                            <XAxis
-                              dataKey="type"
-                              tick={{ fontSize: 11, fill: "#6b7280" }}
-                              stroke="#9ca3af"
-                            />
-                            <YAxis
-                              tick={{ fontSize: 11, fill: "#6b7280" }}
-                              stroke="#9ca3af"
-                              domain={[0, 100]}
-                            />
-                            <Tooltip
-                              contentStyle={{
-                                backgroundColor: "white",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                              }}
-                              formatter={(value, name) => [
-                                name === "percentage" ? `${value}%` : value,
-                                name === "percentage"
-                                  ? "Progress"
-                                  : name === "completed"
-                                  ? "Completed"
-                                  : "Total",
-                              ]}
-                            />
-                            <Bar
-                              dataKey="percentage"
-                              fill="#3b82f6"
-                              radius={[4, 4, 0, 0]}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
+                      <ApexGoalTypeBarChart goalsByType={goalsByType} />
                     </CardContent>
                   </Card>
 
@@ -771,77 +681,7 @@ export default function GoalStart() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div style={{ width: "100%", height: "300px" }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={Object.entries(goalsByType).map(
-                                ([type, typeGoals], index) => {
-                                  const totalSubtopics = typeGoals.reduce(
-                                    (sum, goal) =>
-                                      sum + (goal.totalSubtopics || 0),
-                                    0
-                                  );
-                                  const completedSubtopics = typeGoals.reduce(
-                                    (sum, goal) =>
-                                      sum + (goal.completedSubtopics || 0),
-                                    0
-                                  );
-                                  return {
-                                    name: type,
-                                    value: completedSubtopics,
-                                    total: totalSubtopics,
-                                    color: [
-                                      "#3b82f6",
-                                      "#10b981",
-                                      "#f59e0b",
-                                      "#ef4444",
-                                      "#8b5cf6",
-                                    ][index % 5],
-                                  };
-                                }
-                              )}
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={80}
-                              dataKey="value"
-                              label={({ name, value, total }) =>
-                                `${name}: ${value}/${total}`
-                              }
-                            >
-                              {Object.entries(goalsByType).map((_, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={
-                                    [
-                                      "#3b82f6",
-                                      "#10b981",
-                                      "#f59e0b",
-                                      "#ef4444",
-                                      "#8b5cf6",
-                                    ][index % 5]
-                                  }
-                                />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              contentStyle={{
-                                backgroundColor: "white",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                              }}
-                              formatter={(value, name, props) => [
-                                `${value}/${props.payload.total} (${Math.round(
-                                  (Number(value) /
-                                    Number(props.payload.total)) *
-                                    100
-                                )}%)`,
-                                "Completed Subtopics",
-                              ]}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
+                      <ApexGoalTypePieChart goalsByType={goalsByType} />
                     </CardContent>
                   </Card>
                 </div>

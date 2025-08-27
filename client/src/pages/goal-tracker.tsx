@@ -25,25 +25,9 @@ import {
 } from "@/components/ui/select";
 import { Target, TrendingUp, Upload, ArrowLeft } from "lucide-react";
 import Sidebar from "@/components/sidebar";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import { navigate } from "wouter/use-browser-location";
-// ApexCharts imports
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
+import { navigate } from "wouter/use-browser-location";
 
 // Get URL search params
 const getURLParams = () => {

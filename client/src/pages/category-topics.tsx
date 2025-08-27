@@ -15,16 +15,8 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Target, TrendingUp } from "lucide-react";
 import Sidebar from "@/components/sidebar";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
+import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
 import { navigate } from "wouter/use-browser-location";
 import { useLocation } from "wouter";
 
@@ -434,48 +426,53 @@ export default function CategoryTopics() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div style={{ width: "100%", height: "320px" }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={cumulativeProgressData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                      />
-                      <YAxis
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                        domain={[0, "dataMax + 2"]}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "white",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                        }}
-                        labelStyle={{ color: "#1f2937", fontWeight: "bold" }}
-                      />
-                      <Legend wrapperStyle={{ paddingTop: "20px" }} />
-                      {topics.map((topic: GoalTopic, index: number) => (
-                        <Line
-                          key={topic.id}
-                          type="stepAfter"
-                          dataKey={topic.name}
-                          stroke={TOPIC_COLORS[index % TOPIC_COLORS.length]}
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 5 }}
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                {cumulativeProgressData.length > 0 ? (
+                  <div className="h-80">
+                    <ReactApexChart 
+                      options={{
+                        chart: {
+                          type: 'line',
+                          stacked: false,
+                          height: 320,
+                          zoom: { type: 'x', enabled: true, autoScaleYaxis: true },
+                          toolbar: { autoSelected: 'zoom' },
+                        },
+                        dataLabels: { enabled: false },
+                        stroke: { curve: 'stepline', width: 2 },
+                        title: {
+                          text: 'Real Topic Progress',
+                          align: 'left'
+                        },
+                        markers: { size: 0 },
+                        yaxis: {
+                          title: { text: 'Completed Subtopics' },
+                          labels: { formatter: (val) => val.toFixed(0) },
+                        },
+                        xaxis: { 
+                          type: 'datetime',
+                          categories: cumulativeProgressData.map(item => item.date)
+                        },
+                        tooltip: {
+                          shared: false,
+                          y: { formatter: (val) => `${val.toFixed(0)} completed` },
+                          x: { format: 'dd MMM yyyy' }
+                        },
+                        colors: TOPIC_COLORS,
+                        legend: { position: 'bottom' }
+                      } as ApexOptions}
+                      series={topics.map((topic: GoalTopic, index: number) => ({
+                        name: topic.name,
+                        data: cumulativeProgressData.map(item => item[topic.name] as number || 0)
+                      }))}
+                      type="line" 
+                      height={320} 
+                    />
+                  </div>
+                ) : (
+                  <div className="h-80 flex items-center justify-center text-gray-500">
+                    No topic completion data available for the selected period.
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
