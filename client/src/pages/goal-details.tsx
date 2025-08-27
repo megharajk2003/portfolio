@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
-// tanstack/react-query is not needed for this dummy data setup
-// import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,24 +23,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Target, FileSpreadsheet, TrendingUp } from "lucide-react";
+import { ArrowLeft, Target, Edit2, Trash2, Plus, CheckCircle2 } from "lucide-react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
 
-// 1. UPDATED Goal interface to include timestamps for the graph
-interface Goal {
+// Interfaces
+interface GoalCategory {
   id: string;
-  userId: number;
+  name: string;
+  description?: string;
+  totalTopics: number;
+  completedTopics: number;
+}
+
+interface GoalTopic {
+  id: string;
+  name: string;
+  description?: string;
+  totalSubtopics: number;
+  completedSubtopics: number;
+}
+
+interface GoalSubtopic {
+  id: string;
+  name: string;
+  description?: string;
+  status: "pending" | "start" | "completed";
+  priority: "low" | "medium" | "high";
+  notes?: string;
+  dueDate?: string;
+  completedAt?: string;
+}
+
+interface GoalWithDetails {
+  id: string;
   name: string;
   description?: string;
   totalTopics: number;
@@ -50,120 +65,103 @@ interface Goal {
   completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
-  completedSubtopicTimestamps: string[]; // <-- ADDED FOR ACCURATE GRAPH
+  categories: (GoalCategory & {
+    topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+  })[];
 }
 
-interface GoalProgressData {
-  date: string;
-  [goalName: string]: number | string;
-}
+// API functions
+const fetchGoalWithCategories = async (goalId: string): Promise<GoalWithDetails> => {
+  const response = await fetch(`/api/goals/${goalId}`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch goal details");
+  }
+  return response.json();
+};
 
-const GOAL_COLORS = [
-  "#3b82f6", // blue
-  "#10b981", // green
-  "#f59e0b", // yellow
-  "#ef4444", // red
-  "#8b5cf6", // purple
-  "#f97316", // orange
-  "#06b6d4", // cyan
-  "#84cc16", // lime
-];
+const updateSubtopicStatus = async (subtopicId: string, status: "pending" | "start" | "completed") => {
+  const response = await fetch(`/api/goal-subtopics/${subtopicId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update subtopic status");
+  }
+  return response.json();
+};
 
-// 2. DUMMY DATA to test the component and graph
-const dummyGoals: Goal[] = [
-  {
-    id: "421f836b-aea4-46d9-ba6b-c11d2e200a65",
-    userId: 4,
-    name: "General Intelligence & Reasoning",
-    totalTopics: 1,
-    completedTopics: 0,
-    totalSubtopics: 31,
-    completedSubtopics: 0,
-    createdAt: "2025-06-01T10:00:00.000Z",
-    updatedAt: "2025-08-27T12:00:00.000Z",
-    completedSubtopicTimestamps: [],
-  },
-  {
-    id: "d02c952f-aff7-4112-a2fa-b81a96182970",
-    userId: 4,
-    name: "General Awareness",
-    totalTopics: 1,
-    completedTopics: 0,
-    totalSubtopics: 16,
-    completedSubtopics: 5,
-    createdAt: "2025-06-15T10:00:00.000Z",
-    updatedAt: "2025-08-27T12:00:00.000Z",
-    completedSubtopicTimestamps: [
-      "2025-07-05T11:00:00.000Z",
-      "2025-07-06T11:00:00.000Z",
-      "2025-08-01T14:20:00.000Z",
-      "2025-08-02T09:00:00.000Z",
-      "2025-08-15T18:00:00.000Z",
-    ],
-  },
-  {
-    id: "a2a30053-6aa5-4c06-93e1-b3612b246d7f",
-    userId: 4,
-    name: "Quantitative Aptitude",
-    totalTopics: 1,
-    completedTopics: 0,
-    totalSubtopics: 23,
-    completedSubtopics: 2,
-    createdAt: "2025-07-01T09:00:00.000Z",
-    updatedAt: "2025-08-27T12:00:00.000Z",
-    completedSubtopicTimestamps: [
-      "2025-07-20T15:30:00.000Z", // Ratio and Proportion
-      "2025-08-10T10:00:00.000Z", // Time and Distance
-    ],
-  },
-  {
-    id: "8c77d1fc-42e7-47b5-b425-91e66e0436a8",
-    userId: 4,
-    name: "English Comprehension",
-    totalTopics: 1,
-    completedTopics: 0,
-    totalSubtopics: 15,
-    completedSubtopics: 3,
-    createdAt: "2025-07-10T10:00:00.000Z",
-    updatedAt: "2025-08-27T12:00:00.000Z",
-    completedSubtopicTimestamps: [
-      "2025-08-05T12:00:00.000Z",
-      "2025-08-20T16:00:00.000Z",
-      "2025-08-21T17:00:00.000Z",
-    ],
-  },
-];
+const deleteGoal = async (goalId: string) => {
+  const response = await fetch(`/api/goals/${goalId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete goal");
+  }
+  return response.json();
+};
 
-export default function GoalTracker() {
+export default function GoalDetails() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [goalName, setGoalName] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [editedGoalName, setEditedGoalName] = useState("");
+  const [editedGoalDescription, setEditedGoalDescription] = useState("");
 
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  // Extract goal ID from URL
+  const goalId = location.split("/")[2]; // /goal-details/{goalId}
 
-  const months = [
-    { value: "all", label: "All Months" },
-    { value: "01", label: "January" },
-    { value: "02", label: "February" },
-    { value: "03", label: "March" },
-    { value: "04", label: "April" },
-    { value: "05", label: "May" },
-    { value: "06", label: "June" },
-    { value: "07", label: "July" },
-    { value: "08", label: "August" },
-    { value: "09", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
-    { value: "12", label: "December" },
-  ];
+  // Fetch goal details
+  const { 
+    data: goal, 
+    isLoading, 
+    error,
+    refetch 
+  } = useQuery({
+    queryKey: ["goal", goalId],
+    queryFn: () => fetchGoalWithCategories(goalId),
+    enabled: !!goalId && !!user,
+  });
 
-  const goals = dummyGoals;
-  const goalsLoading = false;
+  // Update subtopic status mutation
+  const updateSubtopicMutation = useMutation({
+    mutationFn: ({ subtopicId, status }: { subtopicId: string; status: "pending" | "start" | "completed" }) =>
+      updateSubtopicStatus(subtopicId, status),
+    onSuccess: () => {
+      toast({ title: "Success", description: "Subtopic status updated" });
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete goal mutation
+  const deleteGoalMutation = useMutation({
+    mutationFn: deleteGoal,
+    onSuccess: () => {
+      toast({ title: "Success", description: "Goal deleted successfully" });
+      navigate("/goal-tracker");
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -171,295 +169,294 @@ export default function GoalTracker() {
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       case "start":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "pending":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
   };
 
-  // FIX: MOVED filteredGoals calculation to its own useMemo hook
-  const filteredGoals = useMemo(() => {
-    return goals.filter((goal) => {
-      const goalCreated = new Date(goal.createdAt);
-      const goalUpdated = new Date(goal.updatedAt);
-
-      let periodStart, periodEnd;
-
-      if (selectedMonth === "all") {
-        periodStart = new Date(selectedYear, 0, 1);
-        periodEnd = new Date(selectedYear, 11, 31, 23, 59, 59);
-      } else {
-        const monthIndex = parseInt(selectedMonth) - 1;
-        periodStart = new Date(selectedYear, monthIndex, 1);
-        periodEnd = new Date(selectedYear, monthIndex + 1, 0, 23, 59, 59);
-      }
-
-      return goalCreated <= periodEnd && goalUpdated >= periodStart;
-    });
-  }, [goals, selectedYear, selectedMonth]);
-
-  const cumulativeProgressData = useMemo(() => {
-    // Now it uses the filteredGoals from the component scope
-    if (!filteredGoals.length) return [];
-
-    const completionsByDay = new Map<string, Map<string, number>>();
-    filteredGoals.forEach((goal) => {
-      const goalCompletions = new Map<string, number>();
-      if (goal.completedSubtopicTimestamps) {
-        goal.completedSubtopicTimestamps.forEach((timestamp) => {
-          const dateKey = new Date(timestamp).toISOString().split("T")[0];
-          goalCompletions.set(dateKey, (goalCompletions.get(dateKey) || 0) + 1);
-        });
-      }
-      completionsByDay.set(goal.id, goalCompletions);
-    });
-
-    let startDate, endDate;
-    if (selectedMonth === "all") {
-      startDate = new Date(selectedYear, 0, 1);
-      endDate = new Date(selectedYear, 11, 31);
-    } else {
-      const monthIndex = parseInt(selectedMonth) - 1;
-      startDate = new Date(selectedYear, monthIndex, 1);
-      endDate = new Date(selectedYear, monthIndex + 1, 0);
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "low":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
+  };
 
-    const dataPoints: GoalProgressData[] = [];
-    const current = new Date(startDate);
-    const cumulativeCounts = new Map<string, number>();
-    filteredGoals.forEach((goal) => cumulativeCounts.set(goal.name, 0));
-
-    while (current <= endDate) {
-      const dateStr = current.toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-      });
-      const dateKey = current.toISOString().split("T")[0];
-
-      const progressPoint: GoalProgressData = { date: dateStr };
-
-      filteredGoals.forEach((goal) => {
-        const goalCreatedDate = new Date(goal.createdAt);
-        if (current >= goalCreatedDate) {
-          const goalCompletions = completionsByDay.get(goal.id);
-          let currentCumulative = cumulativeCounts.get(goal.name) || 0;
-
-          if (goalCompletions && goalCompletions.has(dateKey)) {
-            currentCumulative += goalCompletions.get(dateKey)!;
-            cumulativeCounts.set(goal.name, currentCumulative);
-          }
-          progressPoint[goal.name] = currentCumulative;
-        } else {
-          progressPoint[goal.name] = 0;
-        }
-      });
-
-      dataPoints.push(progressPoint);
-      current.setDate(current.getDate() + 1);
+  const handleSubtopicStatusToggle = (subtopicId: string, currentStatus: string) => {
+    let newStatus: "pending" | "start" | "completed";
+    switch (currentStatus) {
+      case "pending":
+        newStatus = "start";
+        break;
+      case "start":
+        newStatus = "completed";
+        break;
+      case "completed":
+        newStatus = "pending";
+        break;
+      default:
+        newStatus = "start";
     }
+    
+    updateSubtopicMutation.mutate({ subtopicId, status: newStatus });
+  };
 
-    return dataPoints;
-    // FIX: Added filteredGoals to dependency array
-  }, [filteredGoals, selectedYear, selectedMonth]);
+  const handleDeleteGoal = () => {
+    if (window.confirm("Are you sure you want to delete this goal? This action cannot be undone.")) {
+      deleteGoalMutation.mutate(goalId);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <div className="text-center">Please log in to view goal details.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !goal) {
+    return (
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <div className="text-red-600 dark:text-red-400">
+              Error loading goal: {error ? (error as Error).message : "Goal not found"}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div
-          className="container mx-auto p-6 space-y-6"
-          data-testid="goal-tracker-page"
-        >
+        <div className="container mx-auto p-6 space-y-6">
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <div>
-              <h1
-                className="text-3xl font-bold text-gray-900 dark:text-gray-100  dark:text-white"
-                data-testid="page-title"
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/goal-tracker")}
+                className="flex items-center gap-2"
               >
-                Goal Tracker
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Upload CSV files and track your progress with interactive
-                visualizations
-              </p>
+                <ArrowLeft className="h-4 w-4" />
+                Back to Goals
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {goal.name}
+                </h1>
+                {goal.description && (
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    {goal.description}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Goal
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteGoal}
+                className="text-red-600 hover:text-red-700"
+                disabled={deleteGoalMutation.isPending}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {deleteGoalMutation.isPending ? "Deleting..." : "Delete"}
+              </Button>
             </div>
           </div>
 
-          {goalsLoading ? (
-            <div className="text-center py-8"> /* ... */ </div>
-          ) : goals.length === 0 ? (
-            <Card> /* ... */ </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {goals.map((goal) => (
-                <Card
-                  key={goal.id}
-                  className="cursor-pointer transition-all hover:shadow-lg"
-                  onClick={() => navigate(`/goal-tracker/id/subtopic`)}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-blue-500" />
-                      {goal.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">Progress</span>
-                          <span className="text-sm text-gray-600">
-                            {goal.completedSubtopics} / {goal.totalSubtopics}
-                          </span>
-                        </div>
-                        <Progress
-                          value={
-                            (goal.completedSubtopics / goal.totalSubtopics) *
-                            100
-                          }
-                          className="h-2"
-                        />
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">
-                          {goal.totalSubtopics > 0
-                            ? Math.round(
-                                (goal.completedSubtopics /
-                                  goal.totalSubtopics) *
-                                  100
-                              )
-                            : 0}
-                          % Complete
-                        </span>
-                        <Badge
-                          className={getStatusColor(
-                            goal.completedSubtopics === goal.totalSubtopics
-                              ? "completed"
-                              : goal.completedSubtopics > 0
-                              ? "in_progress"
-                              : "pending"
-                          )}
-                        >
-                          {goal.completedSubtopics === goal.totalSubtopics
-                            ? "Completed"
-                            : goal.completedSubtopics > 0
-                            ? "In Progress"
-                            : "Not Started"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {goals.length > 0 && (
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Study Performance
-                  </CardTitle>
-                  <div className="flex gap-4 items-center">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="year-select">Year:</Label>
-                      <Select
-                        value={selectedYear.toString()}
-                        onValueChange={(value) =>
-                          setSelectedYear(parseInt(value))
-                        }
-                      >
-                        <SelectTrigger className="w-32" id="year-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from(
-                            { length: 5 },
-                            (_, i) => currentYear - i
-                          ).map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="month-select">Month:</Label>
-                      <Select
-                        value={selectedMonth}
-                        onValueChange={setSelectedMonth}
-                      >
-                        <SelectTrigger className="w-40" id="month-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {months.map((month) => (
-                            <SelectItem key={month.value} value={month.value}>
-                              {month.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+          {/* Goal Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-500" />
+                Goal Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {goal.categories.length}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Categories
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
-                  This chart shows the cumulative number of subtopics you've
-                  completed for each goal{" "}
-                  {selectedMonth !== "all"
-                    ? `in ${
-                        months.find((m) => m.value === selectedMonth)?.label
-                      } ${selectedYear}`
-                    : `in ${selectedYear}`}
-                  .
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div style={{ width: "100%", height: "320px" }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={cumulativeProgressData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                      />
-                      <YAxis
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                        domain={[0, "dataMax + 2"]}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "white",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                        }}
-                        labelStyle={{ color: "#1f2937", fontWeight: "bold" }}
-                      />
-                      <Legend wrapperStyle={{ paddingTop: "20px" }} />
-                      {/* This now works correctly */}
-                      {filteredGoals.map((goal, index) => (
-                        <Line
-                          key={goal.id}
-                          type="stepAfter"
-                          dataKey={goal.name}
-                          stroke={GOAL_COLORS[index % GOAL_COLORS.length]}
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 5 }}
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
+                <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {goal.totalTopics}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Topics
+                  </div>
                 </div>
+                <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {goal.totalSubtopics}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Subtopics
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    {goal.completedSubtopics}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Completed
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Overall Progress</span>
+                  <span className="text-sm text-gray-600">
+                    {Math.round((goal.completedSubtopics / goal.totalSubtopics) * 100)}%
+                  </span>
+                </div>
+                <Progress
+                  value={goal.totalSubtopics > 0 ? (goal.completedSubtopics / goal.totalSubtopics) * 100 : 0}
+                  className="h-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Categories and Topics */}
+          <div className="space-y-6">
+            {goal.categories.map((category) => (
+              <Card key={category.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{category.name}</span>
+                    <Badge variant="outline">
+                      {category.topics.length} topics
+                    </Badge>
+                  </CardTitle>
+                  {category.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {category.description}
+                    </p>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {category.topics.map((topic) => (
+                    <div key={topic.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">{topic.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600">
+                            {topic.completedSubtopics} / {topic.totalSubtopics}
+                          </span>
+                          <Progress
+                            value={
+                              topic.totalSubtopics > 0
+                                ? (topic.completedSubtopics / topic.totalSubtopics) * 100
+                                : 0
+                            }
+                            className="w-20 h-2"
+                          />
+                        </div>
+                      </div>
+                      
+                      {topic.subtopics.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {topic.subtopics.map((subtopic) => (
+                            <div
+                              key={subtopic.id}
+                              className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium truncate">
+                                  {subtopic.name}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge
+                                    variant="outline"
+                                    className={getStatusColor(subtopic.status)}
+                                  >
+                                    {subtopic.status}
+                                  </Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className={getPriorityColor(subtopic.priority)}
+                                  >
+                                    {subtopic.priority}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleSubtopicStatusToggle(subtopic.id, subtopic.status)
+                                }
+                                disabled={updateSubtopicMutation.isPending}
+                                className="ml-2"
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {goal.categories.length === 0 && (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  No Categories Found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  This goal doesn't have any categories or topics yet. Try uploading a CSV file to populate it.
+                </p>
               </CardContent>
             </Card>
           )}
