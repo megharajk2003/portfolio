@@ -3053,6 +3053,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Badge checking endpoint for dashboard
+  app.post("/api/check-badges/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      // Check all badges for the user
+      const newBadges = await storage.checkAndAwardBadges(userId, "all");
+      
+      // Get badge details for the newly awarded badges
+      const newBadgesWithDetails = [];
+      for (const userBadge of newBadges) {
+        const allBadges = await storage.getBadges();
+        const badgeDetails = allBadges.find(b => b.id === userBadge.badgeId);
+        if (badgeDetails) {
+          newBadgesWithDetails.push({
+            ...userBadge,
+            badge: badgeDetails
+          });
+        }
+      }
+
+      res.json({ 
+        newBadges: newBadgesWithDetails,
+        count: newBadges.length 
+      });
+    } catch (error) {
+      console.error("Error checking badges:", error);
+      res.status(500).json({ message: "Failed to check badges" });
+    }
+  });
+
+  // Get all user badges endpoint
+  app.get("/api/user-badges/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const userBadges = await storage.getUserBadges(userId);
+      res.json(userBadges);
+    } catch (error) {
+      console.error("Error fetching user badges:", error);
+      res.status(500).json({ message: "Failed to fetch badges" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
