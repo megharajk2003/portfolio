@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Target, TrendingUp, Upload } from "lucide-react";
+import { Target, TrendingUp, Upload, ArrowLeft } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import {
   LineChart,
@@ -41,6 +41,14 @@ import {
   Cell,
 } from "recharts";
 import { navigate } from "wouter/use-browser-location";
+
+// Get URL search params
+const getURLParams = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return {
+    type: urlParams.get('type') || null
+  };
+};
 
 // Interfaces for the Goal tracking system
 interface GoalCategory {
@@ -114,6 +122,9 @@ export default function GoalTracker() {
   const { user } = useAuth();
   const { toast } = useToast();
   const currentYear = new Date().getFullYear();
+  
+  // Get URL parameters
+  const { type: selectedGoalType } = getURLParams();
 
   // Fetch user goals
   const { data: goals = [], isLoading: goalsLoading, error: goalsError } = useQuery({
@@ -148,10 +159,26 @@ export default function GoalTracker() {
     return grouped;
   }, [goals]);
 
-  // Get all categories from all goals for detailed view
+  // Filter goals based on selected type
+  const filteredGoals = useMemo(() => {
+    if (!selectedGoalType) return goals;
+    
+    return goals.filter((goal: Goal) => {
+      const goalName = goal.name.toLowerCase();
+      const type = selectedGoalType.toLowerCase();
+      
+      if (type === 'tnpsc') return goalName.includes('tnpsc');
+      if (type === 'ssc') return goalName.includes('ssc');
+      if (type === 'upsc') return goalName.includes('upsc');
+      if (type === 'banking') return goalName.includes('bank');
+      return type === 'other';
+    });
+  }, [goals, selectedGoalType]);
+
+  // Get all categories from filtered goals for detailed view
   const allCategories = useMemo(() => {
     const categories: GoalCategory[] = [];
-    goals.forEach((goal: Goal) => {
+    filteredGoals.forEach((goal: Goal) => {
       if (goal.categories) {
         goal.categories.forEach((category) => {
           categories.push({
@@ -163,7 +190,7 @@ export default function GoalTracker() {
       }
     });
     return categories;
-  }, [goals]);
+  }, [filteredGoals]);
 
   // State for filters
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
@@ -340,9 +367,29 @@ export default function GoalTracker() {
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Category Tracker
-            </h1>
+            <div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/goals")}
+                  className="flex items-center gap-2"
+                  data-testid="button-back-to-goals"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Goals
+                </Button>
+                <div className="h-6 w-px bg-gray-300"></div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {selectedGoalType ? `${selectedGoalType} Categories` : 'All Categories'}
+                </h1>
+              </div>
+              {selectedGoalType && (
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Viewing categories for {selectedGoalType} goals
+                </p>
+              )}
+            </div>
 
             {/* CSV Upload Dialog */}
             <Dialog>
