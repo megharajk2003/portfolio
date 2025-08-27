@@ -2514,6 +2514,64 @@ export class PgStorage implements IStorage {
     }
   }
 
+  // Helper method to update daily activity when subtopics are completed
+  private async updateDailyActivityForSubtopicCompletion(
+    topicId: string
+  ): Promise<void> {
+    try {
+      // Get the goal from the topic to find the userId
+      const topic = await this.getGoalTopic(topicId);
+      if (!topic) return;
+
+      const category = await this.getGoalCategory(topic.categoryId);
+      if (!category) return;
+
+      const goal = await this.getGoal(category.goalId);
+      if (!goal) return;
+
+      const userId = goal.userId;
+      const today = new Date().toISOString().split("T")[0];
+      const xpEarned = 2; // Award 2 XP for subtopic completion
+
+      if (!this.isDbConnected) {
+        const key = `dailyActivity_${userId}`;
+        const activities = this.fallbackData.get(key) || [];
+        const existingActivity = activities.find((a: any) => a.date === today);
+
+        if (existingActivity) {
+          existingActivity.xpEarned =
+            (existingActivity.xpEarned || 0) + xpEarned;
+        } else {
+          activities.push({
+            userId,
+            date: today,
+            xpEarned,
+            lessonsCompleted: 0,
+          });
+        }
+        this.fallbackData.set(key, activities);
+      } else {
+        // Update database daily activity
+        await db
+          .insert(dailyActivity)
+          .values({
+            date: today,
+            userId,
+            xpEarned,
+            lessonsCompleted: 0,
+          })
+          .onConflictDoUpdate({
+            target: [dailyActivity.userId, dailyActivity.date],
+            set: {
+              xpEarned: sql`${dailyActivity.xpEarned} + ${xpEarned}`,
+            },
+          });
+      }
+    } catch (error) {
+      console.error("Error updating daily activity for subtopic completion:", error);
+    }
+  }
+
   // Helper method to check if all lessons are completed and mark module as completed
   private async checkAndCompleteModule(
     userId: number,
@@ -4020,6 +4078,23 @@ export class PgStorage implements IStorage {
     }
   }
 
+  private async getGoalTopic(id: string): Promise<GoalTopic | undefined> {
+    if (!this.isDbConnected) {
+      return undefined;
+    }
+
+    try {
+      const result = await db
+        .select()
+        .from(goalTopics)
+        .where(eq(goalTopics.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Error fetching goal topic:", error);
+      return undefined;
+    }
+  }
+
   private async getGoalCategory(id: string): Promise<GoalCategory | undefined> {
     if (!this.isDbConnected) {
       return undefined;
@@ -4095,6 +4170,12 @@ export class PgStorage implements IStorage {
           if (index !== -1) {
             subtopics[index] = { ...subtopics[index], ...updateData };
             this.fallbackData.set(key, subtopics);
+            
+            // Update daily activity when subtopic is completed
+            if (status === "completed") {
+              await this.updateDailyActivityForSubtopicCompletion(subtopics[index].topicId);
+            }
+            
             return subtopics[index];
           }
         }
@@ -4112,6 +4193,11 @@ export class PgStorage implements IStorage {
       if (subtopic) {
         // Update topic and category counters
         await this.updateTopicProgressCounters(subtopic.topicId);
+        
+        // Update daily activity when subtopic is completed
+        if (status === "completed") {
+          await this.updateDailyActivityForSubtopicCompletion(subtopic.topicId);
+        }
       }
 
       return subtopic;

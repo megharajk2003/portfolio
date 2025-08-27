@@ -1017,6 +1017,15 @@ export default function GoalDetails() {
                                                                 ).toLocaleDateString()}
                                                               </div>
                                                             )}
+                                                            {subtopic.completedAt && (
+                                                              <div className="flex items-center gap-1 mt-1 text-xs text-green-600 dark:text-green-400">
+                                                                <CheckCircle2 className="h-3 w-3" />
+                                                                Completed:{" "}
+                                                                {new Date(
+                                                                  subtopic.completedAt
+                                                                ).toLocaleDateString()}
+                                                              </div>
+                                                            )}
                                                           </div>
                                                         </div>
 

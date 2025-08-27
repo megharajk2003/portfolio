@@ -949,13 +949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const achievementData = insertAchievementSchema.parse(req.body);
       const achievement = await storage.createAchievement(achievementData);
 
-      // Check for achievement badges after achievement creation
-      if (achievementData.userId) {
-        const userIdInt = parseInt(achievementData.userId.toString());
-        if (!isNaN(userIdInt)) {
-          await storage.checkAndAwardBadges(userIdInt, "achievement");
-        }
-      }
+      // Note: Achievement badges would be checked if we had userId in the request
 
       res.json(achievement);
     } catch (error) {
