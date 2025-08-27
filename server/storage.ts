@@ -1,10 +1,3 @@
-import { eq, sql } from "drizzle-orm";
-import { db } from "./db";
-import {
-  badges,
-  userBadges,
-  userStats,
-} from "@shared/schema";
 import {
   type User,
   type InsertUser,
@@ -3452,7 +3445,6 @@ export class PgStorage implements IStorage {
     }
   }
 
-
   // Goal tracking system implementation
   async createGoal(goalData: InsertGoal): Promise<Goal> {
     if (!this.isDbConnected) {
@@ -4363,16 +4355,16 @@ export class PgStorage implements IStorage {
     if (!this.isDbConnected) {
       return this.fallbackData.get("badges") || [];
     }
-    
+
     return await db.select().from(badges);
   }
 
   async createBadge(badge: InsertBadge): Promise<Badge> {
     if (!this.isDbConnected) {
-      const newBadge = { 
-        id: `badge-${Date.now()}`, 
-        ...badge, 
-        createdAt: new Date() 
+      const newBadge = {
+        id: `badge-${Date.now()}`,
+        ...badge,
+        createdAt: new Date(),
       } as Badge;
       const badgesData = this.fallbackData.get("badges") || [];
       badgesData.push(newBadge);
@@ -4384,14 +4376,18 @@ export class PgStorage implements IStorage {
     return created;
   }
 
-  async getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]> {
+  async getUserBadges(
+    userId: number
+  ): Promise<(UserBadge & { badge: Badge })[]> {
     if (!this.isDbConnected) {
-      const userBadgesData = this.fallbackData.get(`userBadges_${userId}`) || [];
+      const userBadgesData =
+        this.fallbackData.get(`userBadges_${userId}`) || [];
       const badgesData = this.fallbackData.get("badges") || [];
-      
+
       return userBadgesData.map((ub: UserBadge) => ({
         ...ub,
-        badge: badgesData.find((b: Badge) => b.id === ub.badgeId) || badgesData[0]
+        badge:
+          badgesData.find((b: Badge) => b.id === ub.badgeId) || badgesData[0],
       }));
     }
 
@@ -4400,10 +4396,10 @@ export class PgStorage implements IStorage {
       .from(userBadges)
       .leftJoin(badges, eq(userBadges.badgeId, badges.id))
       .where(eq(userBadges.userId, userId))
-      .then(rows => 
-        rows.map(row => ({
+      .then((rows) =>
+        rows.map((row) => ({
           ...row.user_badges,
-          badge: row.badges!
+          badge: row.badges!,
         }))
       );
   }
@@ -4413,10 +4409,11 @@ export class PgStorage implements IStorage {
       const newUserBadge = {
         id: `user_badge-${Date.now()}`,
         ...userBadge,
-        earnedAt: new Date()
+        earnedAt: new Date(),
       } as UserBadge;
-      
-      const userBadgesData = this.fallbackData.get(`userBadges_${userBadge.userId}`) || [];
+
+      const userBadgesData =
+        this.fallbackData.get(`userBadges_${userBadge.userId}`) || [];
       userBadgesData.push(newUserBadge);
       this.fallbackData.set(`userBadges_${userBadge.userId}`, userBadgesData);
       return newUserBadge;
@@ -4435,38 +4432,38 @@ export class PgStorage implements IStorage {
     try {
       const allBadges = await this.getBadges();
       const userBadges = await this.getUserBadges(userId);
-      const userBadgeIds = new Set(userBadges.map(ub => ub.badgeId));
-      
+      const userBadgeIds = new Set(userBadges.map((ub) => ub.badgeId));
+
       // Get user data for criteria checking
       const userData = await this.getUserCriteriaData(userId);
-      
+
       const newBadges: UserBadge[] = [];
-      
+
       // Check each badge that the user doesn't already have
       for (const badge of allBadges) {
         if (userBadgeIds.has(badge.id)) continue;
-        
+
         // Filter by type if specified and not "all"
         if (type !== "all" && badge.type !== type) continue;
-        
+
         // Check if user meets the criteria for this badge
         if (await this.checkBadgeCriteria(badge, userData, relatedId)) {
           const userBadge = await this.awardBadge({
             userId,
             badgeId: badge.id,
-            relatedId
+            relatedId,
           });
           newBadges.push(userBadge);
-          
+
           // Award XP for the badge
           if (badge.xpReward && badge.xpReward > 0) {
             await this.updateUserXP(userId, badge.xpReward);
           }
-          
+
           console.log(`🏆 Awarded badge "${badge.title}" to user ${userId}`);
         }
       }
-      
+
       return newBadges;
     } catch (error) {
       console.error("Error in checkAndAwardBadges:", error);
@@ -4480,13 +4477,13 @@ export class PgStorage implements IStorage {
     const userStats = await this.getUserStats(userId);
     const goals = await this.getUserGoals(userId);
     const workExperience = await this.getWorkExperience(userId.toString());
-    
+
     // Calculate profile completion percentage
     let profileCompletion = 0;
     if (profile) {
       let completedSections = 0;
       let totalSections = 0;
-      
+
       // Check personal details
       if (profile.personalDetails) {
         const pd = profile.personalDetails as any;
@@ -4498,7 +4495,7 @@ export class PgStorage implements IStorage {
         if (pd.location?.city) completedSections++;
         if (pd.dob) completedSections++;
       }
-      
+
       // Check contact details
       if (profile.contactDetails) {
         const cd = profile.contactDetails as any;
@@ -4508,8 +4505,11 @@ export class PgStorage implements IStorage {
         if (cd.linkedin) completedSections++;
         if (cd.githubOrPortfolio) completedSections++;
       }
-      
-      profileCompletion = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
+
+      profileCompletion =
+        totalSections > 0
+          ? Math.round((completedSections / totalSections) * 100)
+          : 0;
     }
 
     return {
@@ -4532,88 +4532,94 @@ export class PgStorage implements IStorage {
   }
 
   // Check if user meets badge criteria
-  private async checkBadgeCriteria(badge: Badge, userData: any, relatedId?: string): Promise<boolean> {
+  private async checkBadgeCriteria(
+    badge: Badge,
+    userData: any,
+    relatedId?: string
+  ): Promise<boolean> {
     if (!badge.criteria) return false;
-    
+
     const criteria = badge.criteria as any;
-    
+
     // Profile completion badges
     if (criteria.profileCompleted !== undefined) {
       return userData.profileCompletion >= criteria.profileCompleted;
     }
-    
+
     // First login badge
     if (criteria.firstLogin) {
       return true; // If we're checking, user has logged in
     }
-    
+
     // Profile picture badge
     if (criteria.profilePicture) {
       return userData.hasProfilePicture;
     }
-    
+
     // Bio badge
     if (criteria.bioAdded) {
       return userData.hasBio;
     }
-    
+
     // Goals created badges
     if (criteria.goalsCreated !== undefined) {
       return userData.goalsCount >= criteria.goalsCreated;
     }
-    
+
     // Work experience badges
     if (criteria.workExperienceAdded !== undefined) {
       return userData.workExperienceCount >= criteria.workExperienceAdded;
     }
-    
+
     // XP-based badges
     if (criteria.xpThreshold !== undefined) {
       return userData.totalXp >= criteria.xpThreshold;
     }
-    
+
     // Streak badges
     if (criteria.streakDays !== undefined) {
       return userData.currentStreak >= criteria.streakDays;
     }
-    
+
     // Skills badges (when implemented)
     if (criteria.skillsAdded !== undefined) {
       return userData.skillsCount >= criteria.skillsAdded;
     }
-    
+
     // Projects badges (when implemented)
     if (criteria.projectsAdded !== undefined) {
       return userData.projectsCount >= criteria.projectsAdded;
     }
-    
+
     // Education badges (when implemented)
     if (criteria.educationAdded !== undefined) {
       return userData.educationCount >= criteria.educationAdded;
     }
-    
+
     // Learning-related badges (when implemented)
     if (criteria.lessonsCompleted !== undefined) {
       return userData.lessonsCompleted >= criteria.lessonsCompleted;
     }
-    
+
     if (criteria.coursesCompleted !== undefined) {
       return userData.coursesCompleted >= criteria.coursesCompleted;
     }
-    
+
     // Course type specific badges
     if (criteria.courseType && relatedId) {
       // TODO: Check if completed course matches the required type
       return false;
     }
-    
+
     return false;
   }
 
   // Helper method to update user XP
   private async updateUserXP(userId: number, xpToAdd: number): Promise<void> {
     if (!this.isDbConnected) {
-      const userStatsData = this.fallbackData.get(`userStats_${userId}`) || { totalXp: 0 };
+      const userStatsData = this.fallbackData.get(`userStats_${userId}`) || {
+        totalXp: 0,
+      };
       userStatsData.totalXp += xpToAdd;
       this.fallbackData.set(`userStats_${userId}`, userStatsData);
       return;
@@ -4621,9 +4627,9 @@ export class PgStorage implements IStorage {
 
     await db
       .update(userStats)
-      .set({ 
+      .set({
         totalXp: sql`${userStats.totalXp} + ${xpToAdd}`,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(userStats.userId, userId));
   }
