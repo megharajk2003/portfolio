@@ -67,16 +67,20 @@ export default function GoalHeatMap() {
     goals.forEach(goal => {
       if (goal.categories) {
         goal.categories.forEach(category => {
-          category.topics.forEach(topic => {
-            topic.subtopics.forEach(subtopic => {
-              if (subtopic.status === "completed" && subtopic.completedAt) {
-                allCompletions.push({
-                  goalName: goal.name,
-                  timestamp: new Date(subtopic.completedAt)
+          if (category.topics) {
+            category.topics.forEach(topic => {
+              if (topic.subtopics) {
+                topic.subtopics.forEach(subtopic => {
+                  if (subtopic.status === "completed" && subtopic.completedAt) {
+                    allCompletions.push({
+                      goalName: goal.name,
+                      timestamp: new Date(subtopic.completedAt)
+                    });
+                  }
                 });
               }
             });
-          });
+          }
         });
       }
     });
