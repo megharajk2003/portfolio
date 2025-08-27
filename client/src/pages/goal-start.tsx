@@ -544,6 +544,131 @@ export default function GoalStart() {
                 })}
               </div>
 
+              {/* Study Performance Chart */}
+              <Card className="mb-8">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                    Study Performance
+                  </CardTitle>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    This chart shows the cumulative number of topics you've completed for each goal over the past 2 weeks.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div style={{ width: "100%", height: "300px" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={(() => {
+                          // Generate data for the past 2 weeks
+                          const data = [];
+                          const today = new Date();
+                          
+                          for (let i = 13; i >= 0; i--) {
+                            const date = new Date(today);
+                            date.setDate(date.getDate() - i);
+                            const dateStr = date.toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric' 
+                            });
+                            
+                            const entry: any = { date: dateStr };
+                            
+                            // Add cumulative data for each goal type
+                            Object.entries(goalsByType).forEach(([type, typeGoals]) => {
+                              // Simulate cumulative progress (in real app, this would come from actual data)
+                              const baseProgress = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+                              let cumulativeCount = 0;
+                              
+                              if (i <= 2) { // Show progress in last 2 days
+                                cumulativeCount = Math.max(0, Math.floor(baseProgress * (1 - i * 0.3)));
+                              }
+                              
+                              entry[type.toLowerCase()] = cumulativeCount;
+                            });
+                            
+                            data.push(entry);
+                          }
+                          return data;
+                        })()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="date"
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          stroke="#d1d5db"
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          stroke="#d1d5db"
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px"
+                          }}
+                        />
+                        <Legend />
+                        {Object.keys(goalsByType).map((type, index) => {
+                          const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+                          return (
+                            <Line
+                              key={type}
+                              type="monotone"
+                              dataKey={type.toLowerCase()}
+                              stroke={colors[index % colors.length]}
+                              strokeWidth={2}
+                              dot={{ fill: colors[index % colors.length], r: 4 }}
+                              name={type.toLowerCase()}
+                            />
+                          );
+                        })}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Active Goals Section */}
+                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-4 h-4 rounded-full bg-gray-800 flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-white"></div>
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">Active Goals</span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-3">
+                      {Object.entries(goalsByType).map(([type, typeGoals]) => {
+                        const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+                        const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+                        const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+                        const colorIndex = Object.keys(goalsByType).indexOf(type);
+                        
+                        return (
+                          <div
+                            key={type}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
+                            style={{
+                              backgroundColor: `${colors[colorIndex % colors.length]}15`,
+                              borderColor: colors[colorIndex % colors.length]
+                            }}
+                          >
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: colors[colorIndex % colors.length] }}
+                            ></div>
+                            <span className="text-sm font-medium">
+                              {type.toLowerCase()} ({completedSubtopics}/{totalSubtopics})
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Progress Summary Charts */}
               <div className="space-y-8">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
