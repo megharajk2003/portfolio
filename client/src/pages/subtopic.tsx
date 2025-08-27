@@ -58,7 +58,9 @@ interface TopicWithSubtopics {
 }
 
 // API functions
-const fetchTopicSubtopics = async (topicId: string): Promise<TopicWithSubtopics> => {
+const fetchTopicSubtopics = async (
+  topicId: string
+): Promise<TopicWithSubtopics> => {
   const response = await fetch(`/api/goal-topics/${topicId}/subtopics`, {
     credentials: "include",
   });
@@ -68,7 +70,10 @@ const fetchTopicSubtopics = async (topicId: string): Promise<TopicWithSubtopics>
   return response.json();
 };
 
-const updateSubtopicStatus = async (subtopicId: string, status: "pending" | "start" | "completed") => {
+const updateSubtopicStatus = async (
+  subtopicId: string,
+  status: "pending" | "start" | "completed"
+) => {
   const response = await fetch(`/api/goal-subtopics/${subtopicId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -85,16 +90,16 @@ export default function SubtopicStatus() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
-  
+
   // Extract topic ID from URL: /subtopic/{topicId}
   const topicId = location.split("/")[2];
 
   // Fetch topic and its subtopics
-  const { 
-    data: topicData, 
-    isLoading, 
+  const {
+    data: topicData,
+    isLoading,
     error,
-    refetch 
+    refetch,
   } = useQuery({
     queryKey: ["topic-subtopics", topicId],
     queryFn: () => fetchTopicSubtopics(topicId),
@@ -103,8 +108,13 @@ export default function SubtopicStatus() {
 
   // Update subtopic status mutation
   const updateSubtopicMutation = useMutation({
-    mutationFn: ({ subtopicId, status }: { subtopicId: string; status: "pending" | "start" | "completed" }) =>
-      updateSubtopicStatus(subtopicId, status),
+    mutationFn: ({
+      subtopicId,
+      status,
+    }: {
+      subtopicId: string;
+      status: "pending" | "start" | "completed";
+    }) => updateSubtopicStatus(subtopicId, status),
     onSuccess: () => {
       toast({ title: "Success", description: "Subtopic status updated" });
       refetch();
@@ -146,13 +156,18 @@ export default function SubtopicStatus() {
     }
   };
 
-  const handleStatusChange = (subtopicId: string, newStatus: "pending" | "start" | "completed") => {
+  const handleStatusChange = (
+    subtopicId: string,
+    newStatus: "pending" | "start" | "completed"
+  ) => {
     updateSubtopicMutation.mutate({ subtopicId, status: newStatus });
   };
 
   const goBackToTopics = () => {
     if (topicData?.category) {
-      navigate(`/goal-tracker/${topicData.category.goalId}/category/${topicData.category.id}`);
+      navigate(
+        `/goal-tracker/${topicData.category.goalId}/category/${topicData.category.id}`
+      );
     } else {
       navigate("/goal-tracker");
     }
@@ -194,7 +209,8 @@ export default function SubtopicStatus() {
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
             <div className="text-red-600 dark:text-red-400">
-              Error loading subtopics: {error ? (error as Error).message : "Topic not found"}
+              Error loading subtopics:{" "}
+              {error ? (error as Error).message : "Topic not found"}
             </div>
           </div>
         </div>
@@ -206,10 +222,14 @@ export default function SubtopicStatus() {
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {topicData.name}
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
@@ -219,27 +239,21 @@ export default function SubtopicStatus() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Topics
               </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Subtopic Status
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  <ListChecks className="h-4 w-4 inline mr-1" />
-                  {topicData.name}
-                </p>
-              </div>
             </div>
+          </div>
+        </header>
+        <div className="container mx-auto p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4"></div>
           </div>
 
           {/* Subtopics Table */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ListChecks className="h-5 w-5 text-blue-500" />
-                {topicData.name}
-              </CardTitle>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Progress: {topicData.completedSubtopics} / {topicData.totalSubtopics} subtopics completed
+                Progress: {topicData.completedSubtopics} /{" "}
+                {topicData.totalSubtopics} completed
               </div>
             </CardHeader>
             <CardContent>
@@ -270,9 +284,9 @@ export default function SubtopicStatus() {
                         <TableCell>
                           <Select
                             value={subtopic.status}
-                            onValueChange={(value: "pending" | "start" | "completed") =>
-                              handleStatusChange(subtopic.id, value)
-                            }
+                            onValueChange={(
+                              value: "pending" | "start" | "completed"
+                            ) => handleStatusChange(subtopic.id, value)}
                             disabled={updateSubtopicMutation.isPending}
                           >
                             <SelectTrigger className="w-32">
@@ -281,7 +295,9 @@ export default function SubtopicStatus() {
                             <SelectContent>
                               <SelectItem value="pending">Pending</SelectItem>
                               <SelectItem value="start">Start</SelectItem>
-                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="completed">
+                                Completed
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>

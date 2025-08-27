@@ -68,9 +68,12 @@ const TOPIC_COLORS = [
 
 // API functions
 const fetchGoalCategory = async (goalId: string, categoryId: string) => {
-  const response = await fetch(`/api/goals/${goalId}/categories/${categoryId}`, {
-    credentials: "include",
-  });
+  const response = await fetch(
+    `/api/goals/${goalId}/categories/${categoryId}`,
+    {
+      credentials: "include",
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch category");
   }
@@ -102,10 +105,10 @@ export default function CategoryTopics() {
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
   // Fetch category details
-  const { 
-    data: category, 
-    isLoading: categoryLoading, 
-    error: categoryError 
+  const {
+    data: category,
+    isLoading: categoryLoading,
+    error: categoryError,
   } = useQuery({
     queryKey: ["category", goalId, categoryId],
     queryFn: () => fetchGoalCategory(goalId, categoryId),
@@ -113,10 +116,10 @@ export default function CategoryTopics() {
   });
 
   // Fetch topics for this category
-  const { 
-    data: topics = [], 
-    isLoading: topicsLoading, 
-    error: topicsError 
+  const {
+    data: topics = [],
+    isLoading: topicsLoading,
+    error: topicsError,
   } = useQuery({
     queryKey: ["category-topics", categoryId],
     queryFn: () => fetchCategoryTopics(categoryId),
@@ -141,11 +144,18 @@ export default function CategoryTopics() {
 
   const cumulativeProgressData = useMemo(() => {
     if (topics.length === 0) return [];
-    
+
     const dataPoints: ProgressDataPoint[] = [];
-    const startDate = new Date(selectedYear, selectedMonth === "all" ? 0 : parseInt(selectedMonth) - 1, 1);
-    const endDate = selectedMonth === "all" ? new Date(selectedYear, 11, 31) : new Date(selectedYear, parseInt(selectedMonth), 0);
-    
+    const startDate = new Date(
+      selectedYear,
+      selectedMonth === "all" ? 0 : parseInt(selectedMonth) - 1,
+      1
+    );
+    const endDate =
+      selectedMonth === "all"
+        ? new Date(selectedYear, 11, 31)
+        : new Date(selectedYear, parseInt(selectedMonth), 0);
+
     const current = new Date(startDate);
 
     while (current <= endDate) {
@@ -153,14 +163,16 @@ export default function CategoryTopics() {
         month: "short",
         day: "2-digit",
       });
-      
+
       const progressPoint: ProgressDataPoint = { date: dateStr };
-      
+
       topics.forEach((topic: GoalTopic, index: number) => {
         // Simulate gradual progress over time for each topic
-        const daysSinceStart = Math.floor((current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysSinceStart = Math.floor(
+          (current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
         const currentProgress = Math.min(
-          topic.completedSubtopics, 
+          topic.completedSubtopics,
           Math.floor((daysSinceStart / 30) * topic.completedSubtopics)
         );
         progressPoint[topic.name] = currentProgress;
@@ -172,7 +184,10 @@ export default function CategoryTopics() {
     return dataPoints;
   }, [topics, selectedYear, selectedMonth]);
 
-  const getStatusColor = (completedSubtopics: number, totalSubtopics: number) => {
+  const getStatusColor = (
+    completedSubtopics: number,
+    totalSubtopics: number
+  ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
     } else if (completedSubtopics > 0) {
@@ -182,7 +197,10 @@ export default function CategoryTopics() {
     }
   };
 
-  const getStatusText = (completedSubtopics: number, totalSubtopics: number) => {
+  const getStatusText = (
+    completedSubtopics: number,
+    totalSubtopics: number
+  ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "Completed";
     } else if (completedSubtopics > 0) {
@@ -228,7 +246,10 @@ export default function CategoryTopics() {
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
             <div className="text-red-600 dark:text-red-400">
-              Error loading data: {categoryError ? (categoryError as Error).message : (topicsError as Error).message}
+              Error loading data:{" "}
+              {categoryError
+                ? (categoryError as Error).message
+                : (topicsError as Error).message}
             </div>
           </div>
         </div>
@@ -240,10 +261,16 @@ export default function CategoryTopics() {
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                  {category.name}
+                </h2>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
@@ -253,18 +280,11 @@ export default function CategoryTopics() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Categories
               </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Goal Tracker
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Upload CSV files and track your progress with interactive visualizations
-                </p>
-              </div>
             </div>
           </div>
-
-          {/* Topics Grid */}
+        </header>
+        <div className="container mx-auto p-6 space-y-6">
+          {/* Header */} {/* Topics Grid */}
           {topics.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {topics.map((topic: GoalTopic) => (
@@ -291,7 +311,9 @@ export default function CategoryTopics() {
                         <Progress
                           value={
                             topic.totalSubtopics > 0
-                              ? (topic.completedSubtopics / topic.totalSubtopics) * 100
+                              ? (topic.completedSubtopics /
+                                  topic.totalSubtopics) *
+                                100
                               : 0
                           }
                           className="h-2"
@@ -300,14 +322,24 @@ export default function CategoryTopics() {
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">
                           {topic.totalSubtopics > 0
-                            ? Math.round((topic.completedSubtopics / topic.totalSubtopics) * 100)
+                            ? Math.round(
+                                (topic.completedSubtopics /
+                                  topic.totalSubtopics) *
+                                  100
+                              )
                             : 0}
                           % Complete
                         </span>
                         <Badge
-                          className={getStatusColor(topic.completedSubtopics, topic.totalSubtopics)}
+                          className={getStatusColor(
+                            topic.completedSubtopics,
+                            topic.totalSubtopics
+                          )}
                         >
-                          {getStatusText(topic.completedSubtopics, topic.totalSubtopics)}
+                          {getStatusText(
+                            topic.completedSubtopics,
+                            topic.totalSubtopics
+                          )}
                         </Badge>
                       </div>
                     </div>
@@ -328,7 +360,6 @@ export default function CategoryTopics() {
               </CardContent>
             </Card>
           )}
-
           {/* Study Performance Chart */}
           {topics.length > 0 && (
             <Card>
@@ -343,13 +374,18 @@ export default function CategoryTopics() {
                       <span className="text-sm">Year:</span>
                       <Select
                         value={selectedYear.toString()}
-                        onValueChange={(value) => setSelectedYear(parseInt(value))}
+                        onValueChange={(value) =>
+                          setSelectedYear(parseInt(value))
+                        }
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 5 }, (_, i) => currentYear - i).map((year) => (
+                          {Array.from(
+                            { length: 5 },
+                            (_, i) => currentYear - i
+                          ).map((year) => (
                             <SelectItem key={year} value={year.toString()}>
                               {year}
                             </SelectItem>
@@ -359,7 +395,10 @@ export default function CategoryTopics() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm">Month:</span>
-                      <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                      <Select
+                        value={selectedMonth}
+                        onValueChange={setSelectedMonth}
+                      >
                         <SelectTrigger className="w-40">
                           <SelectValue />
                         </SelectTrigger>
@@ -375,9 +414,12 @@ export default function CategoryTopics() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
-                  This chart shows the cumulative number of subtopics you've completed for each goal{" "}
+                  This chart shows the cumulative number of subtopics you've
+                  completed for each goal{" "}
                   {selectedMonth !== "all"
-                    ? `in ${months.find((m) => m.value === selectedMonth)?.label} ${selectedYear}`
+                    ? `in ${
+                        months.find((m) => m.value === selectedMonth)?.label
+                      } ${selectedYear}`
                     : `in ${selectedYear}`}
                   .
                 </p>

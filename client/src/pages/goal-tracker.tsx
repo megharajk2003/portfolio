@@ -46,7 +46,7 @@ import { navigate } from "wouter/use-browser-location";
 const getURLParams = () => {
   const urlParams = new URLSearchParams(window.location.search);
   return {
-    type: urlParams.get('type') || null
+    type: urlParams.get("type") || null,
   };
 };
 
@@ -104,7 +104,10 @@ const fetchGoalCategories = async (goalId: string) => {
   return response.json();
 };
 
-const createGoalFromCSVApi = async (data: { goalName: string; csvData: any[] }) => {
+const createGoalFromCSVApi = async (data: {
+  goalName: string;
+  csvData: any[];
+}) => {
   const response = await fetch("/api/goals/from-csv", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -122,12 +125,16 @@ export default function GoalTracker() {
   const { user } = useAuth();
   const { toast } = useToast();
   const currentYear = new Date().getFullYear();
-  
+
   // Get URL parameters
   const { type: selectedGoalType } = getURLParams();
 
   // Fetch user goals
-  const { data: goals = [], isLoading: goalsLoading, error: goalsError } = useQuery({
+  const {
+    data: goals = [],
+    isLoading: goalsLoading,
+    error: goalsError,
+  } = useQuery({
     queryKey: ["goals"],
     queryFn: fetchUserGoals,
     enabled: !!user,
@@ -139,18 +146,18 @@ export default function GoalTracker() {
     goals.forEach((goal: Goal) => {
       // Extract type from goal name (TNPSC, SSC, etc.)
       const goalName = goal.name.toLowerCase();
-      let type = 'Other';
-      
-      if (goalName.includes('tnpsc')) {
-        type = 'TNPSC';
-      } else if (goalName.includes('ssc')) {
-        type = 'SSC';
-      } else if (goalName.includes('upsc')) {
-        type = 'UPSC';
-      } else if (goalName.includes('bank')) {
-        type = 'Banking';
+      let type = "Other";
+
+      if (goalName.includes("tnpsc")) {
+        type = "TNPSC";
+      } else if (goalName.includes("ssc")) {
+        type = "SSC";
+      } else if (goalName.includes("upsc")) {
+        type = "UPSC";
+      } else if (goalName.includes("bank")) {
+        type = "Banking";
       }
-      
+
       if (!grouped[type]) {
         grouped[type] = [];
       }
@@ -162,16 +169,16 @@ export default function GoalTracker() {
   // Filter goals based on selected type
   const filteredGoals = useMemo(() => {
     if (!selectedGoalType) return goals;
-    
+
     return goals.filter((goal: Goal) => {
       const goalName = goal.name.toLowerCase();
       const type = selectedGoalType.toLowerCase();
-      
-      if (type === 'tnpsc') return goalName.includes('tnpsc');
-      if (type === 'ssc') return goalName.includes('ssc');
-      if (type === 'upsc') return goalName.includes('upsc');
-      if (type === 'banking') return goalName.includes('bank');
-      return type === 'other';
+
+      if (type === "tnpsc") return goalName.includes("tnpsc");
+      if (type === "ssc") return goalName.includes("ssc");
+      if (type === "upsc") return goalName.includes("upsc");
+      if (type === "banking") return goalName.includes("bank");
+      return type === "other";
     });
   }, [goals, selectedGoalType]);
 
@@ -298,12 +305,19 @@ export default function GoalTracker() {
 
   const cumulativeProgressData = useMemo(() => {
     if (allCategories.length === 0) return [];
-    
+
     // Create simple progress data for the overall goal
     const dataPoints: ProgressDataPoint[] = [];
-    const startDate = new Date(selectedYear, selectedMonth === "all" ? 0 : parseInt(selectedMonth) - 1, 1);
-    const endDate = selectedMonth === "all" ? new Date(selectedYear, 11, 31) : new Date(selectedYear, parseInt(selectedMonth), 0);
-    
+    const startDate = new Date(
+      selectedYear,
+      selectedMonth === "all" ? 0 : parseInt(selectedMonth) - 1,
+      1
+    );
+    const endDate =
+      selectedMonth === "all"
+        ? new Date(selectedYear, 11, 31)
+        : new Date(selectedYear, parseInt(selectedMonth), 0);
+
     const current = new Date(startDate);
     let cumulativeCount = 0;
 
@@ -312,19 +326,30 @@ export default function GoalTracker() {
         month: "short",
         day: "2-digit",
       });
-      
+
       // Simulate gradual progress over time for all categories combined
-      const totalCompleted = allCategories.reduce((sum, cat) => sum + (cat.completedSubtopics || 0), 0);
-      const daysSinceStart = Math.floor((current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      cumulativeCount = Math.min(totalCompleted, Math.floor((daysSinceStart / 30) * totalCompleted));
-      
-      dataPoints.push({ date: dateStr, "Progress": cumulativeCount });
+      const totalCompleted = allCategories.reduce(
+        (sum, cat) => sum + (cat.completedSubtopics || 0),
+        0
+      );
+      const daysSinceStart = Math.floor(
+        (current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      cumulativeCount = Math.min(
+        totalCompleted,
+        Math.floor((daysSinceStart / 30) * totalCompleted)
+      );
+
+      dataPoints.push({ date: dateStr, Progress: cumulativeCount });
       current.setDate(current.getDate() + 1);
     }
     return dataPoints;
   }, [allCategories, selectedYear, selectedMonth]);
 
-  const getStatusColor = (completedSubtopics: number, totalSubtopics: number) => {
+  const getStatusColor = (
+    completedSubtopics: number,
+    totalSubtopics: number
+  ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
     } else if (completedSubtopics > 0) {
@@ -334,7 +359,10 @@ export default function GoalTracker() {
     }
   };
 
-  const getStatusText = (completedSubtopics: number, totalSubtopics: number) => {
+  const getStatusText = (
+    completedSubtopics: number,
+    totalSubtopics: number
+  ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "Completed";
     } else if (completedSubtopics > 0) {
@@ -365,77 +393,32 @@ export default function GoalTracker() {
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/goals")}
-                  className="flex items-center gap-2"
-                  data-testid="button-back-to-goals"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Goals
-                </Button>
-                <div className="h-6 w-px bg-gray-300"></div>
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  {selectedGoalType ? `${selectedGoalType} Categories` : 'All Categories'}
+                  {selectedGoalType
+                    ? `${selectedGoalType} Categories`
+                    : "All Categories"}
                 </h1>
               </div>
-              {selectedGoalType && (
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Viewing categories for {selectedGoalType} goals
-                </p>
-              )}
             </div>
-
-            {/* CSV Upload Dialog */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                  <Upload className="h-4 w-4 mr-2" /> Upload CSV
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Upload Goal from CSV</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="goalName">Goal Name</Label>
-                    <Input
-                      id="goalName"
-                      placeholder="e.g., SSC CGL Preparation"
-                      value={goalName}
-                      onChange={(e) => setGoalName(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="csvFile">CSV File</Label>
-                    <Input
-                      id="csvFile"
-                      type="file"
-                      accept=".csv"
-                      onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                    />
-                    <p className="text-sm text-gray-600 mt-2">
-                      CSV should contain columns: Category, Topics, Sub-topics, Status.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={handleCSVUpload}
-                    disabled={isUploading || !csvFile || !goalName.trim()}
-                    className="w-full"
-                  >
-                    {isUploading ? "Uploading..." : "Create Goal"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/goals")}
+                className="flex items-center gap-2"
+                data-testid="button-back-to-goals"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Goals
+              </Button>
+            </div>
           </div>
-
+        </header>
+        <div className="container mx-auto p-6 space-y-6">
           {/* Loading state */}
           {goalsLoading && (
             <Card>
@@ -469,97 +452,11 @@ export default function GoalTracker() {
                   No Goals Yet
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Create your first goal by uploading a CSV file or manually adding one.
+                  Create your first goal by uploading a CSV file or manually
+                  adding one.
                 </p>
               </CardContent>
             </Card>
-          )}
-
-          {/* Goal Type Cards Display */}
-          {Object.keys(goalsByType).length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                Goal Categories
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Object.entries(goalsByType).map(([type, typeGoals]) => {
-                  const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                  const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                  const progressPercentage = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
-                  
-                  return (
-                    <Card
-                      key={type}
-                      className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
-                    >
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Target className="h-6 w-6 text-blue-500" />
-                          {type}
-                        </CardTitle>
-                        <p className="text-sm text-gray-600">
-                          {typeGoals.length} {typeGoals.length === 1 ? 'goal' : 'goals'}
-                        </p>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {/* Progress Overview */}
-                          <div>
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm font-medium">Overall Progress</span>
-                              <span className="text-sm text-gray-600">
-                                {completedSubtopics} / {totalSubtopics} Subtopics
-                              </span>
-                            </div>
-                            <Progress value={progressPercentage} className="h-2" />
-                            <div className="flex justify-between items-center mt-2">
-                              <span className="text-sm text-gray-600">
-                                {Math.round(progressPercentage)}% Complete
-                              </span>
-                              <Badge className={getStatusColor(completedSubtopics, totalSubtopics)}>
-                                {getStatusText(completedSubtopics, totalSubtopics)}
-                              </Badge>
-                            </div>
-                          </div>
-                          
-                          {/* Individual Goals */}
-                          <div className="space-y-2">
-                            <span className="text-sm font-medium">Goals:</span>
-                            {typeGoals.map((goal) => (
-                              <div 
-                                key={goal.id}
-                                className="p-2 bg-gray-50 dark:bg-gray-800 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (goal.categories && goal.categories.length > 0) {
-                                    navigate(`/goal-tracker/${goal.id}/category/${goal.categories[0].id}`);
-                                  }
-                                }}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm font-medium">{goal.name}</span>
-                                  <span className="text-xs text-gray-500">
-                                    {goal.completedSubtopics || 0}/{goal.totalSubtopics || 0}
-                                  </span>
-                                </div>
-                                <Progress 
-                                  value={
-                                    goal.totalSubtopics > 0 
-                                      ? ((goal.completedSubtopics || 0) / goal.totalSubtopics) * 100 
-                                      : 0
-                                  } 
-                                  className="h-1 mt-1" 
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
           )}
 
           {/* Individual Categories for Detailed View */}
@@ -573,7 +470,11 @@ export default function GoalTracker() {
                   <Card
                     key={category.id}
                     className="cursor-pointer transition-all hover:shadow-lg"
-                    onClick={() => navigate(`/goal-tracker/${category.goalId}/category/${category.id}`)}
+                    onClick={() =>
+                      navigate(
+                        `/goal-tracker/${category.goalId}/category/${category.id}`
+                      )
+                    }
                   >
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -592,14 +493,16 @@ export default function GoalTracker() {
                               Overall Progress
                             </span>
                             <span className="text-sm text-gray-600">
-                              {category.completedSubtopics || 0} / {category.totalSubtopics || 0}{" "}
-                              Subtopics
+                              {category.completedSubtopics || 0} /{" "}
+                              {category.totalSubtopics || 0} Subtopics
                             </span>
                           </div>
                           <Progress
                             value={
                               category.totalSubtopics > 0
-                                ? ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
+                                ? ((category.completedSubtopics || 0) /
+                                    category.totalSubtopics) *
+                                  100
                                 : 0
                             }
                             className="h-2"
@@ -609,7 +512,9 @@ export default function GoalTracker() {
                           <span className="text-gray-600">
                             {category.totalSubtopics > 0
                               ? Math.round(
-                                  ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
+                                  ((category.completedSubtopics || 0) /
+                                    category.totalSubtopics) *
+                                    100
                                 )
                               : 0}
                             % Complete
@@ -649,16 +554,31 @@ export default function GoalTracker() {
                   <div style={{ width: "100%", height: "300px" }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={Object.entries(goalsByType).map(([type, typeGoals]) => {
-                          const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                          const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                          return {
-                            type,
-                            completed: completedSubtopics,
-                            total: totalSubtopics,
-                            percentage: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0
-                          };
-                        })}
+                        data={Object.entries(goalsByType).map(
+                          ([type, typeGoals]) => {
+                            const totalSubtopics = typeGoals.reduce(
+                              (sum, goal) => sum + (goal.totalSubtopics || 0),
+                              0
+                            );
+                            const completedSubtopics = typeGoals.reduce(
+                              (sum, goal) =>
+                                sum + (goal.completedSubtopics || 0),
+                              0
+                            );
+                            return {
+                              type,
+                              completed: completedSubtopics,
+                              total: totalSubtopics,
+                              percentage:
+                                totalSubtopics > 0
+                                  ? Math.round(
+                                      (completedSubtopics / totalSubtopics) *
+                                        100
+                                    )
+                                  : 0,
+                            };
+                          }
+                        )}
                         margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -679,12 +599,19 @@ export default function GoalTracker() {
                             borderRadius: "8px",
                           }}
                           formatter={(value, name) => [
-                            name === 'percentage' ? `${value}%` : value,
-                            name === 'percentage' ? 'Progress' : 
-                            name === 'completed' ? 'Completed' : 'Total'
+                            name === "percentage" ? `${value}%` : value,
+                            name === "percentage"
+                              ? "Progress"
+                              : name === "completed"
+                              ? "Completed"
+                              : "Total",
                           ]}
                         />
-                        <Bar dataKey="percentage" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                        <Bar
+                          dataKey="percentage"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -704,26 +631,51 @@ export default function GoalTracker() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={Object.entries(goalsByType).map(([type, typeGoals], index) => {
-                            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                            return {
-                              name: type,
-                              value: completedSubtopics,
-                              total: totalSubtopics,
-                              color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]
-                            };
-                          })}
+                          data={Object.entries(goalsByType).map(
+                            ([type, typeGoals], index) => {
+                              const totalSubtopics = typeGoals.reduce(
+                                (sum, goal) => sum + (goal.totalSubtopics || 0),
+                                0
+                              );
+                              const completedSubtopics = typeGoals.reduce(
+                                (sum, goal) =>
+                                  sum + (goal.completedSubtopics || 0),
+                                0
+                              );
+                              return {
+                                name: type,
+                                value: completedSubtopics,
+                                total: totalSubtopics,
+                                color: [
+                                  "#3b82f6",
+                                  "#10b981",
+                                  "#f59e0b",
+                                  "#ef4444",
+                                  "#8b5cf6",
+                                ][index % 5],
+                              };
+                            }
+                          )}
                           cx="50%"
                           cy="50%"
                           outerRadius={80}
                           dataKey="value"
-                          label={({ name, value, total }) => `${name}: ${value}/${total}`}
+                          label={({ name, value, total }) =>
+                            `${name}: ${value}/${total}`
+                          }
                         >
                           {Object.entries(goalsByType).map((_, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} 
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={
+                                [
+                                  "#3b82f6",
+                                  "#10b981",
+                                  "#f59e0b",
+                                  "#ef4444",
+                                  "#8b5cf6",
+                                ][index % 5]
+                              }
                             />
                           ))}
                         </Pie>
@@ -734,8 +686,11 @@ export default function GoalTracker() {
                             borderRadius: "8px",
                           }}
                           formatter={(value, name, props) => [
-                            `${value}/${props.payload.total} (${Math.round((Number(value) / Number(props.payload.total)) * 100)}%)`,
-                            'Completed Subtopics'
+                            `${value}/${props.payload.total} (${Math.round(
+                              (Number(value) / Number(props.payload.total)) *
+                                100
+                            )}%)`,
+                            "Completed Subtopics",
                           ]}
                         />
                       </PieChart>

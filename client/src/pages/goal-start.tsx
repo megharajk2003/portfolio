@@ -73,7 +73,10 @@ const fetchUserGoals = async () => {
   return response.json();
 };
 
-const createGoalFromCSVApi = async (data: { goalName: string; csvData: any[] }) => {
+const createGoalFromCSVApi = async (data: {
+  goalName: string;
+  csvData: any[];
+}) => {
   const response = await fetch("/api/goals/from-csv", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -92,7 +95,11 @@ export default function GoalStart() {
   const { toast } = useToast();
 
   // Fetch user goals
-  const { data: goals = [], isLoading: goalsLoading, error: goalsError } = useQuery({
+  const {
+    data: goals = [],
+    isLoading: goalsLoading,
+    error: goalsError,
+  } = useQuery({
     queryKey: ["goals"],
     queryFn: fetchUserGoals,
     enabled: !!user,
@@ -104,18 +111,18 @@ export default function GoalStart() {
     goals.forEach((goal: Goal) => {
       // Extract type from goal name (TNPSC, SSC, etc.)
       const goalName = goal.name.toLowerCase();
-      let type = 'Other';
-      
-      if (goalName.includes('tnpsc')) {
-        type = 'TNPSC';
-      } else if (goalName.includes('ssc')) {
-        type = 'SSC';
-      } else if (goalName.includes('upsc')) {
-        type = 'UPSC';
-      } else if (goalName.includes('bank')) {
-        type = 'Banking';
+      let type = "Other";
+
+      if (goalName.includes("tnpsc")) {
+        type = "TNPSC";
+      } else if (goalName.includes("ssc")) {
+        type = "SSC";
+      } else if (goalName.includes("upsc")) {
+        type = "UPSC";
+      } else if (goalName.includes("bank")) {
+        type = "Banking";
       }
-      
+
       if (!grouped[type]) {
         grouped[type] = [];
       }
@@ -195,7 +202,10 @@ export default function GoalStart() {
     }
   };
 
-  const getStatusColor = (completedSubtopics: number, totalSubtopics: number) => {
+  const getStatusColor = (
+    completedSubtopics: number,
+    totalSubtopics: number
+  ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
     } else if (completedSubtopics > 0) {
@@ -205,7 +215,10 @@ export default function GoalStart() {
     }
   };
 
-  const getStatusText = (completedSubtopics: number, totalSubtopics: number) => {
+  const getStatusText = (
+    completedSubtopics: number,
+    totalSubtopics: number
+  ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "Completed";
     } else if (completedSubtopics > 0) {
@@ -217,31 +230,31 @@ export default function GoalStart() {
 
   const getTypeIcon = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'tnpsc':
-        return '🏛️';
-      case 'ssc':
-        return '📊';
-      case 'upsc':
-        return '🇮🇳';
-      case 'banking':
-        return '🏦';
+      case "tnpsc":
+        return "🏛️";
+      case "ssc":
+        return "📊";
+      case "upsc":
+        return "🇮🇳";
+      case "banking":
+        return "🏦";
       default:
-        return '📚';
+        return "📚";
     }
   };
 
   const getTypeDescription = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'tnpsc':
-        return 'Tamil Nadu Public Service Commission';
-      case 'ssc':
-        return 'Staff Selection Commission';
-      case 'upsc':
-        return 'Union Public Service Commission';
-      case 'banking':
-        return 'Banking & Financial Services';
+      case "tnpsc":
+        return "Tamil Nadu Public Service Commission";
+      case "ssc":
+        return "Staff Selection Commission";
+      case "upsc":
+        return "Union Public Service Commission";
+      case "banking":
+        return "Banking & Financial Services";
       default:
-        return 'General Studies & Preparation';
+        return "General Studies & Preparation";
     }
   };
 
@@ -281,7 +294,10 @@ export default function GoalStart() {
             {/* CSV Upload Dialog */}
             <Dialog>
               <DialogTrigger asChild>
-                <Button data-testid="button-upload-csv" className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  data-testid="button-upload-csv"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
                   <Upload className="h-4 w-4 mr-2" /> Upload CSV
                 </Button>
               </DialogTrigger>
@@ -310,7 +326,8 @@ export default function GoalStart() {
                       onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
                     />
                     <p className="text-sm text-gray-600 mt-2">
-                      CSV should contain columns: Category, Topics, Sub-topics, Status.
+                      CSV should contain columns: Category, Topics, Sub-topics,
+                      Status.
                     </p>
                   </div>
                   <Button
@@ -363,8 +380,9 @@ export default function GoalStart() {
                   Start Your Learning Journey
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Upload your first CSV file to begin tracking your preparation goals.
-                  Support for TNPSC, SSC, UPSC, Banking, and other competitive exams.
+                  Upload your first CSV file to begin tracking your preparation
+                  goals. Support for TNPSC, SSC, UPSC, Banking, and other
+                  competitive exams.
                 </p>
                 <div className="text-sm text-gray-500 mb-4">
                   CSV Format: Category, Topics, Sub-topics, Status
@@ -378,15 +396,28 @@ export default function GoalStart() {
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {Object.entries(goalsByType).map(([type, typeGoals]) => {
-                  const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                  const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                  const progressPercentage = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
-                  
+                  const totalSubtopics = typeGoals.reduce(
+                    (sum, goal) => sum + (goal.totalSubtopics || 0),
+                    0
+                  );
+                  const completedSubtopics = typeGoals.reduce(
+                    (sum, goal) => sum + (goal.completedSubtopics || 0),
+                    0
+                  );
+                  const progressPercentage =
+                    totalSubtopics > 0
+                      ? (completedSubtopics / totalSubtopics) * 100
+                      : 0;
+
                   return (
                     <Card
                       key={type}
                       className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-l-4 border-l-blue-500"
-                      onClick={() => navigate(`/goal-tracker?type=${encodeURIComponent(type)}`)}
+                      onClick={() =>
+                        navigate(
+                          `/goal-tracker?type=${encodeURIComponent(type)}`
+                        )
+                      }
                       data-testid={`card-goal-type-${type.toLowerCase()}`}
                     >
                       <CardHeader className="pb-3">
@@ -405,56 +436,82 @@ export default function GoalStart() {
                           {/* Stats Summary */}
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="font-bold text-lg text-blue-600">{typeGoals.length}</div>
-                              <div className="text-gray-600">{typeGoals.length === 1 ? 'Goal' : 'Goals'}</div>
+                              <div className="font-bold text-lg text-blue-600">
+                                {typeGoals.length}
+                              </div>
+                              <div className="text-gray-600">
+                                {typeGoals.length === 1 ? "Goal" : "Goals"}
+                              </div>
                             </div>
                             <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="font-bold text-lg text-green-600">{totalSubtopics}</div>
+                              <div className="font-bold text-lg text-green-600">
+                                {totalSubtopics}
+                              </div>
                               <div className="text-gray-600">Subtopics</div>
                             </div>
                           </div>
-                          
+
                           {/* Progress Overview */}
                           <div>
                             <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm font-medium">Overall Progress</span>
+                              <span className="text-sm font-medium">
+                                Overall Progress
+                              </span>
                               <span className="text-sm text-gray-600">
                                 {completedSubtopics} / {totalSubtopics}
                               </span>
                             </div>
-                            <Progress value={progressPercentage} className="h-3" />
+                            <Progress
+                              value={progressPercentage}
+                              className="h-3"
+                            />
                             <div className="flex justify-between items-center mt-2">
                               <span className="text-sm text-gray-600">
                                 {Math.round(progressPercentage)}% Complete
                               </span>
-                              <Badge className={getStatusColor(completedSubtopics, totalSubtopics)}>
-                                {getStatusText(completedSubtopics, totalSubtopics)}
+                              <Badge
+                                className={getStatusColor(
+                                  completedSubtopics,
+                                  totalSubtopics
+                                )}
+                              >
+                                {getStatusText(
+                                  completedSubtopics,
+                                  totalSubtopics
+                                )}
                               </Badge>
                             </div>
                           </div>
-                          
+
                           {/* Individual Goals Preview */}
                           <div className="space-y-2">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Goals:</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Goals:
+                            </span>
                             {typeGoals.slice(0, 2).map((goal) => (
-                              <div 
+                              <div
                                 key={goal.id}
                                 className="p-2 bg-white dark:bg-gray-700 rounded-md border text-sm"
                                 data-testid={`preview-goal-${goal.id}`}
                               >
                                 <div className="flex justify-between items-center mb-1">
-                                  <span className="font-medium truncate">{goal.name}</span>
+                                  <span className="font-medium truncate">
+                                    {goal.name}
+                                  </span>
                                   <span className="text-xs text-gray-500 ml-2">
-                                    {goal.completedSubtopics || 0}/{goal.totalSubtopics || 0}
+                                    {goal.completedSubtopics || 0}/
+                                    {goal.totalSubtopics || 0}
                                   </span>
                                 </div>
-                                <Progress 
+                                <Progress
                                   value={
-                                    goal.totalSubtopics > 0 
-                                      ? ((goal.completedSubtopics || 0) / goal.totalSubtopics) * 100 
+                                    goal.totalSubtopics > 0
+                                      ? ((goal.completedSubtopics || 0) /
+                                          goal.totalSubtopics) *
+                                        100
                                       : 0
-                                  } 
-                                  className="h-1" 
+                                  }
+                                  className="h-1"
                                 />
                               </div>
                             ))}
@@ -471,7 +528,9 @@ export default function GoalStart() {
                             className="w-full mt-4"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/goal-tracker?type=${encodeURIComponent(type)}`);
+                              navigate(
+                                `/goal-tracker?type=${encodeURIComponent(type)}`
+                              );
                             }}
                             data-testid={`button-view-${type.toLowerCase()}`}
                           >
@@ -490,251 +549,173 @@ export default function GoalStart() {
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                   Analytics Overview
                 </h2>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Progress by Goal Type Bar Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-blue-500" />
-                      Progress by Goal Type
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div style={{ width: "100%", height: "300px" }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={Object.entries(goalsByType).map(([type, typeGoals]) => {
-                            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                            return {
-                              type,
-                              completed: completedSubtopics,
-                              total: totalSubtopics,
-                              percentage: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0
-                            };
-                          })}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis
-                            dataKey="type"
-                            tick={{ fontSize: 11, fill: "#6b7280" }}
-                            stroke="#9ca3af"
-                          />
-                          <YAxis
-                            tick={{ fontSize: 11, fill: "#6b7280" }}
-                            stroke="#9ca3af"
-                            domain={[0, 100]}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "white",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                            formatter={(value, name) => [
-                              name === 'percentage' ? `${value}%` : value,
-                              name === 'percentage' ? 'Progress' : 
-                              name === 'completed' ? 'Completed' : 'Total'
-                            ]}
-                          />
-                          <Bar dataKey="percentage" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Overall Progress Pie Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-green-500" />
-                      Progress Distribution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div style={{ width: "100%", height: "300px" }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={Object.entries(goalsByType).map(([type, typeGoals], index) => {
-                              const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                              const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                              return {
-                                name: type,
-                                value: completedSubtopics,
-                                total: totalSubtopics,
-                                color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]
-                              };
-                            })}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            dataKey="value"
-                            label={({ name, value, total }) => `${name}: ${value}/${total}`}
-                          >
-                            {Object.entries(goalsByType).map((_, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} 
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "white",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                            formatter={(value, name, props) => [
-                              `${value}/${props.payload.total} (${Math.round((Number(value) / Number(props.payload.total)) * 100)}%)`,
-                              'Completed Subtopics'
-                            ]}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-                </div>
-
-                {/* Additional Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Goals vs Subtopics Comparison */}
+                  {/* Progress by Goal Type Bar Chart */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-purple-500" />
-                        Goals vs Subtopics
+                        <TrendingUp className="h-5 w-5 text-blue-500" />
+                        Progress by Goal Type
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div style={{ width: "100%", height: "250px" }}>
+                      <div style={{ width: "100%", height: "300px" }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart
-                            data={Object.entries(goalsByType).map(([type, typeGoals]) => ({
-                              type,
-                              goals: typeGoals.length,
-                              subtopics: typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0)
-                            }))}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                            data={Object.entries(goalsByType).map(
+                              ([type, typeGoals]) => {
+                                const totalSubtopics = typeGoals.reduce(
+                                  (sum, goal) =>
+                                    sum + (goal.totalSubtopics || 0),
+                                  0
+                                );
+                                const completedSubtopics = typeGoals.reduce(
+                                  (sum, goal) =>
+                                    sum + (goal.completedSubtopics || 0),
+                                  0
+                                );
+                                return {
+                                  type,
+                                  completed: completedSubtopics,
+                                  total: totalSubtopics,
+                                  percentage:
+                                    totalSubtopics > 0
+                                      ? Math.round(
+                                          (completedSubtopics /
+                                            totalSubtopics) *
+                                            100
+                                        )
+                                      : 0,
+                                };
+                              }
+                            )}
+                            margin={{
+                              top: 20,
+                              right: 30,
+                              left: 20,
+                              bottom: 20,
+                            }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="#e5e7eb"
+                            />
                             <XAxis
                               dataKey="type"
-                              tick={{ fontSize: 10, fill: "#6b7280" }}
+                              tick={{ fontSize: 11, fill: "#6b7280" }}
                               stroke="#9ca3af"
                             />
                             <YAxis
-                              tick={{ fontSize: 10, fill: "#6b7280" }}
+                              tick={{ fontSize: 11, fill: "#6b7280" }}
                               stroke="#9ca3af"
+                              domain={[0, 100]}
                             />
-                            <Tooltip />
-                            <Bar dataKey="goals" fill="#8b5cf6" name="Goals" />
-                            <Bar dataKey="subtopics" fill="#10b981" name="Subtopics" />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "white",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "8px",
+                              }}
+                              formatter={(value, name) => [
+                                name === "percentage" ? `${value}%` : value,
+                                name === "percentage"
+                                  ? "Progress"
+                                  : name === "completed"
+                                  ? "Completed"
+                                  : "Total",
+                              ]}
+                            />
+                            <Bar
+                              dataKey="percentage"
+                              fill="#3b82f6"
+                              radius={[4, 4, 0, 0]}
+                            />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Completion Rate by Type */}
+                  {/* Overall Progress Pie Chart */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-orange-500" />
-                        Completion Rates
+                        <TrendingUp className="h-5 w-5 text-green-500" />
+                        Progress Distribution
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div style={{ width: "100%", height: "250px" }}>
+                      <div style={{ width: "100%", height: "300px" }}>
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart
-                            data={Object.entries(goalsByType).map(([type, typeGoals]) => {
-                              const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                              const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                              return {
-                                type,
-                                completed: completedSubtopics,
-                                remaining: totalSubtopics - completedSubtopics,
-                                total: totalSubtopics
-                              };
-                            })}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis
-                              dataKey="type"
-                              tick={{ fontSize: 10, fill: "#6b7280" }}
-                              stroke="#9ca3af"
+                          <PieChart>
+                            <Pie
+                              data={Object.entries(goalsByType).map(
+                                ([type, typeGoals], index) => {
+                                  const totalSubtopics = typeGoals.reduce(
+                                    (sum, goal) =>
+                                      sum + (goal.totalSubtopics || 0),
+                                    0
+                                  );
+                                  const completedSubtopics = typeGoals.reduce(
+                                    (sum, goal) =>
+                                      sum + (goal.completedSubtopics || 0),
+                                    0
+                                  );
+                                  return {
+                                    name: type,
+                                    value: completedSubtopics,
+                                    total: totalSubtopics,
+                                    color: [
+                                      "#3b82f6",
+                                      "#10b981",
+                                      "#f59e0b",
+                                      "#ef4444",
+                                      "#8b5cf6",
+                                    ][index % 5],
+                                  };
+                                }
+                              )}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              dataKey="value"
+                              label={({ name, value, total }) =>
+                                `${name}: ${value}/${total}`
+                              }
+                            >
+                              {Object.entries(goalsByType).map((_, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={
+                                    [
+                                      "#3b82f6",
+                                      "#10b981",
+                                      "#f59e0b",
+                                      "#ef4444",
+                                      "#8b5cf6",
+                                    ][index % 5]
+                                  }
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "white",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "8px",
+                              }}
+                              formatter={(value, name, props) => [
+                                `${value}/${props.payload.total} (${Math.round(
+                                  (Number(value) /
+                                    Number(props.payload.total)) *
+                                    100
+                                )}%)`,
+                                "Completed Subtopics",
+                              ]}
                             />
-                            <YAxis
-                              tick={{ fontSize: 10, fill: "#6b7280" }}
-                              stroke="#9ca3af"
-                            />
-                            <Tooltip />
-                            <Area
-                              type="monotone"
-                              dataKey="completed"
-                              stackId="1"
-                              stroke="#10b981"
-                              fill="#10b981"
-                              name="Completed"
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="remaining"
-                              stackId="1"
-                              stroke="#f59e0b"
-                              fill="#f59e0b"
-                              name="Remaining"
-                            />
-                          </AreaChart>
+                          </PieChart>
                         </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Progress Summary Stats */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-red-500" />
-                        Quick Stats
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {Object.entries(goalsByType).map(([type, typeGoals]) => {
-                          const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-                          const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-                          const progressPercentage = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
-                          
-                          return (
-                            <div key={type} className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium">{getTypeIcon(type)} {type}</span>
-                                <span className="text-xs text-gray-500">{Math.round(progressPercentage)}%</span>
-                              </div>
-                              <div className="flex gap-2 text-xs">
-                                <div className="flex-1 text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                                  <div className="font-bold text-blue-600">{typeGoals.length}</div>
-                                  <div>Goals</div>
-                                </div>
-                                <div className="flex-1 text-center p-2 bg-green-50 dark:bg-green-900/20 rounded">
-                                  <div className="font-bold text-green-600">{completedSubtopics}</div>
-                                  <div>Done</div>
-                                </div>
-                                <div className="flex-1 text-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                                  <div className="font-bold text-gray-600">{totalSubtopics}</div>
-                                  <div>Total</div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
                       </div>
                     </CardContent>
                   </Card>
