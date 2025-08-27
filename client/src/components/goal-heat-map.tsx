@@ -55,7 +55,38 @@ const GOAL_COLORS = [
 
 export default function GoalHeatMap() {
   const { data: goals = [] } = useQuery<Goal[]>({
-    queryKey: ["/api/goals"]
+    queryKey: ["/api/goals-detailed"],
+    queryFn: async () => {
+      const response = await fetch("/api/goals", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch goals");
+      }
+      const goals = await response.json();
+      
+      // For each goal, fetch detailed data including categories, topics, and subtopics
+      const detailedGoals = await Promise.all(
+        goals.map(async (goal: any) => {
+          try {
+            const detailResponse = await fetch(`/api/goals/${goal.id}`, {
+              credentials: "include",
+            });
+            if (!detailResponse.ok) {
+              console.warn(`Failed to fetch details for goal ${goal.id}`);
+              return goal;
+            }
+            const detailedGoal = await detailResponse.json();
+            return detailedGoal;
+          } catch (error) {
+            console.warn(`Error fetching details for goal ${goal.id}:`, error);
+            return goal;
+          }
+        })
+      );
+      
+      return detailedGoals;
+    }
   });
 
   const chartData = useMemo(() => {
@@ -65,13 +96,16 @@ export default function GoalHeatMap() {
     const allCompletions: { goalName: string; timestamp: Date; }[] = [];
     
     goals.forEach(goal => {
-      if (goal.categories) {
+      console.log(`Processing goal: ${goal.name}`, goal); // Debug log
+      
+      if (goal.categories && Array.isArray(goal.categories)) {
         goal.categories.forEach(category => {
-          if (category.topics) {
+          if (category.topics && Array.isArray(category.topics)) {
             category.topics.forEach(topic => {
-              if (topic.subtopics) {
+              if (topic.subtopics && Array.isArray(topic.subtopics)) {
                 topic.subtopics.forEach(subtopic => {
                   if (subtopic.status === "completed" && subtopic.completedAt) {
+                    console.log(`Found completed subtopic: ${subtopic.name} at ${subtopic.completedAt}`); // Debug log
                     allCompletions.push({
                       goalName: goal.name,
                       timestamp: new Date(subtopic.completedAt)
@@ -84,6 +118,8 @@ export default function GoalHeatMap() {
         });
       }
     });
+    
+    console.log(`Total completions found: ${allCompletions.length}`, allCompletions); // Debug log
 
     // If no real completion data exists, return empty series
     if (allCompletions.length === 0) {
