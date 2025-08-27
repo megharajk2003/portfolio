@@ -758,12 +758,12 @@ export default function GoalTracker() {
                 <div style={{ width: "100%", height: "320px" }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={(() => {
-                        // Collect all completion timestamps from all categories
+                      data={useMemo(() => {
+                        // Flatten all completedSubtopicTimestamps from all visible categories
                         const allCompletions: { timestamp: string; categoryName: string }[] = [];
                         
                         allCategories.forEach(category => {
-                          if (category.completedSubtopicTimestamps) {
+                          if (category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0) {
                             category.completedSubtopicTimestamps.forEach(timestamp => {
                               allCompletions.push({
                                 timestamp,
@@ -773,7 +773,7 @@ export default function GoalTracker() {
                           }
                         });
                         
-                        // Sort all completions chronologically
+                        // Sort chronologically
                         allCompletions.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
                         
                         // Initialize cumulative counters for each category
@@ -782,29 +782,28 @@ export default function GoalTracker() {
                           categoryCounts[category.name] = 0;
                         });
                         
-                        // Generate step chart data points
                         const chartData: any[] = [];
                         
-                        // Add initial point with all categories at 0
+                        // Add starting point (all categories at 0)
                         if (allCompletions.length > 0) {
-                          const firstDate = new Date(allCompletions[0].timestamp);
-                          firstDate.setDate(firstDate.getDate() - 1); // One day before first completion
-                          const initialEntry: any = {
-                            date: firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          const startDate = new Date(allCompletions[0].timestamp);
+                          startDate.setDate(startDate.getDate() - 1);
+                          const startEntry: any = {
+                            date: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                           };
                           allCategories.forEach(category => {
-                            initialEntry[category.name] = 0;
+                            startEntry[category.name] = 0;
                           });
-                          chartData.push(initialEntry);
+                          chartData.push(startEntry);
                         }
                         
-                        // Process each completion chronologically
+                        // Iterate through sorted list, increment count for correct category
                         allCompletions.forEach(completion => {
-                          // Increment count for the category that had a completion
+                          // Increment count for the category that had completion
                           categoryCounts[completion.categoryName]++;
                           
-                          // Create chart data point
-                          const entry: any = {
+                          // Add [timestamp, new_cumulative_count] point to data series
+                          const dataPoint: any = {
                             date: new Date(completion.timestamp).toLocaleDateString('en-US', { 
                               month: 'short', 
                               day: 'numeric' 
@@ -813,14 +812,14 @@ export default function GoalTracker() {
                           
                           // Add current cumulative count for each category
                           allCategories.forEach(category => {
-                            entry[category.name] = categoryCounts[category.name] || 0;
+                            dataPoint[category.name] = categoryCounts[category.name];
                           });
                           
-                          chartData.push(entry);
+                          chartData.push(dataPoint);
                         });
                         
                         return chartData;
-                      })()}
+                      }, [allCategories])}
                       margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
