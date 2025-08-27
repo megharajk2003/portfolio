@@ -34,6 +34,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import { navigate } from "wouter/use-browser-location";
 
@@ -117,7 +122,33 @@ export default function GoalTracker() {
     enabled: !!user,
   });
 
-  // Get all categories from all goals
+  // Group goals by type/category for card display
+  const goalsByType = useMemo(() => {
+    const grouped: { [key: string]: Goal[] } = {};
+    goals.forEach((goal: Goal) => {
+      // Extract type from goal name (TNPSC, SSC, etc.)
+      const goalName = goal.name.toLowerCase();
+      let type = 'Other';
+      
+      if (goalName.includes('tnpsc')) {
+        type = 'TNPSC';
+      } else if (goalName.includes('ssc')) {
+        type = 'SSC';
+      } else if (goalName.includes('upsc')) {
+        type = 'UPSC';
+      } else if (goalName.includes('bank')) {
+        type = 'Banking';
+      }
+      
+      if (!grouped[type]) {
+        grouped[type] = [];
+      }
+      grouped[type].push(goal);
+    });
+    return grouped;
+  }, [goals]);
+
+  // Get all categories from all goals for detailed view
   const allCategories = useMemo(() => {
     const categories: GoalCategory[] = [];
     goals.forEach((goal: Goal) => {
@@ -397,78 +428,285 @@ export default function GoalTracker() {
             </Card>
           )}
 
-          {/* Categories List */}
-          {allCategories.length > 0 && (
-            <div className="space-y-4">
-              {allCategories.map((category) => (
-                <Card
-                  key={category.id}
-                  className="cursor-pointer transition-all hover:shadow-lg"
-                  onClick={() => navigate(`/goal-tracker/${category.goalId}/category/${category.id}`)}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-blue-500" />
-                      {category.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">
-                            Overall Progress
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {category.completedSubtopics || 0} / {category.totalSubtopics || 0}{" "}
-                            Subtopics
-                          </span>
+          {/* Goal Type Cards Display */}
+          {Object.keys(goalsByType).length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                Goal Categories
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(goalsByType).map(([type, typeGoals]) => {
+                  const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+                  const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+                  const progressPercentage = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
+                  
+                  return (
+                    <Card
+                      key={type}
+                      className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
+                    >
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-6 w-6 text-blue-500" />
+                          {type}
+                        </CardTitle>
+                        <p className="text-sm text-gray-600">
+                          {typeGoals.length} {typeGoals.length === 1 ? 'goal' : 'goals'}
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Progress Overview */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium">Overall Progress</span>
+                              <span className="text-sm text-gray-600">
+                                {completedSubtopics} / {totalSubtopics} Subtopics
+                              </span>
+                            </div>
+                            <Progress value={progressPercentage} className="h-2" />
+                            <div className="flex justify-between items-center mt-2">
+                              <span className="text-sm text-gray-600">
+                                {Math.round(progressPercentage)}% Complete
+                              </span>
+                              <Badge className={getStatusColor(completedSubtopics, totalSubtopics)}>
+                                {getStatusText(completedSubtopics, totalSubtopics)}
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          {/* Individual Goals */}
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium">Goals:</span>
+                            {typeGoals.map((goal) => (
+                              <div 
+                                key={goal.id}
+                                className="p-2 bg-gray-50 dark:bg-gray-800 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (goal.categories && goal.categories.length > 0) {
+                                    navigate(`/goal-tracker/${goal.id}/category/${goal.categories[0].id}`);
+                                  }
+                                }}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm font-medium">{goal.name}</span>
+                                  <span className="text-xs text-gray-500">
+                                    {goal.completedSubtopics || 0}/{goal.totalSubtopics || 0}
+                                  </span>
+                                </div>
+                                <Progress 
+                                  value={
+                                    goal.totalSubtopics > 0 
+                                      ? ((goal.completedSubtopics || 0) / goal.totalSubtopics) * 100 
+                                      : 0
+                                  } 
+                                  className="h-1 mt-1" 
+                                />
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <Progress
-                          value={
-                            category.totalSubtopics > 0
-                              ? ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
-                              : 0
-                          }
-                          className="h-2"
-                        />
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">
-                          {category.totalSubtopics > 0
-                            ? Math.round(
-                                ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
-                              )
-                            : 0}
-                          % Complete
-                        </span>
-                        <Badge
-                          className={getStatusColor(
-                            category.completedSubtopics || 0,
-                            category.totalSubtopics || 0
-                          )}
-                        >
-                          {getStatusText(
-                            category.completedSubtopics || 0,
-                            category.totalSubtopics || 0
-                          )}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
           )}
 
-          {/* Category Performance Chart */}
+          {/* Individual Categories for Detailed View */}
+          {allCategories.length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                All Categories
+              </h2>
+              <div className="space-y-4">
+                {allCategories.map((category) => (
+                  <Card
+                    key={category.id}
+                    className="cursor-pointer transition-all hover:shadow-lg"
+                    onClick={() => navigate(`/goal-tracker/${category.goalId}/category/${category.id}`)}
+                  >
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-blue-500" />
+                        {category.name}
+                        <Badge variant="outline" className="ml-auto">
+                          {(category as any).goalName}
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium">
+                              Overall Progress
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              {category.completedSubtopics || 0} / {category.totalSubtopics || 0}{" "}
+                              Subtopics
+                            </span>
+                          </div>
+                          <Progress
+                            value={
+                              category.totalSubtopics > 0
+                                ? ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
+                                : 0
+                            }
+                            className="h-2"
+                          />
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-600">
+                            {category.totalSubtopics > 0
+                              ? Math.round(
+                                  ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
+                                )
+                              : 0}
+                            % Complete
+                          </span>
+                          <Badge
+                            className={getStatusColor(
+                              category.completedSubtopics || 0,
+                              category.totalSubtopics || 0
+                            )}
+                          >
+                            {getStatusText(
+                              category.completedSubtopics || 0,
+                              category.totalSubtopics || 0
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Goal Type Performance Charts */}
+          {Object.keys(goalsByType).length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Progress by Goal Type Bar Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                    Progress by Goal Type
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div style={{ width: "100%", height: "300px" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={Object.entries(goalsByType).map(([type, typeGoals]) => {
+                          const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+                          const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+                          return {
+                            type,
+                            completed: completedSubtopics,
+                            total: totalSubtopics,
+                            percentage: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0
+                          };
+                        })}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis
+                          dataKey="type"
+                          tick={{ fontSize: 11, fill: "#6b7280" }}
+                          stroke="#9ca3af"
+                        />
+                        <YAxis
+                          tick={{ fontSize: 11, fill: "#6b7280" }}
+                          stroke="#9ca3af"
+                          domain={[0, 100]}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                          }}
+                          formatter={(value, name) => [
+                            name === 'percentage' ? `${value}%` : value,
+                            name === 'percentage' ? 'Progress' : 
+                            name === 'completed' ? 'Completed' : 'Total'
+                          ]}
+                        />
+                        <Bar dataKey="percentage" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Overall Progress Pie Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    Overall Progress Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div style={{ width: "100%", height: "300px" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={Object.entries(goalsByType).map(([type, typeGoals], index) => {
+                            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+                            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+                            return {
+                              name: type,
+                              value: completedSubtopics,
+                              total: totalSubtopics,
+                              color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]
+                            };
+                          })}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          dataKey="value"
+                          label={({ name, value, total }) => `${name}: ${value}/${total}`}
+                        >
+                          {Object.entries(goalsByType).map((_, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} 
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                          }}
+                          formatter={(value, name, props) => [
+                            `${value}/${props.payload.total} (${Math.round((Number(value) / Number(props.payload.total)) * 100)}%)`,
+                            'Completed Subtopics'
+                          ]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Category Performance Line Chart */}
           {allCategories.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Category Performance
+                    <TrendingUp className="h-5 w-5 text-purple-500" />
+                    Category Progress Trend
                   </CardTitle>
                   <div className="flex gap-4 items-center">
                     <div className="flex items-center gap-2">
