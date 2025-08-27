@@ -1,3 +1,10 @@
+import { eq, sql } from "drizzle-orm";
+import { db } from "./db";
+import {
+  badges,
+  userBadges,
+  userStats,
+} from "@shared/schema";
 import {
   type User,
   type InsertUser,
@@ -1046,6 +1053,276 @@ export class PgStorage implements IStorage {
   private async updateTopicProgressCounters(topicId: string): Promise<void> {
     // Stub implementation
     console.log("Updating topic progress counters for:", topicId);
+  }
+
+  // Badge system methods implementation
+  async getBadges(): Promise<Badge[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get("badges") || [];
+    }
+    
+    return await db.select().from(badges);
+  }
+
+  async createBadge(badge: InsertBadge): Promise<Badge> {
+    if (!this.isDbConnected) {
+      const newBadge = { 
+        id: `badge-${Date.now()}`, 
+        ...badge, 
+        createdAt: new Date() 
+      } as Badge;
+      const badgesData = this.fallbackData.get("badges") || [];
+      badgesData.push(newBadge);
+      this.fallbackData.set("badges", badgesData);
+      return newBadge;
+    }
+
+    const [created] = await db.insert(badges).values(badge).returning();
+    return created;
+  }
+
+  async getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]> {
+    if (!this.isDbConnected) {
+      const userBadgesData = this.fallbackData.get(`userBadges_${userId}`) || [];
+      const badgesData = this.fallbackData.get("badges") || [];
+      
+      return userBadgesData.map((ub: UserBadge) => ({
+        ...ub,
+        badge: badgesData.find((b: Badge) => b.id === ub.badgeId) || badgesData[0]
+      }));
+    }
+
+    return await db
+      .select()
+      .from(userBadges)
+      .leftJoin(badges, eq(userBadges.badgeId, badges.id))
+      .where(eq(userBadges.userId, userId))
+      .then(rows => 
+        rows.map(row => ({
+          ...row.user_badges,
+          badge: row.badges!
+        }))
+      );
+  }
+
+  async awardBadge(userBadge: InsertUserBadge): Promise<UserBadge> {
+    if (!this.isDbConnected) {
+      const newUserBadge = {
+        id: `user_badge-${Date.now()}`,
+        ...userBadge,
+        earnedAt: new Date()
+      } as UserBadge;
+      
+      const userBadgesData = this.fallbackData.get(`userBadges_${userBadge.userId}`) || [];
+      userBadgesData.push(newUserBadge);
+      this.fallbackData.set(`userBadges_${userBadge.userId}`, userBadgesData);
+      return newUserBadge;
+    }
+
+    const [awarded] = await db.insert(userBadges).values(userBadge).returning();
+    return awarded;
+  }
+
+  // Comprehensive badge checking function
+  async checkAndAwardBadges(
+    userId: number,
+    type: string = "all",
+    relatedId?: string
+  ): Promise<UserBadge[]> {
+    try {
+      const allBadges = await this.getBadges();
+      const userBadges = await this.getUserBadges(userId);
+      const userBadgeIds = new Set(userBadges.map(ub => ub.badgeId));
+      
+      // Get user data for criteria checking
+      const userData = await this.getUserCriteriaData(userId);
+      
+      const newBadges: UserBadge[] = [];
+      
+      // Check each badge that the user doesn't already have
+      for (const badge of allBadges) {
+        if (userBadgeIds.has(badge.id)) continue;
+        
+        // Filter by type if specified and not "all"
+        if (type !== "all" && badge.type !== type) continue;
+        
+        // Check if user meets the criteria for this badge
+        if (await this.checkBadgeCriteria(badge, userData, relatedId)) {
+          const userBadge = await this.awardBadge({
+            userId,
+            badgeId: badge.id,
+            relatedId
+          });
+          newBadges.push(userBadge);
+          
+          // Award XP for the badge
+          if (badge.xpReward && badge.xpReward > 0) {
+            await this.updateUserXP(userId, badge.xpReward);
+          }
+          
+          console.log(`🏆 Awarded badge "${badge.title}" to user ${userId}`);
+        }
+      }
+      
+      return newBadges;
+    } catch (error) {
+      console.error("Error in checkAndAwardBadges:", error);
+      return [];
+    }
+  }
+
+  // Get user data for badge criteria evaluation
+  private async getUserCriteriaData(userId: number) {
+    const profile = await this.getProfile(userId.toString());
+    const userStats = await this.getUserStats(userId);
+    const goals = await this.getUserGoals(userId);
+    const workExperience = await this.getWorkExperience(userId.toString());
+    
+    // Calculate profile completion percentage
+    let profileCompletion = 0;
+    if (profile) {
+      let completedSections = 0;
+      let totalSections = 0;
+      
+      // Check personal details
+      if (profile.personalDetails) {
+        const pd = profile.personalDetails as any;
+        totalSections += 6;
+        if (pd.fullName) completedSections++;
+        if (pd.photo) completedSections++;
+        if (pd.roleOrTitle) completedSections++;
+        if (pd.summary) completedSections++;
+        if (pd.location?.city) completedSections++;
+        if (pd.dob) completedSections++;
+      }
+      
+      // Check contact details
+      if (profile.contactDetails) {
+        const cd = profile.contactDetails as any;
+        totalSections += 4;
+        if (cd.email) completedSections++;
+        if (cd.phone) completedSections++;
+        if (cd.linkedin) completedSections++;
+        if (cd.githubOrPortfolio) completedSections++;
+      }
+      
+      profileCompletion = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
+    }
+
+    return {
+      profile,
+      profileCompletion,
+      userStats,
+      goalsCount: goals.length,
+      workExperienceCount: workExperience.length,
+      hasProfilePicture: profile?.personalDetails?.photo ? true : false,
+      hasBio: profile?.personalDetails?.summary ? true : false,
+      totalXp: userStats?.totalXp || 0,
+      currentStreak: userStats?.currentStreak || 0,
+      // Add more criteria data as needed
+      skillsCount: 0, // TODO: implement when skills are available
+      projectsCount: 0, // TODO: implement when projects are available
+      educationCount: 0, // TODO: implement when education is available
+      lessonsCompleted: 0, // TODO: implement when lessons are available
+      coursesCompleted: 0, // TODO: implement when courses are available
+    };
+  }
+
+  // Check if user meets badge criteria
+  private async checkBadgeCriteria(badge: Badge, userData: any, relatedId?: string): Promise<boolean> {
+    if (!badge.criteria) return false;
+    
+    const criteria = badge.criteria as any;
+    
+    // Profile completion badges
+    if (criteria.profileCompleted !== undefined) {
+      return userData.profileCompletion >= criteria.profileCompleted;
+    }
+    
+    // First login badge
+    if (criteria.firstLogin) {
+      return true; // If we're checking, user has logged in
+    }
+    
+    // Profile picture badge
+    if (criteria.profilePicture) {
+      return userData.hasProfilePicture;
+    }
+    
+    // Bio badge
+    if (criteria.bioAdded) {
+      return userData.hasBio;
+    }
+    
+    // Goals created badges
+    if (criteria.goalsCreated !== undefined) {
+      return userData.goalsCount >= criteria.goalsCreated;
+    }
+    
+    // Work experience badges
+    if (criteria.workExperienceAdded !== undefined) {
+      return userData.workExperienceCount >= criteria.workExperienceAdded;
+    }
+    
+    // XP-based badges
+    if (criteria.xpThreshold !== undefined) {
+      return userData.totalXp >= criteria.xpThreshold;
+    }
+    
+    // Streak badges
+    if (criteria.streakDays !== undefined) {
+      return userData.currentStreak >= criteria.streakDays;
+    }
+    
+    // Skills badges (when implemented)
+    if (criteria.skillsAdded !== undefined) {
+      return userData.skillsCount >= criteria.skillsAdded;
+    }
+    
+    // Projects badges (when implemented)
+    if (criteria.projectsAdded !== undefined) {
+      return userData.projectsCount >= criteria.projectsAdded;
+    }
+    
+    // Education badges (when implemented)
+    if (criteria.educationAdded !== undefined) {
+      return userData.educationCount >= criteria.educationAdded;
+    }
+    
+    // Learning-related badges (when implemented)
+    if (criteria.lessonsCompleted !== undefined) {
+      return userData.lessonsCompleted >= criteria.lessonsCompleted;
+    }
+    
+    if (criteria.coursesCompleted !== undefined) {
+      return userData.coursesCompleted >= criteria.coursesCompleted;
+    }
+    
+    // Course type specific badges
+    if (criteria.courseType && relatedId) {
+      // TODO: Check if completed course matches the required type
+      return false;
+    }
+    
+    return false;
+  }
+
+  // Helper method to update user XP
+  private async updateUserXP(userId: number, xpToAdd: number): Promise<void> {
+    if (!this.isDbConnected) {
+      const userStatsData = this.fallbackData.get(`userStats_${userId}`) || { totalXp: 0 };
+      userStatsData.totalXp += xpToAdd;
+      this.fallbackData.set(`userStats_${userId}`, userStatsData);
+      return;
+    }
+
+    await db
+      .update(userStats)
+      .set({ 
+        totalXp: sql`${userStats.totalXp} + ${xpToAdd}`,
+        updatedAt: new Date()
+      })
+      .where(eq(userStats.userId, userId));
   }
 }
 

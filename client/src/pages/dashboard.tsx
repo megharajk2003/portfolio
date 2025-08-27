@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 // FIX: Import the 'profiles' table object itself, not its type.
@@ -67,6 +67,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
   const { user } = useAuth();
   const { handleLogout } = useLogout();
+  const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCheckInHistory, setShowCheckInHistory] = useState(false);
 
@@ -117,6 +118,58 @@ export default function Home() {
     refetchInterval: 30000,
   });
 
+  // Badge checking system
+  const checkBadgesMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(`/api/check-badges/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to check badges');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Show toast notifications for newly awarded badges
+      if (data.newBadges && data.newBadges.length > 0) {
+        data.newBadges.forEach((userBadge: any) => {
+          if (userBadge.badge) {
+            toast({
+              title: "🏆 New Badge Unlocked!",
+              description: `${userBadge.badge.title}: ${userBadge.badge.description}`,
+              variant: "default",
+            });
+          }
+        });
+        
+        // Show summary toast if multiple badges
+        if (data.newBadges.length > 1) {
+          setTimeout(() => {
+            toast({
+              title: "🎉 Badge Streak!",
+              description: `You've unlocked ${data.newBadges.length} new badges! Check the Badges page to see them all.`,
+              variant: "default",
+            });
+          }, 2000);
+        }
+      }
+    },
+    onError: (error) => {
+      console.error('Badge checking error:', error);
+    },
+  });
+
+  // Check badges when dashboard loads
+  useEffect(() => {
+    if (userId && user) {
+      // Delay badge checking by 1 second to let other data load first
+      const timer = setTimeout(() => {
+        checkBadgesMutation.mutate(userId);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [userId, user]);
+
   // Fetch check-in history for the past 30 days
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -137,7 +190,6 @@ export default function Home() {
     },
   });
 
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Daily check-in mutation
