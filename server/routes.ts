@@ -2663,7 +2663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const goals = await storage.getUserGoals(req.user.id);
+      const goals = await storage.getUserGoalsWithCategories(req.user.id);
       res.json(goals);
     } catch (error) {
       console.error("Error fetching goals:", error);
@@ -2841,6 +2841,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedTopic);
     } catch (error) {
       console.error("Error updating topic status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Additional goal API routes for the new navigation
+  app.get("/api/goals/:goalId/categories/:categoryId", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { goalId, categoryId } = req.params;
+
+      // Get category details with goal verification
+      const goal = await storage.getGoal(goalId);
+      if (!goal || goal.userId !== req.user.id) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+
+      const category = await storage.getGoalCategory(categoryId);
+      if (!category || category.goalId !== goalId) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      res.json(category);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/goal-categories/:categoryId/topics", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { categoryId } = req.params;
+      const topics = await storage.getCategoryTopics(categoryId);
+
+      res.json(topics);
+    } catch (error) {
+      console.error("Error fetching topics:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/goal-topics/:topicId/subtopics", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { topicId } = req.params;
+      
+      // Get topic details with category and goal information
+      const topic = await storage.getGoalTopic(topicId);
+      if (!topic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+
+      const category = await storage.getGoalCategory(topic.categoryId);
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      const subtopics = await storage.getTopicSubtopics(topicId);
+
+      const response = {
+        ...topic,
+        category,
+        subtopics,
+        totalSubtopics: subtopics.length,
+        completedSubtopics: subtopics.filter(s => s.status === 'completed').length
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("Error fetching topic subtopics:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/goal-subtopics/:subtopicId", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { subtopicId } = req.params;
+      const { status, notes } = req.body;
+
+      // Validate status
+      const validStatuses = ["pending", "start", "completed"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          message: "Invalid status. Must be pending, start, or completed",
+        });
+      }
+
+      const updatedSubtopic = await storage.updateSubtopicStatus(
+        subtopicId,
+        status as "pending" | "start" | "completed",
+        notes
+      );
+
+      if (!updatedSubtopic) {
+        return res.status(404).json({ message: "Subtopic not found" });
+      }
+
+      res.json(updatedSubtopic);
+    } catch (error) {
+      console.error("Error updating subtopic status:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

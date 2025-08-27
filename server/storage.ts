@@ -350,6 +350,10 @@ export interface IStorage {
       })
     | undefined
   >;
+  getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number })[] })[]>;
+  getGoalCategory(id: string): Promise<GoalCategory | undefined>;
+  getCategoryTopics(categoryId: string): Promise<GoalTopic[]>;
+  getGoalTopic(id: string): Promise<GoalTopic | undefined>;
   updateTopicStatus(
     topicId: string,
     status: "pending" | "start" | "completed",
@@ -3561,6 +3565,41 @@ export class PgStorage implements IStorage {
     }
   }
 
+  async getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number })[] })[]> {
+    const goals = await this.getUserGoals(userId);
+    
+    const goalsWithCategories = await Promise.all(
+      goals.map(async (goal) => {
+        const categories = await this.getGoalCategories(goal.id);
+        
+        // For each category, calculate subtopic totals
+        const categoriesWithSubtopicTotals = await Promise.all(
+          categories.map(async (category) => {
+            const topics = await this.getCategoryTopics(category.id);
+            let totalSubtopics = 0;
+            let completedSubtopics = 0;
+            
+            for (const topic of topics) {
+              const subtopics = await this.getTopicSubtopics(topic.id);
+              totalSubtopics += subtopics.length;
+              completedSubtopics += subtopics.filter(s => s.status === 'completed').length;
+            }
+            
+            return {
+              ...category,
+              totalSubtopics,
+              completedSubtopics
+            };
+          })
+        );
+        
+        return { ...goal, categories: categoriesWithSubtopicTotals };
+      })
+    );
+    
+    return goalsWithCategories;
+  }
+
   // Helper method to calculate subtopic totals for a goal
   private async calculateGoalSubtopicTotals(
     goalId: string
@@ -4002,7 +4041,7 @@ export class PgStorage implements IStorage {
     return topic;
   }
 
-  private async getCategoryTopics(categoryId: string): Promise<GoalTopic[]> {
+  async getCategoryTopics(categoryId: string): Promise<GoalTopic[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`topics_${categoryId}`) || [];
     }
@@ -4078,7 +4117,7 @@ export class PgStorage implements IStorage {
     }
   }
 
-  private async getGoalTopic(id: string): Promise<GoalTopic | undefined> {
+  async getGoalTopic(id: string): Promise<GoalTopic | undefined> {
     if (!this.isDbConnected) {
       return undefined;
     }
@@ -4095,7 +4134,7 @@ export class PgStorage implements IStorage {
     }
   }
 
-  private async getGoalCategory(id: string): Promise<GoalCategory | undefined> {
+  async getGoalCategory(id: string): Promise<GoalCategory | undefined> {
     if (!this.isDbConnected) {
       return undefined;
     }
