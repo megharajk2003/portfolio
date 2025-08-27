@@ -444,6 +444,125 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
     );
 };
 
+// ApexChart Component for Goal Type Bar Chart
+const ApexGoalTypeBarChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
+    const chartData = useMemo(() => {
+        const data = Object.entries(goalsByType).map(([type, typeGoals]) => {
+            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+            
+            return {
+                x: type,
+                y: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0,
+                completed: completedSubtopics,
+                total: totalSubtopics
+            };
+        });
+        
+        return data;
+    }, [goalsByType]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'bar',
+            height: 300,
+            toolbar: { show: false }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+                columnWidth: '60%'
+            }
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, width: 2, colors: ['transparent'] },
+        xaxis: {
+            categories: chartData.map(item => item.x),
+            title: { text: 'Goal Types' }
+        },
+        yaxis: {
+            title: { text: 'Progress Percentage' },
+            max: 100,
+            min: 0
+        },
+        fill: { opacity: 1 },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex }) {
+                const data = chartData[dataPointIndex];
+                return `<div style="padding: 10px;">
+                    <strong>${data.x}</strong><br/>
+                    Progress: ${data.y}%<br/>
+                    Completed: ${data.completed}/${data.total}
+                </div>`;
+            }
+        },
+        colors: ['#3b82f6']
+    };
+
+    const series = [{
+        name: 'Progress %',
+        data: chartData.map(item => item.y)
+    }];
+
+    return <ReactApexChart options={options} series={series} type="bar" height={300} />;
+};
+
+// ApexChart Component for Goal Type Pie Chart
+const ApexGoalTypePieChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
+    const chartData = useMemo(() => {
+        const data = Object.entries(goalsByType).map(([type, typeGoals]) => {
+            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+            return {
+                name: type,
+                value: completedSubtopics
+            };
+        });
+        
+        return data.filter(item => item.value > 0); // Only show types with actual progress
+    }, [goalsByType]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'pie',
+            height: 300
+        },
+        labels: chartData.map(item => item.name),
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+        tooltip: {
+            custom: function({ series, seriesIndex }) {
+                const totalForType = Object.values(goalsByType)[seriesIndex]?.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0) || 0;
+                const completed = series[seriesIndex];
+                const percentage = totalForType > 0 ? Math.round((completed / totalForType) * 100) : 0;
+                
+                return `<div style="padding: 10px;">
+                    <strong>${chartData[seriesIndex]?.name}</strong><br/>
+                    Completed: ${completed}/${totalForType}<br/>
+                    Progress: ${percentage}%
+                </div>`;
+            }
+        },
+        legend: {
+            position: 'bottom'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: { width: 300 },
+                legend: { position: 'bottom' }
+            }
+        }]
+    };
+
+    const series = chartData.map(item => item.value);
+
+    if (series.length === 0) {
+        return <div className="h-[300px] flex items-center justify-center text-gray-500">No completed subtopics yet</div>;
+    }
+
+    return <ReactApexChart options={options} series={series} type="pie" height={300} />;
+};
+
   const cumulativeProgressData = useMemo(() => {
     if (allCategories.length === 0) return [];
 
@@ -692,70 +811,7 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div style={{ width: "100%", height: "300px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={Object.entries(goalsByType).map(
-                          ([type, typeGoals]) => {
-                            const totalSubtopics = typeGoals.reduce(
-                              (sum, goal) => sum + (goal.totalSubtopics || 0),
-                              0
-                            );
-                            const completedSubtopics = typeGoals.reduce(
-                              (sum, goal) =>
-                                sum + (goal.completedSubtopics || 0),
-                              0
-                            );
-                            return {
-                              type,
-                              completed: completedSubtopics,
-                              total: totalSubtopics,
-                              percentage:
-                                totalSubtopics > 0
-                                  ? Math.round(
-                                      (completedSubtopics / totalSubtopics) *
-                                        100
-                                    )
-                                  : 0,
-                            };
-                          }
-                        )}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="type"
-                          tick={{ fontSize: 11, fill: "#6b7280" }}
-                          stroke="#9ca3af"
-                        />
-                        <YAxis
-                          tick={{ fontSize: 11, fill: "#6b7280" }}
-                          stroke="#9ca3af"
-                          domain={[0, 100]}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                          }}
-                          formatter={(value, name) => [
-                            name === "percentage" ? `${value}%` : value,
-                            name === "percentage"
-                              ? "Progress"
-                              : name === "completed"
-                              ? "Completed"
-                              : "Total",
-                          ]}
-                        />
-                        <Bar
-                          dataKey="percentage"
-                          fill="#3b82f6"
-                          radius={[4, 4, 0, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                  <ApexGoalTypeBarChart goalsByType={goalsByType} />
                 </CardContent>
               </Card>
 
@@ -768,75 +824,7 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div style={{ width: "100%", height: "300px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={Object.entries(goalsByType).map(
-                            ([type, typeGoals], index) => {
-                              const totalSubtopics = typeGoals.reduce(
-                                (sum, goal) => sum + (goal.totalSubtopics || 0),
-                                0
-                              );
-                              const completedSubtopics = typeGoals.reduce(
-                                (sum, goal) =>
-                                  sum + (goal.completedSubtopics || 0),
-                                0
-                              );
-                              return {
-                                name: type,
-                                value: completedSubtopics,
-                                total: totalSubtopics,
-                                color: [
-                                  "#3b82f6",
-                                  "#10b981",
-                                  "#f59e0b",
-                                  "#ef4444",
-                                  "#8b5cf6",
-                                ][index % 5],
-                              };
-                            }
-                          )}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          dataKey="value"
-                          label={({ name, value, total }) =>
-                            `${name}: ${value}/${total}`
-                          }
-                        >
-                          {Object.entries(goalsByType).map((_, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={
-                                [
-                                  "#3b82f6",
-                                  "#10b981",
-                                  "#f59e0b",
-                                  "#ef4444",
-                                  "#8b5cf6",
-                                ][index % 5]
-                              }
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                          }}
-                          formatter={(value, name, props) => [
-                            `${value}/${props.payload.total} (${Math.round(
-                              (Number(value) / Number(props.payload.total)) *
-                                100
-                            )}%)`,
-                            "Completed Subtopics",
-                          ]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+                  <ApexGoalTypePieChart goalsByType={goalsByType} />
                 </CardContent>
               </Card>
             </div>

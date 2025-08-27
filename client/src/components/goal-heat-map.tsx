@@ -3,16 +3,28 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Target } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend
-} from "recharts";
+import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
+
+interface GoalSubtopic {
+  id: string;
+  name: string;
+  status: "pending" | "start" | "completed";
+  completedAt?: string;
+  createdAt: string;
+}
+
+interface GoalTopic {
+  id: string;
+  name: string;
+  subtopics: GoalSubtopic[];
+}
+
+interface GoalCategory {
+  id: string;
+  name: string;
+  topics: GoalTopic[];
+}
 
 interface Goal {
   id: string;
@@ -21,14 +33,11 @@ interface Goal {
   description?: string;
   totalTopics: number;
   completedTopics: number;
+  totalSubtopics: number;
+  completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
-}
-
-interface ChartDataPoint {
-  date: string;
-  month: string;
-  [key: string]: number | string; // Dynamic goal names as keys
+  categories?: GoalCategory[];
 }
 
 const GOAL_COLORS = [
@@ -50,121 +59,139 @@ export default function GoalHeatMap() {
   });
 
   const chartData = useMemo(() => {
-    if (goals.length === 0) return [];
+    if (goals.length === 0) return { series: [] };
 
-    // Get the last 14 days
-    const today = new Date();
-    const daysData: ChartDataPoint[] = [];
-
-    // Initialize the last 14 days
-    for (let i = 13; i >= 0; i--) {
-      const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-      const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
-
-      const dataPoint: ChartDataPoint = {
-        date: dateKey,
-        month: monthName
-      };
-
-      // Initialize all goals with 0 completed topics for this day
-      goals.forEach(goal => {
-        dataPoint[goal.name] = 0;
-      });
-
-      daysData.push(dataPoint);
-    }
-
-    // Process each goal to populate the chart data
+    // Collect all real completion data from all goals
+    const allCompletions: { goalName: string; timestamp: Date; }[] = [];
+    
     goals.forEach(goal => {
-      // Normalize goal dates to start of day for accurate comparison
-      const createdNormalized = new Date(goal.createdAt);
-      createdNormalized.setHours(0, 0, 0, 0);
-
-      const updatedNormalized = new Date(goal.updatedAt);
-      updatedNormalized.setHours(0, 0, 0, 0);
-
-      // Calculate daily progress for each day in the 2-week period
-      daysData.forEach(dayData => {
-        const dayDate = new Date(dayData.date);
-        dayDate.setHours(0, 0, 0, 0);
-
-        if (dayDate >= createdNormalized) {
-          // Calculate progress based on time elapsed
-          const totalTimespan = updatedNormalized.getTime() - createdNormalized.getTime();
-          const currentTimespan = dayDate.getTime() - createdNormalized.getTime();
-
-          let cumulativeProgress = 0;
-          if (totalTimespan > 0) {
-            const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
-            cumulativeProgress = Math.round(goal.completedTopics * progressRatio);
-          } else if (dayDate >= updatedNormalized) {
-            cumulativeProgress = goal.completedTopics;
-          }
-
-          dayData[goal.name] = Math.max(0, cumulativeProgress);
-        } else {
-          dayData[goal.name] = 0;
-        }
-      });
+      if (goal.categories) {
+        goal.categories.forEach(category => {
+          category.topics.forEach(topic => {
+            topic.subtopics.forEach(subtopic => {
+              if (subtopic.status === "completed" && subtopic.completedAt) {
+                allCompletions.push({
+                  goalName: goal.name,
+                  timestamp: new Date(subtopic.completedAt)
+                });
+              }
+            });
+          });
+        });
+      }
     });
 
-    return daysData;
+    // If no real completion data exists, return empty series
+    if (allCompletions.length === 0) {
+      return { series: [] };
+    }
+
+    // Sort chronologically
+    allCompletions.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+    // Create series for each goal with real completion data
+    const series = goals.map(goal => ({
+      name: goal.name,
+      data: [] as [number, number][]
+    }));
+
+    // Initialize cumulative counters
+    const cumulativeCounts: { [goalName: string]: number } = {};
+    goals.forEach(goal => (cumulativeCounts[goal.name] = 0));
+
+    // Add starting points at goal creation with 0 completions
+    goals.forEach(goal => {
+      const seriesIndex = series.findIndex(s => s.name === goal.name);
+      series[seriesIndex].data.push([new Date(goal.createdAt).getTime(), 0]);
+    });
+
+    // Process each completion to build cumulative progress
+    allCompletions.forEach(({ goalName, timestamp }) => {
+      cumulativeCounts[goalName]++;
+      const seriesIndex = series.findIndex(s => s.name === goalName);
+      
+      if (seriesIndex > -1) {
+        series[seriesIndex].data.push([timestamp.getTime(), cumulativeCounts[goalName]]);
+      }
+    });
+
+    // Extend all series to current time with final counts
+    const now = new Date().getTime();
+    series.forEach(s => {
+      if (s.data.length > 0 && s.data[s.data.length - 1][0] < now) {
+        s.data.push([now, s.data[s.data.length - 1][1]]);
+      }
+    });
+
+    return { series: series.filter(s => s.data.length > 1) }; // Only include goals with actual progress
   }, [goals]);
 
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const options: ApexOptions = {
+    chart: {
+      type: 'area',
+      stacked: false,
+      height: 350,
+      zoom: { type: 'x', enabled: true, autoScaleYaxis: true },
+      toolbar: { autoSelected: 'zoom' },
+    },
+    dataLabels: { enabled: false },
+    markers: { size: 0 },
+    title: {
+      text: 'Real Goal Progress Over Time',
+      align: 'left'
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        inverseColors: false,
+        opacityFrom: 0.5,
+        opacityTo: 0.1,
+        stops: [0, 90, 100]
+      },
+    },
+    yaxis: {
+      title: { text: 'Completed Subtopics' },
+      labels: { formatter: (val) => val.toFixed(0) },
+    },
+    xaxis: { type: 'datetime' },
+    tooltip: {
+      shared: false,
+      y: { formatter: (val) => `${val.toFixed(0)} completed` },
+      x: { format: 'dd MMM yyyy HH:mm' }
+    },
+    stroke: { curve: 'stepline', width: 2 },
+    colors: GOAL_COLORS
+  };
 
   return (
     <Card data-testid="goal-heat-map">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-blue-500" />
-          Study Performance
+          Real Study Performance
         </CardTitle>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          This chart shows the cumulative number of topics you've completed for each goal over the past 2 weeks.
+          This chart shows actual completion progress based on real subtopic completion timestamps.
         </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Line Chart */}
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                <XAxis 
-                  dataKey="month" 
-                  className="text-gray-600 dark:text-gray-400"
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis 
-                  className="text-gray-600 dark:text-gray-400"
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                  }}
-                  labelStyle={{ color: '#374151', fontWeight: 'semibold' }}
-                />
-                <Legend />
-                {goals.map((goal, index) => (
-                  <Line
-                    key={goal.id}
-                    type="monotone"
-                    dataKey={goal.name}
-                    stroke={GOAL_COLORS[index % GOAL_COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          {/* ApexChart */}
+          {chartData.series.length > 0 ? (
+            <div className="h-80">
+              <ReactApexChart 
+                options={options} 
+                series={chartData.series} 
+                type="area" 
+                height={320} 
+              />
+            </div>
+          ) : (
+            <div className="h-80 flex items-center justify-center text-gray-500">
+              No completed subtopics yet. Start completing subtopics to see progress over time.
+            </div>
+          )}
 
           {/* Goals Legend */}
           {goals.length > 0 && (
@@ -190,7 +217,7 @@ export default function GoalHeatMap() {
                     />
                     {goal.name}
                     <span className="text-gray-500 dark:text-gray-400">
-                      ({goal.completedTopics}/{goal.totalTopics})
+                      ({goal.completedSubtopics || 0}/{goal.totalSubtopics || 0})
                     </span>
                   </Badge>
                 ))}
