@@ -41,6 +41,9 @@ import {
   Cell,
 } from "recharts";
 import { navigate } from "wouter/use-browser-location";
+// ApexCharts imports
+import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
 
 // Get URL search params
 const getURLParams = () => {
@@ -304,105 +307,100 @@ export default function GoalTracker() {
     { value: "12", label: "December" },
   ];
 
-  // Chart data for category progress line chart
-  const categoryProgressChartData = useMemo(() => {
-    // Check if we have real completion timestamp data
-    const hasRealData = allCategories.some(category => 
-      category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0
+// ApexChart Component for Category Progress
+const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categories }) => {
+    
+    const chartState = useMemo(() => {
+        // This logic processes your real data into the format ApexCharts requires
+        const series = categories.map(category => ({
+            name: category.name,
+            data: [] as [number, number][],
+        }));
+
+        const allTimestamps = categories.flatMap(cat => 
+            (cat.completedSubtopicTimestamps || []).map(ts => ({
+                catName: cat.name,
+                timestamp: new Date(ts),
+            }))
+        ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+        const cumulativeCounts: { [key: string]: number } = {};
+        categories.forEach(cat => (cumulativeCounts[cat.name] = 0));
+        
+        // Add a starting point for each series at its creation date
+        categories.forEach(cat => {
+            const seriesIndex = series.findIndex(s => s.name === cat.name);
+            const startDate = new Date(cat.createdAt).getTime();
+            series[seriesIndex].data.push([startDate, 0]);
+        });
+
+        // Build the incremental, cumulative data points
+        allTimestamps.forEach(({ catName, timestamp }) => {
+            cumulativeCounts[catName]++;
+            const seriesIndex = series.findIndex(s => s.name === catName);
+            if (seriesIndex > -1) {
+                series[seriesIndex].data.push([timestamp.getTime(), cumulativeCounts[catName]]);
+            }
+        });
+        
+        // Ensure all lines extend to the final timestamp for a clean graph
+        if (allTimestamps.length > 0) {
+            const lastTimestamp = allTimestamps[allTimestamps.length - 1].timestamp.getTime();
+            series.forEach(s => {
+                if (s.data.length > 0 && s.data[s.data.length - 1][0] < lastTimestamp) {
+                    s.data.push([lastTimestamp, s.data[s.data.length - 1][1]]);
+                }
+            });
+        }
+
+        return { series };
+    }, [categories]);
+    
+    // Options object adapted from your template
+    const options: ApexOptions = {
+        chart: {
+            type: 'area',
+            stacked: false,
+            height: 350,
+            zoom: { type: 'x', enabled: true, autoScaleYaxis: true },
+            toolbar: { autoSelected: 'zoom' },
+        },
+        dataLabels: { enabled: false },
+        markers: { size: 0 },
+        title: {
+            text: 'Category Progress Over Time',
+            align: 'left'
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                inverseColors: false,
+                opacityFrom: 0.5,
+                opacityTo: 0.1,
+                stops: [0, 90, 100]
+            },
+        },
+        yaxis: {
+            title: { text: 'Subtopics Completed' },
+            labels: { formatter: (val) => val.toFixed(0) },
+        },
+        xaxis: { type: 'datetime' },
+        tooltip: {
+            shared: false,
+            y: { formatter: (val) => val.toFixed(0) }
+        },
+        stroke: { curve: 'stepline' } // Use 'stepline' to show incremental progress accurately
+    };
+
+    return (
+        <div>
+            <div id="chart">
+                <ReactApexChart options={options} series={chartState.series} type="area" height={350} />
+            </div>
+        </div>
     );
-    
-    if (!hasRealData) {
-      // Generate sample data based on current completion status
-      const data = [];
-      const today = new Date();
-      
-      // Generate data for past 14 days
-      for (let i = 13; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const timestamp = date.getTime();
-        
-        const entry: any = { date: timestamp };
-        
-        // Add sample progression for each category based on their completed subtopics
-        allCategories.forEach((category, index) => {
-          const completedSubtopics = category.completedSubtopics || 0;
-          let cumulativeProgress = 0;
-          
-          // Show realistic step progression in last few days
-          if (i <= 3 && completedSubtopics > 0) {
-            cumulativeProgress = Math.min(
-              Math.floor(completedSubtopics * (1 - i * 0.25)),
-              completedSubtopics
-            );
-          }
-          
-          entry[category.name] = Math.max(0, cumulativeProgress);
-        });
-        
-        data.push(entry);
-      }
-      return data;
-    }
-    
-    // Use real completion timestamp data
-    const allCompletions: { timestamp: string; categoryName: string }[] = [];
-    
-    allCategories.forEach(category => {
-      if (category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0) {
-        category.completedSubtopicTimestamps.forEach(timestamp => {
-          allCompletions.push({
-            timestamp,
-            categoryName: category.name
-          });
-        });
-      }
-    });
-    
-    // Sort chronologically
-    allCompletions.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-    
-    // Initialize cumulative counters for each category
-    const categoryCounts: { [categoryName: string]: number } = {};
-    allCategories.forEach(category => {
-      categoryCounts[category.name] = 0;
-    });
-    
-    const chartData: any[] = [];
-    
-    // Add starting point (all categories at 0)
-    if (allCompletions.length > 0) {
-      const startDate = new Date(allCompletions[0].timestamp);
-      startDate.setDate(startDate.getDate() - 1);
-      const startEntry: any = {
-        date: startDate.getTime()
-      };
-      allCategories.forEach(category => {
-        startEntry[category.name] = 0;
-      });
-      chartData.push(startEntry);
-    }
-    
-    // Iterate through sorted list, increment count for correct category
-    allCompletions.forEach(completion => {
-      // Increment count for the category that had completion
-      categoryCounts[completion.categoryName]++;
-      
-      // Add [timestamp, new_cumulative_count] point to data series
-      const dataPoint: any = {
-        date: new Date(completion.timestamp).getTime()
-      };
-      
-      // Add current cumulative count for each category
-      allCategories.forEach(category => {
-        dataPoint[category.name] = categoryCounts[category.name];
-      });
-      
-      chartData.push(dataPoint);
-    });
-    
-    return chartData;
-  }, [allCategories]);
+};
 
   const cumulativeProgressData = useMemo(() => {
     if (allCategories.length === 0) return [];
@@ -855,61 +853,8 @@ export default function GoalTracker() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div style={{ width: "100%", height: "320px" }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={categoryProgressChartData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis
-                        dataKey="date"
-                        type="number"
-                        scale="time"
-                        domain={['dataMin', 'dataMax']}
-                        tickFormatter={(timestamp) => {
-                          const date = new Date(timestamp);
-                          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        }}
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                      />
-                      <YAxis
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                        domain={[0, "dataMax + 2"]}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "white",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Legend />
-                      {allCategories.map((category, index) => {
-                        const colors = [
-                          "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
-                          "#06b6d4", "#84cc16", "#f97316", "#ec4899", "#6366f1",
-                          "#14b8a6", "#f43f5e", "#a855f7", "#0ea5e9", "#84cc16"
-                        ];
-                        return (
-                          <Line
-                            key={category.id}
-                            type="stepAfter"
-                            dataKey={category.name}
-                            stroke={colors[index % colors.length]}
-                            strokeWidth={2}
-                            dot={false}
-                            activeDot={{ r: 5 }}
-                            name={category.name}
-                          />
-                        );
-                      })}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                {/* Render the new ApexChart component instead of the Recharts one */}
+                <ApexProgressChart categories={allCategories} />
               </CardContent>
             </Card>
           )}

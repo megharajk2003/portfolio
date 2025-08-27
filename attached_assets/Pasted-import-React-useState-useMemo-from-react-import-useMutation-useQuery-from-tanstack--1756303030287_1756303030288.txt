@@ -1,0 +1,177 @@
+import React, { useState, useMemo } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Target, TrendingUp, Upload, ArrowLeft } from "lucide-react";
+import Sidebar from "@/components/sidebar";
+// REMOVED LineChart imports, kept others for Bar/Pie charts
+import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { navigate } from "wouter/use-browser-location";
+// 1. ADDED ApexCharts imports
+import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
+
+
+// --- INTERFACES (Ensure completedSubtopicTimestamps is available) ---
+interface GoalCategory {
+    id: string;
+    goalId: string;
+    name: string;
+    description?: string;
+    totalTopics: number;
+    completedTopics: number;
+    totalSubtopics: number;
+    completedSubtopics: number;
+    completedSubtopicTimestamps?: string[]; // Timestamps are crucial for this chart
+    createdAt: string;
+}
+
+// ... (Other interfaces and API functions remain the same)
+// ...
+
+// ==================================================================
+// 2. NEW ApexChart Component (based on your template)
+// ==================================================================
+const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categories }) => {
+    
+    const chartState = useMemo(() => {
+        // This logic processes your real data into the format ApexCharts requires
+        const series = categories.map(category => ({
+            name: category.name,
+            data: [] as [number, number][],
+        }));
+
+        const allTimestamps = categories.flatMap(cat => 
+            (cat.completedSubtopicTimestamps || []).map(ts => ({
+                catName: cat.name,
+                timestamp: new Date(ts),
+            }))
+        ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+        const cumulativeCounts: { [key: string]: number } = {};
+        categories.forEach(cat => (cumulativeCounts[cat.name] = 0));
+        
+        // Add a starting point for each series at its creation date
+        categories.forEach(cat => {
+            const seriesIndex = series.findIndex(s => s.name === cat.name);
+            const startDate = new Date(cat.createdAt).getTime();
+            series[seriesIndex].data.push([startDate, 0]);
+        });
+
+        // Build the incremental, cumulative data points
+        allTimestamps.forEach(({ catName, timestamp }) => {
+            cumulativeCounts[catName]++;
+            const seriesIndex = series.findIndex(s => s.name === catName);
+            if (seriesIndex > -1) {
+                series[seriesIndex].data.push([timestamp.getTime(), cumulativeCounts[catName]]);
+            }
+        });
+        
+        // Ensure all lines extend to the final timestamp for a clean graph
+        if (allTimestamps.length > 0) {
+            const lastTimestamp = allTimestamps[allTimestamps.length - 1].timestamp.getTime();
+            series.forEach(s => {
+                if (s.data.length > 0 && s.data[s.data.length - 1][0] < lastTimestamp) {
+                    s.data.push([lastTimestamp, s.data[s.data.length - 1][1]]);
+                }
+            });
+        }
+
+        return { series };
+    }, [categories]);
+    
+    // Options object adapted from your template
+    const options: ApexOptions = {
+        chart: {
+            type: 'area',
+            stacked: false,
+            height: 350,
+            zoom: { type: 'x', enabled: true, autoScaleYaxis: true },
+            toolbar: { autoSelected: 'zoom' },
+        },
+        dataLabels: { enabled: false },
+        markers: { size: 0 },
+        title: {
+            text: 'Category Progress Over Time',
+            align: 'left'
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                inverseColors: false,
+                opacityFrom: 0.5,
+                opacityTo: 0.1,
+                stops: [0, 90, 100]
+            },
+        },
+        yaxis: {
+            title: { text: 'Subtopics Completed' },
+            labels: { formatter: (val) => val.toFixed(0) },
+        },
+        xaxis: { type: 'datetime' },
+        tooltip: {
+            shared: false,
+            y: { formatter: (val) => val.toFixed(0) }
+        },
+        stroke: { curve: 'stepline' } // Use 'stepline' to show incremental progress accurately
+    };
+
+    return (
+        <div>
+            <div id="chart">
+                <ReactApexChart options={options} series={chartState.series} type="area" height={350} />
+            </div>
+        </div>
+    );
+};
+
+export default function GoalTracker() {
+    // ... (All your existing component logic, state, and hooks remain the same)
+    // ...
+
+    // IMPORTANT: The `cumulativeProgressData` and `categoryProgressChartData` useMemo hooks are no longer needed
+    // as the logic has been moved into the ApexProgressChart component. You can safely delete them.
+
+    return (
+        <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+            <Sidebar />
+            <div className="flex-1 overflow-auto">
+                <header> {/* ... (Header is the same) ... */} </header>
+                <div className="container mx-auto p-6 space-y-6">
+                    {/* ... (All other cards for loading, errors, categories, bar/pie charts are the same) ... */}
+
+                    {/* Category Performance Line Chart */}
+                    {allCategories.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <div className="flex justify-between items-center">
+                                    <CardTitle className="flex items-center gap-2">
+                                        <TrendingUp className="h-5 w-5 text-purple-500" />
+                                        Category Progress Trend
+                                    </CardTitle>
+                                    <div className="flex gap-4 items-center">
+                                        {/* ... (Filters are the same) ... */}
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {/* 3. RENDER the new ApexChart component instead of the Recharts one */}
+                                <ApexProgressChart categories={allCategories} />
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
