@@ -30,6 +30,7 @@ import Forum from "@/pages/forum";
 import GoalTracker from "@/pages/goal-tracker";
 import GoalDetails from "@/pages/goal-details";
 import Badges from "@/pages/badges";
+import SubtopicListPage from "./pages/subtopic";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -109,14 +110,21 @@ function Router() {
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/learning" component={Learning} />
           <Route path="/forum" component={Forum} />
-        <Route path="/goal-tracker" component={GoalTracker} />
-        <Route path="/goal-tracker/:id" component={GoalDetails} />
+          <Route path="/goal-tracker" component={GoalTracker} />
+          <Route path="/goal-tracker/:id" component={GoalDetails} />
+          <Route
+            path="/goal-tracker/:id/subtopic"
+            component={SubtopicListPage}
+          />
           <Route path="/badges" component={Badges} />
           <Route path="/course/:courseId/learn" component={CourseLearn} />
           <Route path="/course/:id" component={CourseDetail} />
           <Route path="/module/:id" component={ModuleDetail} />
           <Route path="/edit-portfolio" component={EditPortfolio} />
-          <Route path="/public-portfolio/:username" component={PublicPortfolio} />
+          <Route
+            path="/public-portfolio/:username"
+            component={PublicPortfolio}
+          />
           <Route path="/career-tools" component={CareerTools} />
           <Route path="/career-advisor" component={CareerAdvisor} />
           <Route path="/career-timeline" component={CareerTimeline} />

@@ -1,21 +1,8 @@
-import { useState, useCallback, useMemo } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { queryClient } from "@/lib/queryClient";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -23,14 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Upload,
-  Target,
-  FileSpreadsheet,
-  TrendingUp,
-  Filter,
-} from "lucide-react";
-import { useLocation } from "wouter";
+import { Target, TrendingUp } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import {
   LineChart,
@@ -43,44 +23,98 @@ import {
   Legend,
 } from "recharts";
 
-interface Goal {
+// 1. NEW Interfaces for the Category -> Topic hierarchy
+interface Topic {
   id: string;
-  userId: number;
   name: string;
-  description?: string;
+  totalSubtopics: number;
+  completedSubtopics: number;
+  createdAt: string;
+  completedSubtopicTimestamps: string[];
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description: string;
   totalTopics: number;
   completedTopics: number;
   totalSubtopics: number;
   completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
+  topics: Topic[];
 }
 
-interface GoalProgressData {
+interface ProgressDataPoint {
   date: string;
-  [goalName: string]: number | string;
+  [key: string]: number | string;
 }
 
-const GOAL_COLORS = [
-  "#3b82f6", // blue
-  "#10b981", // green
-  "#f59e0b", // yellow
-  "#ef4444", // red
-  "#8b5cf6", // purple
-  "#f97316", // orange
-  "#06b6d4", // cyan
-  "#84cc16", // lime
-];
+const CATEGORY_COLOR = "#3b82f6"; // Blue for the single category line
 
-export default function GoalTracker() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [goalName, setGoalName] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [, navigate] = useLocation();
+// 2. NEW Dummy Data Structure
+const dummyCategory: Category = {
+  id: "cat-ssc-cgl-01",
+  name: "SSC CGL Preparation",
+  description: "Overall preparation for the SSC CGL examination.",
+  totalTopics: 4,
+  completedTopics: 0,
+  totalSubtopics: 85, // 31 + 16 + 23 + 15
+  completedSubtopics: 10, // 0 + 5 + 2 + 3
+  createdAt: "2025-06-01T10:00:00.000Z",
+  updatedAt: "2025-08-27T12:00:00.000Z",
+  topics: [
+    {
+      id: "421f836b-aea4-46d9-ba6b-c11d2e200a65",
+      name: "General Intelligence & Reasoning",
+      totalSubtopics: 31,
+      completedSubtopics: 0,
+      createdAt: "2025-06-01T10:00:00.000Z",
+      completedSubtopicTimestamps: [],
+    },
+    {
+      id: "d02c952f-aff7-4112-a2fa-b81a96182970",
+      name: "General Awareness",
+      totalSubtopics: 16,
+      completedSubtopics: 5,
+      createdAt: "2025-06-15T10:00:00.000Z",
+      completedSubtopicTimestamps: [
+        "2025-07-05T11:00:00.000Z",
+        "2025-07-06T11:00:00.000Z",
+        "2025-08-01T14:20:00.000Z",
+        "2025-08-02T09:00:00.000Z",
+        "2025-08-15T18:00:00.000Z",
+      ],
+    },
+    {
+      id: "a2a30053-6aa5-4c06-93e1-b3612b246d7f",
+      name: "Quantitative Aptitude",
+      totalSubtopics: 23,
+      completedSubtopics: 2,
+      createdAt: "2025-07-01T09:00:00.000Z",
+      completedSubtopicTimestamps: [
+        "2025-07-20T15:30:00.000Z",
+        "2025-08-10T10:00:00.000Z",
+      ],
+    },
+    {
+      id: "8c77d1fc-42e7-47b5-b425-91e66e0436a8",
+      name: "English Comprehension",
+      totalSubtopics: 15,
+      completedSubtopics: 3,
+      createdAt: "2025-07-10T10:00:00.000Z",
+      completedSubtopicTimestamps: [
+        "2025-08-05T12:00:00.000Z",
+        "2025-08-20T16:00:00.000Z",
+        "2025-08-21T17:00:00.000Z",
+      ],
+    },
+  ],
+};
 
-  // Filter states
+export default function CategoryTracker() {
+  const category = dummyCategory; // Use the dummy data
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
@@ -101,45 +135,58 @@ export default function GoalTracker() {
     { value: "12", label: "December" },
   ];
 
-  // Fetch user's goals
-  const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
-    queryKey: ["/api/goals"],
-    enabled: !!user,
-  });
+  // 3. UPDATED Graph logic to aggregate all topic data
+  const cumulativeProgressData = useMemo(() => {
+    // Flatten all completion timestamps from all topics into one array
+    const allTimestamps = category.topics.flatMap(
+      (topic) => topic.completedSubtopicTimestamps
+    );
 
+    // Create a map of completions per day for the entire category
+    const completionsByDay = new Map<string, number>();
+    allTimestamps.forEach((timestamp) => {
+      const dateKey = new Date(timestamp).toISOString().split("T")[0];
+      completionsByDay.set(dateKey, (completionsByDay.get(dateKey) || 0) + 1);
+    });
 
-  // CSV upload mutation
-  const csvUploadMutation = useMutation({
-    mutationFn: async (data: { goalName: string; csvData: any[] }) => {
-      const response = await fetch("/api/goals/from-csv", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
+    let startDate, endDate;
+    if (selectedMonth === "all") {
+      startDate = new Date(selectedYear, 0, 1);
+      endDate = new Date(selectedYear, 11, 31);
+    } else {
+      const monthIndex = parseInt(selectedMonth) - 1;
+      startDate = new Date(selectedYear, monthIndex, 1);
+      endDate = new Date(selectedYear, monthIndex + 1, 0);
+    }
+
+    const dataPoints: ProgressDataPoint[] = [];
+    const current = new Date(startDate);
+    let cumulativeCount = 0;
+
+    while (current <= endDate) {
+      const dateStr = current.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
       });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to create goal");
+      const dateKey = current.toISOString().split("T")[0];
+
+      if (completionsByDay.has(dateKey)) {
+        cumulativeCount += completionsByDay.get(dateKey)!;
       }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "Goal created successfully from CSV data",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
-      setCsvFile(null);
-      setGoalName("");
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Upload failed",
-        description: error.message || "Failed to create goal from CSV",
-        variant: "destructive",
-      });
-    },
-  });
+
+      // Only start plotting after the category was created
+      if (current >= new Date(category.createdAt)) {
+        dataPoints.push({
+          date: dateStr,
+          [category.name]: cumulativeCount,
+        });
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return dataPoints;
+  }, [category, selectedYear, selectedMonth]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -152,454 +199,167 @@ export default function GoalTracker() {
     }
   };
 
-  const parseCSV = (file: File): Promise<any[]> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const text = e.target?.result as string;
-          const lines = text.split("\n").filter((line) => line.trim());
-
-          if (lines.length < 2) {
-            reject(
-              new Error("CSV must have at least a header row and one data row")
-            );
-            return;
-          }
-
-          const headers = lines[0]
-            .split(",")
-            .map((h) => h.trim().toLowerCase());
-          const data = lines.slice(1).map((line) => {
-            const values = line.split(",").map((v) => v.trim());
-            const row: any = {};
-            headers.forEach((header, index) => {
-              row[header] = values[index] || "";
-            });
-            return row;
-          });
-
-          resolve(data);
-        } catch (error) {
-          reject(new Error("Failed to parse CSV file"));
-        }
-      };
-      reader.onerror = () => reject(new Error("Failed to read file"));
-      reader.readAsText(file);
-    });
-  };
-
-  const handleCSVUpload = async () => {
-    if (!csvFile || !goalName.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please select a CSV file and enter a goal name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      const csvData = await parseCSV(csvFile);
-      await csvUploadMutation.mutateAsync({
-        goalName: goalName.trim(),
-        csvData,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  // Generate cumulative progress data for the line chart based on real dates
-  const cumulativeProgressData = useMemo(() => {
-    if (!goals.length) return [];
-
-    // Filter goals based on selected year and month
-    const filteredGoals = goals.filter((goal) => {
-      const goalDate = new Date(goal.createdAt);
-      goalDate.setHours(0, 0, 0, 0); // Normalize to start of day
-      
-      const goalYear = goalDate.getFullYear();
-      const goalMonth = String(goalDate.getMonth() + 1).padStart(2, "0");
-
-      const yearMatch = goalYear <= selectedYear;
-      const monthMatch = selectedMonth === "all" || goalMonth === selectedMonth;
-
-      return (
-        yearMatch &&
-        (selectedMonth === "all" || goalYear === selectedYear) &&
-        monthMatch
-      );
-    });
-
-    if (!filteredGoals.length) return [];
-
-    // Generate date range based on selected filters
-    let startDate: Date;
-    let endDate: Date;
-
-    if (selectedMonth === "all") {
-      // Show full year
-      startDate = new Date(selectedYear, 0, 1);
-      endDate = new Date(selectedYear, 11, 31);
-    } else {
-      // Show specific month
-      const monthIndex = parseInt(selectedMonth) - 1;
-      startDate = new Date(selectedYear, monthIndex, 1);
-      endDate = new Date(selectedYear, monthIndex + 1, 0);
-    }
-
-    const dataPoints: GoalProgressData[] = [];
-    const current = new Date(startDate);
-
-    // Generate data points - daily for specific month, weekly for full year
-    const isMonthView = selectedMonth !== "all";
-    const intervalDays = isMonthView ? 1 : 7; // Daily for month, weekly for year
-
-    while (current <= endDate) {
-      const dateStr = isMonthView
-        ? current.toLocaleDateString("en-US", { day: "2-digit" })
-        : current.toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-          });
-
-      const progressPoint: GoalProgressData = { date: dateStr };
-
-      filteredGoals.forEach((goal) => {
-        // Normalize goal dates to the beginning of the day (midnight) for accurate day-by-day comparison
-        const goalCreated = new Date(goal.createdAt);
-        goalCreated.setHours(0, 0, 0, 0);
-
-        const goalUpdated = new Date(goal.updatedAt);
-        goalUpdated.setHours(0, 0, 0, 0);
-
-        // Also normalize the current date for consistent comparison
-        const currentNormalized = new Date(current);
-        currentNormalized.setHours(0, 0, 0, 0);
-
-        if (currentNormalized >= goalCreated) {
-          // Calculate actual progress based on time elapsed
-          const totalTimespan = goalUpdated.getTime() - goalCreated.getTime();
-          const currentTimespan = currentNormalized.getTime() - goalCreated.getTime();
-
-          let cumulativeProgress = 0;
-          if (totalTimespan > 0) {
-            const progressRatio = Math.min(currentTimespan / totalTimespan, 1);
-            cumulativeProgress = Math.round(
-              goal.completedSubtopics * progressRatio
-            );
-          } else if (currentNormalized >= goalUpdated) {
-            cumulativeProgress = goal.completedSubtopics;
-          }
-
-          progressPoint[goal.name] = Math.max(0, cumulativeProgress);
-        } else {
-          progressPoint[goal.name] = 0;
-        }
-      });
-
-      dataPoints.push(progressPoint);
-      current.setDate(current.getDate() + intervalDays);
-    }
-
-    return dataPoints;
-  }, [goals, selectedYear, selectedMonth]);
-
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div
-          className="container mx-auto p-6 space-y-6"
-          data-testid="goal-tracker-page"
-        >
+        <div className="container mx-auto p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1
-                className="text-3xl font-bold text-gray-900 dark:text-gray-100  dark:text-white"
-                data-testid="page-title"
-              >
-                Goal Tracker
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Upload CSV files and track your progress with interactive
-                visualizations
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button data-testid="button-upload-csv">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload CSV
-                  </Button>
-                </DialogTrigger>
-                <DialogContent data-testid="dialog-upload-csv">
-                  <DialogHeader>
-                    <DialogTitle>Upload Goal from CSV</DialogTitle>
-                  </DialogHeader>
-
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="goalName">Goal Name</Label>
-                      <Input
-                        id="goalName"
-                        placeholder="Enter a name for your goal"
-                        value={goalName}
-                        onChange={(e) => setGoalName(e.target.value)}
-                        data-testid="input-goal-name"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="csvFile">CSV File</Label>
-                      <Input
-                        id="csvFile"
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) =>
-                          setCsvFile(e.target.files?.[0] || null)
-                        }
-                        data-testid="input-csv-file"
-                      />
-                      <p className="text-sm text-gray-600 mt-2">
-                        CSV should contain columns: Category, Topic, Status
-                      </p>
-                    </div>
-
-                    <Button
-                      onClick={handleCSVUpload}
-                      disabled={isUploading || !csvFile || !goalName.trim()}
-                      className="w-full"
-                      data-testid="button-submit-csv"
-                    >
-                      {isUploading ? "Uploading..." : "Create Goal"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Category Tracker
+            </h1>
           </div>
 
-          {/* Goals Overview */}
-          {goalsLoading ? (
-            <div className="text-center py-8" data-testid="loading-goals">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading your goals...</p>
-            </div>
-          ) : goals.length === 0 ? (
-            <Card data-testid="empty-state">
-              <CardContent className="text-center py-12">
-                <FileSpreadsheet className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No goals yet
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Upload a CSV file to create your first goal and start tracking
-                  your progress
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {goals.map((goal) => (
-                <Card
-                  key={goal.id}
-                  className="cursor-pointer transition-all hover:shadow-lg"
-                  onClick={() => navigate(`/goal-tracker/${goal.id}`)}
-                  data-testid={`card-goal-${goal.id}`}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-blue-500" />
-                      {goal.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">Progress</span>
-                          <span className="text-sm text-gray-600">
-                            {goal.completedSubtopics} / {goal.totalSubtopics}
-                          </span>
-                        </div>
-                        <Progress
-                          value={
-                            (goal.completedSubtopics / goal.totalSubtopics) *
+          {/* Category Overview Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-500" />
+                {category.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">
+                      Overall Progress
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {category.completedSubtopics} / {category.totalSubtopics}{" "}
+                      Subtopics
+                    </span>
+                  </div>
+                  <Progress
+                    value={
+                      (category.completedSubtopics / category.totalSubtopics) *
+                      100
+                    }
+                    className="h-2"
+                  />
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">
+                    {category.totalSubtopics > 0
+                      ? Math.round(
+                          (category.completedSubtopics /
+                            category.totalSubtopics) *
                             100
-                          }
-                          className="h-2"
-                          data-testid={`progress-goal-${goal.id}`}
-                        />
-                      </div>
-
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">
-                          {Math.round(
-                            (goal.completedSubtopics / goal.totalSubtopics) *
-                              100
-                          )}
-                          % Complete
-                        </span>
-                        <Badge
-                          className={getStatusColor(
-                            goal.completedSubtopics === goal.totalSubtopics
-                              ? "completed"
-                              : goal.completedSubtopics > 0
-                              ? "in_progress"
-                              : "pending"
-                          )}
-                        >
-                          {goal.completedSubtopics === goal.totalSubtopics
-                            ? "Completed"
-                            : goal.completedSubtopics > 0
-                            ? "In Progress"
-                            : "Not Started"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Filters */}
+                        )
+                      : 0}
+                    % Complete
+                  </span>
+                  <Badge
+                    className={getStatusColor(
+                      category.completedSubtopics === category.totalSubtopics
+                        ? "completed"
+                        : category.completedSubtopics > 0
+                        ? "in_progress"
+                        : "pending"
+                    )}
+                  >
+                    {category.completedSubtopics === category.totalSubtopics
+                      ? "Completed"
+                      : category.completedSubtopics > 0
+                      ? "In Progress"
+                      : "Not Started"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Study Performance Chart */}
-          {goals.length > 0 && (
-            <Card>
-              <CardHeader>
-                {/* Flex container to position title and filters on the same line */}
-                <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Study Performance
-                  </CardTitle>
-
-                  {/* Filters are now here */}
-                  <div className="flex gap-4 items-center">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="year-select">Year:</Label>
-                      <Select
-                        value={selectedYear.toString()}
-                        onValueChange={(value) =>
-                          setSelectedYear(parseInt(value))
-                        }
-                      >
-                        <SelectTrigger className="w-32" id="year-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from(
-                            { length: 5 },
-                            (_, i) => currentYear - i
-                          ).map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="month-select">Month:</Label>
-                      <Select
-                        value={selectedMonth}
-                        onValueChange={setSelectedMonth}
-                      >
-                        <SelectTrigger className="w-40" id="month-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {months.map((month) => (
-                            <SelectItem key={month.value} value={month.value}>
-                              {month.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-500" />
+                  Category Performance
+                </CardTitle>
+                <div className="flex gap-4 items-center">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="year-select">Year:</Label>
+                    <Select
+                      value={selectedYear.toString()}
+                      onValueChange={(v) => setSelectedYear(parseInt(v))}
+                    >
+                      <SelectTrigger className="w-32" id="year-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from(
+                          { length: 5 },
+                          (_, i) => currentYear - i
+                        ).map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="month-select">Month:</Label>
+                    <Select
+                      value={selectedMonth}
+                      onValueChange={setSelectedMonth}
+                    >
+                      <SelectTrigger className="w-40" id="month-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {months.map((month) => (
+                          <SelectItem key={month.value} value={month.value}>
+                            {month.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-
-                <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
-                  This chart shows the cumulative number of subtopics you've
-                  completed for each goal{" "}
-                  {selectedMonth !== "all"
-                    ? `in ${
-                        months.find((m) => m.value === selectedMonth)?.label
-                      } ${selectedYear}`
-                    : `in ${selectedYear}`}
-                  .
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div style={{ width: "100%", height: "320px" }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={cumulativeProgressData}
-                      margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 11, fill: "#6b7280" }}
-                        stroke="#9ca3af"
-                        domain={[0, "dataMax + 2"]}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "white",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                        }}
-                        labelStyle={{ color: "#1f2937", fontWeight: "bold" }}
-                      />
-                      <Legend wrapperStyle={{ paddingTop: "20px" }} />
-                      {goals.map((goal, index) => (
-                        <Line
-                          key={goal.id}
-                          type="monotone"
-                          dataKey={goal.name}
-                          stroke={GOAL_COLORS[index % GOAL_COLORS.length]}
-                          strokeWidth={2}
-                          dot={{
-                            r: 3,
-                            fill: GOAL_COLORS[index % GOAL_COLORS.length],
-                          }}
-                          activeDot={{
-                            r: 5,
-                            fill: GOAL_COLORS[index % GOAL_COLORS.length],
-                          }}
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div style={{ width: "100%", height: "320px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={cumulativeProgressData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 11, fill: "#6b7280" }}
+                      stroke="#9ca3af"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#6b7280" }}
+                      stroke="#9ca3af"
+                      domain={[0, "dataMax + 2"]}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="stepAfter"
+                      dataKey={category.name}
+                      stroke={CATEGORY_COLOR}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
