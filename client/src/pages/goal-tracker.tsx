@@ -60,6 +60,7 @@ interface GoalCategory {
   completedTopics: number;
   totalSubtopics: number;
   completedSubtopics: number;
+  completedSubtopicTimestamps?: string[];
   createdAt: string;
 }
 
@@ -758,43 +759,67 @@ export default function GoalTracker() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={(() => {
-                        // Generate data showing each category's progress over time
-                        const data = [];
-                        const today = new Date();
+                        // Collect all completion timestamps from all categories
+                        const allCompletions: { timestamp: string; categoryName: string }[] = [];
                         
-                        // Generate data for past 12 months
-                        for (let i = 11; i >= 0; i--) {
-                          const date = new Date(today);
-                          date.setMonth(date.getMonth() - i);
-                          date.setDate(Math.floor(Math.random() * 28) + 1); // Random day in month
-                          
-                          const dateStr = date.toLocaleDateString('en-US', { 
-                            month: 'short',
-                            day: 'numeric'
+                        allCategories.forEach(category => {
+                          if (category.completedSubtopicTimestamps) {
+                            category.completedSubtopicTimestamps.forEach(timestamp => {
+                              allCompletions.push({
+                                timestamp,
+                                categoryName: category.name
+                              });
+                            });
+                          }
+                        });
+                        
+                        // Sort all completions chronologically
+                        allCompletions.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+                        
+                        // Initialize cumulative counters for each category
+                        const categoryCounts: { [categoryName: string]: number } = {};
+                        allCategories.forEach(category => {
+                          categoryCounts[category.name] = 0;
+                        });
+                        
+                        // Generate step chart data points
+                        const chartData: any[] = [];
+                        
+                        // Add initial point with all categories at 0
+                        if (allCompletions.length > 0) {
+                          const firstDate = new Date(allCompletions[0].timestamp);
+                          firstDate.setDate(firstDate.getDate() - 1); // One day before first completion
+                          const initialEntry: any = {
+                            date: firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          };
+                          allCategories.forEach(category => {
+                            initialEntry[category.name] = 0;
                           });
-                          
-                          const entry: any = { date: dateStr };
-                          
-                          // Add cumulative progress data for each category
-                          allCategories.forEach((category, catIndex) => {
-                            // Simulate realistic step-wise cumulative progress
-                            const baseProgress = Math.floor(Math.random() * 2);
-                            const monthlyIncrement = Math.floor(Math.random() * 3);
-                            let cumulativeProgress = 0;
-                            
-                            if (i <= 8) { // Start showing progress from 3 months ago
-                              cumulativeProgress = Math.min(
-                                baseProgress + ((8 - i) * monthlyIncrement),
-                                category.totalSubtopics || 20
-                              );
-                            }
-                            
-                            entry[category.name] = Math.max(0, cumulativeProgress);
-                          });
-                          
-                          data.push(entry);
+                          chartData.push(initialEntry);
                         }
-                        return data;
+                        
+                        // Process each completion chronologically
+                        allCompletions.forEach(completion => {
+                          // Increment count for the category that had a completion
+                          categoryCounts[completion.categoryName]++;
+                          
+                          // Create chart data point
+                          const entry: any = {
+                            date: new Date(completion.timestamp).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })
+                          };
+                          
+                          // Add current cumulative count for each category
+                          allCategories.forEach(category => {
+                            entry[category.name] = categoryCounts[category.name] || 0;
+                          });
+                          
+                          chartData.push(entry);
+                        });
+                        
+                        return chartData;
                       })()}
                       margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
