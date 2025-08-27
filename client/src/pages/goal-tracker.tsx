@@ -1,8 +1,20 @@
 import { useState, useMemo } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -10,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Target, TrendingUp } from "lucide-react";
+import { Target, TrendingUp, Upload } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import {
   LineChart,
@@ -22,8 +34,9 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { navigate } from "wouter/use-browser-location";
 
-// 1. NEW Interfaces for the Category -> Topic hierarchy
+// Interfaces for the Category -> Topic hierarchy
 interface Topic {
   id: string;
   name: string;
@@ -51,17 +64,17 @@ interface ProgressDataPoint {
   [key: string]: number | string;
 }
 
-const CATEGORY_COLOR = "#3b82f6"; // Blue for the single category line
+const CATEGORY_COLOR = "#3b82f6";
 
-// 2. NEW Dummy Data Structure
+// Dummy Data Structure
 const dummyCategory: Category = {
   id: "cat-ssc-cgl-01",
   name: "SSC CGL Preparation",
   description: "Overall preparation for the SSC CGL examination.",
   totalTopics: 4,
   completedTopics: 0,
-  totalSubtopics: 85, // 31 + 16 + 23 + 15
-  completedSubtopics: 10, // 0 + 5 + 2 + 3
+  totalSubtopics: 85,
+  completedSubtopics: 10,
   createdAt: "2025-06-01T10:00:00.000Z",
   updatedAt: "2025-08-27T12:00:00.000Z",
   topics: [
@@ -114,10 +127,111 @@ const dummyCategory: Category = {
 };
 
 export default function CategoryTracker() {
-  const category = dummyCategory; // Use the dummy data
+  const category = dummyCategory; // In a real app, you'd fetch this data
+  const { toast } = useToast();
   const currentYear = new Date().getFullYear();
+
+  // State for filters
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
+
+  // === START: ADDED CSV UPLOAD LOGIC ===
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [categoryName, setCategoryName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  // CSV upload mutation (assumes an endpoint like `/api/categories/from-csv`)
+  const csvUploadMutation = useMutation({
+    mutationFn: async (data: { categoryName: string; csvData: any[] }) => {
+      const response = await fetch("/api/categories/from-csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create category");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success!", description: "Category created from CSV" });
+      // In a real app, this would refetch the category data
+      // queryClient.invalidateQueries({ queryKey: ["/api/category"] });
+      setCsvFile(null);
+      setCategoryName("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const parseCSV = (file: File): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target?.result as string;
+          const lines = text.split("\n").filter((line) => line.trim());
+          if (lines.length < 2) {
+            reject(
+              new Error("CSV must have a header and at least one data row")
+            );
+            return;
+          }
+          const headers = lines[0]
+            .split(",")
+            .map((h) => h.trim().toLowerCase());
+          const data = lines.slice(1).map((line) => {
+            const values = line.split(",").map((v) => v.trim());
+            const row: any = {};
+            headers.forEach((header, index) => {
+              row[header] = values[index] || "";
+            });
+            return row;
+          });
+          resolve(data);
+        } catch (error) {
+          reject(new Error("Failed to parse CSV file"));
+        }
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsText(file);
+    });
+  };
+
+  const handleCSVUpload = async () => {
+    if (!csvFile || !categoryName.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please select a file and enter a category name",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const csvData = await parseCSV(csvFile);
+      await csvUploadMutation.mutateAsync({
+        categoryName: categoryName.trim(),
+        csvData,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  // === END: ADDED CSV UPLOAD LOGIC ===
 
   const months = [
     { value: "all", label: "All Months" },
@@ -135,14 +249,10 @@ export default function CategoryTracker() {
     { value: "12", label: "December" },
   ];
 
-  // 3. UPDATED Graph logic to aggregate all topic data
   const cumulativeProgressData = useMemo(() => {
-    // Flatten all completion timestamps from all topics into one array
     const allTimestamps = category.topics.flatMap(
       (topic) => topic.completedSubtopicTimestamps
     );
-
-    // Create a map of completions per day for the entire category
     const completionsByDay = new Map<string, number>();
     allTimestamps.forEach((timestamp) => {
       const dateKey = new Date(timestamp).toISOString().split("T")[0];
@@ -173,30 +283,16 @@ export default function CategoryTracker() {
       if (completionsByDay.has(dateKey)) {
         cumulativeCount += completionsByDay.get(dateKey)!;
       }
-
-      // Only start plotting after the category was created
       if (current >= new Date(category.createdAt)) {
-        dataPoints.push({
-          date: dateStr,
-          [category.name]: cumulativeCount,
-        });
+        dataPoints.push({ date: dateStr, [category.name]: cumulativeCount });
       }
-
       current.setDate(current.getDate() + 1);
     }
-
     return dataPoints;
   }, [category, selectedYear, selectedMonth]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "start":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
-    }
+    /* ... (no changes) */
   };
 
   return (
@@ -208,10 +304,58 @@ export default function CategoryTracker() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Category Tracker
             </h1>
+
+            {/* === START: ADDED UPLOAD BUTTON & DIALOG JSX === */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Upload className="h-4 w-4 mr-2" /> Upload CSV
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Upload Category from CSV</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="categoryName">Category Name</Label>
+                    <Input
+                      id="categoryName"
+                      placeholder="e.g., SSC CGL Preparation"
+                      value={categoryName}
+                      onChange={(e) => setCategoryName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="csvFile">CSV File</Label>
+                    <Input
+                      id="csvFile"
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+                    />
+                    <p className="text-sm text-gray-600 mt-2">
+                      CSV should contain columns: Topic, Subtopic, Status.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleCSVUpload}
+                    disabled={isUploading || !csvFile || !categoryName.trim()}
+                    className="w-full"
+                  >
+                    {isUploading ? "Uploading..." : "Create Category"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            {/* === END: ADDED UPLOAD BUTTON & DIALOG JSX === */}
           </div>
 
           {/* Category Overview Card */}
-          <Card>
+          <Card
+            className="cursor-pointer transition-all hover:shadow-lg"
+            onClick={() => navigate(`/goal-tracker/id}`)}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5 text-blue-500" />

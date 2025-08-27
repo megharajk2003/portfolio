@@ -294,7 +294,7 @@ export default function GoalTracker() {
                 <Card
                   key={goal.id}
                   className="cursor-pointer transition-all hover:shadow-lg"
-                  onClick={() => navigate(`/goal-tracker/${goal.id}`)}
+                  onClick={() => navigate(`/goal-tracker/id/subtopic`)}
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
