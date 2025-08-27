@@ -135,12 +135,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profileData = insertProfileSchema.parse(req.body);
       const profile = await storage.createProfile(profileData);
-      
+
       // Check for achievement badges after profile creation
       if (profileData.userId) {
         await storage.checkAndAwardBadges(profileData.userId, "achievement");
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error creating profile:", error);
@@ -166,12 +166,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profileData = insertProfileSchema.parse(req.body);
       const profile = await storage.createProfile(profileData);
-      
+
       // Check for achievement badges after profile upsert
       if (profileData.userId) {
         await storage.checkAndAwardBadges(profileData.userId, "achievement");
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error upserting profile:", error);
@@ -199,13 +199,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
-      
+
       // Check for achievement badges after profile update
       const userIdInt = parseInt(userId);
       if (!isNaN(userIdInt)) {
         await storage.checkAndAwardBadges(userIdInt, "achievement");
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -294,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const experience = await storage.createWorkExperience(experienceData);
       console.log("💼 POST /api/work-experience - Created record:", experience);
-      
+
       // Check for achievement badges after work experience creation
       if (experienceData.userId) {
         const userIdInt = parseInt(experienceData.userId.toString());
@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.checkAndAwardBadges(userIdInt, "achievement");
         }
       }
-      
+
       res.json(experience);
     } catch (error) {
       console.error("Error creating work experience:", error);
@@ -409,57 +409,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update subtopic
-  app.put("/api/subtopics/:id", async (req, res) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const subtopicId = req.params.id;
-      const { name, description, priority, dueDate, notes } = req.body;
-
-      const updateData: any = {};
-      if (name !== undefined) updateData.name = name;
-      if (description !== undefined) updateData.description = description;
-      if (priority !== undefined) updateData.priority = priority;
-      if (dueDate !== undefined) updateData.dueDate = dueDate;
-      if (notes !== undefined) updateData.notes = notes;
-
-      const updatedSubtopic = await storage.updateGoalSubtopic(subtopicId, updateData);
-
-      if (!updatedSubtopic) {
-        return res.status(404).json({ message: "Subtopic not found" });
-      }
-
-      res.json(updatedSubtopic);
-    } catch (error) {
-      console.error("Error updating subtopic:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  // Delete subtopic
-  app.delete("/api/subtopics/:id", async (req, res) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const subtopicId = req.params.id;
-      const deleted = await storage.deleteSubtopic(subtopicId);
-
-      if (!deleted) {
-        return res.status(404).json({ message: "Subtopic not found" });
-      }
-
-      res.json({ message: "Subtopic deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting subtopic:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
   // Education routes
   app.get("/api/education/:userId", async (req, res) => {
     try {
@@ -500,7 +449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🎓 POST /api/education - Parsed data:", educationData);
       const education = await storage.createEducation(educationData);
       console.log("🎓 POST /api/education - Created record:", education);
-      
+
       // Check for achievement badges after education creation
       if (educationData.userId) {
         const userIdInt = parseInt(educationData.userId.toString());
@@ -508,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.checkAndAwardBadges(userIdInt, "achievement");
         }
       }
-      
+
       res.json(education);
     } catch (error) {
       console.error("Error creating education:", error);
@@ -642,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🎨 POST /api/skills - Parsed data:", skillData);
       const skill = await storage.createSkill(skillData);
       console.log("🎨 POST /api/skills - Created record:", skill);
-      
+
       // Check for achievement badges after skill creation
       if (skillData.userId) {
         const userIdInt = parseInt(skillData.userId.toString());
@@ -650,7 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.checkAndAwardBadges(userIdInt, "achievement");
         }
       }
-      
+
       res.json(skill);
     } catch (error) {
       console.error("Error creating skill:", error);
@@ -764,7 +713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const projectData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(projectData);
-      
+
       // Check for achievement badges after project creation
       if (projectData.userId) {
         const userIdInt = parseInt(projectData.userId.toString());
@@ -772,7 +721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.checkAndAwardBadges(userIdInt, "achievement");
         }
       }
-      
+
       res.json(project);
     } catch (error) {
       console.error("Error creating project:", error);
@@ -875,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certification = await storage.createCertification(
         certificationData
       );
-      
+
       // Check for achievement badges after certification creation
       if (certificationData.userId) {
         const userIdInt = parseInt(certificationData.userId.toString());
@@ -883,7 +832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.checkAndAwardBadges(userIdInt, "achievement");
         }
       }
-      
+
       res.json(certification);
     } catch (error) {
       console.error("Error creating certification:", error);
@@ -999,12 +948,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const achievementData = insertAchievementSchema.parse(req.body);
       const achievement = await storage.createAchievement(achievementData);
-      
+
       // Check for achievement badges after achievement creation
-      if (req.user?.id) {
-        await storage.checkAndAwardBadges(req.user.id, "achievement");
+      if (achievementData.userId) {
+        const userIdInt = parseInt(achievementData.userId.toString());
+        if (!isNaN(userIdInt)) {
+          await storage.checkAndAwardBadges(userIdInt, "achievement");
+        }
       }
-      
+
       res.json(achievement);
     } catch (error) {
       console.error("Error creating achievement:", error);
@@ -2744,7 +2696,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-
       res.json(goal);
     } catch (error) {
       console.error("Error fetching goal:", error);
@@ -2765,10 +2716,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const goal = await storage.createGoal(goalData);
-      
+
       // Check for achievement badges after goal creation
       await storage.checkAndAwardBadges(req.user.id, "achievement");
-      
+
       res.status(201).json(goal);
     } catch (error) {
       console.error("Error creating goal:", error);
