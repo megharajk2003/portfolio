@@ -71,7 +71,8 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCheckInHistory, setShowCheckInHistory] = useState(false);
 
-  const userId = user?.id?.toString() ?? "1"; // Fallback for demo
+  const userId = user?.id ?? 1; // Fallback for demo
+  const userIdString = userId.toString();
   console.log("Dashboard - userId:", userId);
   // FIX: Use the correctly inferred 'Profile' type for the query data.
   const { data: profile } = useQuery<Profile>({
@@ -438,7 +439,7 @@ export default function Home() {
                   </div>
                   <DropdownMenuSeparator />
                   
-                  {notifications && notifications.length > 0 ? (
+                  {notifications && Array.isArray(notifications) && notifications.length > 0 ? (
                     notifications.slice(0, 10).map((notification: any) => (
                       <DropdownMenuItem
                         key={notification.id}
@@ -620,7 +621,7 @@ export default function Home() {
 
           {/* Recent Badges */}
           <section>
-            <RecentBadges userId={userId} />
+            <RecentBadges userId={userIdString} />
           </section>
 
           {/* Skill Dashboard */}

@@ -304,6 +304,112 @@ export default function GoalTracker() {
     { value: "12", label: "December" },
   ];
 
+  // Chart data for category progress line chart
+  const categoryProgressChartData = useMemo(() => {
+    // Check if we have real completion timestamp data
+    const hasRealData = allCategories.some(category => 
+      category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0
+    );
+    
+    if (!hasRealData) {
+      // Generate sample data based on current completion status
+      const data = [];
+      const today = new Date();
+      
+      // Generate data for past 14 days
+      for (let i = 13; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        
+        const entry: any = { date: dateStr };
+        
+        // Add sample progression for each category based on their completed subtopics
+        allCategories.forEach((category, index) => {
+          const completedSubtopics = category.completedSubtopics || 0;
+          let cumulativeProgress = 0;
+          
+          // Show realistic step progression in last few days
+          if (i <= 3 && completedSubtopics > 0) {
+            cumulativeProgress = Math.min(
+              Math.floor(completedSubtopics * (1 - i * 0.25)),
+              completedSubtopics
+            );
+          }
+          
+          entry[category.name] = Math.max(0, cumulativeProgress);
+        });
+        
+        data.push(entry);
+      }
+      return data;
+    }
+    
+    // Use real completion timestamp data
+    const allCompletions: { timestamp: string; categoryName: string }[] = [];
+    
+    allCategories.forEach(category => {
+      if (category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0) {
+        category.completedSubtopicTimestamps.forEach(timestamp => {
+          allCompletions.push({
+            timestamp,
+            categoryName: category.name
+          });
+        });
+      }
+    });
+    
+    // Sort chronologically
+    allCompletions.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    
+    // Initialize cumulative counters for each category
+    const categoryCounts: { [categoryName: string]: number } = {};
+    allCategories.forEach(category => {
+      categoryCounts[category.name] = 0;
+    });
+    
+    const chartData: any[] = [];
+    
+    // Add starting point (all categories at 0)
+    if (allCompletions.length > 0) {
+      const startDate = new Date(allCompletions[0].timestamp);
+      startDate.setDate(startDate.getDate() - 1);
+      const startEntry: any = {
+        date: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      };
+      allCategories.forEach(category => {
+        startEntry[category.name] = 0;
+      });
+      chartData.push(startEntry);
+    }
+    
+    // Iterate through sorted list, increment count for correct category
+    allCompletions.forEach(completion => {
+      // Increment count for the category that had completion
+      categoryCounts[completion.categoryName]++;
+      
+      // Add [timestamp, new_cumulative_count] point to data series
+      const dataPoint: any = {
+        date: new Date(completion.timestamp).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric' 
+        })
+      };
+      
+      // Add current cumulative count for each category
+      allCategories.forEach(category => {
+        dataPoint[category.name] = categoryCounts[category.name];
+      });
+      
+      chartData.push(dataPoint);
+    });
+    
+    return chartData;
+  }, [allCategories]);
+
   const cumulativeProgressData = useMemo(() => {
     if (allCategories.length === 0) return [];
 
@@ -758,110 +864,7 @@ export default function GoalTracker() {
                 <div style={{ width: "100%", height: "320px" }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={useMemo(() => {
-                        // Check if we have real completion timestamp data
-                        const hasRealData = allCategories.some(category => 
-                          category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0
-                        );
-                        
-                        if (!hasRealData) {
-                          // Generate sample data based on current completion status
-                          const data = [];
-                          const today = new Date();
-                          
-                          // Generate data for past 14 days
-                          for (let i = 13; i >= 0; i--) {
-                            const date = new Date(today);
-                            date.setDate(date.getDate() - i);
-                            const dateStr = date.toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric' 
-                            });
-                            
-                            const entry: any = { date: dateStr };
-                            
-                            // Add sample progression for each category based on their completed subtopics
-                            allCategories.forEach((category, index) => {
-                              const completedSubtopics = category.completedSubtopics || 0;
-                              let cumulativeProgress = 0;
-                              
-                              // Show realistic step progression in last few days
-                              if (i <= 3 && completedSubtopics > 0) {
-                                cumulativeProgress = Math.min(
-                                  Math.floor(completedSubtopics * (1 - i * 0.25)),
-                                  completedSubtopics
-                                );
-                              }
-                              
-                              entry[category.name] = Math.max(0, cumulativeProgress);
-                            });
-                            
-                            data.push(entry);
-                          }
-                          return data;
-                        }
-                        
-                        // Use real completion timestamp data
-                        const allCompletions: { timestamp: string; categoryName: string }[] = [];
-                        
-                        allCategories.forEach(category => {
-                          if (category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0) {
-                            category.completedSubtopicTimestamps.forEach(timestamp => {
-                              allCompletions.push({
-                                timestamp,
-                                categoryName: category.name
-                              });
-                            });
-                          }
-                        });
-                        
-                        // Sort chronologically
-                        allCompletions.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-                        
-                        // Initialize cumulative counters for each category
-                        const categoryCounts: { [categoryName: string]: number } = {};
-                        allCategories.forEach(category => {
-                          categoryCounts[category.name] = 0;
-                        });
-                        
-                        const chartData: any[] = [];
-                        
-                        // Add starting point (all categories at 0)
-                        if (allCompletions.length > 0) {
-                          const startDate = new Date(allCompletions[0].timestamp);
-                          startDate.setDate(startDate.getDate() - 1);
-                          const startEntry: any = {
-                            date: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                          };
-                          allCategories.forEach(category => {
-                            startEntry[category.name] = 0;
-                          });
-                          chartData.push(startEntry);
-                        }
-                        
-                        // Iterate through sorted list, increment count for correct category
-                        allCompletions.forEach(completion => {
-                          // Increment count for the category that had completion
-                          categoryCounts[completion.categoryName]++;
-                          
-                          // Add [timestamp, new_cumulative_count] point to data series
-                          const dataPoint: any = {
-                            date: new Date(completion.timestamp).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric' 
-                            })
-                          };
-                          
-                          // Add current cumulative count for each category
-                          allCategories.forEach(category => {
-                            dataPoint[category.name] = categoryCounts[category.name];
-                          });
-                          
-                          chartData.push(dataPoint);
-                        });
-                        
-                        return chartData;
-                      }, [allCategories])}
+                      data={categoryProgressChartData}
                       margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
