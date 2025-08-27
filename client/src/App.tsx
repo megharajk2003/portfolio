@@ -28,7 +28,7 @@ import ResumeGenerator from "@/pages/resume-generator";
 import CareerChat from "@/pages/career-chat";
 import Forum from "@/pages/forum";
 import GoalTracker from "@/pages/goal-tracker";
-import GoalDetails from "@/pages/goal-details";
+import CategoryTopics from "@/pages/category-topics";
 import Badges from "@/pages/badges";
 import SubtopicListPage from "./pages/subtopic";
 
@@ -111,11 +111,8 @@ function Router() {
           <Route path="/learning" component={Learning} />
           <Route path="/forum" component={Forum} />
           <Route path="/goal-tracker" component={GoalTracker} />
-          <Route path="/goal-tracker/:id" component={GoalDetails} />
-          <Route
-            path="/goal-tracker/:id/subtopic"
-            component={SubtopicListPage}
-          />
+          <Route path="/goal-tracker/:goalId/category/:categoryId" component={CategoryTopics} />
+          <Route path="/subtopic/:topicId" component={SubtopicListPage} />
           <Route path="/badges" component={Badges} />
           <Route path="/course/:courseId/learn" component={CourseLearn} />
           <Route path="/course/:id" component={CourseDetail} />

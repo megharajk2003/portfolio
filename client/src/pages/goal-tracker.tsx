@@ -38,6 +38,18 @@ import {
 import { navigate } from "wouter/use-browser-location";
 
 // Interfaces for the Goal tracking system
+interface GoalCategory {
+  id: string;
+  goalId: string;
+  name: string;
+  description?: string;
+  totalTopics: number;
+  completedTopics: number;
+  totalSubtopics: number;
+  completedSubtopics: number;
+  createdAt: string;
+}
+
 interface Goal {
   id: string;
   name: string;
@@ -48,6 +60,7 @@ interface Goal {
   completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
+  categories?: GoalCategory[];
 }
 
 interface ProgressDataPoint {
@@ -64,6 +77,16 @@ const fetchUserGoals = async () => {
   });
   if (!response.ok) {
     throw new Error("Failed to fetch goals");
+  }
+  return response.json();
+};
+
+const fetchGoalCategories = async (goalId: string) => {
+  const response = await fetch(`/api/goals/${goalId}/categories`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch goal categories");
   }
   return response.json();
 };
@@ -94,19 +117,22 @@ export default function GoalTracker() {
     enabled: !!user,
   });
 
-  // For now, show the first goal or create a placeholder
-  const firstGoal = goals[0];
-  const category = firstGoal ? {
-    id: firstGoal.id,
-    name: firstGoal.name,
-    description: firstGoal.description || '',
-    totalTopics: firstGoal.totalTopics || 0,
-    completedTopics: firstGoal.completedTopics || 0,
-    totalSubtopics: firstGoal.totalSubtopics || 0,
-    completedSubtopics: firstGoal.completedSubtopics || 0,
-    createdAt: firstGoal.createdAt,
-    updatedAt: firstGoal.updatedAt,
-  } : null;
+  // Get all categories from all goals
+  const allCategories = useMemo(() => {
+    const categories: GoalCategory[] = [];
+    goals.forEach((goal: Goal) => {
+      if (goal.categories) {
+        goal.categories.forEach((category) => {
+          categories.push({
+            ...category,
+            goalName: goal.name,
+            goalId: goal.id,
+          } as GoalCategory & { goalName: string });
+        });
+      }
+    });
+    return categories;
+  }, [goals]);
 
   // State for filters
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
@@ -213,17 +239,15 @@ export default function GoalTracker() {
   ];
 
   const cumulativeProgressData = useMemo(() => {
-    if (!category) return [];
+    if (allCategories.length === 0) return [];
     
-    // Create simple progress data based on the goal's completion
+    // Create simple progress data for the overall goal
     const dataPoints: ProgressDataPoint[] = [];
     const startDate = new Date(selectedYear, selectedMonth === "all" ? 0 : parseInt(selectedMonth) - 1, 1);
     const endDate = selectedMonth === "all" ? new Date(selectedYear, 11, 31) : new Date(selectedYear, parseInt(selectedMonth), 0);
     
     const current = new Date(startDate);
     let cumulativeCount = 0;
-    const maxProgress = category.totalSubtopics;
-    const currentProgress = category.completedSubtopics;
 
     while (current <= endDate) {
       const dateStr = current.toLocaleDateString("en-US", {
@@ -231,30 +255,34 @@ export default function GoalTracker() {
         day: "2-digit",
       });
       
-      // Simulate gradual progress over time
-      const daysSinceStart = Math.floor((current.getTime() - new Date(category.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSinceStart >= 0) {
-        cumulativeCount = Math.min(currentProgress, Math.floor((daysSinceStart / 30) * currentProgress));
-      }
+      // Simulate gradual progress over time for all categories combined
+      const totalCompleted = allCategories.reduce((sum, cat) => sum + (cat.completedSubtopics || 0), 0);
+      const daysSinceStart = Math.floor((current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      cumulativeCount = Math.min(totalCompleted, Math.floor((daysSinceStart / 30) * totalCompleted));
       
-      if (current >= new Date(category.createdAt)) {
-        dataPoints.push({ date: dateStr, [category.name]: cumulativeCount });
-      }
+      dataPoints.push({ date: dateStr, "Progress": cumulativeCount });
       current.setDate(current.getDate() + 1);
     }
     return dataPoints;
-  }, [category, selectedYear, selectedMonth]);
+  }, [allCategories, selectedYear, selectedMonth]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
-      case "in_progress":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100";
+  const getStatusColor = (completedSubtopics: number, totalSubtopics: number) => {
+    if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
+    } else if (completedSubtopics > 0) {
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
+    } else {
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100";
+    }
+  };
+
+  const getStatusText = (completedSubtopics: number, totalSubtopics: number) => {
+    if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
+      return "Completed";
+    } else if (completedSubtopics > 0) {
+      return "In Progress";
+    } else {
+      return "Not Started";
     }
   };
 
@@ -282,7 +310,7 @@ export default function GoalTracker() {
         <div className="container mx-auto p-6 space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Goal Tracker
+              Category Tracker
             </h1>
 
             {/* CSV Upload Dialog */}
@@ -369,77 +397,78 @@ export default function GoalTracker() {
             </Card>
           )}
 
-          {/* Goal Overview Card */}
-          {category && (
-            <Card
-              className="cursor-pointer transition-all hover:shadow-lg"
-              onClick={() => navigate(`/goal-details/${category.id}`)}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-blue-500" />
-                  {category.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">
-                        Overall Progress
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        {category.completedSubtopics} / {category.totalSubtopics}{" "}
-                        Subtopics
-                      </span>
+          {/* Categories List */}
+          {allCategories.length > 0 && (
+            <div className="space-y-4">
+              {allCategories.map((category) => (
+                <Card
+                  key={category.id}
+                  className="cursor-pointer transition-all hover:shadow-lg"
+                  onClick={() => navigate(`/goal-tracker/${category.goalId}/category/${category.id}`)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-500" />
+                      {category.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">
+                            Overall Progress
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            {category.completedSubtopics || 0} / {category.totalSubtopics || 0}{" "}
+                            Subtopics
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            category.totalSubtopics > 0
+                              ? ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
+                              : 0
+                          }
+                          className="h-2"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">
+                          {category.totalSubtopics > 0
+                            ? Math.round(
+                                ((category.completedSubtopics || 0) / category.totalSubtopics) * 100
+                              )
+                            : 0}
+                          % Complete
+                        </span>
+                        <Badge
+                          className={getStatusColor(
+                            category.completedSubtopics || 0,
+                            category.totalSubtopics || 0
+                          )}
+                        >
+                          {getStatusText(
+                            category.completedSubtopics || 0,
+                            category.totalSubtopics || 0
+                          )}
+                        </Badge>
+                      </div>
                     </div>
-                    <Progress
-                      value={
-                        category.totalSubtopics > 0
-                          ? (category.completedSubtopics / category.totalSubtopics) * 100
-                          : 0
-                      }
-                      className="h-2"
-                    />
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">
-                      {category.totalSubtopics > 0
-                        ? Math.round(
-                            (category.completedSubtopics / category.totalSubtopics) * 100
-                          )
-                        : 0}
-                      % Complete
-                    </span>
-                    <Badge
-                      className={getStatusColor(
-                        category.completedSubtopics === category.totalSubtopics
-                          ? "completed"
-                          : category.completedSubtopics > 0
-                          ? "in_progress"
-                          : "pending"
-                      )}
-                    >
-                      {category.completedSubtopics === category.totalSubtopics
-                        ? "Completed"
-                        : category.completedSubtopics > 0
-                        ? "In Progress"
-                        : "Not Started"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
 
-          {/* Study Performance Chart */}
-          {category && (
+          {/* Category Performance Chart */}
+          {allCategories.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Goal Performance
+                    Category Performance
                   </CardTitle>
                   <div className="flex gap-4 items-center">
                     <div className="flex items-center gap-2">
@@ -513,7 +542,7 @@ export default function GoalTracker() {
                       <Legend />
                       <Line
                         type="stepAfter"
-                        dataKey={category.name}
+                        dataKey="Progress"
                         stroke={GOAL_COLOR}
                         strokeWidth={2}
                         dot={false}

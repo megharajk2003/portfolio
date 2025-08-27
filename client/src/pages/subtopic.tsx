@@ -1,6 +1,11 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -16,262 +21,110 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ListChecks } from "lucide-react";
+import { ArrowLeft, ListChecks } from "lucide-react";
 import Sidebar from "@/components/sidebar";
+import { useLocation } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 
-// 1. Interface to define the shape of our subtopic data
+// Interfaces
 interface Subtopic {
   id: string;
-  categoryName: string;
-  topicName: string;
-  subtopicName: string;
-  status: "pending" | "in_progress" | "completed";
+  topicId: string;
+  name: string;
+  description?: string;
+  status: "pending" | "start" | "completed";
+  priority: "low" | "medium" | "high";
+  notes?: string;
+  dueDate?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// 2. Dummy data based on the list you provided
-const initialSubtopics: Subtopic[] = [
-  {
-    id: "sub-1",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Analogies (Semantic, Symbolic/Number, Figural)",
-    status: "pending",
-  },
-  {
-    id: "sub-2",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Classification (Semantic, Symbolic/Number, Figural)",
-    status: "pending",
-  },
-  {
-    id: "sub-3",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Series (Number, Alphabet, Semantic, Figural, Non-Verbal)",
-    status: "pending",
-  },
-  {
-    id: "sub-4",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Coding-Decoding",
-    status: "pending",
-  },
-  {
-    id: "sub-5",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Blood Relations",
-    status: "pending",
-  },
-  {
-    id: "sub-6",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Direction Sense Test",
-    status: "pending",
-  },
-  {
-    id: "sub-7",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Logical Venn Diagrams",
-    status: "pending",
-  },
-  {
-    id: "sub-8",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Syllogism",
-    status: "pending",
-  },
-  {
-    id: "sub-9",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Statement & Conclusions",
-    status: "pending",
-  },
-  {
-    id: "sub-10",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Statement & Assumptions",
-    status: "pending",
-  },
-  {
-    id: "sub-11",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Critical Thinking",
-    status: "pending",
-  },
-  {
-    id: "sub-12",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Emotional Intelligence",
-    status: "pending",
-  },
-  {
-    id: "sub-13",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Social Intelligence",
-    status: "pending",
-  },
-  {
-    id: "sub-14",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Word Building",
-    status: "pending",
-  },
-  {
-    id: "sub-15",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Numerical Operations",
-    status: "pending",
-  },
-  {
-    id: "sub-16",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Symbolic Operations",
-    status: "pending",
-  },
-  {
-    id: "sub-17",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Puzzles",
-    status: "pending",
-  },
-  {
-    id: "sub-18",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Space Visualization",
-    status: "pending",
-  },
-  {
-    id: "sub-19",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Space Orientation",
-    status: "pending",
-  },
-  {
-    id: "sub-20",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Problem Solving",
-    status: "pending",
-  },
-  {
-    id: "sub-21",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Analysis, Judgment, Decision Making",
-    status: "pending",
-  },
-  {
-    id: "sub-22",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Visual Memory",
-    status: "pending",
-  },
-  {
-    id: "sub-23",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Discrimination, Observation",
-    status: "pending",
-  },
-  {
-    id: "sub-24",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Relationship Concepts",
-    status: "pending",
-  },
-  {
-    id: "sub-25",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Arithmetical Reasoning and Figural Classification",
-    status: "pending",
-  },
-  {
-    id: "sub-26",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Embedded Figures",
-    status: "pending",
-  },
-  {
-    id: "sub-27",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Pattern Completion",
-    status: "pending",
-  },
-  {
-    id: "sub-28",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Figure Classification",
-    status: "pending",
-  },
-  {
-    id: "sub-29",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Odd One Out",
-    status: "pending",
-  },
-  {
-    id: "sub-30",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Punched hole/pattern-folding & unfolding",
-    status: "pending",
-  },
-  {
-    id: "sub-31",
-    categoryName: "SSC CGL",
-    topicName: "General Intelligence & Reasoning",
-    subtopicName: "Figural Pattern-folding and completion",
-    status: "pending",
-  },
-];
-
-export default function SubtopicListPage() {
-  const [subtopics, setSubtopics] = useState<Subtopic[]>(initialSubtopics);
-
-  // 3. Handler function to update the status of a subtopic
-  const handleStatusChange = (
-    subtopicId: string,
-    newStatus: "pending" | "in_progress" | "completed"
-  ) => {
-    setSubtopics((currentSubtopics) =>
-      currentSubtopics.map((subtopic) =>
-        subtopic.id === subtopicId
-          ? { ...subtopic, status: newStatus }
-          : subtopic
-      )
-    );
+interface TopicWithSubtopics {
+  id: string;
+  categoryId: string;
+  name: string;
+  description?: string;
+  totalSubtopics: number;
+  completedSubtopics: number;
+  subtopics: Subtopic[];
+  category: {
+    id: string;
+    goalId: string;
+    name: string;
+    description?: string;
   };
+}
 
-  // Helper to get colors for status badges
-  const getStatusColor = (status: Subtopic["status"]) => {
+// API functions
+const fetchTopicSubtopics = async (topicId: string): Promise<TopicWithSubtopics> => {
+  const response = await fetch(`/api/goal-topics/${topicId}/subtopics`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch subtopics");
+  }
+  return response.json();
+};
+
+const updateSubtopicStatus = async (subtopicId: string, status: "pending" | "start" | "completed") => {
+  const response = await fetch(`/api/goal-subtopics/${subtopicId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update subtopic status");
+  }
+  return response.json();
+};
+
+export default function SubtopicStatus() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [location] = useLocation();
+  
+  // Extract topic ID from URL: /subtopic/{topicId}
+  const topicId = location.split("/")[2];
+
+  // Fetch topic and its subtopics
+  const { 
+    data: topicData, 
+    isLoading, 
+    error,
+    refetch 
+  } = useQuery({
+    queryKey: ["topic-subtopics", topicId],
+    queryFn: () => fetchTopicSubtopics(topicId),
+    enabled: !!topicId && !!user,
+  });
+
+  // Update subtopic status mutation
+  const updateSubtopicMutation = useMutation({
+    mutationFn: ({ subtopicId, status }: { subtopicId: string; status: "pending" | "start" | "completed" }) =>
+      updateSubtopicStatus(subtopicId, status),
+    onSuccess: () => {
+      toast({ title: "Success", description: "Subtopic status updated" });
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      queryClient.invalidateQueries({ queryKey: ["category-topics"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "in_progress":
+      case "start":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "pending":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
@@ -280,72 +133,175 @@ export default function SubtopicListPage() {
     }
   };
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "low":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+    }
+  };
+
+  const handleStatusChange = (subtopicId: string, newStatus: "pending" | "start" | "completed") => {
+    updateSubtopicMutation.mutate({ subtopicId, status: newStatus });
+  };
+
+  const goBackToTopics = () => {
+    if (topicData?.category) {
+      navigate(`/goal-tracker/${topicData.category.goalId}/category/${topicData.category.id}`);
+    } else {
+      navigate("/goal-tracker");
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <div className="text-center">Please log in to view subtopics.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !topicData) {
+    return (
+      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <div className="text-red-600 dark:text-red-400">
+              Error loading subtopics: {error ? (error as Error).message : "Topic not found"}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6 space-y-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Subtopic Status
-          </h1>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goBackToTopics}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Topics
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  Subtopic Status
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  <ListChecks className="h-4 w-4 inline mr-1" />
+                  {topicData.name}
+                </p>
+              </div>
+            </div>
+          </div>
 
+          {/* Subtopics Table */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ListChecks className="h-5 w-5 text-blue-500" />
-                General Intelligence & Reasoning
+                {topicData.name}
               </CardTitle>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Progress: {topicData.completedSubtopics} / {topicData.totalSubtopics} subtopics completed
+              </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/4">Category</TableHead>
-                    <TableHead className="w-1/4">Topic</TableHead>
-                    <TableHead className="w-1/2">Subtopic</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Update Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {subtopics.map((subtopic) => (
-                    <TableRow key={subtopic.id}>
-                      <TableCell className="font-medium">
-                        {subtopic.categoryName}
-                      </TableCell>
-                      <TableCell>{subtopic.topicName}</TableCell>
-                      <TableCell>{subtopic.subtopicName}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getStatusColor(subtopic.status)}
-                        >
-                          {subtopic.status.replace("_", " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Select
-                          value={subtopic.status}
-                          onValueChange={(newStatus: Subtopic["status"]) =>
-                            handleStatusChange(subtopic.id, newStatus)
-                          }
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Update Status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="in_progress">
-                              In Progress
-                            </SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Topic</TableHead>
+                      <TableHead>Subtopic</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Update Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {topicData.subtopics.map((subtopic) => (
+                      <TableRow key={subtopic.id}>
+                        <TableCell className="font-medium">
+                          {topicData.category.name}
+                        </TableCell>
+                        <TableCell>{topicData.name}</TableCell>
+                        <TableCell>{subtopic.name}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(subtopic.status)}>
+                            {subtopic.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={subtopic.status}
+                            onValueChange={(value: "pending" | "start" | "completed") =>
+                              handleStatusChange(subtopic.id, value)
+                            }
+                            disabled={updateSubtopicMutation.isPending}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="start">Start</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {topicData.subtopics.length === 0 && (
+                <div className="text-center py-8">
+                  <ListChecks className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No Subtopics Found
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    This topic doesn't have any subtopics yet.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
