@@ -78,7 +78,7 @@ export default function ProjectsAchievements({
                     </div>
                     <div className="flex space-x-2">
                       {project.url && (
-                        <Button size="icon-sm" variant="outline" asChild>
+                        <Button size="icon" variant="outline" asChild>
                           <a
                             href={project.url}
                             target="_blank"
@@ -89,7 +89,7 @@ export default function ProjectsAchievements({
                         </Button>
                       )}
                       {project.githubUrl && (
-                        <Button size="icon-sm" variant="outline" asChild>
+                        <Button size="icon" variant="outline" asChild>
                           <a
                             href={project.githubUrl}
                             target="_blank"
@@ -158,14 +158,14 @@ export default function ProjectsAchievements({
         <CardContent>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {achievementsData.length > 0 ? (
-              achievementsData.map((achievement: string, index: number) => (
+              achievementsData.map((achievement, index: number) => (
                 <div
                   key={index}
                   className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-md"
                 >
                   <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
-                    {achievement}
+                    {typeof achievement === 'string' ? achievement : achievement.title}
                   </p>
                 </div>
               ))
