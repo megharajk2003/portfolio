@@ -4629,7 +4629,6 @@ export class PgStorage implements IStorage {
       .update(userStats)
       .set({
         totalXp: sql`${userStats.totalXp} + ${xpToAdd}`,
-        updatedAt: new Date(),
       })
       .where(eq(userStats.userId, userId));
   }
