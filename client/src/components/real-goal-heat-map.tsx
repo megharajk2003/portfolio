@@ -42,8 +42,8 @@ interface GoalWithDetails {
 }
 
 interface ChartDataPoint {
-  date: string;
-  month: string;
+  date: number; // timestamp for proper time series
+  dateLabel: string; // formatted date for display
   [key: string]: number | string; // Dynamic goal names as keys
 }
 
@@ -100,12 +100,12 @@ export default function RealGoalHeatMap() {
     // Initialize the last 14 days
     for (let i = 13; i >= 0; i--) {
       const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-      const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      const timestamp = date.getTime();
+      const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
 
       const dataPoint: ChartDataPoint = {
-        date: dateKey,
-        month: monthName
+        date: timestamp,
+        dateLabel: dateLabel
       };
 
       // Initialize all goals with 0 completed topics for this day
@@ -152,7 +152,7 @@ export default function RealGoalHeatMap() {
       // Calculate cumulative progress for each day in the 2-week period
       let cumulativeCompleted = 0;
       daysData.forEach(dayData => {
-        const dayDate = new Date(dayData.date);
+        const dayDate = new Date(dayData.date); // dayData.date is now a timestamp
         dayDate.setHours(0, 0, 0, 0);
 
         // Add completions from this day
@@ -199,7 +199,14 @@ export default function RealGoalHeatMap() {
                 <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
                   <XAxis 
-                    dataKey="month" 
+                    dataKey="date"
+                    type="number"
+                    scale="time"
+                    domain={['dataMin', 'dataMax']}
+                    tickFormatter={(timestamp) => {
+                      const date = new Date(timestamp);
+                      return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+                    }}
                     className="text-gray-600 dark:text-gray-400"
                     tick={{ fontSize: 12 }}
                   />

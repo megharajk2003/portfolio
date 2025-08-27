@@ -320,12 +320,9 @@ export default function GoalTracker() {
       for (let i = 13; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        const dateStr = date.toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric' 
-        });
+        const timestamp = date.getTime();
         
-        const entry: any = { date: dateStr };
+        const entry: any = { date: timestamp };
         
         // Add sample progression for each category based on their completed subtopics
         allCategories.forEach((category, index) => {
@@ -378,7 +375,7 @@ export default function GoalTracker() {
       const startDate = new Date(allCompletions[0].timestamp);
       startDate.setDate(startDate.getDate() - 1);
       const startEntry: any = {
-        date: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        date: startDate.getTime()
       };
       allCategories.forEach(category => {
         startEntry[category.name] = 0;
@@ -393,10 +390,7 @@ export default function GoalTracker() {
       
       // Add [timestamp, new_cumulative_count] point to data series
       const dataPoint: any = {
-        date: new Date(completion.timestamp).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric' 
-        })
+        date: new Date(completion.timestamp).getTime()
       };
       
       // Add current cumulative count for each category
@@ -870,6 +864,13 @@ export default function GoalTracker() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis
                         dataKey="date"
+                        type="number"
+                        scale="time"
+                        domain={['dataMin', 'dataMax']}
+                        tickFormatter={(timestamp) => {
+                          const date = new Date(timestamp);
+                          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        }}
                         tick={{ fontSize: 11, fill: "#6b7280" }}
                         stroke="#9ca3af"
                       />
