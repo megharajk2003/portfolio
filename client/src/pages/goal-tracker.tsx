@@ -338,12 +338,13 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
         }
 
         // Use real completion timestamp data
-        const series = categories.map(category => ({
+        const validCategories = categories.filter(cat => cat && cat.name);
+        const series = validCategories.map(category => ({
             name: category.name,
             data: [] as [number, number][],
         }));
 
-        const allTimestamps = categories.flatMap(cat => 
+        const allTimestamps = validCategories.flatMap(cat => 
             (cat.completedSubtopicTimestamps || []).map(ts => ({
                 catName: cat.name,
                 timestamp: new Date(ts),
@@ -351,13 +352,15 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
         ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
         const cumulativeCounts: { [key: string]: number } = {};
-        categories.forEach(cat => (cumulativeCounts[cat.name] = 0));
+        validCategories.forEach(cat => (cumulativeCounts[cat.name] = 0));
         
         // Add a starting point for each series at its creation date
-        categories.forEach(cat => {
+        validCategories.forEach(cat => {
             const seriesIndex = series.findIndex(s => s.name === cat.name);
-            const startDate = new Date(cat.createdAt).getTime();
-            series[seriesIndex].data.push([startDate, 0]);
+            if (seriesIndex > -1 && cat.createdAt) {
+                const startDate = new Date(cat.createdAt).getTime();
+                series[seriesIndex].data.push([startDate, 0]);
+            }
         });
 
         // Build the incremental, cumulative data points

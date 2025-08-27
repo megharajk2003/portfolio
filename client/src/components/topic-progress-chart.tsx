@@ -36,14 +36,16 @@ export default function TopicProgressChart({ categoryId }: TopicProgressChartPro
     const allCompletions: { topicName: string; timestamp: Date; }[] = [];
     
     topics.forEach(topic => {
-      topic.subtopics.forEach(subtopic => {
-        if (subtopic.status === "completed" && subtopic.completedAt) {
-          allCompletions.push({
-            topicName: topic.name,
-            timestamp: new Date(subtopic.completedAt)
-          });
-        }
-      });
+      if (topic && topic.subtopics && Array.isArray(topic.subtopics)) {
+        topic.subtopics.forEach(subtopic => {
+          if (subtopic && subtopic.status === "completed" && subtopic.completedAt) {
+            allCompletions.push({
+              topicName: topic.name,
+              timestamp: new Date(subtopic.completedAt)
+            });
+          }
+        });
+      }
     });
 
     // If no real completion data exists, return empty series

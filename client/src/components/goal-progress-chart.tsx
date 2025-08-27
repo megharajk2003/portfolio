@@ -62,18 +62,24 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
     // Collect all subtopics with completion dates
     const completedSubtopics: { date: Date; name: string }[] = [];
     
-    goal.categories.forEach(category => {
-      category.topics.forEach(topic => {
-        topic.subtopics.forEach(subtopic => {
-          if (subtopic.status === "completed" && subtopic.completedAt) {
-            completedSubtopics.push({
-              date: new Date(subtopic.completedAt),
-              name: subtopic.name
-            });
-          }
-        });
+    if (goal.categories && Array.isArray(goal.categories)) {
+      goal.categories.forEach(category => {
+        if (category && category.topics && Array.isArray(category.topics)) {
+          category.topics.forEach(topic => {
+            if (topic && topic.subtopics && Array.isArray(topic.subtopics)) {
+              topic.subtopics.forEach(subtopic => {
+                if (subtopic && subtopic.status === "completed" && subtopic.completedAt) {
+                  completedSubtopics.push({
+                    date: new Date(subtopic.completedAt),
+                    name: subtopic.name
+                  });
+                }
+              });
+            }
+          });
+        }
       });
-    });
+    }
 
     // Sort by completion date
     completedSubtopics.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -116,17 +122,25 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
   }, [goal]);
 
   const totalSubtopics = useMemo(() => {
-    if (!goal) return 0;
-    return goal.categories.reduce((total, category) => 
-      total + category.topics.reduce((topicTotal, topic) => 
-        topicTotal + topic.subtopics.length, 0), 0);
+    if (!goal || !goal.categories) return 0;
+    return goal.categories.reduce((total, category) => {
+      if (!category || !category.topics) return total;
+      return total + category.topics.reduce((topicTotal, topic) => {
+        if (!topic || !topic.subtopics) return topicTotal;
+        return topicTotal + topic.subtopics.length;
+      }, 0);
+    }, 0);
   }, [goal]);
 
   const completedCount = useMemo(() => {
-    if (!goal) return 0;
-    return goal.categories.reduce((total, category) => 
-      total + category.topics.reduce((topicTotal, topic) => 
-        topicTotal + topic.subtopics.filter(s => s.status === "completed").length, 0), 0);
+    if (!goal || !goal.categories) return 0;
+    return goal.categories.reduce((total, category) => {
+      if (!category || !category.topics) return total;
+      return total + category.topics.reduce((topicTotal, topic) => {
+        if (!topic || !topic.subtopics) return topicTotal;
+        return topicTotal + topic.subtopics.filter(s => s && s.status === "completed").length;
+      }, 0);
+    }, 0);
   }, [goal]);
 
   const state = {
