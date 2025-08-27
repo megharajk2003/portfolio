@@ -50,7 +50,7 @@ import ProfileCompletionNotification from "@/components/profile-completion-notif
 import ActivityCalendar from "@/components/activity-calendar";
 import ProjectsAchievements from "@/components/projects-achievements";
 import QuickActions from "@/components/quick-actions";
-import GoalHeatMap from "@/components/goal-heat-map";
+import RealGoalHeatMap from "@/components/real-goal-heat-map";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import {
   DropdownMenu,
@@ -525,7 +525,7 @@ export default function Home() {
           {/* Hero Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Learning Heat Map */}
-            <GoalHeatMap />
+            <RealGoalHeatMap />
             <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 justify-between flex flex-col">
               <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 border border-gray-200 dark:border-gray-700 flex items-center justify-between ">
                 <div className="flex items-center space-x-4">

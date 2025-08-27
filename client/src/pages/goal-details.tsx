@@ -26,6 +26,7 @@ import {
 import { ArrowLeft, Target, Edit2, Trash2, Plus, CheckCircle2 } from "lucide-react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
+import GoalProgressChart from "@/components/goal-progress-chart";
 
 // Interfaces
 interface GoalCategory {
@@ -361,6 +362,9 @@ export default function GoalDetails() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Real Progress Chart with Completion Dates */}
+          <GoalProgressChart goalId={goalId} />
 
           {/* Categories and Topics */}
           <div className="space-y-6">
