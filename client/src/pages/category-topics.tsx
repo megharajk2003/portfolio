@@ -273,14 +273,7 @@ export default function CategoryTopics() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  // Preserve the goal type when navigating back
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const type = urlParams.get("type");
-                  if (type) {
-                    navigate(`/goal-tracker?type=${encodeURIComponent(type)}`);
-                  } else {
-                    navigate("/goal-tracker");
-                  }
+                  navigate(`/goal-tracker/${goalId}`);
                 }}
                 className="flex items-center gap-2"
               >

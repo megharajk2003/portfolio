@@ -152,7 +152,7 @@ export default function GoalDetails() {
     mutationFn: deleteGoal,
     onSuccess: () => {
       toast({ title: "Success", description: "Goal deleted successfully" });
-      navigate("/goal-tracker");
+      navigate("/goals");
       queryClient.invalidateQueries({ queryKey: ["goals"] });
     },
     onError: (error: any) => {
@@ -270,7 +270,7 @@ export default function GoalDetails() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/goal-tracker")}
+                onClick={() => navigate("/goals")}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />

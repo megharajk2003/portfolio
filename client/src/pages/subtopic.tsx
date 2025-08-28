@@ -169,7 +169,7 @@ export default function SubtopicStatus() {
         `/goal-tracker/${topicData.category.goalId}/category/${topicData.category.id}`
       );
     } else {
-      navigate("/goal-tracker");
+      navigate("/goals");
     }
   };
 
