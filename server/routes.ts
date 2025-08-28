@@ -3067,7 +3067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
-  s;
+
   // Notifications routes
   app.get("/api/notifications/:userId", async (req, res) => {
     try {

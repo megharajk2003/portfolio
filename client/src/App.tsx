@@ -113,8 +113,11 @@ function Router() {
           <Route path="/learning" component={Learning} />
           <Route path="/forum" component={Forum} />
           <Route path="/goals" component={GoalStart} />
-          <Route path="/goal-tracker" component={GoalTracker} />
-          <Route path="/goal-tracker/:goalId/category/:categoryId" component={CategoryTopics} />
+          <Route path="/goal-tracker/:goalId" component={GoalTracker} />
+          <Route
+            path="/goal-tracker/:goalId/category/:categoryId"
+            component={CategoryTopics}
+          />
           <Route path="/subtopic/:topicId" component={SubtopicListPage} />
           <Route path="/badges" component={Badges} />
           <Route path="/course/:courseId/learn" component={CourseLearn} />
