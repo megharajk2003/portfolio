@@ -28,6 +28,7 @@ interface GoalTopic {
   description?: string;
   totalSubtopics: number;
   completedSubtopics: number;
+  completedSubtopicTimestamps?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -39,7 +40,20 @@ interface GoalCategory {
   description?: string;
   totalTopics: number;
   completedTopics: number;
+  completedSubtopicTimestamps?: string[];
+  topics: GoalTopic[];
   createdAt: string;
+}
+
+interface Goal {
+  id: string;
+  userId: number;
+  name: string;
+  description?: string;
+  type: string;
+  completedSubtopics: number;
+  totalSubtopics: number;
+  categories: GoalCategory[];
 }
 
 interface ProgressDataPoint {
@@ -59,25 +73,12 @@ const TOPIC_COLORS = [
 ];
 
 // API functions
-const fetchGoalCategory = async (goalId: string, categoryId: string) => {
-  const response = await fetch(
-    `/api/goals/${goalId}/categories/${categoryId}`,
-    {
-      credentials: "include",
-    }
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch category");
-  }
-  return response.json();
-};
-
-const fetchCategoryTopics = async (categoryId: string) => {
-  const response = await fetch(`/api/goal-categories/${categoryId}/topics`, {
+const fetchGoalWithCategories = async (goalId: string) => {
+  const response = await fetch(`/api/goals/${goalId}`, {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch topics");
+    throw new Error("Failed to fetch goal with categories");
   }
   return response.json();
 };
@@ -96,27 +97,20 @@ export default function CategoryTopics() {
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
-  // Fetch category details
+  // Fetch goal with all categories and topics
   const {
-    data: category,
-    isLoading: categoryLoading,
-    error: categoryError,
+    data: goalData,
+    isLoading: goalLoading,
+    error: goalError,
   } = useQuery({
-    queryKey: ["category", goalId, categoryId],
-    queryFn: () => fetchGoalCategory(goalId, categoryId),
-    enabled: !!goalId && !!categoryId && !!user,
+    queryKey: ["goal-with-categories", goalId],
+    queryFn: () => fetchGoalWithCategories(goalId),
+    enabled: !!goalId && !!user,
   });
 
-  // Fetch topics for this category
-  const {
-    data: topics = [],
-    isLoading: topicsLoading,
-    error: topicsError,
-  } = useQuery({
-    queryKey: ["category-topics", categoryId],
-    queryFn: () => fetchCategoryTopics(categoryId),
-    enabled: !!categoryId && !!user,
-  });
+  // Extract the specific category and its topics from the goal data
+  const category = goalData?.categories?.find((cat: GoalCategory) => cat.id === categoryId);
+  const topics = category?.topics || [];
 
   const months = [
     { value: "all", label: "All Months" },
@@ -134,46 +128,68 @@ export default function CategoryTopics() {
     { value: "12", label: "December" },
   ];
 
-  const cumulativeProgressData = useMemo(() => {
-    if (topics.length === 0) return [];
+  const chartState = useMemo(() => {
+    if (topics.length === 0) return { series: [] };
 
-    const dataPoints: ProgressDataPoint[] = [];
-    const startDate = new Date(
-      selectedYear,
-      selectedMonth === "all" ? 0 : parseInt(selectedMonth) - 1,
-      1
-    );
-    const endDate =
-      selectedMonth === "all"
-        ? new Date(selectedYear, 11, 31)
-        : new Date(selectedYear, parseInt(selectedMonth), 0);
+    const validTopics = topics.filter(topic => topic && topic.name);
+    const series = validTopics.map(topic => ({
+      name: topic.name,
+      data: [] as [number, number][],
+    }));
 
-    const current = new Date(startDate);
+    // Collect all completion timestamps from all topics
+    const allTimestamps = validTopics.flatMap(topic => 
+      (topic.completedSubtopicTimestamps || []).map(ts => ({
+        topicName: topic.name,
+        timestamp: new Date(ts),
+      }))
+    ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
-    while (current <= endDate) {
-      const dateStr = current.toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-      });
+    // Filter by selected year and month
+    const filteredTimestamps = allTimestamps.filter(item => {
+      const date = item.timestamp;
+      const matchesYear = date.getFullYear() === selectedYear;
+      const matchesMonth = selectedMonth === "all" || 
+        (date.getMonth() + 1) === parseInt(selectedMonth);
+      return matchesYear && matchesMonth;
+    });
 
-      const progressPoint: ProgressDataPoint = { date: dateStr };
-
-      topics.forEach((topic: GoalTopic, index: number) => {
-        // Simulate gradual progress over time for each topic
-        const daysSinceStart = Math.floor(
-          (current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const currentProgress = Math.min(
-          topic.completedSubtopics,
-          Math.floor((daysSinceStart / 30) * topic.completedSubtopics)
-        );
-        progressPoint[topic.name] = currentProgress;
-      });
-
-      dataPoints.push(progressPoint);
-      current.setDate(current.getDate() + 1);
+    // If no completion data, return empty series
+    if (filteredTimestamps.length === 0) {
+      return { series: [] };
     }
-    return dataPoints;
+
+    const cumulativeCounts: { [key: string]: number } = {};
+    validTopics.forEach(topic => (cumulativeCounts[topic.name] = 0));
+    
+    // Add starting points for each topic
+    validTopics.forEach(topic => {
+      const seriesIndex = series.findIndex(s => s.name === topic.name);
+      if (seriesIndex > -1 && topic.createdAt) {
+        const startDate = new Date(topic.createdAt).getTime();
+        series[seriesIndex].data.push([startDate, 0]);
+      }
+    });
+
+    // Build the incremental, cumulative data points from real completion data
+    filteredTimestamps.forEach(({ topicName, timestamp }) => {
+      cumulativeCounts[topicName]++;
+      const seriesIndex = series.findIndex(s => s.name === topicName);
+      if (seriesIndex > -1) {
+        series[seriesIndex].data.push([timestamp.getTime(), cumulativeCounts[topicName]]);
+      }
+    });
+    
+    // Extend all lines to current time with final counts
+    const now = new Date().getTime();
+    series.forEach(s => {
+      if (s.data.length > 0 && s.data[s.data.length - 1][0] < now) {
+        s.data.push([now, s.data[s.data.length - 1][1]]);
+      }
+    });
+
+    // Only return series that have actual data points
+    return { series: series.filter(s => s.data.length > 1) };
   }, [topics, selectedYear, selectedMonth]);
 
   const getStatusColor = (
@@ -215,7 +231,7 @@ export default function CategoryTopics() {
     );
   }
 
-  if (categoryLoading || topicsLoading) {
+  if (goalLoading) {
     return (
       <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
         <Sidebar />
@@ -231,7 +247,7 @@ export default function CategoryTopics() {
     );
   }
 
-  if (categoryError || topicsError || !category) {
+  if (goalError || !goalData || !category) {
     return (
       <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
         <Sidebar />
@@ -239,9 +255,7 @@ export default function CategoryTopics() {
           <div className="container mx-auto p-6">
             <div className="text-red-600 dark:text-red-400">
               Error loading data:{" "}
-              {categoryError
-                ? (categoryError as Error).message
-                : (topicsError as Error).message}
+              {goalError ? (goalError as Error).message : "Category not found"}
             </div>
           </div>
         </div>
@@ -426,7 +440,7 @@ export default function CategoryTopics() {
                 </p>
               </CardHeader>
               <CardContent>
-                {cumulativeProgressData.length > 0 ? (
+                {chartState.series.length > 0 ? (
                   <div className="h-80">
                     <ReactApexChart 
                       options={{
@@ -440,7 +454,7 @@ export default function CategoryTopics() {
                         dataLabels: { enabled: false },
                         stroke: { curve: 'stepline', width: 2 },
                         title: {
-                          text: 'Real Topic Progress',
+                          text: 'Topic Progress Over Time',
                           align: 'left'
                         },
                         markers: { size: 0 },
@@ -450,7 +464,14 @@ export default function CategoryTopics() {
                         },
                         xaxis: { 
                           type: 'datetime',
-                          categories: cumulativeProgressData.map(item => item.date)
+                          labels: {
+                            datetimeFormatter: {
+                              year: 'yyyy',
+                              month: 'MMM \'yy',
+                              day: 'dd MMM',
+                              hour: 'HH:mm'
+                            }
+                          }
                         },
                         tooltip: {
                           shared: false,
@@ -460,17 +481,14 @@ export default function CategoryTopics() {
                         colors: TOPIC_COLORS,
                         legend: { position: 'bottom' }
                       } as ApexOptions}
-                      series={topics.map((topic: GoalTopic, index: number) => ({
-                        name: topic.name,
-                        data: cumulativeProgressData.map(item => item[topic.name] as number || 0)
-                      }))}
+                      series={chartState.series}
                       type="line" 
                       height={320} 
                     />
                   </div>
                 ) : (
                   <div className="h-80 flex items-center justify-center text-gray-500">
-                    No topic completion data available for the selected period.
+                    No completed subtopics yet. Start completing subtopics to see progress over time.
                   </div>
                 )}
               </CardContent>

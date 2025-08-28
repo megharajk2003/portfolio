@@ -3915,7 +3915,10 @@ export class PgStorage implements IStorage {
   async getGoalWithCategories(goalId: string): Promise<
     | (Goal & {
         categories: (GoalCategory & {
-          topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+          topics: (GoalTopic & { 
+            subtopics: GoalSubtopic[];
+            completedSubtopicTimestamps?: string[];
+          })[];
         })[];
       })
     | undefined
@@ -3930,7 +3933,17 @@ export class PgStorage implements IStorage {
         const topicsWithSubtopics = await Promise.all(
           topics.map(async (topic) => {
             const subtopics = await this.getTopicSubtopics(topic.id);
-            return { ...topic, subtopics };
+            
+            // Collect completion timestamps for this topic
+            const completedSubtopicTimestamps = subtopics
+              .filter(s => s.status === 'completed' && s.completedAt)
+              .map(s => s.completedAt!.toISOString());
+            
+            return { 
+              ...topic, 
+              subtopics,
+              completedSubtopicTimestamps
+            };
           })
         );
         return { ...category, topics: topicsWithSubtopics };
