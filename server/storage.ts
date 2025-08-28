@@ -350,7 +350,17 @@ export interface IStorage {
       })
     | undefined
   >;
-  getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number; completedSubtopicTimestamps?: string[] })[] })[]>;
+  getUserGoalsWithCategories(
+    userId: number
+  ): Promise<
+    (Goal & {
+      categories: (GoalCategory & {
+        totalSubtopics: number;
+        completedSubtopics: number;
+        completedSubtopicTimestamps?: string[];
+      })[];
+    })[]
+  >;
   getGoalCategory(id: string): Promise<GoalCategory | undefined>;
   getCategoryTopics(categoryId: string): Promise<GoalTopic[]>;
   getGoalTopic(id: string): Promise<GoalTopic | undefined>;
@@ -2572,7 +2582,10 @@ export class PgStorage implements IStorage {
           });
       }
     } catch (error) {
-      console.error("Error updating daily activity for subtopic completion:", error);
+      console.error(
+        "Error updating daily activity for subtopic completion:",
+        error
+      );
     }
   }
 
@@ -3565,13 +3578,23 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number; completedSubtopicTimestamps?: string[] })[] })[]> {
+  async getUserGoalsWithCategories(
+    userId: number
+  ): Promise<
+    (Goal & {
+      categories: (GoalCategory & {
+        totalSubtopics: number;
+        completedSubtopics: number;
+        completedSubtopicTimestamps?: string[];
+      })[];
+    })[]
+  > {
     const goals = await this.getUserGoals(userId);
-    
+
     const goalsWithCategories = await Promise.all(
       goals.map(async (goal) => {
         const categories = await this.getGoalCategories(goal.id);
-        
+
         // For each category, calculate subtopic totals and collect completion timestamps
         const categoriesWithSubtopicTotals = await Promise.all(
           categories.map(async (category) => {
@@ -3579,32 +3602,34 @@ export class PgStorage implements IStorage {
             let totalSubtopics = 0;
             let completedSubtopics = 0;
             const completedSubtopicTimestamps: string[] = [];
-            
+
             for (const topic of topics) {
               const subtopics = await this.getTopicSubtopics(topic.id);
               totalSubtopics += subtopics.length;
-              
+
               for (const subtopic of subtopics) {
-                if (subtopic.status === 'completed' && subtopic.completedAt) {
+                if (subtopic.status === "completed" && subtopic.completedAt) {
                   completedSubtopics++;
-                  completedSubtopicTimestamps.push(subtopic.completedAt.toISOString());
+                  completedSubtopicTimestamps.push(
+                    subtopic.completedAt.toISOString()
+                  );
                 }
               }
             }
-            
+
             return {
               ...category,
               totalSubtopics,
               completedSubtopics,
-              completedSubtopicTimestamps
+              completedSubtopicTimestamps,
             };
           })
         );
-        
+
         return { ...goal, categories: categoriesWithSubtopicTotals };
       })
     );
-    
+
     return goalsWithCategories;
   }
 
@@ -3912,13 +3937,18 @@ export class PgStorage implements IStorage {
     }
   }
 
+  // In storage.ts
+
+  // ... other code
+
   async getGoalWithCategories(goalId: string): Promise<
     | (Goal & {
         categories: (GoalCategory & {
-          topics: (GoalTopic & { 
+          topics: (GoalTopic & {
             subtopics: GoalSubtopic[];
             completedSubtopicTimestamps?: string[];
           })[];
+          completedSubtopicTimestamps?: string[];
         })[];
       })
     | undefined
@@ -3927,31 +3957,60 @@ export class PgStorage implements IStorage {
     if (!goal) return undefined;
 
     const categories = await this.getGoalCategories(goalId);
-    const categoriesWithTopics = await Promise.all(
+
+    const categoriesWithDetails = await Promise.all(
       categories.map(async (category) => {
         const topics = await this.getCategoryTopics(category.id);
-        const topicsWithSubtopics = await Promise.all(
+        let categoryCompletedTimestamps: string[] = [];
+
+        const topicsWithDetails = await Promise.all(
           topics.map(async (topic) => {
             const subtopics = await this.getTopicSubtopics(topic.id);
-            
-            // Collect completion timestamps for this topic
-            const completedSubtopicTimestamps = subtopics
-              .filter(s => s.status === 'completed' && s.completedAt)
-              .map(s => s.completedAt!.toISOString());
-            
-            return { 
-              ...topic, 
+            const completedSubtopics = subtopics.filter(
+              (s) => s.status === "completed"
+            );
+
+            const topicCompletedTimestamps = completedSubtopics
+              .map((s) => (s.completedAt ? s.completedAt.toISOString() : null))
+              .filter((ts): ts is string => ts !== null);
+
+            // Add this topic's timestamps to the category's list
+            categoryCompletedTimestamps.push(...topicCompletedTimestamps);
+
+            return {
+              ...topic,
               subtopics,
-              completedSubtopicTimestamps
+              totalSubtopics: subtopics.length,
+              completedSubtopics: completedSubtopics.length,
+              completedSubtopicTimestamps: topicCompletedTimestamps,
             };
           })
         );
-        return { ...category, topics: topicsWithSubtopics };
+
+        const categoryTotalSubtopics = topicsWithDetails.reduce(
+          (sum, t) => sum + t.totalSubtopics,
+          0
+        );
+        const categoryCompletedSubtopics = topicsWithDetails.reduce(
+          (sum, t) => sum + t.completedSubtopics,
+          0
+        );
+
+        // Return the category enriched with the calculated data
+        return {
+          ...category,
+          topics: topicsWithDetails,
+          totalSubtopics: categoryTotalSubtopics,
+          completedSubtopics: categoryCompletedSubtopics,
+          completedSubtopicTimestamps: categoryCompletedTimestamps,
+        };
       })
     );
 
-    return { ...goal, categories: categoriesWithTopics };
+    return { ...goal, categories: categoriesWithDetails };
   }
+
+  // ... other code
 
   async updateTopicStatus(
     topicId: string,
@@ -4230,12 +4289,14 @@ export class PgStorage implements IStorage {
           if (index !== -1) {
             subtopics[index] = { ...subtopics[index], ...updateData };
             this.fallbackData.set(key, subtopics);
-            
+
             // Update daily activity when subtopic is completed
             if (status === "completed") {
-              await this.updateDailyActivityForSubtopicCompletion(subtopics[index].topicId);
+              await this.updateDailyActivityForSubtopicCompletion(
+                subtopics[index].topicId
+              );
             }
-            
+
             return subtopics[index];
           }
         }
@@ -4253,7 +4314,7 @@ export class PgStorage implements IStorage {
       if (subtopic) {
         // Update topic and category counters
         await this.updateTopicProgressCounters(subtopic.topicId);
-        
+
         // Update daily activity when subtopic is completed
         if (status === "completed") {
           await this.updateDailyActivityForSubtopicCompletion(subtopic.topicId);

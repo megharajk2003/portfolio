@@ -18,8 +18,8 @@ import {
 import { Target, Upload, BookOpen, TrendingUp } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import GoalHeatMap from "@/components/goal-heat-map";
-import ReactApexChart from 'react-apexcharts';
-import { ApexOptions } from 'apexcharts';
+import ReactApexChart from "react-apexcharts";
+import { ApexOptions } from "apexcharts";
 import { navigate } from "wouter/use-browser-location";
 
 // Interfaces for the Goal tracking system
@@ -47,125 +47,6 @@ interface Goal {
   updatedAt: string;
   categories?: GoalCategory[];
 }
-
-// ApexChart Component for Goal Type Bar Chart
-const ApexGoalTypeBarChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
-    const chartData = useMemo(() => {
-        const data = Object.entries(goalsByType).map(([type, typeGoals]) => {
-            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
-            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-            
-            return {
-                x: type,
-                y: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0,
-                completed: completedSubtopics,
-                total: totalSubtopics
-            };
-        });
-        
-        return data;
-    }, [goalsByType]);
-
-    const options: ApexOptions = {
-        chart: {
-            type: 'bar',
-            height: 300,
-            toolbar: { show: false }
-        },
-        plotOptions: {
-            bar: {
-                borderRadius: 4,
-                horizontal: false,
-                columnWidth: '60%'
-            }
-        },
-        dataLabels: { enabled: false },
-        stroke: { show: true, width: 2, colors: ['transparent'] },
-        xaxis: {
-            categories: chartData.map(item => item.x),
-            title: { text: 'Goal Types' }
-        },
-        yaxis: {
-            title: { text: 'Progress Percentage' },
-            max: 100,
-            min: 0
-        },
-        fill: { opacity: 1 },
-        tooltip: {
-            custom: function({ series, seriesIndex, dataPointIndex }) {
-                const data = chartData[dataPointIndex];
-                return `<div style="padding: 10px;">
-                    <strong>${data.x}</strong><br/>
-                    Progress: ${data.y}%<br/>
-                    Completed: ${data.completed}/${data.total}
-                </div>`;
-            }
-        },
-        colors: ['#3b82f6']
-    };
-
-    const series = [{
-        name: 'Progress %',
-        data: chartData.map(item => item.y)
-    }];
-
-    return <ReactApexChart options={options} series={series} type="bar" height={300} />;
-};
-
-// ApexChart Component for Goal Type Pie Chart
-const ApexGoalTypePieChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
-    const chartData = useMemo(() => {
-        const data = Object.entries(goalsByType).map(([type, typeGoals]) => {
-            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
-            return {
-                name: type,
-                value: completedSubtopics
-            };
-        });
-        
-        return data.filter(item => item.value > 0); // Only show types with actual progress
-    }, [goalsByType]);
-
-    const options: ApexOptions = {
-        chart: {
-            type: 'pie',
-            height: 300
-        },
-        labels: chartData.map(item => item.name),
-        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
-        tooltip: {
-            custom: function({ series, seriesIndex }) {
-                const totalForType = Object.values(goalsByType)[seriesIndex]?.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0) || 0;
-                const completed = series[seriesIndex];
-                const percentage = totalForType > 0 ? Math.round((completed / totalForType) * 100) : 0;
-                
-                return `<div style="padding: 10px;">
-                    <strong>${chartData[seriesIndex]?.name}</strong><br/>
-                    Completed: ${completed}/${totalForType}<br/>
-                    Progress: ${percentage}%
-                </div>`;
-            }
-        },
-        legend: {
-            position: 'bottom'
-        },
-        responsive: [{
-            breakpoint: 480,
-            options: {
-                chart: { width: 300 },
-                legend: { position: 'bottom' }
-            }
-        }]
-    };
-
-    const series = chartData.map(item => item.value);
-
-    if (series.length === 0) {
-        return <div className="h-[300px] flex items-center justify-center text-gray-500">No completed subtopics yet</div>;
-    }
-
-    return <ReactApexChart options={options} series={series} type="pie" height={300} />;
-};
 
 // API functions for goals
 const fetchUserGoals = async () => {
@@ -195,6 +76,94 @@ const createGoalFromCSVApi = async (data: {
   return response.json();
 };
 
+// ==================================================================
+// 1. NEW ApexChart Component for Goal Progress (Bar Chart)
+// ==================================================================
+const ApexGoalProgressBarChart: React.FC<{ goals: Goal[] }> = ({ goals }) => {
+  const chartData = useMemo(() => {
+    return goals.map((goal) => ({
+      x: goal.name,
+      y:
+        goal.totalSubtopics > 0
+          ? Math.round((goal.completedSubtopics / goal.totalSubtopics) * 100)
+          : 0,
+      completed: goal.completedSubtopics,
+      total: goal.totalSubtopics,
+    }));
+  }, [goals]);
+
+  const options: ApexOptions = {
+    chart: { type: "bar", height: 300, toolbar: { show: false } },
+    plotOptions: { bar: { borderRadius: 4, horizontal: true } },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: chartData.map((item) => item.x),
+      title: { text: "Progress Percentage" },
+      max: 100,
+      min: 0,
+    },
+    yaxis: { title: { text: "Goals" } },
+    tooltip: {
+      custom: function ({ series, seriesIndex, dataPointIndex }) {
+        const data = chartData[dataPointIndex];
+        return `<div style="padding: 10px;">
+                    <strong>${data.x}</strong><br/>
+                    Progress: ${data.y}%<br/>
+                    Completed: ${data.completed}/${data.total}
+                </div>`;
+      },
+    },
+    colors: ["#3b82f6"],
+  };
+
+  const series = [
+    {
+      name: "Progress %",
+      data: chartData.map((item) => item.y),
+    },
+  ];
+
+  return (
+    <ReactApexChart options={options} series={series} type="bar" height={300} />
+  );
+};
+
+// ==================================================================
+// 2. NEW ApexChart Component for Effort Distribution (Pie Chart)
+// ==================================================================
+const ApexGoalPieChart: React.FC<{ goals: Goal[] }> = ({ goals }) => {
+  const chartData = useMemo(() => {
+    return goals
+      .filter((goal) => goal.completedSubtopics > 0)
+      .map((goal) => ({
+        name: goal.name,
+        value: goal.completedSubtopics,
+      }));
+  }, [goals]);
+
+  const options: ApexOptions = {
+    chart: { type: "pie", height: 300 },
+    labels: chartData.map((item) => item.name),
+    colors: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"],
+    legend: { position: "bottom" },
+    tooltip: { y: { formatter: (val) => `${val} subtopics` } },
+  };
+
+  const series = chartData.map((item) => item.value);
+
+  if (series.length === 0) {
+    return (
+      <div className="h-[300px] flex items-center justify-center text-gray-500">
+        No completed subtopics yet.
+      </div>
+    );
+  }
+
+  return (
+    <ReactApexChart options={options} series={series} type="pie" height={300} />
+  );
+};
+
 export default function GoalStart() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -212,8 +181,9 @@ export default function GoalStart() {
 
   // Use goals directly instead of grouping by type
   const sortedGoals = useMemo(() => {
-    return [...goals].sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    return [...goals].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
   }, [goals]);
 
@@ -464,7 +434,8 @@ export default function GoalStart() {
                 {sortedGoals.map((goal) => {
                   const progressPercentage =
                     goal.totalSubtopics > 0
-                      ? ((goal.completedSubtopics || 0) / goal.totalSubtopics) * 100
+                      ? ((goal.completedSubtopics || 0) / goal.totalSubtopics) *
+                        100
                       : 0;
 
                   return (
@@ -476,7 +447,9 @@ export default function GoalStart() {
                     >
                       <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-3">
-                          <div className="text-2xl">{getTypeIcon(goal.name)}</div>
+                          <div className="text-2xl">
+                            {getTypeIcon(goal.name)}
+                          </div>
                           <div>
                             <div className="text-xl font-bold">{goal.name}</div>
                             <div className="text-sm text-gray-600 font-normal">
@@ -510,7 +483,8 @@ export default function GoalStart() {
                                 Overall Progress
                               </span>
                               <span className="text-sm text-gray-600">
-                                {goal.completedSubtopics || 0} / {goal.totalSubtopics || 0}
+                                {goal.completedSubtopics || 0} /{" "}
+                                {goal.totalSubtopics || 0}
                               </span>
                             </div>
                             <Progress
@@ -541,33 +515,36 @@ export default function GoalStart() {
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Categories:
                               </span>
-                              {goal.categories.slice(0, 2).map((category: GoalCategory) => (
-                                <div
-                                  key={category.id}
-                                  className="p-2 bg-white dark:bg-gray-700 rounded-md border text-sm"
-                                  data-testid={`preview-category-${category.id}`}
-                                >
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="font-medium truncate">
-                                      {category.name}
-                                    </span>
-                                    <span className="text-xs text-gray-500 ml-2">
-                                      {category.completedSubtopics || 0}/
-                                      {category.totalSubtopics || 0}
-                                    </span>
+                              {goal.categories
+                                .slice(0, 2)
+                                .map((category: GoalCategory) => (
+                                  <div
+                                    key={category.id}
+                                    className="p-2 bg-white dark:bg-gray-700 rounded-md border text-sm"
+                                    data-testid={`preview-category-${category.id}`}
+                                  >
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="font-medium truncate">
+                                        {category.name}
+                                      </span>
+                                      <span className="text-xs text-gray-500 ml-2">
+                                        {category.completedSubtopics || 0}/
+                                        {category.totalSubtopics || 0}
+                                      </span>
+                                    </div>
+                                    <Progress
+                                      value={
+                                        category.totalSubtopics > 0
+                                          ? ((category.completedSubtopics ||
+                                              0) /
+                                              category.totalSubtopics) *
+                                            100
+                                          : 0
+                                      }
+                                      className="h-1"
+                                    />
                                   </div>
-                                  <Progress
-                                    value={
-                                      category.totalSubtopics > 0
-                                        ? ((category.completedSubtopics || 0) /
-                                            category.totalSubtopics) *
-                                          100
-                                        : 0
-                                    }
-                                    className="h-1"
-                                  />
-                                </div>
-                              ))}
+                                ))}
                               {goal.categories.length > 2 && (
                                 <div className="text-xs text-gray-500 text-center pt-1">
                                   +{goal.categories.length - 2} more categories
@@ -582,39 +559,37 @@ export default function GoalStart() {
                 })}
               </div>
 
-              {/* Import and use the existing GoalHeatMap component for real data */}
-              <GoalHeatMap />
-
-              {/* Progress Summary Charts */}
+              {/* --- 3. UPDATED Analytics Overview Section --- */}
               <div className="space-y-8">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                   Analytics Overview
                 </h2>
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Progress by Goal Type Bar Chart */}
+                  {/* Progress by Goal Bar Chart */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUp className="h-5 w-5 text-blue-500" />
-                        Progress by Goal Type
+                        Progress by Goal
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ApexGoalTypeBarChart goalsByType={{}} />
+                      {/* Use the new chart component with the goals data */}
+                      <ApexGoalProgressBarChart goals={sortedGoals} />
                     </CardContent>
                   </Card>
 
-                  {/* Overall Progress Pie Chart */}
+                  {/* Effort Distribution Pie Chart */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUp className="h-5 w-5 text-green-500" />
-                        Progress Distribution
+                        Effort Distribution
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ApexGoalTypePieChart goalsByType={{}} />
+                      {/* Use the new chart component with the goals data */}
+                      <ApexGoalPieChart goals={sortedGoals} />
                     </CardContent>
                   </Card>
                 </div>
@@ -622,6 +597,9 @@ export default function GoalStart() {
             </div>
           )}
         </div>
+
+        {/* Import and use the existing GoalHeatMap component for real data */}
+        <GoalHeatMap />
       </div>
     </div>
   );
