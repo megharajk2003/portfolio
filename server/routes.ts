@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { AICareerService } from "./ai-service";
+import { requireAdmin } from "./adminUtils";
 import {
   insertUserSchema,
   insertProfileSchema,
@@ -3208,6 +3209,269 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user badges:", error);
       res.status(500).json({ message: "Failed to fetch badges" });
+    }
+  });
+
+  // =================== ADMIN ROUTES ===================
+  // Admin module management
+  app.get("/api/admin/modules", requireAdmin, async (req, res) => {
+    try {
+      const modules = await storage.getAllModules();
+      res.json(modules);
+    } catch (error) {
+      console.error("Error fetching all modules:", error);
+      res.status(500).json({ message: "Failed to fetch modules" });
+    }
+  });
+
+  app.post("/api/admin/modules", requireAdmin, async (req, res) => {
+    try {
+      const module = await storage.createModule(req.body);
+      res.json(module);
+    } catch (error) {
+      console.error("Error creating module:", error);
+      res.status(500).json({ message: "Failed to create module" });
+    }
+  });
+
+  app.put("/api/admin/modules/:id", requireAdmin, async (req, res) => {
+    try {
+      const module = await storage.updateModule(req.params.id, req.body);
+      if (!module) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+      res.json(module);
+    } catch (error) {
+      console.error("Error updating module:", error);
+      res.status(500).json({ message: "Failed to update module" });
+    }
+  });
+
+  app.delete("/api/admin/modules/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteModule(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+      res.json({ message: "Module deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      res.status(500).json({ message: "Failed to delete module" });
+    }
+  });
+
+  // Admin lesson management
+  app.get("/api/admin/lessons", requireAdmin, async (req, res) => {
+    try {
+      const lessons = await storage.getAllLessons();
+      res.json(lessons);
+    } catch (error) {
+      console.error("Error fetching all lessons:", error);
+      res.status(500).json({ message: "Failed to fetch lessons" });
+    }
+  });
+
+  app.post("/api/admin/lessons", requireAdmin, async (req, res) => {
+    try {
+      const lesson = await storage.createLesson(req.body);
+      res.json(lesson);
+    } catch (error) {
+      console.error("Error creating lesson:", error);
+      res.status(500).json({ message: "Failed to create lesson" });
+    }
+  });
+
+  app.put("/api/admin/lessons/:id", requireAdmin, async (req, res) => {
+    try {
+      const lesson = await storage.updateLesson(req.params.id, req.body);
+      if (!lesson) {
+        return res.status(404).json({ message: "Lesson not found" });
+      }
+      res.json(lesson);
+    } catch (error) {
+      console.error("Error updating lesson:", error);
+      res.status(500).json({ message: "Failed to update lesson" });
+    }
+  });
+
+  app.delete("/api/admin/lessons/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteLesson(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Lesson not found" });
+      }
+      res.json({ message: "Lesson deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+      res.status(500).json({ message: "Failed to delete lesson" });
+    }
+  });
+
+  // Admin course management
+  app.get("/api/admin/courses", requireAdmin, async (req, res) => {
+    try {
+      const courses = await storage.getCourses();
+      res.json(courses);
+    } catch (error) {
+      console.error("Error fetching all courses:", error);
+      res.status(500).json({ message: "Failed to fetch courses" });
+    }
+  });
+
+  app.post("/api/admin/courses", requireAdmin, async (req, res) => {
+    try {
+      const course = await storage.createCourse(req.body);
+      res.json(course);
+    } catch (error) {
+      console.error("Error creating course:", error);
+      res.status(500).json({ message: "Failed to create course" });
+    }
+  });
+
+  app.put("/api/admin/courses/:id", requireAdmin, async (req, res) => {
+    try {
+      const course = await storage.updateCourse(req.params.id, req.body);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      res.json(course);
+    } catch (error) {
+      console.error("Error updating course:", error);
+      res.status(500).json({ message: "Failed to update course" });
+    }
+  });
+
+  app.delete("/api/admin/courses/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteCourse(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      res.json({ message: "Course deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      res.status(500).json({ message: "Failed to delete course" });
+    }
+  });
+
+  // Admin user management
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      // Remove password from response for security
+      const safeUsers = users.map(({ password, ...user }) => user);
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove password from response for security
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.get("/api/admin/users/:id/profile", requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const profile = await storage.getProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  // Admin forum moderation
+  app.get("/api/admin/forum/posts", requireAdmin, async (req, res) => {
+    try {
+      const posts = await storage.getForumPosts();
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching all forum posts:", error);
+      res.status(500).json({ message: "Failed to fetch forum posts" });
+    }
+  });
+
+  app.put("/api/admin/forum/posts/:id", requireAdmin, async (req, res) => {
+    try {
+      const post = await storage.updateForumPost(req.params.id, req.body);
+      if (!post) {
+        return res.status(404).json({ message: "Forum post not found" });
+      }
+      res.json(post);
+    } catch (error) {
+      console.error("Error updating forum post:", error);
+      res.status(500).json({ message: "Failed to update forum post" });
+    }
+  });
+
+  app.delete("/api/admin/forum/posts/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteForumPost(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Forum post not found" });
+      }
+      res.json({ message: "Forum post deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting forum post:", error);
+      res.status(500).json({ message: "Failed to delete forum post" });
+    }
+  });
+
+  app.get("/api/admin/forum/replies", requireAdmin, async (req, res) => {
+    try {
+      const replies = await storage.getAllForumReplies();
+      res.json(replies);
+    } catch (error) {
+      console.error("Error fetching all forum replies:", error);
+      res.status(500).json({ message: "Failed to fetch forum replies" });
+    }
+  });
+
+  app.put("/api/admin/forum/replies/:id", requireAdmin, async (req, res) => {
+    try {
+      const reply = await storage.updateForumReply(req.params.id, req.body);
+      if (!reply) {
+        return res.status(404).json({ message: "Forum reply not found" });
+      }
+      res.json(reply);
+    } catch (error) {
+      console.error("Error updating forum reply:", error);
+      res.status(500).json({ message: "Failed to update forum reply" });
+    }
+  });
+
+  app.delete("/api/admin/forum/replies/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteForumReply(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Forum reply not found" });
+      }
+      res.json({ message: "Forum reply deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting forum reply:", error);
+      res.status(500).json({ message: "Failed to delete forum reply" });
     }
   });
 

@@ -242,6 +242,7 @@ export interface IStorage {
     data: Partial<InsertForumReply>
   ): Promise<ForumReply | undefined>;
   deleteForumReply(id: string): Promise<boolean>;
+  getAllForumReplies(): Promise<(ForumReply & { user: User })[]>;
 
   toggleForumLike(
     data: InsertForumLike
@@ -273,10 +274,16 @@ export interface IStorage {
   getCourseModules(courseId: string): Promise<Module[]>;
   getModule(id: string): Promise<Module | undefined>;
   createModule(module: InsertModule): Promise<Module>;
+  getAllModules(): Promise<Module[]>;
+  updateModule(id: string, module: Partial<InsertModule>): Promise<Module | undefined>;
+  deleteModule(id: string): Promise<boolean>;
 
   getModuleLessons(moduleId: string): Promise<Lesson[]>;
   getLesson(id: string): Promise<Lesson | undefined>;
   createLesson(lesson: InsertLesson): Promise<Lesson>;
+  getAllLessons(): Promise<Lesson[]>;
+  updateLesson(id: string, lesson: Partial<InsertLesson>): Promise<Lesson | undefined>;
+  deleteLesson(id: string): Promise<boolean>;
 
   getUserEnrollments(userId: number): Promise<Enrollment[]>;
   getCourseEnrollments(courseId: string): Promise<Enrollment[]>;
@@ -2253,6 +2260,94 @@ export class PgStorage implements IStorage {
     return lesson;
   }
 
+  async getAllModules(): Promise<Module[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get("modules") || [];
+    }
+    return await db.select().from(modules);
+  }
+
+  async updateModule(
+    id: string,
+    moduleData: Partial<InsertModule>
+  ): Promise<Module | undefined> {
+    if (!this.isDbConnected) {
+      const allModules = this.fallbackData.get("modules") || [];
+      const index = allModules.findIndex((m: any) => m.id === id);
+      if (index !== -1) {
+        allModules[index] = { ...allModules[index], ...moduleData };
+        this.fallbackData.set("modules", allModules);
+        return allModules[index];
+      }
+      return undefined;
+    }
+    const [module] = await db
+      .update(modules)
+      .set(moduleData)
+      .where(eq(modules.id, id))
+      .returning();
+    return module;
+  }
+
+  async deleteModule(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      const allModules = this.fallbackData.get("modules") || [];
+      const index = allModules.findIndex((m: any) => m.id === id);
+      if (index !== -1) {
+        allModules.splice(index, 1);
+        this.fallbackData.set("modules", allModules);
+        return true;
+      }
+      return false;
+    }
+    const result = await db.delete(modules).where(eq(modules.id, id));
+    return result.length > 0;
+  }
+
+  async getAllLessons(): Promise<Lesson[]> {
+    if (!this.isDbConnected) {
+      return this.fallbackData.get("lessons") || [];
+    }
+    return await db.select().from(lessons);
+  }
+
+  async updateLesson(
+    id: string,
+    lessonData: Partial<InsertLesson>
+  ): Promise<Lesson | undefined> {
+    if (!this.isDbConnected) {
+      const allLessons = this.fallbackData.get("lessons") || [];
+      const index = allLessons.findIndex((l: any) => l.id === id);
+      if (index !== -1) {
+        allLessons[index] = { ...allLessons[index], ...lessonData };
+        this.fallbackData.set("lessons", allLessons);
+        return allLessons[index];
+      }
+      return undefined;
+    }
+    const [lesson] = await db
+      .update(lessons)
+      .set(lessonData)
+      .where(eq(lessons.id, id))
+      .returning();
+    return lesson;
+  }
+
+  async deleteLesson(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      const allLessons = this.fallbackData.get("lessons") || [];
+      const index = allLessons.findIndex((l: any) => l.id === id);
+      if (index !== -1) {
+        allLessons.splice(index, 1);
+        this.fallbackData.set("lessons", allLessons);
+        return true;
+      }
+      return false;
+    }
+    const result = await db.delete(lessons).where(eq(lessons.id, id));
+    return result.length > 0;
+  }
+
   // Import the Course type if you haven't already
 
   // 👇 Update the return type here
@@ -3392,6 +3487,35 @@ export class PgStorage implements IStorage {
     } catch (error) {
       console.error("Error deleting forum reply:", error);
       return false;
+    }
+  }
+
+  async getAllForumReplies(): Promise<(ForumReply & { user: User })[]> {
+    if (!this.isDbConnected) {
+      const allReplies: any[] = [];
+      for (const key of this.fallbackData.keys()) {
+        if (key.startsWith("forumReplies_")) {
+          const replies = this.fallbackData.get(key) || [];
+          allReplies.push(...replies.filter((r: any) => r.isActive !== false));
+        }
+      }
+      return allReplies;
+    }
+    try {
+      const result = await db
+        .select()
+        .from(forumReplies)
+        .innerJoin(users, eq(forumReplies.userId, users.id))
+        .where(eq(forumReplies.isActive, true))
+        .orderBy(desc(forumReplies.createdAt));
+
+      return result.map((row) => ({
+        ...row.forum_replies,
+        user: row.users,
+      }));
+    } catch (error) {
+      console.error("Error fetching all forum replies:", error);
+      return [];
     }
   }
 

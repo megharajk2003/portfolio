@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Folder,
   CheckCircle2,
+  Settings,
 } from "lucide-react";
 
 const navigation = [
@@ -57,6 +58,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { user } = useAuth();
 
   const userId = user?.id?.toString() ?? "1"; // Fallback for demo
+  const isAdmin = user?.email === 'admin@email.com';
 
   // Check if we're on a goal details page
   const isGoalDetailsPage =
@@ -166,6 +168,27 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
           );
         })}
+        
+        {/* Admin Navigation */}
+        {isAdmin && (
+          <Link href="/admin">
+            <div
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors border border-red-200 dark:border-red-800",
+                location === "/admin"
+                  ? "bg-red-600 text-white border-red-600"
+                  : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              )}
+              onClick={() => onClose && onClose()}
+            >
+              <Settings className="h-5 w-5" />
+              <span>Admin Dashboard</span>
+              <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                Admin
+              </span>
+            </div>
+          </Link>
+        )}
       </nav>
 
       {/* Portfolio Link */}

@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import AuthProviderWrapper from "@/components/clerk-provider";
 import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
+import AdminDashboard from "@/pages/admin-dashboard";
 import { useToast } from "@/hooks/use-toast";
 
 import Portfolio from "@/pages/portfolio";
@@ -65,6 +66,7 @@ function Router() {
       "/goals",
       "/goal-tracker",
       "/badges",
+      "/admin",
     ];
     const isProtectedRoute = protectedRoutes.some((route) =>
       location.startsWith(route)
@@ -133,6 +135,7 @@ function Router() {
           <Route path="/career-timeline" component={CareerTimeline} />
           <Route path="/resume-generator" component={ResumeGenerator} />
           <Route path="/career-chat" component={CareerChat} />
+          <Route path="/admin" component={AdminDashboard} />
         </>
       ) : (
         <>
