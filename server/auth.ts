@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { isAdminUser } from "./adminUtils";
 
 declare global {
   namespace Express {
@@ -168,6 +169,7 @@ export function setupAuth(app: Express) {
       firstName: req.user.firstName,
       lastName: req.user.lastName,
       profileImageUrl: req.user.profileImageUrl,
+      isAdmin: isAdminUser(req.user.email),
     });
   });
 }
