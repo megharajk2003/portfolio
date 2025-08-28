@@ -136,11 +136,8 @@ export default function GoalTracker() {
       const goalName = goal.name.toLowerCase();
       const type = selectedGoalType.toLowerCase();
 
-      if (type === "tnpsc") return goalName.includes("tnpsc");
-      if (type === "ssc") return goalName.includes("ssc");
-      if (type === "upsc") return goalName.includes("upsc");
-      if (type === "banking") return goalName.includes("bank");
-      return type === "other";
+      // Dynamic filtering: check if goal name contains the type
+      return goalName.includes(type);
     });
   }, [goals, selectedGoalType]);
 
