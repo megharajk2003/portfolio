@@ -210,21 +210,11 @@ export default function GoalStart() {
     enabled: !!user,
   });
 
-  // Group goals by type/category for card display
-  const goalsByType = useMemo(() => {
-    const grouped: { [key: string]: Goal[] } = {};
-    goals.forEach((goal: Goal) => {
-      // Extract type from goal name - use first word as type
-      const goalName = goal.name.trim();
-      const firstWord = goalName.split(' ')[0];
-      const type = firstWord || "Other";
-
-      if (!grouped[type]) {
-        grouped[type] = [];
-      }
-      grouped[type].push(goal);
-    });
-    return grouped;
+  // Use goals directly instead of grouping by type
+  const sortedGoals = useMemo(() => {
+    return [...goals].sort((a, b) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
   }, [goals]);
 
   // CSV upload state
@@ -467,42 +457,30 @@ export default function GoalStart() {
             </Card>
           )}
 
-          {/* Goal Type Cards Display */}
-          {Object.keys(goalsByType).length > 0 && (
+          {/* Individual Goal Cards Display */}
+          {sortedGoals.length > 0 && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {Object.entries(goalsByType).map(([type, typeGoals]) => {
-                  const totalSubtopics = typeGoals.reduce(
-                    (sum, goal) => sum + (goal.totalSubtopics || 0),
-                    0
-                  );
-                  const completedSubtopics = typeGoals.reduce(
-                    (sum, goal) => sum + (goal.completedSubtopics || 0),
-                    0
-                  );
+                {sortedGoals.map((goal) => {
                   const progressPercentage =
-                    totalSubtopics > 0
-                      ? (completedSubtopics / totalSubtopics) * 100
+                    goal.totalSubtopics > 0
+                      ? ((goal.completedSubtopics || 0) / goal.totalSubtopics) * 100
                       : 0;
 
                   return (
                     <Card
-                      key={type}
+                      key={goal.id}
                       className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-l-4 border-l-blue-500"
-                      onClick={() =>
-                        navigate(
-                          `/goal-tracker?type=${encodeURIComponent(type)}`
-                        )
-                      }
-                      data-testid={`card-goal-type-${type.toLowerCase()}`}
+                      onClick={() => navigate(`/goal-tracker/${goal.id}`)}
+                      data-testid={`card-goal-${goal.id}`}
                     >
                       <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-3">
-                          <div className="text-2xl">{getTypeIcon(type)}</div>
+                          <div className="text-2xl">{getTypeIcon(goal.name)}</div>
                           <div>
-                            <div className="text-xl font-bold">{type}</div>
+                            <div className="text-xl font-bold">{goal.name}</div>
                             <div className="text-sm text-gray-600 font-normal">
-                              {getTypeDescription(type)}
+                              {getTypeDescription(goal.name)}
                             </div>
                           </div>
                         </CardTitle>
@@ -513,15 +491,13 @@ export default function GoalStart() {
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                               <div className="font-bold text-lg text-blue-600">
-                                {typeGoals.length}
+                                {goal.categories?.length || 0}
                               </div>
-                              <div className="text-gray-600">
-                                {typeGoals.length === 1 ? "Goal" : "Goals"}
-                              </div>
+                              <div className="text-gray-600">Categories</div>
                             </div>
                             <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                               <div className="font-bold text-lg text-green-600">
-                                {totalSubtopics}
+                                {goal.totalSubtopics || 0}
                               </div>
                               <div className="text-gray-600">Subtopics</div>
                             </div>
@@ -534,7 +510,7 @@ export default function GoalStart() {
                                 Overall Progress
                               </span>
                               <span className="text-sm text-gray-600">
-                                {completedSubtopics} / {totalSubtopics}
+                                {goal.completedSubtopics || 0} / {goal.totalSubtopics || 0}
                               </span>
                             </div>
                             <Progress
@@ -547,72 +523,58 @@ export default function GoalStart() {
                               </span>
                               <Badge
                                 className={getStatusColor(
-                                  completedSubtopics,
-                                  totalSubtopics
+                                  goal.completedSubtopics || 0,
+                                  goal.totalSubtopics || 0
                                 )}
                               >
                                 {getStatusText(
-                                  completedSubtopics,
-                                  totalSubtopics
+                                  goal.completedSubtopics || 0,
+                                  goal.totalSubtopics || 0
                                 )}
                               </Badge>
                             </div>
                           </div>
 
-                          {/* Individual Goals Preview */}
-                          <div className="space-y-2">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Goals:
-                            </span>
-                            {typeGoals.slice(0, 2).map((goal) => (
-                              <div
-                                key={goal.id}
-                                className="p-2 bg-white dark:bg-gray-700 rounded-md border text-sm"
-                                data-testid={`preview-goal-${goal.id}`}
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="font-medium truncate">
-                                    {goal.name}
-                                  </span>
-                                  <span className="text-xs text-gray-500 ml-2">
-                                    {goal.completedSubtopics || 0}/
-                                    {goal.totalSubtopics || 0}
-                                  </span>
+                          {/* Categories Preview */}
+                          {goal.categories && goal.categories.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Categories:
+                              </span>
+                              {goal.categories.slice(0, 2).map((category: GoalCategory) => (
+                                <div
+                                  key={category.id}
+                                  className="p-2 bg-white dark:bg-gray-700 rounded-md border text-sm"
+                                  data-testid={`preview-category-${category.id}`}
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="font-medium truncate">
+                                      {category.name}
+                                    </span>
+                                    <span className="text-xs text-gray-500 ml-2">
+                                      {category.completedSubtopics || 0}/
+                                      {category.totalSubtopics || 0}
+                                    </span>
+                                  </div>
+                                  <Progress
+                                    value={
+                                      category.totalSubtopics > 0
+                                        ? ((category.completedSubtopics || 0) /
+                                            category.totalSubtopics) *
+                                          100
+                                        : 0
+                                    }
+                                    className="h-1"
+                                  />
                                 </div>
-                                <Progress
-                                  value={
-                                    goal.totalSubtopics > 0
-                                      ? ((goal.completedSubtopics || 0) /
-                                          goal.totalSubtopics) *
-                                        100
-                                      : 0
-                                  }
-                                  className="h-1"
-                                />
-                              </div>
-                            ))}
-                            {typeGoals.length > 2 && (
-                              <div className="text-xs text-gray-500 text-center py-1">
-                                +{typeGoals.length - 2} more goals
-                              </div>
-                            )}
-                          </div>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full mt-4"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(
-                                `/goal-tracker?type=${encodeURIComponent(type)}`
-                              );
-                            }}
-                            data-testid={`button-view-${type.toLowerCase()}`}
-                          >
-                            <BookOpen className="h-4 w-4 mr-2" />
-                            View Categories
-                          </Button>
+                              ))}
+                              {goal.categories.length > 2 && (
+                                <div className="text-xs text-gray-500 text-center pt-1">
+                                  +{goal.categories.length - 2} more categories
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -639,7 +601,7 @@ export default function GoalStart() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ApexGoalTypeBarChart goalsByType={goalsByType} />
+                      <ApexGoalTypeBarChart goalsByType={{}} />
                     </CardContent>
                   </Card>
 
@@ -652,7 +614,7 @@ export default function GoalStart() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ApexGoalTypePieChart goalsByType={goalsByType} />
+                      <ApexGoalTypePieChart goalsByType={{}} />
                     </CardContent>
                   </Card>
                 </div>
