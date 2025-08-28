@@ -214,19 +214,10 @@ export default function GoalStart() {
   const goalsByType = useMemo(() => {
     const grouped: { [key: string]: Goal[] } = {};
     goals.forEach((goal: Goal) => {
-      // Extract type from goal name (TNPSC, SSC, etc.)
-      const goalName = goal.name.toLowerCase();
-      let type = "Other";
-
-      if (goalName.includes("tnpsc")) {
-        type = "TNPSC";
-      } else if (goalName.includes("ssc")) {
-        type = "SSC";
-      } else if (goalName.includes("upsc")) {
-        type = "UPSC";
-      } else if (goalName.includes("bank")) {
-        type = "Banking";
-      }
+      // Extract type from goal name - use first word as type
+      const goalName = goal.name.trim();
+      const firstWord = goalName.split(' ')[0];
+      const type = firstWord || "Other";
 
       if (!grouped[type]) {
         grouped[type] = [];
@@ -334,33 +325,13 @@ export default function GoalStart() {
   };
 
   const getTypeIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "tnpsc":
-        return "🏛️";
-      case "ssc":
-        return "📊";
-      case "upsc":
-        return "🇮🇳";
-      case "banking":
-        return "🏦";
-      default:
-        return "📚";
-    }
+    // Return a default icon for all types
+    return "📚";
   };
 
   const getTypeDescription = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "tnpsc":
-        return "Tamil Nadu Public Service Commission";
-      case "ssc":
-        return "Staff Selection Commission";
-      case "upsc":
-        return "Union Public Service Commission";
-      case "banking":
-        return "Banking & Financial Services";
-      default:
-        return "General Studies & Preparation";
-    }
+    // Return a generic description for all types
+    return "Learning & Preparation";
   };
 
   // Show loading state if user is not loaded yet
