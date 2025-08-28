@@ -550,6 +550,276 @@ const ApexGoalTypePieChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }>
     return <ReactApexChart options={options} series={series} type="pie" height={300} />;
 };
 
+// ApexChart Component for Calendar Heat Map
+const ApexCalendarHeatMap: React.FC<{ goals: Goal[] }> = ({ goals }) => {
+    const heatMapData = useMemo(() => {
+        // Generate heat map data for the current year
+        const currentYear = new Date().getFullYear();
+        const startDate = new Date(currentYear, 0, 1);
+        const endDate = new Date(currentYear, 11, 31);
+        
+        // Create an array of dates for the year
+        const dates: { x: number; y: number }[] = [];
+        const current = new Date(startDate);
+        
+        while (current <= endDate) {
+            dates.push({
+                x: current.getTime(),
+                y: 0 // Start with 0 completions
+            });
+            current.setDate(current.getDate() + 1);
+        }
+        
+        // Process goals to add completion data
+        goals.forEach(goal => {
+            if (goal.categories) {
+                goal.categories.forEach(category => {
+                    if (category.completedSubtopicTimestamps) {
+                        category.completedSubtopicTimestamps.forEach(timestamp => {
+                            const date = new Date(timestamp);
+                            if (date.getFullYear() === currentYear) {
+                                const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                                const dateIndex = dates.findIndex(d => d.x === dayStart.getTime());
+                                if (dateIndex >= 0) {
+                                    dates[dateIndex].y += 1;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        
+        return dates;
+    }, [goals]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'heatmap',
+            height: 200,
+            toolbar: { show: false }
+        },
+        plotOptions: {
+            heatmap: {
+                shadeIntensity: 0.5,
+                radius: 0,
+                useFillColorAsStroke: true,
+                colorScale: {
+                    ranges: [
+                        { from: 0, to: 0, name: 'No activity', color: '#f3f4f6' },
+                        { from: 1, to: 2, name: 'Low', color: '#ddd6fe' },
+                        { from: 3, to: 5, name: 'Medium', color: '#a5b4fc' },
+                        { from: 6, to: 10, name: 'High', color: '#6366f1' },
+                        { from: 11, to: 999, name: 'Very High', color: '#4338ca' }
+                    ]
+                }
+            }
+        },
+        dataLabels: { enabled: false },
+        stroke: { width: 1 },
+        title: {
+            text: 'Daily Study Activity Heat Map',
+            align: 'left'
+        },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                format: 'MMM'
+            }
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const data = heatMapData[dataPointIndex];
+                const date = new Date(data.x).toDateString();
+                return `<div style="padding: 10px;">
+                    <strong>${date}</strong><br/>
+                    Subtopics completed: ${data.y}
+                </div>`;
+            }
+        }
+    };
+
+    const series = [{
+        name: 'Subtopics Completed',
+        data: heatMapData
+    }];
+
+    return <ReactApexChart options={options} series={series} type="heatmap" height={200} />;
+};
+
+// ApexChart Component for Radar Chart
+const ApexRadarChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }> = ({ goalsByType }) => {
+    const radarData = useMemo(() => {
+        return Object.entries(goalsByType).map(([type, typeGoals]) => {
+            const totalSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.totalSubtopics || 0), 0);
+            const completedSubtopics = typeGoals.reduce((sum, goal) => sum + (goal.completedSubtopics || 0), 0);
+            
+            return {
+                category: type,
+                percentage: totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0
+            };
+        });
+    }, [goalsByType]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'radar',
+            height: 350,
+            toolbar: { show: false }
+        },
+        title: {
+            text: 'Subject Proficiency Balance',
+            align: 'left'
+        },
+        xaxis: {
+            categories: radarData.map(item => item.category)
+        },
+        yaxis: {
+            stepSize: 20,
+            max: 100,
+            min: 0,
+            labels: {
+                formatter: (val) => `${val}%`
+            }
+        },
+        plotOptions: {
+            radar: {
+                size: 140,
+                polygons: {
+                    strokeColors: '#e9e9e9',
+                    fill: {
+                        colors: ['#f8f9fa', '#e9ecef']
+                    }
+                }
+            }
+        },
+        colors: ['#3b82f6'],
+        markers: {
+            size: 4,
+            colors: ['#3b82f6'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+        },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex }) {
+                const data = radarData[dataPointIndex];
+                return `<div style="padding: 10px;">
+                    <strong>${data.category}</strong><br/>
+                    Progress: ${data.percentage}%
+                </div>`;
+            }
+        },
+        fill: {
+            opacity: 0.1
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['#3b82f6'],
+            dashArray: 0
+        }
+    };
+
+    const series = [{
+        name: 'Progress %',
+        data: radarData.map(item => item.percentage)
+    }];
+
+    return <ReactApexChart options={options} series={series} type="radar" height={350} />;
+};
+
+// ApexChart Component for Treemap
+const ApexTreemapChart: React.FC<{ allCategories: GoalCategory[] }> = ({ allCategories }) => {
+    const treemapData = useMemo(() => {
+        return allCategories.map(category => {
+            const completionRate = category.totalSubtopics > 0 
+                ? (category.completedSubtopics || 0) / category.totalSubtopics 
+                : 0;
+            
+            return {
+                x: category.name,
+                y: category.totalSubtopics || 1, // Size based on total subtopics
+                fillColor: completionRate === 1 ? '#10b981' : completionRate > 0 ? '#3b82f6' : '#f59e0b'
+            };
+        });
+    }, [allCategories]);
+
+    const options: ApexOptions = {
+        chart: {
+            type: 'treemap',
+            height: 400,
+            toolbar: { show: false }
+        },
+        title: {
+            text: 'Topic Structure Overview',
+            align: 'left'
+        },
+        dataLabels: {
+            enabled: true,
+            style: {
+                fontSize: '12px',
+                fontWeight: 'bold',
+                colors: ['#fff']
+            },
+            formatter: function(text: string, op: any): string | string[] {
+                const category = allCategories.find(cat => cat.name === text);
+                if (category) {
+                    return [text, `${category.completedSubtopics}/${category.totalSubtopics}`];
+                }
+                return text;
+            },
+            offsetY: -4
+        },
+        plotOptions: {
+            treemap: {
+                enableShades: true,
+                shadeIntensity: 0.5,
+                reverseNegativeShade: true,
+                colorScale: {
+                    ranges: [
+                        { from: -1, to: 0, color: '#f59e0b' }, // Not started - yellow
+                        { from: 0.01, to: 0.99, color: '#3b82f6' }, // In progress - blue  
+                        { from: 1, to: 1, color: '#10b981' } // Completed - green
+                    ]
+                }
+            }
+        },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const category = allCategories[dataPointIndex];
+                const completionRate = category.totalSubtopics > 0 
+                    ? Math.round((category.completedSubtopics || 0) / category.totalSubtopics * 100) 
+                    : 0;
+                
+                let status = 'Not Started';
+                if (completionRate === 100) status = 'Completed';
+                else if (completionRate > 0) status = 'In Progress';
+                
+                return `<div style="padding: 10px;">
+                    <strong>${category.name}</strong><br/>
+                    Progress: ${category.completedSubtopics || 0}/${category.totalSubtopics || 0} (${completionRate}%)<br/>
+                    Status: ${status}
+                </div>`;
+            }
+        }
+    };
+
+    const series = [{
+        data: treemapData
+    }];
+
+    if (treemapData.length === 0) {
+        return <div className="h-[400px] flex items-center justify-center text-gray-500">No categories available</div>;
+    }
+
+    return <ReactApexChart options={options} series={series} type="treemap" height={400} />;
+};
+
   const cumulativeProgressData = useMemo(() => {
     if (allCategories.length === 0) return [];
 
@@ -874,6 +1144,66 @@ const ApexGoalTypePieChart: React.FC<{ goalsByType: { [key: string]: Goal[] } }>
                 <ApexProgressChart categories={allCategories} />
               </CardContent>
             </Card>
+          )}
+
+          {/* New Enhanced Visualization Charts */}
+          {goals.length > 0 && (
+            <div className="space-y-6">
+              {/* Calendar Heat Map */}
+              <Card data-testid="calendar-heat-map">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-indigo-500" />
+                    Daily Study Activity Heat Map
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    GitHub-style heat map showing your daily consistency and study habits
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ApexCalendarHeatMap goals={filteredGoals} />
+                </CardContent>
+              </Card>
+
+              {/* Radar Chart and Treemap in a grid */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {/* Radar Chart */}
+                {Object.keys(goalsByType).length > 0 && (
+                  <Card data-testid="radar-chart">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-orange-500" />
+                        Subject Proficiency Balance
+                      </CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Compare your performance across different subjects
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <ApexRadarChart goalsByType={goalsByType} />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Treemap */}
+                {allCategories.length > 0 && (
+                  <Card data-testid="treemap-chart">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-emerald-500" />
+                        Topic Structure Overview
+                      </CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Hierarchical view of all topics and their completion status
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <ApexTreemapChart allCategories={allCategories} />
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
