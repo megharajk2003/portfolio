@@ -2895,7 +2895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { topicId } = req.params;
-      
+
       // Get topic details with category and goal information
       const topic = await storage.getGoalTopic(topicId);
       if (!topic) {
@@ -2914,7 +2914,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category,
         subtopics,
         totalSubtopics: subtopics.length,
-        completedSubtopics: subtopics.filter(s => s.status === 'completed').length
+        completedSubtopics: subtopics.filter((s) => s.status === "completed")
+          .length,
       };
 
       res.json(response);
@@ -3066,7 +3067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
-
+  s;
   // Notifications routes
   app.get("/api/notifications/:userId", async (req, res) => {
     try {
@@ -3170,23 +3171,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check all badges for the user
       const newBadges = await storage.checkAndAwardBadges(userId, "all");
-      
+
       // Get badge details for the newly awarded badges
       const newBadgesWithDetails = [];
       for (const userBadge of newBadges) {
         const allBadges = await storage.getBadges();
-        const badgeDetails = allBadges.find(b => b.id === userBadge.badgeId);
+        const badgeDetails = allBadges.find((b) => b.id === userBadge.badgeId);
         if (badgeDetails) {
           newBadgesWithDetails.push({
             ...userBadge,
-            badge: badgeDetails
+            badge: badgeDetails,
           });
         }
       }
 
-      res.json({ 
+      res.json({
         newBadges: newBadgesWithDetails,
-        count: newBadges.length 
+        count: newBadges.length,
       });
     } catch (error) {
       console.error("Error checking badges:", error);
