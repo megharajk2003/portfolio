@@ -350,7 +350,7 @@ export interface IStorage {
       })
     | undefined
   >;
-  getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number })[] })[]>;
+  getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number; completedSubtopicTimestamps?: string[] })[] })[]>;
   getGoalCategory(id: string): Promise<GoalCategory | undefined>;
   getCategoryTopics(categoryId: string): Promise<GoalTopic[]>;
   getGoalTopic(id: string): Promise<GoalTopic | undefined>;
@@ -3565,30 +3565,38 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number })[] })[]> {
+  async getUserGoalsWithCategories(userId: number): Promise<(Goal & { categories: (GoalCategory & { totalSubtopics: number; completedSubtopics: number; completedSubtopicTimestamps?: string[] })[] })[]> {
     const goals = await this.getUserGoals(userId);
     
     const goalsWithCategories = await Promise.all(
       goals.map(async (goal) => {
         const categories = await this.getGoalCategories(goal.id);
         
-        // For each category, calculate subtopic totals
+        // For each category, calculate subtopic totals and collect completion timestamps
         const categoriesWithSubtopicTotals = await Promise.all(
           categories.map(async (category) => {
             const topics = await this.getCategoryTopics(category.id);
             let totalSubtopics = 0;
             let completedSubtopics = 0;
+            const completedSubtopicTimestamps: string[] = [];
             
             for (const topic of topics) {
               const subtopics = await this.getTopicSubtopics(topic.id);
               totalSubtopics += subtopics.length;
-              completedSubtopics += subtopics.filter(s => s.status === 'completed').length;
+              
+              for (const subtopic of subtopics) {
+                if (subtopic.status === 'completed' && subtopic.completedAt) {
+                  completedSubtopics++;
+                  completedSubtopicTimestamps.push(subtopic.completedAt.toISOString());
+                }
+              }
             }
             
             return {
               ...category,
               totalSubtopics,
-              completedSubtopics
+              completedSubtopics,
+              completedSubtopicTimestamps
             };
           })
         );

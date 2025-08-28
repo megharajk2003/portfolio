@@ -295,55 +295,13 @@ export default function GoalTracker() {
 const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categories }) => {
     
     const chartState = useMemo(() => {
-        // Check if we have real completion timestamp data
-        const hasRealData = categories.some(category => 
-            category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0
-        );
-        
-        if (!hasRealData) {
-            // Generate sample data based on current completion status for demo
-            const series = categories.map(category => ({
-                name: category.name,
-                data: [] as [number, number][],
-            }));
-            
-            const today = new Date();
-            const startDate = new Date(today);
-            startDate.setDate(startDate.getDate() - 14); // 14 days ago
-            
-            // Generate realistic progress over the last 14 days
-            for (let i = 0; i <= 14; i++) {
-                const currentDate = new Date(startDate);
-                currentDate.setDate(startDate.getDate() + i);
-                const timestamp = currentDate.getTime();
-                
-                categories.forEach((category, categoryIndex) => {
-                    const completedSubtopics = category.completedSubtopics || 0;
-                    let progress = 0;
-                    
-                    // Show gradual progress buildup over time
-                    if (completedSubtopics > 0) {
-                        // Show more recent progress
-                        if (i >= 10) {
-                            progress = Math.min(completedSubtopics, Math.floor(completedSubtopics * ((i - 9) / 5)));
-                        }
-                    }
-                    
-                    const seriesIndex = series.findIndex(s => s.name === category.name);
-                    series[seriesIndex].data.push([timestamp, Math.max(0, progress)]);
-                });
-            }
-            
-            return { series };
-        }
-
-        // Use real completion timestamp data
         const validCategories = categories.filter(cat => cat && cat.name);
         const series = validCategories.map(category => ({
             name: category.name,
             data: [] as [number, number][],
         }));
 
+        // Collect all completion timestamps from all categories
         const allTimestamps = validCategories.flatMap(cat => 
             (cat.completedSubtopicTimestamps || []).map(ts => ({
                 catName: cat.name,
@@ -351,10 +309,15 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
             }))
         ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
+        // If no completion data, return empty series
+        if (allTimestamps.length === 0) {
+            return { series: [] };
+        }
+
         const cumulativeCounts: { [key: string]: number } = {};
         validCategories.forEach(cat => (cumulativeCounts[cat.name] = 0));
         
-        // Add a starting point for each series at its creation date
+        // Add a starting point for each category at its creation date
         validCategories.forEach(cat => {
             const seriesIndex = series.findIndex(s => s.name === cat.name);
             if (seriesIndex > -1 && cat.createdAt) {
@@ -363,7 +326,7 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
             }
         });
 
-        // Build the incremental, cumulative data points
+        // Build the incremental, cumulative data points from real completion data
         allTimestamps.forEach(({ catName, timestamp }) => {
             cumulativeCounts[catName]++;
             const seriesIndex = series.findIndex(s => s.name === catName);
@@ -372,17 +335,16 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
             }
         });
         
-        // Ensure all lines extend to the final timestamp for a clean graph
-        if (allTimestamps.length > 0) {
-            const lastTimestamp = allTimestamps[allTimestamps.length - 1].timestamp.getTime();
-            series.forEach(s => {
-                if (s.data.length > 0 && s.data[s.data.length - 1][0] < lastTimestamp) {
-                    s.data.push([lastTimestamp, s.data[s.data.length - 1][1]]);
-                }
-            });
-        }
+        // Extend all lines to current time with final counts
+        const now = new Date().getTime();
+        series.forEach(s => {
+            if (s.data.length > 0 && s.data[s.data.length - 1][0] < now) {
+                s.data.push([now, s.data[s.data.length - 1][1]]);
+            }
+        });
 
-        return { series };
+        // Only return series that have actual data points
+        return { series: series.filter(s => s.data.length > 1) };
     }, [categories]);
     
     // Options object adapted from your template
@@ -421,6 +383,14 @@ const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categorie
         },
         stroke: { curve: 'stepline' } // Use 'stepline' to show incremental progress accurately
     };
+
+    if (chartState.series.length === 0) {
+        return (
+            <div className="h-80 flex items-center justify-center text-gray-500">
+                No completed subtopics yet. Start completing subtopics to see progress over time.
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -570,11 +540,11 @@ const ApexCalendarHeatMap: React.FC<{ goals: Goal[] }> = ({ goals }) => {
             current.setDate(current.getDate() + 1);
         }
         
-        // Process goals to add completion data
+        // Process goals to add completion data from real timestamps
         goals.forEach(goal => {
             if (goal.categories) {
                 goal.categories.forEach(category => {
-                    if (category.completedSubtopicTimestamps) {
+                    if (category.completedSubtopicTimestamps && category.completedSubtopicTimestamps.length > 0) {
                         category.completedSubtopicTimestamps.forEach(timestamp => {
                             const date = new Date(timestamp);
                             if (date.getFullYear() === currentYear) {
@@ -1140,7 +1110,6 @@ const ApexTreemapChart: React.FC<{ allCategories: GoalCategory[] }> = ({ allCate
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Render the new ApexChart component instead of the Recharts one */}
                 <ApexProgressChart categories={allCategories} />
               </CardContent>
             </Card>

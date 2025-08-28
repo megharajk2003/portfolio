@@ -1,0 +1,405 @@
+The graphs on your different pages are not consistent because the data isn't being correctly aggregated and passed down through the levels of your application. The charts are using simulated or placeholder data instead of the real completion timestamps from your database.
+
+Let's fix this by correcting the data flow and standardizing the chart logic.
+
+The Root Cause: The API Data Structure
+
+The core issue starts with your /api/goals response. For the charts to work correctly, your API must provide the completedSubtopicTimestamps at every level. The frontend cannot accurately plot what it doesn't receive.
+
+Your API should aggregate these timestamps, so a category's list includes all timestamps from its topics, and a goal's list includes all timestamps from its categories.
+
+Correct API Response Structure:
+
+
+
+JSON
+
+
+
+[
+
+  {
+
+    "id": "tnpsc-goal-id",
+
+    "name": "tnpsc",
+
+    "completedSubtopicTimestamps": [ /* All 7 timestamps from TNPSC completions */ ],
+
+    "categories": [
+
+      {
+
+        "id": "part-a-id",
+
+        "name": "Part A: General Studies",
+
+        "completedSubtopicTimestamps": [ /* All 6 timestamps from this category's topics */ ],
+
+        "topics": [
+
+          {
+
+            "id": "gen-science-id",
+
+            "name": "Unit 1: General Science",
+
+            "completedSubtopicTimestamps": [ /* The 2 actual timestamps for this topic */
+
+                "2025-08-27T13:46:35.216Z",
+
+                "2025-08-27T13:46:36.441Z"
+
+            ]
+
+          }
+
+          // ... other topics
+
+        ]
+
+      }
+
+      // ... other categories
+
+    ]
+
+  }
+
+]
+
+The Solution: Update the Frontend Components
+
+Once your API provides the correct data, you can update your components to use it. Here is the corrected code for your GoalTracker (Category View) and CategoryTopics (Topic View) pages.
+
+1. GoalTracker.tsx (Category View)
+
+This page should display the progress of each category within a goal. The chart will have a line for "Part A", "Part B", etc., based on their aggregated timestamps.
+
+
+
+TypeScript
+
+
+
+// src/pages/GoalTracker.tsximport React, { useState, useMemo } from "react";import { useQuery } from "@tanstack/react-query";import { useAuth } from "@/hooks/useAuth";import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";import { Button } from "@/components/ui/button";import { Progress } from "@/components/ui/progress";import { Badge } from "@/components/ui/badge";import { ArrowLeft, Target, TrendingUp } from "lucide-react";import Sidebar from "@/components/sidebar";import ReactApexChart from 'react-apexcharts';import { ApexOptions } from 'apexcharts';import { navigate, useLocation } from "wouter";// --- INTERFACES ---interface GoalCategory {
+
+  id: string;
+
+  goalId: string;
+
+  name: string;
+
+  totalSubtopics: number;
+
+  completedSubtopics: number;
+
+  createdAt: string;
+
+  completedSubtopicTimestamps?: string[]; // Expect this from the API
+
+}interface Goal {
+
+  id: string;
+
+  name: string;
+
+  categories?: GoalCategory[];
+
+}// --- API FUNCTIONS ---const fetchUserGoals = async () => { /* ... (your existing fetch function) ... */ };// --- APEXCHART COMPONENT ---const ApexCategoryProgressChart: React.FC<{ categories: GoalCategory[] }> = ({ categories }) => {
+
+    const chartState = useMemo(() => {
+
+        const series = categories.map(category => ({
+
+            name: category.name,
+
+            data: [] as [number, number][],
+
+        }));
+
+
+
+        categories.forEach((category, index) => {
+
+            const timestamps = (category.completedSubtopicTimestamps || [])
+
+                .map(ts => new Date(ts))
+
+                .sort((a, b) => a.getTime() - b.getTime());
+
+
+
+            let cumulativeCount = 0;
+
+            series[index].data.push([new Date(category.createdAt).getTime(), 0]);
+
+
+
+            timestamps.forEach(ts => {
+
+                cumulativeCount++;
+
+                series[index].data.push([ts.getTime(), cumulativeCount]);
+
+            });
+
+        });
+
+
+
+        return { series };
+
+    }, [categories]);
+
+
+
+    const options: ApexOptions = {
+
+        chart: { type: 'area', height: 350, zoom: { enabled: true }, toolbar: { autoSelected: 'zoom' } },
+
+        title: { text: 'Category Progress Over Time' },
+
+        stroke: { curve: 'stepline' },
+
+        yaxis: { title: { text: 'Subtopics Completed' }, labels: { formatter: (val) => val.toFixed(0) } },
+
+        xaxis: { type: 'datetime' },
+
+        tooltip: { y: { formatter: (val) => val.toFixed(0) } },
+
+        // ... other chart options
+
+    };
+
+
+
+    return <ReactApexChart options={options} series={chartState.series} type="area" height={350} />;
+
+};export default function GoalTracker() {
+
+    const { type: selectedGoalType } = new URLSearchParams(window.location.search);
+
+    const { data: goals = [] } = useQuery({ queryKey: ["goals"], queryFn: fetchUserGoals });
+
+
+
+    const allCategories = useMemo(() => {
+
+        if (!selectedGoalType) return [];
+
+        const selectedGoal = goals.find((g: Goal) => g.name.toLowerCase() === selectedGoalType.toLowerCase());
+
+        return selectedGoal?.categories || [];
+
+    }, [goals, selectedGoalType]);
+
+
+
+    // ... (rest of your component logic: getStatusColor, etc.)
+
+
+
+    return (
+
+        <div className="flex h-screen">
+
+            <Sidebar />
+
+            <div className="flex-1 overflow-auto">
+
+                <header> {/* ... Your header JSX ... */} </header>
+
+                <div className="container mx-auto p-6 space-y-6">
+
+                    {/* ... Your category cards mapping ... */}
+
+                    
+
+                    {allCategories.length > 0 && (
+
+                        <Card>
+
+                            <CardHeader>
+
+                                <CardTitle>Category Progress Trend</CardTitle>
+
+                            </CardHeader>
+
+                            <CardContent>
+
+                                <ApexCategoryProgressChart categories={allCategories} />
+
+                            </CardContent>
+
+                        </Card>
+
+                    )}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    );
+
+}
+
+2. CategoryTopics.tsx (Topic View)
+
+This page should display the progress of each topic within a category. The chart will have a line for "Unit 1", "Unit II", etc.
+
+
+
+TypeScript
+
+
+
+// src/pages/CategoryTopics.tsximport React, { useMemo } from "react";import { useQuery } from "@tanstack/react-query";// ... other importsimport ReactApexChart from 'react-apexcharts';import { ApexOptions } from 'apexcharts';// --- INTERFACES ---interface GoalTopic {
+
+  id: string;
+
+  name: string;
+
+  totalSubtopics: number;
+
+  completedSubtopics: number;
+
+  createdAt: string;
+
+  completedSubtopicTimestamps?: string[]; // Expect this from the API
+
+}// --- API FUNCTIONS ---const fetchCategoryTopics = async (categoryId: string) => { /* ... */ };// --- APEXCHART COMPONENT ---const ApexTopicProgressChart: React.FC<{ topics: GoalTopic[] }> = ({ topics }) => {
+
+    const chartState = useMemo(() => {
+
+        const series = topics.map(topic => ({
+
+            name: topic.name,
+
+            data: [] as [number, number][],
+
+        }));
+
+
+
+        topics.forEach((topic, index) => {
+
+            const timestamps = (topic.completedSubtopicTimestamps || [])
+
+                .map(ts => new Date(ts))
+
+                .sort((a, b) => a.getTime() - b.getTime());
+
+
+
+            let cumulativeCount = 0;
+
+            series[index].data.push([new Date(topic.createdAt).getTime(), 0]);
+
+
+
+            timestamps.forEach(ts => {
+
+                cumulativeCount++;
+
+                series[index].data.push([ts.getTime(), cumulativeCount]);
+
+            });
+
+        });
+
+
+
+        return { series };
+
+    }, [topics]);
+
+
+
+    const options: ApexOptions = {
+
+        chart: { type: 'area', height: 350, zoom: { enabled: true }, toolbar: { autoSelected: 'zoom' } },
+
+        title: { text: 'Topic Progress Over Time' },
+
+        stroke: { curve: 'stepline' },
+
+        yaxis: { title: { text: 'Subtopics Completed' }, labels: { formatter: (val) => val.toFixed(0) } },
+
+        xaxis: { type: 'datetime' },
+
+        tooltip: { y: { formatter: (val) => val.toFixed(0) } },
+
+        // ... other chart options
+
+    };
+
+
+
+    return <ReactApexChart options={options} series={chartState.series} type="area" height={350} />;
+
+};export default function CategoryTopics() {
+
+    const { categoryId } = /* ... logic to get categoryId from URL ... */;
+
+    const { data: topics = [] } = useQuery({ 
+
+        queryKey: ["category-topics", categoryId], 
+
+        queryFn: () => fetchCategoryTopics(categoryId) 
+
+    });
+
+
+
+    // ... (rest of your component logic)
+
+
+
+    return (
+
+        <div className="flex h-screen">
+
+            <Sidebar />
+
+            <div className="flex-1 overflow-auto">
+
+                <header> {/* ... Your header JSX ... */} </header>
+
+                <div className="container mx-auto p-6 space-y-6">
+
+                    {/* ... Your topic cards mapping ... */}
+
+
+
+                    {topics.length > 0 && (
+
+                        <Card>
+
+                            <CardHeader>
+
+                                <CardTitle>Study Performance</CardTitle>
+
+                            </CardHeader>
+
+                            <CardContent>
+
+                                <ApexTopicProgressChart topics={topics} />
+
+                            </CardContent>
+
+                        </Card>
+
+                    )}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    );
+
+}
