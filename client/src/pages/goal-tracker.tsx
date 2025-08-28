@@ -28,14 +28,8 @@ import Sidebar from "@/components/sidebar";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { navigate } from "wouter/use-browser-location";
+import { useLocation } from "wouter";
 
-// Get URL search params
-const getURLParams = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  return {
-    type: urlParams.get("type") || null,
-  };
-};
 
 // Interfaces for the Goal tracking system
 interface GoalCategory {
@@ -51,7 +45,31 @@ interface GoalCategory {
   createdAt: string;
 }
 
-interface Goal {
+interface GoalTopic {
+  id: string;
+  categoryId: string;
+  name: string;
+  description?: string;
+  totalSubtopics: number;
+  completedSubtopics: number;
+  subtopics: GoalSubtopic[];
+}
+
+interface GoalSubtopic {
+  id: string;
+  topicId: string;
+  name: string;
+  description?: string;
+  status: "pending" | "start" | "completed";
+  priority: "low" | "medium" | "high";
+  notes?: string;
+  dueDate?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface GoalWithDetails {
   id: string;
   name: string;
   description?: string;
@@ -61,7 +79,9 @@ interface Goal {
   completedSubtopics: number;
   createdAt: string;
   updatedAt: string;
-  categories?: GoalCategory[];
+  categories: (GoalCategory & {
+    topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+  })[];
 }
 
 interface ProgressDataPoint {
@@ -71,23 +91,13 @@ interface ProgressDataPoint {
 
 const GOAL_COLOR = "#3b82f6";
 
-// API functions for goals
-const fetchUserGoals = async () => {
-  const response = await fetch("/api/goals", {
+// API functions
+const fetchGoalWithCategories = async (goalId: string): Promise<GoalWithDetails> => {
+  const response = await fetch(`/api/goals/${goalId}`, {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch goals");
-  }
-  return response.json();
-};
-
-const fetchGoalCategories = async (goalId: string) => {
-  const response = await fetch(`/api/goals/${goalId}/categories`, {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch goal categories");
+    throw new Error("Failed to fetch goal details");
   }
   return response.json();
 };
@@ -112,51 +122,26 @@ const createGoalFromCSVApi = async (data: {
 export default function GoalTracker() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const currentYear = new Date().getFullYear();
+  const [location] = useLocation();
 
-  // Get URL parameters
-  const { type: selectedGoalType } = getURLParams();
+  // Extract goal ID from URL: /goal-tracker/{goalId}
+  const goalId = location.split("/")[2];
 
-  // Fetch user goals
+  // Fetch specific goal with categories
   const {
-    data: goals = [],
-    isLoading: goalsLoading,
-    error: goalsError,
+    data: goal,
+    isLoading: goalLoading,
+    error: goalError,
   } = useQuery({
-    queryKey: ["goals"],
-    queryFn: fetchUserGoals,
-    enabled: !!user,
+    queryKey: ["goal", goalId],
+    queryFn: () => fetchGoalWithCategories(goalId),
+    enabled: !!goalId && !!user,
   });
 
-  // Filter goals based on selected type
-  const filteredGoals = useMemo(() => {
-    if (!selectedGoalType) return goals;
-
-    return goals.filter((goal: Goal) => {
-      const goalName = goal.name.toLowerCase();
-      const type = selectedGoalType.toLowerCase();
-
-      // Dynamic filtering: check if goal name contains the type
-      return goalName.includes(type);
-    });
-  }, [goals, selectedGoalType]);
-
-  // Get all categories from filtered goals for detailed view
-  const allCategories = useMemo(() => {
-    const categories: GoalCategory[] = [];
-    filteredGoals.forEach((goal: Goal) => {
-      if (goal.categories) {
-        goal.categories.forEach((category) => {
-          categories.push({
-            ...category,
-            goalName: goal.name,
-            goalId: goal.id,
-          } as GoalCategory & { goalName: string });
-        });
-      }
-    });
-    return categories;
-  }, [filteredGoals]);
+  // Extract categories from the goal
+  const categories = useMemo(() => {
+    return goal?.categories || [];
+  }, [goal]);
 
   // CSV upload state
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -243,7 +228,7 @@ export default function GoalTracker() {
   };
 
   // ApexChart Component for Category Progress
-  const ApexProgressChart: React.FC<{ categories: GoalCategory[] }> = ({
+  const ApexProgressChart: React.FC<{ categories: (GoalCategory & { topics: GoalTopic[] })[] }> = ({
     categories,
   }) => {
     const chartState = useMemo(() => {
@@ -416,10 +401,13 @@ export default function GoalTracker() {
             <div className="flex items-center space-x-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  {selectedGoalType
-                    ? `${selectedGoalType} Categories`
-                    : "All Categories"}
+                  {goal?.name || "Goal Categories"}
                 </h1>
+                {goal?.description && (
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    {goal.description}
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
@@ -438,7 +426,7 @@ export default function GoalTracker() {
         </header>
         <div className="container mx-auto p-6 space-y-6">
           {/* Loading state */}
-          {goalsLoading && (
+          {goalLoading && (
             <Card>
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-4">
@@ -451,46 +439,105 @@ export default function GoalTracker() {
           )}
 
           {/* Error state */}
-          {goalsError && (
+          {goalError && (
             <Card>
               <CardContent className="p-6">
                 <div className="text-red-600 dark:text-red-400">
-                  Error loading goals: {(goalsError as Error).message}
+                  Error loading goal: {(goalError as Error).message}
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* No goals state */}
-          {!goalsLoading && !goalsError && goals.length === 0 && (
+          {/* No categories state */}
+          {!goalLoading && !goalError && goal && categories.length === 0 && (
             <Card>
               <CardContent className="p-6 text-center">
                 <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No Goals Yet
+                  No Categories Yet
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Create your first goal by uploading a CSV file or manually
-                  adding one.
+                  This goal doesn't have any categories yet. Try uploading a CSV file to populate it.
                 </p>
               </CardContent>
             </Card>
           )}
 
-          {/* Individual Categories for Detailed View */}
-          {allCategories.length > 0 && (
+          {/* Goal Overview */}
+          {goal && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-blue-500" />
+                  Goal Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {goal.categories.length}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Categories
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {goal.totalTopics}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Topics
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {goal.totalSubtopics}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Subtopics
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      {goal.completedSubtopics}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Completed
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Overall Progress</span>
+                    <span className="text-sm text-gray-600">
+                      {Math.round((goal.completedSubtopics / goal.totalSubtopics) * 100)}%
+                    </span>
+                  </div>
+                  <Progress
+                    value={goal.totalSubtopics > 0 ? (goal.completedSubtopics / goal.totalSubtopics) * 100 : 0}
+                    className="h-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Categories for Detailed View */}
+          {categories.length > 0 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                All Categories
+                Categories
               </h2>
               <div className="space-y-4">
-                {allCategories.map((category) => (
+                {categories.map((category) => (
                   <Card
                     key={category.id}
                     className="cursor-pointer transition-all hover:shadow-lg"
                     onClick={() =>
                       navigate(
-                        `/goal-tracker/${category.goalId}/category/${category.id}`
+                        `/goal-tracker/${goalId}/category/${category.id}`
                       )
                     }
                   >
@@ -498,9 +545,6 @@ export default function GoalTracker() {
                       <CardTitle className="flex items-center gap-2">
                         <Target className="h-5 w-5 text-blue-500" />
                         {category.name}
-                        <Badge variant="outline" className="ml-auto">
-                          {(category as any).goalName}
-                        </Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -558,7 +602,7 @@ export default function GoalTracker() {
           )}
 
           {/* Category Performance Line Chart */}
-          {allCategories.length > 0 && (
+          {categories.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -569,7 +613,7 @@ export default function GoalTracker() {
                 </div>
               </CardHeader>
               <CardContent>
-                <ApexProgressChart categories={allCategories} />
+                <ApexProgressChart categories={categories} />
               </CardContent>
             </Card>
           )}
