@@ -1,0 +1,145 @@
+The graphs on your different pages are not matching because the data isn't being correctly aggregated and passed down from one level to the next.
+
+The core of the problem is that each page's chart is currently using simulated or improperly scoped data instead of rolling up the actual completion timestamps from the levels below it.
+
+To fix this and make all your charts accurate and consistent, we need to ensure the data flows correctly from your database all the way to each chart.
+
+The Solution: Standardize Your Data Flow
+Here is the step-by-step guide to fix the logic for each of your pages.
+
+1. Backend API Fix (Crucial)
+Your API must provide the completedSubtopicTimestamps at every level. Your /api/goals response should be structured like this, with timestamps nested all the way down:
+
+JSON
+
+[
+  {
+    "id": "tnpsc-goal-id",
+    "name": "tnpsc",
+    "completedSubtopics": 7,
+    "totalSubtopics": 111,
+    "completedSubtopicTimestamps": [ // Aggregated from all categories below
+        "2025-08-27T13:46:35.216Z",
+        "2025-08-27T13:46:36.441Z",
+        // ... all 7 timestamps
+    ],
+    "categories": [
+      {
+        "id": "part-a-id",
+        "name": "Part A: General Studies",
+        "completedSubtopics": 6,
+        "completedSubtopicTimestamps": [ // Aggregated from all topics below
+            "2025-08-27T13:46:35.216Z",
+            // ... all 6 timestamps for this category
+        ],
+        "topics": [
+          {
+            "id": "gen-science-id",
+            "name": "Unit 1: General Science",
+            "completedSubtopics": 2,
+            "completedSubtopicTimestamps": [ // Actual timestamps for this topic
+                "2025-08-27T13:46:35.216Z",
+                "2025-08-27T13:46:36.441Z"
+            ]
+          }
+          // ... other topics
+        ]
+      }
+      // ... other categories
+    ]
+  }
+  // ... other goals like "ssc"
+]
+2. GoalStart Page (Main Dashboard)
+This page should show the progress of each main goal (e.g., "tnpsc" vs. "ssc"). The chart logic needs to process the aggregated timestamps for each goal.
+
+Here is the corrected ApexProgressChart component for your GoalStart.tsx file:
+
+TypeScript
+
+const ApexProgressChart: React.FC<{ goals: Goal[] }> = ({ goals }) => {
+    
+    const chartState = useMemo(() => {
+        // Each series will represent a main goal (tnpsc, ssc)
+        const series = goals.map(goal => ({
+            name: goal.name,
+            data: [] as [number, number][],
+        }));
+
+        // Process each goal's aggregated timestamps
+        goals.forEach((goal, index) => {
+            const timestamps = (goal.completedSubtopicTimestamps || [])
+                .map(ts => new Date(ts))
+                .sort((a, b) => a.getTime() - b.getTime());
+
+            let cumulativeCount = 0;
+            
+            // Add a starting point at the goal's creation date
+            series[index].data.push([new Date(goal.createdAt).getTime(), 0]);
+
+            // Create the incremental data points
+            timestamps.forEach(ts => {
+                cumulativeCount++;
+                series[index].data.push([ts.getTime(), cumulativeCount]);
+            });
+        });
+
+        return { series };
+    }, [goals]);
+    
+    const options: ApexOptions = {
+        chart: { type: 'area', height: 350, zoom: { enabled: true }, toolbar: { autoSelected: 'zoom' } },
+        title: { text: 'Real Goal Progress Over Time' },
+        stroke: { curve: 'stepline' },
+        // ... other options from your template
+    };
+
+    return <ReactApexChart options={options} series={chartState.series} type="area" height={350} />;
+};
+3. CategoryTopics Page (Most Detailed View)
+This page should show the progress of each topic within a single category (e.g., "Unit 1: General Science" vs. "Unit II: Geography"). The logic is nearly identical but operates on the topics array of a single category.
+
+Here is the corrected ApexProgressChart component for your CategoryTopics.tsx file:
+
+TypeScript
+
+const ApexTopicProgressChart: React.FC<{ topics: GoalTopic[] }> = ({ topics }) => {
+    
+    const chartState = useMemo(() => {
+        // Each series will represent a Topic (Unit 1, Unit II, etc.)
+        const series = topics.map(topic => ({
+            name: topic.name,
+            data: [] as [number, number][],
+        }));
+
+        // Process each topic's timestamps
+        topics.forEach((topic, index) => {
+            const timestamps = (topic.completedSubtopicTimestamps || [])
+                .map(ts => new Date(ts))
+                .sort((a, b) => a.getTime() - b.getTime());
+
+            let cumulativeCount = 0;
+
+            // Add a starting point
+            series[index].data.push([new Date(topic.createdAt).getTime(), 0]);
+
+            // Create incremental data points
+            timestamps.forEach(ts => {
+                cumulativeCount++;
+                series[index].data.push([ts.getTime(), cumulativeCount]);
+            });
+        });
+
+        return { series };
+    }, [topics]);
+    
+    const options: ApexOptions = {
+        chart: { type: 'area', height: 350, zoom: { enabled: true }, toolbar: { autoSelected: 'zoom' } },
+        title: { text: 'Real Topic Progress' },
+        stroke: { curve: 'stepline' },
+        // ... other options from your template
+    };
+
+    return <ReactApexChart options={options} series={chartState.series} type="area" height={350} />;
+};
+By making these changes, you ensure that the data is correctly aggregated and passed down. Your GoalStart page will show the total progress of each goal, and when you click into a goal and then a category, the chart will accurately reflect the detailed progress of the topics within it.
