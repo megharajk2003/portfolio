@@ -118,6 +118,9 @@ export default function GoalHeatMap() {
           }
         });
       }
+      console.log(
+        `Goal: ${goal.name}, totalSubtopics (API): ${goal.totalSubtopics}, recalculated: ${goal.categories}`
+      );
     });
 
     console.log(
@@ -241,42 +244,6 @@ export default function GoalHeatMap() {
             <div className="h-80 flex items-center justify-center text-gray-500">
               No completed subtopics yet. Start completing subtopics to see
               progress over time.
-            </div>
-          )}
-
-          {/* Goals Legend */}
-          {goals.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Target className="h-4 w-4" />
-                Active Goals
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {goals.map((goal, index) => (
-                  <Badge
-                    key={goal.id}
-                    variant="outline"
-                    className="text-xs flex items-center gap-2"
-                    style={{
-                      borderColor: GOAL_COLORS[index % GOAL_COLORS.length],
-                      color: GOAL_COLORS[index % GOAL_COLORS.length],
-                    }}
-                  >
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{
-                        backgroundColor:
-                          GOAL_COLORS[index % GOAL_COLORS.length],
-                      }}
-                    />
-                    {goal.name}
-                    <span className="text-gray-500 dark:text-gray-400">
-                      ({goal.completedSubtopics || 0}/{goal.totalSubtopics || 0}
-                      )
-                    </span>
-                  </Badge>
-                ))}
-              </div>
             </div>
           )}
         </div>
