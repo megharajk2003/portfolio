@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Target, TrendingUp } from "lucide-react";
 import Sidebar from "@/components/sidebar";
-import ReactApexChart from 'react-apexcharts';
-import { ApexOptions } from 'apexcharts';
+import ReactApexChart from "react-apexcharts";
+import { ApexOptions } from "apexcharts";
 import { navigate } from "wouter/use-browser-location";
 import { useLocation } from "wouter";
 
@@ -109,48 +109,37 @@ export default function CategoryTopics() {
   });
 
   // Extract the specific category and its topics from the goal data
-  const category = goalData?.categories?.find((cat: GoalCategory) => cat.id === categoryId);
+  const category = goalData?.categories?.find(
+    (cat: GoalCategory) => cat.id === categoryId
+  );
   const topics = category?.topics || [];
-
-  const months = [
-    { value: "all", label: "All Months" },
-    { value: "01", label: "January" },
-    { value: "02", label: "February" },
-    { value: "03", label: "March" },
-    { value: "04", label: "April" },
-    { value: "05", label: "May" },
-    { value: "06", label: "June" },
-    { value: "07", label: "July" },
-    { value: "08", label: "August" },
-    { value: "09", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
-    { value: "12", label: "December" },
-  ];
 
   const chartState = useMemo(() => {
     if (topics.length === 0) return { series: [] };
 
-    const validTopics = topics.filter(topic => topic && topic.name);
-    const series = validTopics.map(topic => ({
+    const validTopics = topics.filter((topic) => topic && topic.name);
+    const series = validTopics.map((topic) => ({
       name: topic.name,
       data: [] as [number, number][],
     }));
 
     // Collect all completion timestamps from all topics
-    const allTimestamps = validTopics.flatMap(topic => 
-      (topic.completedSubtopicTimestamps || []).map(ts => ({
-        topicName: topic.name,
-        timestamp: new Date(ts),
-      }))
-    ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const allTimestamps = validTopics
+      .flatMap((topic) =>
+        (topic.completedSubtopicTimestamps || []).map((ts) => ({
+          topicName: topic.name,
+          timestamp: new Date(ts),
+        }))
+      )
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
     // Filter by selected year and month
-    const filteredTimestamps = allTimestamps.filter(item => {
+    const filteredTimestamps = allTimestamps.filter((item) => {
       const date = item.timestamp;
       const matchesYear = date.getFullYear() === selectedYear;
-      const matchesMonth = selectedMonth === "all" || 
-        (date.getMonth() + 1) === parseInt(selectedMonth);
+      const matchesMonth =
+        selectedMonth === "all" ||
+        date.getMonth() + 1 === parseInt(selectedMonth);
       return matchesYear && matchesMonth;
     });
 
@@ -160,11 +149,11 @@ export default function CategoryTopics() {
     }
 
     const cumulativeCounts: { [key: string]: number } = {};
-    validTopics.forEach(topic => (cumulativeCounts[topic.name] = 0));
-    
+    validTopics.forEach((topic) => (cumulativeCounts[topic.name] = 0));
+
     // Add starting points for each topic
-    validTopics.forEach(topic => {
-      const seriesIndex = series.findIndex(s => s.name === topic.name);
+    validTopics.forEach((topic) => {
+      const seriesIndex = series.findIndex((s) => s.name === topic.name);
       if (seriesIndex > -1 && topic.createdAt) {
         const startDate = new Date(topic.createdAt).getTime();
         series[seriesIndex].data.push([startDate, 0]);
@@ -174,22 +163,25 @@ export default function CategoryTopics() {
     // Build the incremental, cumulative data points from real completion data
     filteredTimestamps.forEach(({ topicName, timestamp }) => {
       cumulativeCounts[topicName]++;
-      const seriesIndex = series.findIndex(s => s.name === topicName);
+      const seriesIndex = series.findIndex((s) => s.name === topicName);
       if (seriesIndex > -1) {
-        series[seriesIndex].data.push([timestamp.getTime(), cumulativeCounts[topicName]]);
+        series[seriesIndex].data.push([
+          timestamp.getTime(),
+          cumulativeCounts[topicName],
+        ]);
       }
     });
-    
+
     // Extend all lines to current time with final counts
     const now = new Date().getTime();
-    series.forEach(s => {
+    series.forEach((s) => {
       if (s.data.length > 0 && s.data[s.data.length - 1][0] < now) {
         s.data.push([now, s.data[s.data.length - 1][1]]);
       }
     });
 
     // Only return series that have actual data points
-    return { series: series.filter(s => s.data.length > 1) };
+    return { series: series.filter((s) => s.data.length > 1) };
   }, [topics, selectedYear, selectedMonth]);
 
   const getStatusColor = (
@@ -283,7 +275,7 @@ export default function CategoryTopics() {
                 onClick={() => {
                   // Preserve the goal type when navigating back
                   const urlParams = new URLSearchParams(window.location.search);
-                  const type = urlParams.get('type');
+                  const type = urlParams.get("type");
                   if (type) {
                     navigate(`/goal-tracker?type=${encodeURIComponent(type)}`);
                   } else {
@@ -384,111 +376,71 @@ export default function CategoryTopics() {
                     <TrendingUp className="h-5 w-5 text-blue-500" />
                     Study Performance
                   </CardTitle>
-                  <div className="flex gap-4 items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">Year:</span>
-                      <Select
-                        value={selectedYear.toString()}
-                        onValueChange={(value) =>
-                          setSelectedYear(parseInt(value))
-                        }
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from(
-                            { length: 5 },
-                            (_, i) => currentYear - i
-                          ).map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">Month:</span>
-                      <Select
-                        value={selectedMonth}
-                        onValueChange={setSelectedMonth}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {months.map((month) => (
-                            <SelectItem key={month.value} value={month.value}>
-                              {month.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
                   This chart shows the cumulative number of subtopics you've
-                  completed for each goal{" "}
-                  {selectedMonth !== "all"
-                    ? `in ${
-                        months.find((m) => m.value === selectedMonth)?.label
-                      } ${selectedYear}`
-                    : `in ${selectedYear}`}
-                  .
+                  completed for each goal .
                 </p>
               </CardHeader>
               <CardContent>
                 {chartState.series.length > 0 ? (
                   <div className="h-80">
-                    <ReactApexChart 
-                      options={{
-                        chart: {
-                          type: 'line',
-                          stacked: false,
-                          height: 320,
-                          zoom: { type: 'x', enabled: true, autoScaleYaxis: true },
-                          toolbar: { autoSelected: 'zoom' },
-                        },
-                        dataLabels: { enabled: false },
-                        stroke: { curve: 'stepline', width: 2 },
-                        title: {
-                          text: 'Topic Progress Over Time',
-                          align: 'left'
-                        },
-                        markers: { size: 0 },
-                        yaxis: {
-                          title: { text: 'Completed Subtopics' },
-                          labels: { formatter: (val) => val.toFixed(0) },
-                        },
-                        xaxis: { 
-                          type: 'datetime',
-                          labels: {
-                            datetimeFormatter: {
-                              year: 'yyyy',
-                              month: 'MMM \'yy',
-                              day: 'dd MMM',
-                              hour: 'HH:mm'
-                            }
-                          }
-                        },
-                        tooltip: {
-                          shared: false,
-                          y: { formatter: (val) => `${val.toFixed(0)} completed` },
-                          x: { format: 'dd MMM yyyy' }
-                        },
-                        colors: TOPIC_COLORS,
-                        legend: { position: 'bottom' }
-                      } as ApexOptions}
+                    <ReactApexChart
+                      options={
+                        {
+                          chart: {
+                            type: "line",
+                            stacked: false,
+                            height: 320,
+                            zoom: {
+                              type: "x",
+                              enabled: true,
+                              autoScaleYaxis: true,
+                            },
+                            toolbar: { autoSelected: "zoom" },
+                          },
+                          dataLabels: { enabled: false },
+                          stroke: { curve: "stepline", width: 2 },
+                          title: {
+                            text: "Topic Progress Over Time",
+                            align: "left",
+                          },
+                          markers: { size: 0 },
+                          yaxis: {
+                            title: { text: "Completed Subtopics" },
+                            labels: { formatter: (val) => val.toFixed(0) },
+                          },
+                          xaxis: {
+                            type: "datetime",
+                            labels: {
+                              datetimeFormatter: {
+                                year: "yyyy",
+                                month: "MMM 'yy",
+                                day: "dd MMM",
+                                hour: "HH:mm",
+                              },
+                            },
+                          },
+                          tooltip: {
+                            shared: false,
+                            y: {
+                              formatter: (val) => `${val.toFixed(0)} completed`,
+                            },
+                            x: { format: "dd MMM yyyy" },
+                          },
+                          colors: TOPIC_COLORS,
+                          legend: { position: "bottom" },
+                        } as ApexOptions
+                      }
                       series={chartState.series}
-                      type="line" 
-                      height={320} 
+                      type="line"
+                      height={320}
                     />
                   </div>
                 ) : (
                   <div className="h-80 flex items-center justify-center text-gray-500">
-                    No completed subtopics yet. Start completing subtopics to see progress over time.
+                    No completed subtopics yet. Start completing subtopics to
+                    see progress over time.
                   </div>
                 )}
               </CardContent>
