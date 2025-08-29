@@ -327,6 +327,8 @@ export interface IStorage {
   // Badge system methods
   getBadges(): Promise<Badge[]>;
   createBadge(badge: InsertBadge): Promise<Badge>;
+  updateBadge(id: string, badge: Partial<InsertBadge>): Promise<Badge | undefined>;
+  deleteBadge(id: string): Promise<boolean>;
   getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]>;
   awardBadge(userBadge: InsertUserBadge): Promise<UserBadge>;
   checkAndAwardBadges(
@@ -4750,6 +4752,52 @@ export class PgStorage implements IStorage {
 
     const [created] = await db.insert(badges).values(badge).returning();
     return created;
+  }
+
+  async updateBadge(id: string, badgeData: Partial<InsertBadge>): Promise<Badge | undefined> {
+    if (!this.isDbConnected) {
+      const badgesData = this.fallbackData.get("badges") || [];
+      const index = badgesData.findIndex((b: Badge) => b.id === id);
+      if (index !== -1) {
+        badgesData[index] = { ...badgesData[index], ...badgeData };
+        this.fallbackData.set("badges", badgesData);
+        return badgesData[index];
+      }
+      return undefined;
+    }
+
+    try {
+      const [updated] = await db
+        .update(badges)
+        .set(badgeData)
+        .where(eq(badges.id, id))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error("Error updating badge:", error);
+      return undefined;
+    }
+  }
+
+  async deleteBadge(id: string): Promise<boolean> {
+    if (!this.isDbConnected) {
+      const badgesData = this.fallbackData.get("badges") || [];
+      const index = badgesData.findIndex((b: Badge) => b.id === id);
+      if (index !== -1) {
+        badgesData.splice(index, 1);
+        this.fallbackData.set("badges", badgesData);
+        return true;
+      }
+      return false;
+    }
+
+    try {
+      const result = await db.delete(badges).where(eq(badges.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting badge:", error);
+      return false;
+    }
   }
 
   async getUserBadges(

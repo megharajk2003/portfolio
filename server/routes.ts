@@ -1408,6 +1408,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Badge Management Routes
+  app.get("/api/admin/badges", requireAdmin, async (req, res) => {
+    try {
+      const badges = await storage.getBadges();
+      // Transform badges to match frontend interface expectations
+      const transformedBadges = badges.map(badge => ({
+        id: badge.id,
+        name: badge.title,
+        description: badge.description,
+        imageUrl: badge.icon,
+        category: badge.type,
+        xpValue: badge.xpReward || 0,
+        criteria: typeof badge.criteria === 'string' ? badge.criteria : JSON.stringify(badge.criteria || {}),
+        createdAt: badge.createdAt
+      }));
+      res.json(transformedBadges);
+    } catch (error) {
+      console.error("Error fetching badges:", error);
+      res.status(500).json({ message: "Failed to fetch badges" });
+    }
+  });
+
+  app.post("/api/admin/badges", requireAdmin, async (req, res) => {
+    try {
+      // Transform frontend data to match database schema
+      const badgeData = {
+        title: req.body.name,
+        description: req.body.description,
+        icon: req.body.imageUrl,
+        type: req.body.category,
+        xpReward: req.body.xpValue,
+        criteria: req.body.criteria,
+        color: "blue", // default color
+        rarity: "common" as const // default rarity
+      };
+      const badge = await storage.createBadge(badgeData);
+      // Transform back to frontend format
+      const transformedBadge = {
+        id: badge.id,
+        name: badge.title,
+        description: badge.description,
+        imageUrl: badge.icon,
+        category: badge.type,
+        xpValue: badge.xpReward || 0,
+        criteria: typeof badge.criteria === 'string' ? badge.criteria : JSON.stringify(badge.criteria || {}),
+        createdAt: badge.createdAt
+      };
+      res.json(transformedBadge);
+    } catch (error) {
+      console.error("Error creating badge:", error);
+      res.status(500).json({ message: "Failed to create badge" });
+    }
+  });
+
+  app.put("/api/admin/badges/:id", requireAdmin, async (req, res) => {
+    try {
+      // Transform frontend data to match database schema
+      const badgeData = {
+        title: req.body.name,
+        description: req.body.description,
+        icon: req.body.imageUrl,
+        type: req.body.category,
+        xpReward: req.body.xpValue,
+        criteria: req.body.criteria
+      };
+      const badge = await storage.updateBadge(req.params.id, badgeData);
+      if (!badge) {
+        return res.status(404).json({ message: "Badge not found" });
+      }
+      // Transform back to frontend format
+      const transformedBadge = {
+        id: badge.id,
+        name: badge.title,
+        description: badge.description,
+        imageUrl: badge.icon,
+        category: badge.type,
+        xpValue: badge.xpReward || 0,
+        criteria: typeof badge.criteria === 'string' ? badge.criteria : JSON.stringify(badge.criteria || {}),
+        createdAt: badge.createdAt
+      };
+      res.json(transformedBadge);
+    } catch (error) {
+      console.error("Error updating badge:", error);
+      res.status(500).json({ message: "Failed to update badge" });
+    }
+  });
+
+  app.delete("/api/admin/badges/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteBadge(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Badge not found" });
+      }
+      res.json({ message: "Badge deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting badge:", error);
+      res.status(500).json({ message: "Failed to delete badge" });
+    }
+  });
+
   app.post("/api/categories", async (req, res) => {
     try {
       const category = await storage.createCategory(req.body);
