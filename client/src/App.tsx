@@ -34,6 +34,14 @@ import CategoryTopics from "@/pages/category-topics";
 import Badges from "@/pages/badges";
 import SubtopicListPage from "./pages/subtopic";
 
+// Admin Pages
+import CoursesManagement from "@/pages/admin/courses-management";
+import ModulesList from "@/pages/admin/modules-list";
+import LessonsList from "@/pages/admin/lessons-list";
+import ForumModeration from "@/pages/admin/forum-moderation";
+import UserManagement from "@/pages/admin/user-management";
+import BadgeManagement from "@/pages/admin/badge-management";
+
 function Router() {
   const { user, isLoading } = useAuth();
   const isAuthenticated = !!user;
@@ -136,6 +144,18 @@ function Router() {
           <Route path="/resume-generator" component={ResumeGenerator} />
           <Route path="/career-chat" component={CareerChat} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/courses" component={CoursesManagement} />
+          <Route path="/admin/badges" component={BadgeManagement} />
+          <Route
+            path="/admin/courses/:courseId/modules"
+            component={ModulesList}
+          />
+          <Route
+            path="/admin/modules/:moduleId/lessons"
+            component={LessonsList}
+          />
+          <Route path="/admin/forum" component={ForumModeration} />
+          <Route path="/admin/users" component={UserManagement} />
         </>
       ) : (
         <>

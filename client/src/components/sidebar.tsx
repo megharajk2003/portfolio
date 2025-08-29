@@ -17,6 +17,7 @@ import {
   BookOpen,
   ExternalLink,
   Flame,
+  Award,
   X,
   Sparkles,
   MessageCircle,
@@ -58,26 +59,36 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { user } = useAuth();
 
   const userId = user?.id?.toString() ?? "1"; // Fallback for demo
-  const isAdmin = user?.email === 'admin@email.com';
+  const isAdmin = user?.email === "admin@email.com";
 
-  // Check if we're on a goal details page
+  // Define which links to hide for the admin
+  const adminHiddenLinks = [
+    "Learning",
+    "Goal Tracker",
+    "Career Tools",
+    "Dashboard",
+    "Profile",
+  ];
+
+  // Filter the navigation array based on the admin status
+  const filteredNavigation = navigation.filter(
+    (item) => !isAdmin || !adminHiddenLinks.includes(item.name)
+  ); // Check if we're on a goal details page
+
   const isGoalDetailsPage =
     location.startsWith("/goal-tracker/") && location !== "/goal-tracker";
-  const currentGoalId = isGoalDetailsPage ? location.split("/")[2] : null;
+  const currentGoalId = isGoalDetailsPage ? location.split("/")[2] : null; // Fetch user stats for streak and XP display
 
-  // Fetch user stats for streak and XP display
   const { data: userStats } = useQuery({
     queryKey: ["/api/user-stats", userId],
     enabled: !!user,
-  });
+  }); // Fetch user goals for goal tracker section
 
-  // Fetch user goals for goal tracker section
   const { data: goals } = useQuery<Goal[]>({
     queryKey: ["/api/goals"],
     enabled: !!user,
-  });
+  }); // Fetch current goal details for enhanced sidebar
 
-  // Fetch current goal details for enhanced sidebar
   const { data: currentGoal } = useQuery<Goal>({
     queryKey: [`/api/goals/${currentGoalId}`],
     enabled: !!currentGoalId && !!user,
@@ -85,60 +96,85 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <aside className="w-64 h-screen bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-xl border-r border-gray-200/50 dark:border-gray-700/50 relative inset-y-0 left-0 z-30 flex flex-col p-4">
-      {/* Mobile close button */}
+            {/* Mobile close button */}     
       {onClose && (
         <div className="lg:hidden flex justify-end mb-4">
+                   
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+                        <X className="h-5 w-5" />         
           </Button>
+                 
         </div>
       )}
-      {/* Logo */}
+            {/* Logo */}     
       <div className="flex items-center justify-between mb-8">
+               
         <div className="flex items-center space-x-3">
+                   
           <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-            <User className="text-white h-5 w-5" />
+                        <User className="text-white h-5 w-5" />         
           </div>
+                   
           <div>
+                       
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              knowme
+                            knowme            
             </h1>
+                   
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Dashboard
+                            Dashboard            
             </p>
+                     
           </div>
+                 
         </div>
-        <ThemeSwitcher />
+                <ThemeSwitcher />     
       </div>
-
+           
       <div className="gradient-primary rounded-xl p-4 mb-6 text-white shadow-lg border border-white/20">
+               
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs opacity-90 font-medium">Total XP</span>
+                   
+          <span className="text-xs opacity-90 font-medium">Total XP</span>     
+             
           <span className="text-lg font-bold">
-            {userStats?.totalXp?.toLocaleString() || "0"}
+                        {userStats?.totalXp?.toLocaleString() || "0"}         
           </span>
+                 
         </div>
+               
         <div className="flex items-center justify-between">
+                   
           <div className="flex items-center space-x-1">
-            <Flame className="h-4 w-4 text-yellow-300" />
+                        <Flame className="h-4 w-4 text-yellow-300" />           
             <span className="text-sm font-medium">
-              {userStats?.currentStreak || 0} day streak
+                            {userStats?.currentStreak || 0} day streak          
+               
             </span>
+                     
           </div>
+                   
           <div className="w-8 h-1 bg-white/30 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-yellow-300 rounded-full transition-all duration-300" 
-              style={{ 
-                width: `${Math.min(((userStats?.currentStreak || 0) / 7) * 100, 100)}%` 
+                       
+            <div
+              className="h-full bg-yellow-300 rounded-full transition-all duration-300"
+              style={{
+                width: `${Math.min(
+                  ((userStats?.currentStreak || 0) / 7) * 100,
+                  100
+                )}%`,
               }}
             ></div>
+                     
           </div>
+                 
         </div>
+             
       </div>
-
-      {/* Navigation */}
+            {/* Navigation */}     
       <nav className="space-y-2">
-        {navigation.map((item) => {
+        {/* Use the filteredNavigation array here */}       
+        {filteredNavigation.map((item) => {
           const IconComponent = item.icon;
           const isActive =
             location === item.href ||
@@ -148,6 +184,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
           return (
             <Link key={item.name} href={item.href}>
+                           
               <div
                 className={cn(
                   "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
@@ -157,55 +194,146 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 )}
                 onClick={() => onClose && onClose()}
               >
-                <IconComponent className="h-5 w-5" />
-                <span>{item.name}</span>
+                                <IconComponent className="h-5 w-5" />           
+                    <span>{item.name}</span>               
                 {item.name === "Learning" && (
                   <span className="ml-auto bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
-                    New
+                                        New                  
                   </span>
                 )}
+                             
               </div>
+                         
             </Link>
           );
         })}
-        
-        {/* Admin Navigation */}
+                        {/* Admin Navigation */}       
         {isAdmin && (
-          <Link href="/admin">
-            <div
-              className={cn(
-                "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors border border-red-200 dark:border-red-800",
-                location === "/admin"
-                  ? "bg-red-600 text-white border-red-600"
-                  : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-              )}
-              onClick={() => onClose && onClose()}
-            >
-              <Settings className="h-5 w-5" />
-              <span>Admin Dashboard</span>
-              <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                Admin
-              </span>
+          <>
+                       
+            <div className="px-4 py-2">
+                           
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Admin Area
+              </p>
+                         
             </div>
-          </Link>
+                       
+            {/* <Link href="/admin">
+                           
+              <div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors border border-red-200 dark:border-red-800",
+                  location === "/admin"
+                    ? "bg-red-600 text-white border-red-600"
+                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+                onClick={() => onClose && onClose()}
+              >
+                                <LayoutDashboard className="h-5 w-5" />         
+                      <span>Admin Overview</span>             
+              </div>
+                         
+            </Link> */}
+                       
+            <Link href="/admin/courses">
+                           
+              <div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                  location === "/admin/courses" ||
+                    location.startsWith("/admin/courses/") ||
+                    location.startsWith("/admin/modules/")
+                    ? "bg-red-600 text-white"
+                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+                onClick={() => onClose && onClose()}
+              >
+                                <BookOpen className="h-5 w-5" />               
+                <span>Courses</span>             
+              </div>
+                         
+            </Link>
+                       
+            <Link href="/admin/forum">
+                       
+              <div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                  location === "/admin/forum"
+                    ? "bg-red-600 text-white"
+                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+                onClick={() => onClose && onClose()}
+              >
+                                <MessageCircle className="h-5 w-5" />           
+                    <span>Forum</span>             
+              </div>
+                         
+            </Link>
+                       
+            <Link href="/admin/users">
+              <div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                  location === "/admin/users"
+                    ? "bg-red-600 text-white"
+                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+                onClick={() => onClose && onClose()}
+              >
+                <User className="h-5 w-5" />
+                <span>Users</span>
+              </div>
+            </Link>
+            <Link href="/admin/badges">
+              <div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                  location === "/admin/badges"
+                    ? "bg-red-600 text-white"
+                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+                onClick={() => onClose && onClose()}
+              >
+                <Award className="h-5 w-5" />
+                <span>Badges</span>
+              </div>
+            </Link>
+                       
+            <div className="px-4 py-2 mt-2">
+                           
+              <Badge
+                variant="outline"
+                className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800 w-full justify-center"
+              >
+                                Admin Access              
+              </Badge>
+                         
+            </div>
+                     
+          </>
         )}
+             
       </nav>
-
-      {/* Portfolio Link */}
+            {/* Portfolio Link */}     
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+               
         <Link href="/portfolio">
+                   
           <div
             className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors mb-4 shadow-sm"
             onClick={() => onClose && onClose()}
           >
-            <ExternalLink className="h-5 w-5" />
-            <span>View Portfolio</span>
+                        <ExternalLink className="h-5 w-5" />           
+            <span>View Portfolio</span>         
           </div>
+                 
         </Link>
-
-        {/* User Profile */}
-        <UserProfileDropdown />
+                {/* User Profile */}
+                <UserProfileDropdown />     
       </div>
+         
     </aside>
   );
 }
