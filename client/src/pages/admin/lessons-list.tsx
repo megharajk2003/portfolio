@@ -52,7 +52,7 @@ interface Lesson {
   title: string;
   content: string;
   videoUrl?: string;
-  order: number;
+  lessonOrder: number;
   durationMinutes: number;
   contentType: "video" | "text" | "quiz";
 }
@@ -84,7 +84,7 @@ export default function LessonsList() {
     content: "",
     videoUrl: "",
     durationMinutes: 10,
-    order: 0,
+    lessonOrder: 0,
     contentType: "text",
     moduleId: moduleId,
   });
@@ -130,7 +130,7 @@ export default function LessonsList() {
         title: "Success",
         description: "Lesson created successfully",
       });
-      setIsAddModalOpen(false);
+      setIsCreateModalOpen(false);
       resetForm();
     },
     onError: (error) => {
@@ -271,7 +271,7 @@ export default function LessonsList() {
       content: "",
       videoUrl: "",
       durationMinutes: 10,
-      order: lessons.length,
+      lessonOrder: lessons.length,
       contentType: "text",
       moduleId: moduleId,
     });
@@ -300,7 +300,7 @@ export default function LessonsList() {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update order property for each lesson
+    // Update lessonOrder property for each lesson
     const updatedLessons = items.map((item, index) => ({
       id: item.id,
       order: index,
@@ -435,7 +435,7 @@ export default function LessonsList() {
                           ref={provided.innerRef}
                         >
                           {lessons
-                            .sort((a, b) => a.order - b.order)
+                            .sort((a, b) => a.lessonOrder - b.lessonOrder)
                             .map((lesson, index) => (
                               <Draggable
                                 key={lesson.id}
@@ -470,7 +470,7 @@ export default function LessonsList() {
                                       </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                      {lesson.order + 1}
+                                      {lesson.lessonOrder + 1}
                                     </TableCell>
                                     <TableCell className="text-center">
                                       {lesson.durationMinutes} min

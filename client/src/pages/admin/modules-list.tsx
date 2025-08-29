@@ -40,7 +40,7 @@ interface Module {
   courseId: string;
   title: string;
   description: string;
-  order: number;
+  moduleOrder: number;
   durationHours: number;
   lessonsCount?: number;
 }
@@ -63,8 +63,7 @@ export default function ModulesList() {
     title: "",
     description: "",
     durationHours: 1,
-    order: 0,
-    moduleOrder: 0, // Add moduleOrder field to match database schema
+    moduleOrder: 0,
     courseId: courseId,
   });
 
@@ -237,8 +236,7 @@ export default function ModulesList() {
       title: "",
       description: "",
       durationHours: 1,
-      order: modules.length,
-      moduleOrder: modules.length, // Add moduleOrder field to match database schema
+      moduleOrder: modules.length,
       courseId: courseId,
     });
   };
@@ -266,7 +264,7 @@ export default function ModulesList() {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update order property for each module
+    // Update moduleOrder property for each module
     const updatedModules = items.map((item, index) => ({
       id: item.id,
       order: index,
@@ -367,7 +365,7 @@ export default function ModulesList() {
                           ref={provided.innerRef}
                         >
                           {modules
-                            .sort((a, b) => a.order - b.order)
+                            .sort((a, b) => a.moduleOrder - b.moduleOrder)
                             .map((module, index) => (
                               <Draggable
                                 key={module.id}
@@ -399,7 +397,7 @@ export default function ModulesList() {
                                       </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                      {module.order + 1}
+                                      {module.moduleOrder + 1}
                                     </TableCell>
                                     <TableCell className="text-center">
                                       {module.durationHours} hours

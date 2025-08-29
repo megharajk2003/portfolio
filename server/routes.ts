@@ -3237,6 +3237,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/admin/modules/:id", requireAdmin, async (req, res) => {
+    try {
+      const module = await storage.getModule(req.params.id);
+      if (!module) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+      res.json(module);
+    } catch (error) {
+      console.error("Error fetching module:", error);
+      res.status(500).json({ message: "Failed to fetch module" });
+    }
+  });
+
   // Get modules for a specific course (admin)
   app.get("/api/admin/courses/:courseId/modules", requireAdmin, async (req, res) => {
     try {
@@ -3302,6 +3315,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting module:", error);
       res.status(500).json({ message: "Failed to delete module" });
+    }
+  });
+
+  // Reorder modules for a course
+  app.put("/api/admin/courses/:courseId/modules/reorder", requireAdmin, async (req, res) => {
+    try {
+      const { modules } = req.body;
+      
+      // Update each module's order
+      for (const moduleUpdate of modules) {
+        await storage.updateModule(moduleUpdate.id, { moduleOrder: moduleUpdate.order });
+      }
+      
+      res.json({ message: "Modules reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering modules:", error);
+      res.status(500).json({ message: "Failed to reorder modules" });
     }
   });
 
@@ -3375,6 +3405,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting lesson:", error);
       res.status(500).json({ message: "Failed to delete lesson" });
+    }
+  });
+
+  // Reorder lessons for a module
+  app.put("/api/admin/modules/:moduleId/lessons/reorder", requireAdmin, async (req, res) => {
+    try {
+      const { lessons } = req.body;
+      
+      // Update each lesson's order
+      for (const lessonUpdate of lessons) {
+        await storage.updateLesson(lessonUpdate.id, { lessonOrder: lessonUpdate.order });
+      }
+      
+      res.json({ message: "Lessons reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering lessons:", error);
+      res.status(500).json({ message: "Failed to reorder lessons" });
     }
   });
 
