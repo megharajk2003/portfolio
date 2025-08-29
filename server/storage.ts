@@ -2118,13 +2118,11 @@ export class PgStorage implements IStorage {
   }
 
   async deleteCourse(id: string): Promise<boolean> {
-    // For PostgreSQL, Drizzle returns an object with the number of rows affected.
-    // A rowCount > 0 means the deletion was successful.
     try {
-      const result = await db.delete(courses).where(eq(courses.id, id));
+      const result = await db.delete(courses).where(eq(courses.id, id)).returning();
       return result.length > 0;
     } catch (error) {
-      console.error("Error deleting goal:", error);
+      console.error("Error deleting course:", error);
       return false;
     }
   }
@@ -2339,8 +2337,13 @@ export class PgStorage implements IStorage {
       }
       return false;
     }
-    const result = await db.delete(modules).where(eq(modules.id, id));
-    return result.length > 0;
+    try {
+      const result = await db.delete(modules).where(eq(modules.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      return false;
+    }
   }
 
   async getAllLessons(): Promise<Lesson[]> {
@@ -2383,8 +2386,13 @@ export class PgStorage implements IStorage {
       }
       return false;
     }
-    const result = await db.delete(lessons).where(eq(lessons.id, id));
-    return result.length > 0;
+    try {
+      const result = await db.delete(lessons).where(eq(lessons.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+      return false;
+    }
   }
 
   // Import the Course type if you haven't already
