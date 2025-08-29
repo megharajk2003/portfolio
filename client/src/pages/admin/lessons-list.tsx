@@ -70,7 +70,8 @@ interface Course {
 
 export default function LessonsList() {
   const { toast } = useToast();
-  const [moduleId] = useParams();
+  const { moduleId } = useParams();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -101,9 +102,7 @@ export default function LessonsList() {
   });
 
   // Fetch lessons for this module
-  const { data: lessons = [], isLoading: isLoadingLessons } = useQuery<
-    Lesson[]
-  >({
+  const { data: lessons = [], isLoading: isLoadingLessons } = useQuery<Lesson[]>({
     queryKey: [`/api/admin/modules/${moduleId}/lessons`],
     enabled: !!moduleId,
   });

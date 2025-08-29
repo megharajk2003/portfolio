@@ -1429,13 +1429,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/instructors", async (req, res) => {
+  app.post("/api/admin/instructors", requireAdmin, async (req, res) => {
     try {
       const instructor = await storage.createInstructor(req.body);
       res.json(instructor);
     } catch (error) {
       console.error("Error creating instructor:", error);
       res.status(500).json({ message: "Failed to create instructor" });
+    }
+  });
+
+  app.put("/api/admin/instructors/:id", requireAdmin, async (req, res) => {
+    try {
+      const instructor = await storage.updateInstructor(
+        req.params.id,
+        req.body
+      );
+      if (!instructor) {
+        return res.status(404).json({ message: "Instructor not found" });
+      }
+      res.json(instructor);
+    } catch (error) {
+      console.error("Error updating instructor:", error);
+      res.status(500).json({ message: "Failed to update instructor" });
+    }
+  });
+
+  app.delete("/api/admin/instructors/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteInstructor(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Instructor not found" });
+      }
+      res.json({ message: "Instructor deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting instructor:", error);
+      res.status(500).json({ message: "Failed to delete instructor" });
     }
   });
 
@@ -1450,15 +1479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/modules", async (req, res) => {
-    try {
-      const module = await storage.createModule(req.body);
-      res.json(module);
-    } catch (error) {
-      console.error("Error creating module:", error);
-      res.status(500).json({ message: "Failed to create module" });
-    }
-  });
+  // Admin module endpoints are defined later in the file
 
   // Lessons
   app.get("/api/modules/:moduleId/lessons", async (req, res) => {
@@ -1471,15 +1492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/lessons", async (req, res) => {
-    try {
-      const lesson = await storage.createLesson(req.body);
-      res.json(lesson);
-    } catch (error) {
-      console.error("Error creating lesson:", error);
-      res.status(500).json({ message: "Failed to create lesson" });
-    }
-  });
+  // Lesson endpoints for admin are defined later in the file
 
   // Enrollments
   app.get("/api/users/:userId/enrollments", async (req, res) => {
@@ -3224,9 +3237,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get modules for a specific course (admin)
+  app.get("/api/admin/courses/:courseId/modules", requireAdmin, async (req, res) => {
+    try {
+      const modules = await storage.getCourseModules(req.params.courseId);
+      res.json(modules);
+    } catch (error) {
+      console.error("Error fetching course modules:", error);
+      res.status(500).json({ message: "Failed to fetch course modules" });
+    }
+  });
+  
+  // Create module for a specific course (admin)
+  app.post("/api/admin/courses/:courseId/modules", requireAdmin, async (req, res) => {
+    try {
+      const moduleData = {
+        ...req.body,
+        courseId: req.params.courseId,
+        moduleOrder: req.body.moduleOrder || req.body.order || 0
+      };
+      const module = await storage.createModule(moduleData);
+      res.json(module);
+    } catch (error) {
+      console.error("Error creating module:", error);
+      res.status(500).json({ message: "Failed to create module" });
+    }
+  });
+  
   app.post("/api/admin/modules", requireAdmin, async (req, res) => {
     try {
-      const module = await storage.createModule(req.body);
+      // Ensure moduleOrder field is set (schema requires module_order to be not null)
+      const moduleData = {
+        ...req.body,
+        moduleOrder: req.body.moduleOrder || req.body.order || 0
+      };
+      const module = await storage.createModule(moduleData);
       res.json(module);
     } catch (error) {
       console.error("Error creating module:", error);
@@ -3270,7 +3315,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch lessons" });
     }
   });
+  
+  // Get lessons for a specific module (admin)
+  app.get("/api/admin/modules/:moduleId/lessons", requireAdmin, async (req, res) => {
+    try {
+      const lessons = await storage.getModuleLessons(req.params.moduleId);
+      res.json(lessons);
+    } catch (error) {
+      console.error("Error fetching module lessons:", error);
+      res.status(500).json({ message: "Failed to fetch module lessons" });
+    }
+  });
 
+  // Create lesson for a specific module (admin)
+  app.post("/api/admin/modules/:moduleId/lessons", requireAdmin, async (req, res) => {
+    try {
+      const lessonData = {
+        ...req.body,
+        moduleId: req.params.moduleId
+      };
+      const lesson = await storage.createLesson(lessonData);
+      res.json(lesson);
+    } catch (error) {
+      console.error("Error creating lesson:", error);
+      res.status(500).json({ message: "Failed to create lesson" });
+    }
+  });
+  
   app.post("/api/admin/lessons", requireAdmin, async (req, res) => {
     try {
       const lesson = await storage.createLesson(req.body);
@@ -3373,12 +3444,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
       }
-      
+
       const user = await storage.getUserById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       // Remove password from response for security
       const { password, ...safeUser } = user;
       res.json(safeUser);

@@ -64,12 +64,13 @@ export default function ModulesList() {
     description: "",
     durationHours: 1,
     order: 0,
+    moduleOrder: 0, // Add moduleOrder field to match database schema
     courseId: courseId,
   });
 
   // Fetch course details
   const { data: course } = useQuery<Course>({
-    queryKey: [`/api/admin/courses/${courseId}`],
+    queryKey: [`/api/courses/${courseId}`],
     enabled: !!courseId,
   });
 
@@ -237,6 +238,7 @@ export default function ModulesList() {
       description: "",
       durationHours: 1,
       order: modules.length,
+      moduleOrder: modules.length, // Add moduleOrder field to match database schema
       courseId: courseId,
     });
   };

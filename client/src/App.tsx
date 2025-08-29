@@ -41,6 +41,7 @@ import LessonsList from "@/pages/admin/lessons-list";
 import ForumModeration from "@/pages/admin/forum-moderation";
 import UserManagement from "@/pages/admin/user-management";
 import BadgeManagement from "@/pages/admin/badge-management";
+import InstructorManagement from "@/pages/admin/instructor-management";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -156,6 +157,7 @@ function Router() {
           />
           <Route path="/admin/forum" component={ForumModeration} />
           <Route path="/admin/users" component={UserManagement} />
+          <Route path="/admin/instructors" component={InstructorManagement} />
         </>
       ) : (
         <>

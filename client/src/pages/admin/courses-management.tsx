@@ -52,8 +52,8 @@ interface Course {
 
 interface Instructor {
   id: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+
   email: string;
 }
 
@@ -83,14 +83,14 @@ export default function CoursesManagement() {
   const { data: courses = [], isLoading: isLoadingCourses } = useQuery<
     Course[]
   >({
-    queryKey: ["/api/admin/courses"],
+    queryKey: ["/api/courses"],
   });
 
   // Fetch instructors
   const { data: instructors = [] } = useQuery<Instructor[]>({
-    queryKey: ["/api/admin/instructors"],
+    queryKey: ["/api/instructors"],
   });
-
+  console.log(`instructors`, instructors);
   // Create course mutation
   const createCourseMutation = useMutation({
     mutationFn: async (courseData: Partial<Course>) => {
@@ -364,7 +364,7 @@ export default function CoursesManagement() {
                           </TableCell>
                           <TableCell>
                             {instructor
-                              ? `${instructor.firstName} ${instructor.lastName}`
+                              ? `${instructor.fullName} `
                               : "Unassigned"}
                           </TableCell>
                           <TableCell className="text-center">
@@ -493,7 +493,7 @@ export default function CoursesManagement() {
                     <SelectContent>
                       {instructors.map((instructor) => (
                         <SelectItem key={instructor.id} value={instructor.id}>
-                          {instructor.firstName} {instructor.lastName}
+                          {instructor.fullName}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -652,7 +652,7 @@ export default function CoursesManagement() {
                     <SelectContent>
                       {instructors.map((instructor) => (
                         <SelectItem key={instructor.id} value={instructor.id}>
-                          {instructor.firstName} {instructor.lastName}
+                          {instructor.fullName}
                         </SelectItem>
                       ))}
                     </SelectContent>

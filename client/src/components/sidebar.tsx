@@ -300,6 +300,20 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 <span>Badges</span>
               </div>
             </Link>
+            <Link href="/admin/instructors">
+              <div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                  location === "/admin/instructors"
+                    ? "bg-red-600 text-white"
+                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+                onClick={() => onClose && onClose()}
+              >
+                <GraduationCap className="h-5 w-5" />
+                <span>Instructors</span>
+              </div>
+            </Link>
                        
             <div className="px-4 py-2 mt-2">
                            

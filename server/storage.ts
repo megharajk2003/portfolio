@@ -270,19 +270,30 @@ export interface IStorage {
   getInstructors(): Promise<Instructor[]>;
   getInstructor(id: string): Promise<Instructor | undefined>;
   createInstructor(instructor: InsertInstructor): Promise<Instructor>;
+  updateInstructor(
+    id: string,
+    instructor: Partial<InsertInstructor>
+  ): Promise<Instructor | undefined>;
+  deleteInstructor(id: string): Promise<boolean>;
 
   getCourseModules(courseId: string): Promise<Module[]>;
   getModule(id: string): Promise<Module | undefined>;
   createModule(module: InsertModule): Promise<Module>;
   getAllModules(): Promise<Module[]>;
-  updateModule(id: string, module: Partial<InsertModule>): Promise<Module | undefined>;
+  updateModule(
+    id: string,
+    module: Partial<InsertModule>
+  ): Promise<Module | undefined>;
   deleteModule(id: string): Promise<boolean>;
 
   getModuleLessons(moduleId: string): Promise<Lesson[]>;
   getLesson(id: string): Promise<Lesson | undefined>;
   createLesson(lesson: InsertLesson): Promise<Lesson>;
   getAllLessons(): Promise<Lesson[]>;
-  updateLesson(id: string, lesson: Partial<InsertLesson>): Promise<Lesson | undefined>;
+  updateLesson(
+    id: string,
+    lesson: Partial<InsertLesson>
+  ): Promise<Lesson | undefined>;
   deleteLesson(id: string): Promise<boolean>;
 
   getUserEnrollments(userId: number): Promise<Enrollment[]>;
@@ -357,9 +368,7 @@ export interface IStorage {
       })
     | undefined
   >;
-  getUserGoalsWithCategories(
-    userId: number
-  ): Promise<
+  getUserGoalsWithCategories(userId: number): Promise<
     (Goal & {
       categories: (GoalCategory & {
         totalSubtopics: number;
@@ -2109,18 +2118,15 @@ export class PgStorage implements IStorage {
   }
 
   async deleteCourse(id: string): Promise<boolean> {
-    if (!this.isDbConnected) {
-      const allCourses = this.fallbackData.get("courses") || [];
-      const index = allCourses.findIndex((c: any) => c.id === id);
-      if (index !== -1) {
-        allCourses.splice(index, 1);
-        this.fallbackData.set("courses", allCourses);
-        return true;
-      }
+    // For PostgreSQL, Drizzle returns an object with the number of rows affected.
+    // A rowCount > 0 means the deletion was successful.
+    try {
+      const result = await db.delete(courses).where(eq(courses.id, id));
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting goal:", error);
       return false;
     }
-    const result = await db.delete(courses).where(eq(courses.id, id));
-    return result.length > 0;
   }
 
   async getCategories(): Promise<Category[]> {
@@ -2194,6 +2200,39 @@ export class PgStorage implements IStorage {
       .values(instructorData)
       .returning();
     return instructor;
+  }
+
+  async updateInstructor(
+    id: string,
+    instructorData: Partial<InsertInstructor>
+  ): Promise<Instructor | undefined> {
+    if (!this.isDbConnected) {
+      const allInstructors = this.fallbackData.get("instructors") || [];
+      const index = allInstructors.findIndex((i: any) => i.id === id);
+      if (index !== -1) {
+        allInstructors[index] = { ...allInstructors[index], ...instructorData };
+        this.fallbackData.set("instructors", allInstructors);
+        return allInstructors[index];
+      }
+      return undefined;
+    }
+    const [instructor] = await db
+      .update(instructors)
+      .set(instructorData)
+      .where(eq(instructors.id, id))
+      .returning();
+    return instructor;
+  }
+
+  async deleteInstructor(id: string): Promise<boolean> {
+    const result = await db
+      .delete(instructors)
+      .where(eq(instructors.id, id))
+      .returning({ id: instructors.id }); // We only need the id back
+
+    // 'result' is now an array, e.g., [{ id: 'some-uuid' }] or []
+    // This check is now type-safe and works perfectly.
+    return result.length > 0;
   }
 
   async getCourseModules(courseId: string): Promise<Module[]> {
@@ -3702,9 +3741,7 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getUserGoalsWithCategories(
-    userId: number
-  ): Promise<
+  async getUserGoalsWithCategories(userId: number): Promise<
     (Goal & {
       categories: (GoalCategory & {
         totalSubtopics: number;
