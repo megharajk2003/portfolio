@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Edit, Trash2, Search, BookOpen } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Search, BookOpen, Settings } from "lucide-react";
 import { Link } from "wouter";
 import Sidebar from "@/components/sidebar";
 
@@ -40,10 +40,17 @@ interface Course {
   title: string;
   subtitle: string;
   description: string;
+  language: string;
   level: string;
+  coverImageUrl: string;
+  promoVideoUrl: string;
   isFree: boolean;
   price: string;
   durationMonths: number;
+  scheduleInfo: string;
+  whatYouWillLearn: string[];
+  skillsYouWillGain: string[];
+  detailsToKnow: string[];
   instructorId: string;
   status: "Published" | "Draft";
   createdAt: string;
@@ -64,6 +71,7 @@ export default function CoursesManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
 
   // Form state
@@ -71,10 +79,17 @@ export default function CoursesManagement() {
     title: "",
     subtitle: "",
     description: "",
+    language: "English",
     level: "Beginner",
+    coverImageUrl: "",
+    promoVideoUrl: "",
     isFree: true,
     price: "0",
     durationMonths: 1,
+    scheduleInfo: "",
+    whatYouWillLearn: [],
+    skillsYouWillGain: [],
+    detailsToKnow: [],
     instructorId: "",
     status: "Draft",
   });
@@ -187,6 +202,39 @@ export default function CoursesManagement() {
     },
   });
 
+  // Update course details mutation
+  const updateCourseDetailsMutation = useMutation({
+    mutationFn: async (courseData: Partial<Course>) => {
+      const response = await fetch(`/api/admin/courses/${courseData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(courseData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update course details");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      toast({
+        title: "Success",
+        description: "Course details updated successfully",
+      });
+      setIsDetailsModalOpen(false);
+      setCurrentCourse(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update course details: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -223,10 +271,17 @@ export default function CoursesManagement() {
       title: "",
       subtitle: "",
       description: "",
+      language: "English",
       level: "Beginner",
+      coverImageUrl: "",
+      promoVideoUrl: "",
       isFree: true,
       price: "0",
       durationMonths: 1,
+      scheduleInfo: "",
+      whatYouWillLearn: [],
+      skillsYouWillGain: [],
+      detailsToKnow: [],
       instructorId: "",
       status: "Draft",
     });
@@ -245,6 +300,24 @@ export default function CoursesManagement() {
   const handleDeleteClick = (course: Course) => {
     setCurrentCourse(course);
     setIsDeleteModalOpen(true);
+  };
+
+  // Open course details modal
+  const handleManageDetails = (course: Course) => {
+    setCurrentCourse(course);
+    setFormData({
+      ...course,
+    });
+    setIsDetailsModalOpen(true);
+  };
+
+  // Handle array field changes (for whatYouWillLearn, skillsYouWillGain, detailsToKnow)
+  const handleArrayFieldChange = (fieldName: string, value: string) => {
+    const items = value.split('\n').filter(item => item.trim() !== '');
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: items,
+    }));
   };
 
   // Filter courses based on search query and status filter
@@ -391,6 +464,14 @@ export default function CoursesManagement() {
                                   Manage Modules
                                 </Button>
                               </Link>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleManageDetails(course)}
+                              >
+                                <Settings className="h-4 w-4 mr-1" />
+                                Manage Details
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -771,6 +852,142 @@ export default function CoursesManagement() {
                 {deleteCourseMutation.isPending
                   ? "Deleting..."
                   : "Delete Course"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Course Details Management Modal */}
+        <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Manage Course Details</DialogTitle>
+              <DialogDescription>
+                Update comprehensive course information including media, learning outcomes, and scheduling.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              {/* Media & Visual Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Media & Visual Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="coverImageUrl">Cover Image URL</Label>
+                    <Input
+                      id="coverImageUrl"
+                      name="coverImageUrl"
+                      value={formData.coverImageUrl || ''}
+                      onChange={handleInputChange}
+                      placeholder="https://example.com/course-image.jpg"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="promoVideoUrl">Promotional Video URL</Label>
+                    <Input
+                      id="promoVideoUrl"
+                      name="promoVideoUrl"
+                      value={formData.promoVideoUrl || ''}
+                      onChange={handleInputChange}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="language">Course Language</Label>
+                    <Select
+                      value={formData.language || 'English'}
+                      onValueChange={(value) => handleSelectChange("language", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Spanish">Spanish</SelectItem>
+                        <SelectItem value="French">French</SelectItem>
+                        <SelectItem value="German">German</SelectItem>
+                        <SelectItem value="Chinese">Chinese</SelectItem>
+                        <SelectItem value="Japanese">Japanese</SelectItem>
+                        <SelectItem value="Portuguese">Portuguese</SelectItem>
+                        <SelectItem value="Italian">Italian</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="scheduleInfo">Schedule Information</Label>
+                    <Input
+                      id="scheduleInfo"
+                      name="scheduleInfo"
+                      value={formData.scheduleInfo || ''}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 3 hours/week, flexible schedule"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Learning Outcomes */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Learning Outcomes</h3>
+                <div>
+                  <Label htmlFor="whatYouWillLearn">What You Will Learn</Label>
+                  <Textarea
+                    id="whatYouWillLearn"
+                    value={(formData.whatYouWillLearn || []).join('\n')}
+                    onChange={(e) => handleArrayFieldChange('whatYouWillLearn', e.target.value)}
+                    placeholder="Enter each learning outcome on a new line&#10;Master React fundamentals&#10;Build responsive web applications&#10;Implement state management"
+                    rows={5}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter each learning outcome on a separate line
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="skillsYouWillGain">Skills You Will Gain</Label>
+                  <Textarea
+                    id="skillsYouWillGain"
+                    value={(formData.skillsYouWillGain || []).join('\n')}
+                    onChange={(e) => handleArrayFieldChange('skillsYouWillGain', e.target.value)}
+                    placeholder="Enter each skill on a new line&#10;JavaScript&#10;React&#10;CSS&#10;HTML"
+                    rows={5}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter each skill on a separate line
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="detailsToKnow">Important Details to Know</Label>
+                  <Textarea
+                    id="detailsToKnow"
+                    value={(formData.detailsToKnow || []).join('\n')}
+                    onChange={(e) => handleArrayFieldChange('detailsToKnow', e.target.value)}
+                    placeholder="Enter each detail on a new line&#10;Basic programming knowledge required&#10;Course includes hands-on projects&#10;Certificate of completion provided"
+                    rows={5}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter each important detail on a separate line
+                  </p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsDetailsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => updateCourseDetailsMutation.mutate(formData)}
+                disabled={updateCourseDetailsMutation.isPending}
+              >
+                {updateCourseDetailsMutation.isPending
+                  ? "Updating..."
+                  : "Update Details"}
               </Button>
             </DialogFooter>
           </DialogContent>
