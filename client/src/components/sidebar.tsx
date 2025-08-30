@@ -131,46 +131,51 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 <ThemeSwitcher />     
       </div>
            
-      <div className="gradient-primary rounded-xl p-4 mb-6 text-white shadow-lg border border-white/20">
-               
-        <div className="flex items-center justify-between mb-2">
-                   
-          <span className="text-xs opacity-90 font-medium">Total XP</span>     
-             
-          <span className="text-lg font-bold">
-                        {userStats?.totalXp?.toLocaleString() || "0"}         
-          </span>
+      {!isAdmin && (
+        <div className="gradient-primary rounded-xl p-4 mb-6 text-white shadow-lg border border-white/20">
                  
-        </div>
-               
-        <div className="flex items-center justify-between">
-                   
-          <div className="flex items-center space-x-1">
-                        <Flame className="h-4 w-4 text-yellow-300" />           
-            <span className="text-sm font-medium">
-                            {userStats?.currentStreak || 0} day streak          
-               
+          <div className="flex items-center justify-between mb-2">
+                     
+            <span className="text-xs opacity-90 font-medium">Total XP</span>   
+                 
+            <span className="text-lg font-bold">
+              {(userStats as { totalXp?: number })?.totalXp?.toLocaleString() ||
+                "0"}
             </span>
-                     
+                   
           </div>
-                   
-          <div className="w-8 h-1 bg-white/30 rounded-full overflow-hidden">
-                       
-            <div
-              className="h-full bg-yellow-300 rounded-full transition-all duration-300"
-              style={{
-                width: `${Math.min(
-                  ((userStats?.currentStreak || 0) / 7) * 100,
-                  100
-                )}%`,
-              }}
-            ></div>
+          <div className="flex items-center justify-between">
                      
+            <div className="flex items-center space-x-1">
+                          <Flame className="h-4 w-4 text-yellow-300" />         
+               
+              <span className="text-sm font-medium">
+                {(userStats as { currentStreak?: number })?.currentStreak || 0}{" "}
+                day streak    
+              </span>
+                       
+            </div>
+                     
+            <div className="w-8 h-1 bg-white/30 rounded-full overflow-hidden">
+                         
+              <div
+                className="h-full bg-yellow-300 rounded-full transition-all duration-300"
+                style={{
+                  width: `${Math.min(
+                    (((userStats as { currentStreak?: number })
+                      ?.currentStreak || 0) /
+                      7) *
+                      100,
+                    100
+                  )}%`,
+                }}
+              ></div>
+                       
+            </div>
+                   
           </div>
-                 
         </div>
-             
-      </div>
+      )}
             {/* Navigation */}     
       <nav className="space-y-2">
         {/* Use the filteredNavigation array here */}       
@@ -267,7 +272,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 onClick={() => onClose && onClose()}
               >
                                 <MessageCircle className="h-5 w-5" />           
-                    <span>Forum</span>             
+                    <span>Forum manage</span>             
               </div>
                          
             </Link>
@@ -332,18 +337,20 @@ export default function Sidebar({ onClose }: SidebarProps) {
       </nav>
             {/* Portfolio Link */}     
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-               
-        <Link href="/portfolio">
-                   
-          <div
-            className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors mb-4 shadow-sm"
-            onClick={() => onClose && onClose()}
-          >
-                        <ExternalLink className="h-5 w-5" />           
-            <span>View Portfolio</span>         
-          </div>
-                 
-        </Link>
+           {" "}
+        {!isAdmin && (
+          <Link href="/portfolio">
+                     
+            <div
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors mb-4 shadow-sm"
+              onClick={() => onClose && onClose()}
+            >
+                          <ExternalLink className="h-5 w-5" />           
+              <span>View Portfolio</span>         
+            </div>
+                   
+          </Link>
+        )}
                 {/* User Profile */}
                 <UserProfileDropdown />     
       </div>

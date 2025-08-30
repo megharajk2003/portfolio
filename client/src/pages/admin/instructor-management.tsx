@@ -65,7 +65,7 @@ export default function InstructorManagement() {
     mutationFn: async (
       data: Omit<Instructor, "id" | "createdAt" | "updatedAt">
     ) => {
-      const response = await fetch("/api/admin/instructors", {
+      const response = await fetch("/api/instructors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -78,7 +78,7 @@ export default function InstructorManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/instructors"] });
       toast({
         title: "Success",
         description: "Instructor created successfully",
@@ -117,7 +117,7 @@ export default function InstructorManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/instructors"] });
       toast({
         title: "Success",
         description: "Instructor updated successfully",
@@ -148,7 +148,7 @@ export default function InstructorManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/instructors"] });
       toast({
         title: "Success",
         description: "Instructor deleted successfully",

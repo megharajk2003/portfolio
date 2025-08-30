@@ -40,7 +40,7 @@ interface Module {
   courseId: string;
   title: string;
   description: string;
-  moduleOrder: number;
+  order: number;
   durationHours: number;
   lessonsCount?: number;
 }
@@ -63,7 +63,8 @@ export default function ModulesList() {
     title: "",
     description: "",
     durationHours: 1,
-    moduleOrder: 0,
+    order: 0,
+    moduleOrder: 0, // Add moduleOrder field to match database schema
     courseId: courseId,
   });
 
@@ -77,14 +78,14 @@ export default function ModulesList() {
   const { data: modules = [], isLoading: isLoadingModules } = useQuery<
     Module[]
   >({
-    queryKey: [`/api/admin/courses/${courseId}/modules`],
+    queryKey: [`/api/admin/modules`],
     enabled: !!courseId,
   });
 
   // Create module mutation
   const createModuleMutation = useMutation({
     mutationFn: async (moduleData: Partial<Module>) => {
-      const response = await fetch(`/api/admin/courses/${courseId}/modules`, {
+      const response = await fetch(`/api/admin/modules`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(moduleData),
@@ -236,7 +237,8 @@ export default function ModulesList() {
       title: "",
       description: "",
       durationHours: 1,
-      moduleOrder: modules.length,
+      order: modules.length,
+      moduleOrder: modules.length, // Add moduleOrder field to match database schema
       courseId: courseId,
     });
   };
@@ -264,7 +266,7 @@ export default function ModulesList() {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update moduleOrder property for each module
+    // Update order property for each module
     const updatedModules = items.map((item, index) => ({
       id: item.id,
       order: index,
@@ -365,7 +367,7 @@ export default function ModulesList() {
                           ref={provided.innerRef}
                         >
                           {modules
-                            .sort((a, b) => a.moduleOrder - b.moduleOrder)
+                            .sort((a, b) => a.order - b.order)
                             .map((module, index) => (
                               <Draggable
                                 key={module.id}
@@ -397,7 +399,7 @@ export default function ModulesList() {
                                       </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                      {module.moduleOrder + 1}
+                                      {module.order + 1}
                                     </TableCell>
                                     <TableCell className="text-center">
                                       {module.durationHours} hours
