@@ -3396,14 +3396,26 @@ export default function Profile() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basic" data-testid="tab-basic-info">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+              <TabsTrigger
+                value="basic"
+                data-testid="tab-basic-info"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-slate-50 data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 transition-all"
+              >
                 Basic Information
               </TabsTrigger>
-              <TabsTrigger value="academic" data-testid="tab-academic-details">
+              <TabsTrigger
+                value="academic"
+                data-testid="tab-academic-details"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-slate-50 data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 transition-all"
+              >
                 Academic Details
               </TabsTrigger>
-              <TabsTrigger value="view" data-testid="tab-view-profile">
+              <TabsTrigger
+                value="view"
+                data-testid="tab-view-profile"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-slate-50 data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 transition-all"
+              >
                 Preview Profile
               </TabsTrigger>
             </TabsList>
@@ -3887,7 +3899,6 @@ export default function Profile() {
                           <AvatarImage
                             src={
                               profile?.personalDetails?.photo ||
-                              profile?.photo ||
                               `https://api.dicebear.com/7.x/initials/svg?seed=${
                                 profile?.personalDetails?.fullName ||
                                 `${user?.firstName} ${user?.lastName}`

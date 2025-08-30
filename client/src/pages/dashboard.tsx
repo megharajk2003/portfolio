@@ -112,7 +112,9 @@ export default function Home() {
   const { data: unreadCount } = useQuery({
     queryKey: ["/api/notifications", userId, "count"],
     queryFn: async () => {
-      const response = await fetch(`/api/notifications/${userId}/count?unreadOnly=true`);
+      const response = await fetch(
+        `/api/notifications/${userId}/count?unreadOnly=true`
+      );
       if (!response.ok) return { count: 0 };
       return response.json();
     },
@@ -123,10 +125,10 @@ export default function Home() {
   const checkBadgesMutation = useMutation({
     mutationFn: async (userId: string) => {
       const response = await fetch(`/api/check-badges/${userId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
-      if (!response.ok) throw new Error('Failed to check badges');
+      if (!response.ok) throw new Error("Failed to check badges");
       return response.json();
     },
     onSuccess: (data) => {
@@ -155,7 +157,7 @@ export default function Home() {
       }
     },
     onError: (error) => {
-      console.error('Badge checking error:', error);
+      console.error("Badge checking error:", error);
     },
   });
 
@@ -255,43 +257,58 @@ export default function Home() {
   // Notification mutations
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await fetch(`/api/notifications/${notificationId}/read`, {
-        method: 'PATCH',
-      });
-      if (!response.ok) throw new Error('Failed to mark as read');
+      const response = await fetch(
+        `/api/notifications/${notificationId}/read`,
+        {
+          method: "PATCH",
+        }
+      );
+      if (!response.ok) throw new Error("Failed to mark as read");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId, 'count'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications", userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications", userId, "count"],
+      });
     },
   });
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/notifications/${userId}/read-all`, {
-        method: 'PATCH',
+        method: "PATCH",
       });
-      if (!response.ok) throw new Error('Failed to mark all as read');
+      if (!response.ok) throw new Error("Failed to mark all as read");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId, 'count'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications", userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications", userId, "count"],
+      });
     },
   });
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      if (!response.ok) throw new Error('Failed to delete notification');
+      if (!response.ok) throw new Error("Failed to delete notification");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications', userId, 'count'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications", userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications", userId, "count"],
+      });
     },
   });
   return (
@@ -317,7 +334,7 @@ export default function Home() {
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
+        <header className="sticky top-0 z-30 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               {/* Mobile menu button */}
@@ -418,12 +435,15 @@ export default function Home() {
                     <Bell className="h-5 w-5" />
                     {unreadCount && unreadCount.count > 0 && (
                       <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                        {unreadCount.count > 9 ? '9+' : unreadCount.count}
+                        {unreadCount.count > 9 ? "9+" : unreadCount.count}
                       </span>
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-80 max-h-96 overflow-y-auto"
+                >
                   <div className="flex items-center justify-between p-2">
                     <h3 className="font-semibold">Notifications</h3>
                     {unreadCount && unreadCount.count > 0 && (
@@ -439,12 +459,16 @@ export default function Home() {
                   </div>
                   <DropdownMenuSeparator />
 
-                  {notifications && Array.isArray(notifications) && notifications.length > 0 ? (
+                  {notifications &&
+                  Array.isArray(notifications) &&
+                  notifications.length > 0 ? (
                     notifications.slice(0, 10).map((notification: any) => (
                       <DropdownMenuItem
                         key={notification.id}
                         className={`p-3 cursor-pointer ${
-                          !notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                          !notification.isRead
+                            ? "bg-blue-50 dark:bg-blue-900/20"
+                            : ""
                         }`}
                         onClick={() => {
                           if (!notification.isRead) {
@@ -469,11 +493,13 @@ export default function Home() {
                               {notification.message}
                             </p>
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {new Date(notification.createdAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
+                              {new Date(
+                                notification.createdAt
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })}
                             </p>
                           </div>
@@ -497,7 +523,9 @@ export default function Home() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                deleteNotificationMutation.mutate(notification.id);
+                                deleteNotificationMutation.mutate(
+                                  notification.id
+                                );
                               }}
                               disabled={deleteNotificationMutation.isPending}
                               className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
@@ -509,7 +537,10 @@ export default function Home() {
                       </DropdownMenuItem>
                     ))
                   ) : (
-                    <DropdownMenuItem disabled className="p-4 text-center text-gray-500">
+                    <DropdownMenuItem
+                      disabled
+                      className="p-4 text-center text-gray-500"
+                    >
                       No notifications yet
                     </DropdownMenuItem>
                   )}
@@ -533,19 +564,19 @@ export default function Home() {
                   <div className="px-5 relative ">
                     {/* Updated Avatar to show profile photo */}
                     <Avatar className="h-16 w-16">
-                    <AvatarImage
-                      src={
-                        profile?.personalDetails?.photo ||
-                        profile?.photo ||
-                        `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`
-                      }
-                      alt="Profile"
-                    />
-                    <AvatarFallback>
-                      {user?.firstName?.charAt(0) || "U"}
-                      {user?.lastName?.charAt(0) || ""}
-                    </AvatarFallback>
-                  </Avatar>
+                      <AvatarImage
+                        src={
+                          profile?.personalDetails?.photo ||
+                          profile?.photo ||
+                          `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`
+                        }
+                        alt="Profile"
+                      />
+                      <AvatarFallback>
+                        {user?.firstName?.charAt(0) || "U"}
+                        {user?.lastName?.charAt(0) || ""}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
                   <div>
                     <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
