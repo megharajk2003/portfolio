@@ -27,7 +27,7 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-100 to-violet-500 dark:from-gray-900 dark:via-blue-800 dark:to-gray-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-blue-100 to-blue-300  dark:from-gray-900 dark:via-blue-800 dark:to-gray-900 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 gradient-primary rounded-full opacity-10 animate-pulse-slow"></div>
@@ -73,7 +73,7 @@ export default function Landing() {
             <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
               Build Your
               <span className="relative">
-                <span className="relative bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark: bg-gradient-to-r from-blue-400 via-neutral-100 to-purple-500">
+                <span className="relative bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:bg-gradient-to-r dark:from-blue-400 dark:via-neutral-100 dark:to-purple-500">
                   {" "}
                   Career{" "}
                 </span>
@@ -218,8 +218,9 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
+
       <section className="container mx-auto px-4 py-20">
-        <Card className="border-0 shadow-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <Card className="mx-auto  max-w-7xl border-0 shadow-2xl rounded-3xl bg-gradient-to-br from-blue-600  to-violet-500  dark:bg-gradient-to-br from-grey-800  to-purple-500 backdrop-blur-md">
           <CardContent className="py-16 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to Build Your Future?
