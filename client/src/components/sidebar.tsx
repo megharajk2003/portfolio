@@ -26,8 +26,10 @@ import {
   Folder,
   CheckCircle2,
   Settings,
+  ChevronLeft,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -58,6 +60,7 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const [location] = useLocation();
   const { user } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const userId = user?.id?.toString() ?? "1"; // Fallback for demo
   const isAdmin = user?.email === "admin@email.com";
@@ -195,27 +198,25 @@ export default function Sidebar({ onClose }: SidebarProps) {
               location.startsWith("/goal-tracker"));
 
           return (
-            <Link key={item.name} href={item.href}>
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                isActive
+                  ? "bg-primary text-white"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              )}
+              onClick={() => onClose && onClose()}
+            >
+                              <IconComponent className="h-5 w-5" />               
+              <span>{item.name}</span>               
+              {item.name === "Learning" && (
+                <span className="ml-auto bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+                                      New                  
+                </span>
+              )}
                            
-              <div
-                className={cn(
-                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                )}
-                onClick={() => onClose && onClose()}
-              >
-                                <IconComponent className="h-5 w-5" />           
-                    <span>{item.name}</span>               
-                {item.name === "Learning" && (
-                  <span className="ml-auto bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
-                                        New                  
-                  </span>
-                )}
-                             
-              </div>
-                         
             </Link>
           );
         })}
@@ -231,22 +232,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
                          
             </div>
                        
-            {/* <Link href="/admin">
-                           
-              <div
-                className={cn(
-                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
-                  location === "/admin"
-                    ? "bg-red-600 text-white border-red-600"
-                    : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                )}
-                onClick={() => onClose && onClose()}
-              >
-                                <LayoutDashboard className="h-5 w-5" />         
-                      <span>Admin Overview</span>             
-              </div>
-                         
-            </Link> */}
                        
             <Link href="/admin/courses">
                            
