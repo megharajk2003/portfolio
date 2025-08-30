@@ -97,7 +97,11 @@ export default function CourseDetail() {
   // Get user enrollments to check enrollment status
   const { data: userEnrollments = [] } = useQuery<any[]>({
     queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
-    // Add this line to wait for the user object
+    queryFn: async () => {
+      if (!CURRENT_USER_ID) return [];
+      const response = await apiRequest("GET", `/api/users/${CURRENT_USER_ID}/enrollments`);
+      return response;
+    },
     enabled: !!CURRENT_USER_ID,
   });
 
