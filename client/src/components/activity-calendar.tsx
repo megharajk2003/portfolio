@@ -10,23 +10,23 @@ const TOTAL_DAYS = 365;
 
 export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
   const { data: dailyActivity = [] } = useQuery<
-    { date: string; xpEarned: number; intensity: number }[]
+    { date: string; xpEarned: number; lessonsCompleted: number; intensity: number }[]
   >({
     queryKey: ["/api/daily-activity", userId],
   });
 
-  // Calculate intensity based on real XP earned
-  const calculateIntensity = (xpEarned: number) => {
-    if (xpEarned === 0) return 0;
-    if (xpEarned <= 10) return 1;
-    if (xpEarned <= 30) return 2;
-    return 3;
+  // Calculate intensity based on lessons completed: 0, 1-2, 3-4, >4
+  const calculateIntensity = (lessonsCompleted: number) => {
+    if (lessonsCompleted === 0) return 0;
+    if (lessonsCompleted >= 1 && lessonsCompleted <= 2) return 1;
+    if (lessonsCompleted >= 3 && lessonsCompleted <= 4) return 2;
+    return 3; // >4 lessons
   };
 
-  // Use real activity data with calculated intensity
+  // Use real activity data with calculated intensity based on lessons
   const activityData = dailyActivity.map(day => ({
     ...day,
-    intensity: calculateIntensity(day.xpEarned || 0)
+    intensity: calculateIntensity(day.lessonsCompleted || 0)
   }));
 
   // --- Helper Functions and Data for Yearly View ---
@@ -109,7 +109,7 @@ export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
                   className={`w-3 h-3 rounded-sm ${getIntensityClass(
                     day.intensity || 0
                   )}`}
-                  title={`${day.date}: ${day.xpEarned || 0} XP`}
+                  title={`${day.date}: ${day.lessonsCompleted || 0} lessons completed`}
                 />
               ))}
             </div>

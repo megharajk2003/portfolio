@@ -423,9 +423,11 @@ export const dailyActivity = pgTable("daily_activity", {
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  date: text("date").notNull(), // YYYY-MM-DD format
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
   xpEarned: integer("xp_earned").default(0),
   lessonsCompleted: integer("lessons_completed").default(0),
+  intensity: integer("intensity").default(0), // 0-3 scale for heat map visualization
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const sectionSettings = pgTable("section_settings", {

@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/profile/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;
-      
+
       // Handle photo field - ensure it's properly nested in personalDetails if needed
       const profileData = { ...req.body };
       if (profileData.photo && !profileData.personalDetails?.photo) {
@@ -205,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         profileData.personalDetails.photo = profileData.photo;
       }
-      
+
       const profile = await storage.updateProfile(userId, profileData);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
@@ -1559,7 +1559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (instructorData.updatedAt && typeof instructorData.updatedAt === 'string') {
         instructorData.updatedAt = new Date(instructorData.updatedAt);
       }
-      
+
       const instructor = await storage.updateInstructor(
         req.params.id,
         instructorData
@@ -1787,16 +1787,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily activity routes
+  // Get daily activity for heat map
   app.get("/api/daily-activity/:userId", async (req, res) => {
     try {
-      const { startDate, endDate } = req.query;
-      const activity = await storage.getDailyActivity(
-        parseInt(req.params.userId),
-        (startDate as string) || "2024-01-01",
-        (endDate as string) || "2024-12-31"
-      );
-      res.json(activity);
+      const userId = parseInt(req.params.userId);
+      const dailyActivityData = await storage.getDailyActivity(userId);
+
+      // Ensure each activity record includes lessonsCompleted
+      const enrichedData = dailyActivityData.map(activity => ({
+        ...activity,
+        lessonsCompleted: activity.lessonsCompleted || 0
+      }));
+
+      res.json(enrichedData);
     } catch (error) {
+      console.error("Error fetching daily activity:", error);
       res.status(500).json({ message: "Failed to fetch daily activity" });
     }
   });
@@ -3379,7 +3384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch course modules" });
     }
   });
-  
+
   // Create module for a specific course (admin)
   app.post("/api/admin/courses/:courseId/modules", requireAdmin, async (req, res) => {
     try {
@@ -3395,7 +3400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create module" });
     }
   });
-  
+
   app.post("/api/admin/modules", requireAdmin, async (req, res) => {
     try {
       // Ensure moduleOrder field is set (schema requires module_order to be not null)
@@ -3421,7 +3426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (moduleData.updatedAt && typeof moduleData.updatedAt === 'string') {
         moduleData.updatedAt = new Date(moduleData.updatedAt);
       }
-      
+
       const module = await storage.updateModule(req.params.id, moduleData);
       if (!module) {
         return res.status(404).json({ message: "Module not found" });
@@ -3450,12 +3455,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/courses/:courseId/modules/reorder", requireAdmin, async (req, res) => {
     try {
       const { modules } = req.body;
-      
+
       // Update each module's order
       for (const moduleUpdate of modules) {
         await storage.updateModule(moduleUpdate.id, { moduleOrder: moduleUpdate.order });
       }
-      
+
       res.json({ message: "Modules reordered successfully" });
     } catch (error) {
       console.error("Error reordering modules:", error);
@@ -3473,7 +3478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch lessons" });
     }
   });
-  
+
   // Get lessons for a specific module (admin)
   app.get("/api/admin/modules/:moduleId/lessons", requireAdmin, async (req, res) => {
     try {
@@ -3499,7 +3504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create lesson" });
     }
   });
-  
+
   app.post("/api/admin/lessons", requireAdmin, async (req, res) => {
     try {
       const lesson = await storage.createLesson(req.body);
@@ -3520,7 +3525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (lessonData.updatedAt && typeof lessonData.updatedAt === 'string') {
         lessonData.updatedAt = new Date(lessonData.updatedAt);
       }
-      
+
       const lesson = await storage.updateLesson(req.params.id, lessonData);
       if (!lesson) {
         return res.status(404).json({ message: "Lesson not found" });
@@ -3549,12 +3554,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/modules/:moduleId/lessons/reorder", requireAdmin, async (req, res) => {
     try {
       const { lessons } = req.body;
-      
+
       // Update each lesson's order
       for (const lessonUpdate of lessons) {
         await storage.updateLesson(lessonUpdate.id, { lessonOrder: lessonUpdate.order });
       }
-      
+
       res.json({ message: "Lessons reordered successfully" });
     } catch (error) {
       console.error("Error reordering lessons:", error);
@@ -3593,7 +3598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (courseData.updatedAt && typeof courseData.updatedAt === 'string') {
         courseData.updatedAt = new Date(courseData.updatedAt);
       }
-      
+
       const course = await storage.updateCourse(req.params.id, courseData);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });

@@ -2633,6 +2633,56 @@ export class PgStorage implements IStorage {
         const key = `dailyActivity_${userId}`;
         const activities = this.fallbackData.get(key) || [];
         const existingActivity = activities.find((a: any) => a.date === today);
+        
+        if (existingActivity) {
+          existingActivity.xpEarned = (existingActivity.xpEarned || 0) + xpEarned;
+          existingActivity.lessonsCompleted = (existingActivity.lessonsCompleted || 0) + 1;
+        } else {
+          activities.push({
+            date: today,
+            xpEarned: xpEarned,
+            lessonsCompleted: 1,
+            intensity: 1
+          });
+        }
+        this.fallbackData.set(key, activities);
+        return;
+      }
+
+      // Check if activity record exists for today
+      const existingActivity = await db
+        .select()
+        .from(dailyActivity)
+        .where(
+          and(
+            eq(dailyActivity.userId, userId),
+            eq(dailyActivity.date, today)
+          )
+        )
+        .limit(1);
+
+      if (existingActivity.length > 0) {
+        // Update existing record
+        await db
+          .update(dailyActivity)
+          .set({
+            xpEarned: (existingActivity[0].xpEarned || 0) + xpEarned,
+            lessonsCompleted: (existingActivity[0].lessonsCompleted || 0) + 1,
+          })
+          .where(eq(dailyActivity.id, existingActivity[0].id));
+      } else {
+        // Create new record
+        await db.insert(dailyActivity).values({
+          userId,
+          date: today,
+          xpEarned: xpEarned,
+          lessonsCompleted: 1,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating daily activity:", error);
+    }
+  }te === today);
 
         if (existingActivity) {
           existingActivity.xpEarned =
