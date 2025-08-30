@@ -311,15 +311,6 @@ export default function CoursesManagement() {
     setIsDetailsModalOpen(true);
   };
 
-  // Handle array field changes (for whatYouWillLearn, skillsYouWillGain, detailsToKnow)
-  const handleArrayFieldChange = (fieldName: string, value: string) => {
-    const items = value.split('\n').filter(item => item.trim() !== '');
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: items,
-    }));
-  };
-
   // Filter courses based on search query and status filter
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
@@ -927,50 +918,146 @@ export default function CoursesManagement() {
                 </div>
               </div>
 
-              {/* Learning Outcomes */}
+              {/* Learning Outcomes & Skills */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Learning Outcomes</h3>
+                <h3 className="text-lg font-semibold">Learning Outcomes & Skills</h3>
+
+                {/* What You Will Learn */}
                 <div>
-                  <Label htmlFor="whatYouWillLearn">What You Will Learn</Label>
-                  <Textarea
-                    id="whatYouWillLearn"
-                    value={(formData.whatYouWillLearn || []).join('\n')}
-                    onChange={(e) => handleArrayFieldChange('whatYouWillLearn', e.target.value)}
-                    placeholder="Enter each learning outcome on a new line&#10;Master React fundamentals&#10;Build responsive web applications&#10;Implement state management"
-                    rows={5}
-                    className="mt-1"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Enter each learning outcome on a separate line
-                  </p>
+                  <Label>What You Will Learn</Label>
+                  <div className="space-y-2">
+                    {(formData.whatYouWillLearn || []).map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item}
+                          onChange={(e) => {
+                            const updated = [...(formData.whatYouWillLearn || [])];
+                            updated[index] = e.target.value;
+                            setFormData(prev => ({ ...prev, whatYouWillLearn: updated }));
+                          }}
+                          placeholder="Enter learning outcome"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const updated = (formData.whatYouWillLearn || []).filter((_, i) => i !== index);
+                            setFormData(prev => ({ ...prev, whatYouWillLearn: updated }));
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          whatYouWillLearn: [...(prev.whatYouWillLearn || []), '']
+                        }));
+                      }}
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Add Learning Outcome
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Skills You Will Gain */}
                 <div>
-                  <Label htmlFor="skillsYouWillGain">Skills You Will Gain</Label>
-                  <Textarea
-                    id="skillsYouWillGain"
-                    value={(formData.skillsYouWillGain || []).join('\n')}
-                    onChange={(e) => handleArrayFieldChange('skillsYouWillGain', e.target.value)}
-                    placeholder="Enter each skill on a new line&#10;JavaScript&#10;React&#10;CSS&#10;HTML"
-                    rows={5}
-                    className="mt-1"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Enter each skill on a separate line
-                  </p>
+                  <Label>Skills You Will Gain</Label>
+                  <div className="space-y-2">
+                    {(formData.skillsYouWillGain || []).map((skill, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={skill}
+                          onChange={(e) => {
+                            const updated = [...(formData.skillsYouWillGain || [])];
+                            updated[index] = e.target.value;
+                            setFormData(prev => ({ ...prev, skillsYouWillGain: updated }));
+                          }}
+                          placeholder="Enter skill"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const updated = (formData.skillsYouWillGain || []).filter((_, i) => i !== index);
+                            setFormData(prev => ({ ...prev, skillsYouWillGain: updated }));
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          skillsYouWillGain: [...(prev.skillsYouWillGain || []), '']
+                        }));
+                      }}
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Add Skill
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Important Details to Know */}
                 <div>
-                  <Label htmlFor="detailsToKnow">Important Details to Know</Label>
-                  <Textarea
-                    id="detailsToKnow"
-                    value={(formData.detailsToKnow || []).join('\n')}
-                    onChange={(e) => handleArrayFieldChange('detailsToKnow', e.target.value)}
-                    placeholder="Enter each detail on a new line&#10;Basic programming knowledge required&#10;Course includes hands-on projects&#10;Certificate of completion provided"
-                    rows={5}
-                    className="mt-1"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Enter each important detail on a separate line
-                  </p>
+                  <Label>Important Details to Know</Label>
+                  <div className="space-y-2">
+                    {(formData.detailsToKnow || []).map((detail, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={detail}
+                          onChange={(e) => {
+                            const updated = [...(formData.detailsToKnow || [])];
+                            updated[index] = e.target.value;
+                            setFormData(prev => ({ ...prev, detailsToKnow: updated }));
+                          }}
+                          placeholder="Enter important detail"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const updated = (formData.detailsToKnow || []).filter((_, i) => i !== index);
+                            setFormData(prev => ({ ...prev, detailsToKnow: updated }));
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          detailsToKnow: [...(prev.detailsToKnow || []), '']
+                        }));
+                      }}
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Add Detail
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
