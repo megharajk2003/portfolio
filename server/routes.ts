@@ -1541,9 +1541,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/instructors/:id", requireAdmin, async (req, res) => {
     try {
+      // Convert timestamp strings to Date objects if present
+      const instructorData = { ...req.body };
+      if (instructorData.createdAt && typeof instructorData.createdAt === 'string') {
+        instructorData.createdAt = new Date(instructorData.createdAt);
+      }
+      if (instructorData.updatedAt && typeof instructorData.updatedAt === 'string') {
+        instructorData.updatedAt = new Date(instructorData.updatedAt);
+      }
+      
       const instructor = await storage.updateInstructor(
         req.params.id,
-        req.body
+        instructorData
       );
       if (!instructor) {
         return res.status(404).json({ message: "Instructor not found" });
@@ -3394,7 +3403,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/modules/:id", requireAdmin, async (req, res) => {
     try {
-      const module = await storage.updateModule(req.params.id, req.body);
+      // Convert timestamp strings to Date objects if present
+      const moduleData = { ...req.body };
+      if (moduleData.createdAt && typeof moduleData.createdAt === 'string') {
+        moduleData.createdAt = new Date(moduleData.createdAt);
+      }
+      if (moduleData.updatedAt && typeof moduleData.updatedAt === 'string') {
+        moduleData.updatedAt = new Date(moduleData.updatedAt);
+      }
+      
+      const module = await storage.updateModule(req.params.id, moduleData);
       if (!module) {
         return res.status(404).json({ message: "Module not found" });
       }
@@ -3484,7 +3502,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/lessons/:id", requireAdmin, async (req, res) => {
     try {
-      const lesson = await storage.updateLesson(req.params.id, req.body);
+      // Convert timestamp strings to Date objects if present
+      const lessonData = { ...req.body };
+      if (lessonData.createdAt && typeof lessonData.createdAt === 'string') {
+        lessonData.createdAt = new Date(lessonData.createdAt);
+      }
+      if (lessonData.updatedAt && typeof lessonData.updatedAt === 'string') {
+        lessonData.updatedAt = new Date(lessonData.updatedAt);
+      }
+      
+      const lesson = await storage.updateLesson(req.params.id, lessonData);
       if (!lesson) {
         return res.status(404).json({ message: "Lesson not found" });
       }
@@ -3548,7 +3575,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/courses/:id", requireAdmin, async (req, res) => {
     try {
-      const course = await storage.updateCourse(req.params.id, req.body);
+      // Convert timestamp strings to Date objects if present
+      const courseData = { ...req.body };
+      if (courseData.createdAt && typeof courseData.createdAt === 'string') {
+        courseData.createdAt = new Date(courseData.createdAt);
+      }
+      if (courseData.updatedAt && typeof courseData.updatedAt === 'string') {
+        courseData.updatedAt = new Date(courseData.updatedAt);
+      }
+      
+      const course = await storage.updateCourse(req.params.id, courseData);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
