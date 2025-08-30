@@ -105,7 +105,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   });
 
   return (
-    <aside className="w-64 h-screen bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-xl border-r border-gray-200/50 dark:border-gray-700/50 relative inset-y-0 left-0 z-30 flex flex-col p-4">
+    <aside className="w-64 h-screen bg-gray-800 dark:bg-gray-900/95 backdrop-blur-lg shadow-xl border-r border-gray-700/50 relative inset-y-0 left-0 z-30 flex flex-col p-4">
             {/* Mobile close button */}     
       {onClose && (
         <div className="lg:hidden flex justify-end mb-4">
@@ -127,11 +127,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
                    
           <div>
                        
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl font-bold text-white">
                             knowme            
             </h1>
                    
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-200">
                             Dashboard            
             </p>
                      
@@ -205,7 +205,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
                 isActive
                   ? "bg-primary text-white"
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  : "text-gray-300 dark:text-gray-300 hover:bg-gray-700 dark:hover:bg-gray-700"
               )}
               onClick={() => onClose && onClose()}
             >
@@ -226,7 +226,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                        
             <div className="px-4 py-2">
                            
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 Admin Area
               </p>
                          
@@ -328,7 +328,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
              
       </nav>
             {/* Portfolio Link */}     
-      <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-auto pt-4 border-t border-gray-700">
            {" "}
         {!isAdmin && (
           <Link href="/portfolio">

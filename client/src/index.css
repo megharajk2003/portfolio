@@ -38,8 +38,8 @@
   --font-mono: 'Fira Code', monospace;
   
   /* New colorful variables */
-  --header-bg: linear-gradient(135deg, hsl(238, 74%, 60%) 0%, hsl(265, 75%, 58%) 50%, hsl(310, 75%, 55%) 100%);
-  --sidebar-bg: linear-gradient(180deg, hsl(220, 60%, 97%) 0%, hsl(240, 80%, 98%) 50%, hsl(260, 60%, 97%) 100%);
+  --header-bg: hsl(220, 90%, 25%);
+  --sidebar-bg: hsl(220, 85%, 30%);
   --colorful-accent: hsl(280, 70%, 65%);
   --colorful-secondary: hsl(320, 65%, 60%);
   --colorful-tertiary: hsl(200, 70%, 55%);
@@ -278,15 +278,17 @@
   /* Colorful header styles */
   .colorful-header {
     background: var(--header-bg);
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
-    border-bottom: 2px solid rgba(124, 58, 237, 0.2);
+    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.25);
+    border-bottom: 2px solid rgba(30, 58, 138, 0.3);
+    color: white;
   }
 
   /* Colorful sidebar styles */
   .colorful-sidebar {
     background: var(--sidebar-bg);
-    border-right: 2px solid rgba(124, 58, 237, 0.1);
-    box-shadow: 4px 0 20px rgba(124, 58, 237, 0.1);
+    border-right: 2px solid rgba(30, 58, 138, 0.2);
+    box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+    color: white;
   }
 
   /* Colorful card styles */
