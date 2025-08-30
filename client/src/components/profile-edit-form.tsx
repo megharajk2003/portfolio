@@ -34,6 +34,8 @@ import {
   BookOpen,
   Building,
   Users,
+  Camera,
+  Upload,
 } from "lucide-react";
 import { ArrayField } from "./array-field";
 
@@ -89,6 +91,8 @@ const profileFormSchema = insertProfileSchema.omit({ userId: true }).extend({
   educationSummary: z.string().max(500).optional(),
   skillsSummary: z.string().max(500).optional(),
   internshipExperience: z.string().max(500).optional(),
+  // Photo field
+  photo: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileFormSchema>;
@@ -138,6 +142,7 @@ export default function ProfileEditForm({
       educationSummary: "",
       skillsSummary: "",
       internshipExperience: "",
+      photo: "", // Initialize photo field
     },
   });
 
@@ -171,6 +176,7 @@ export default function ProfileEditForm({
         educationSummary: profile?.educationSummary || "",
         skillsSummary: profile?.skillsSummary || "",
         internshipExperience: profile?.internshipExperience || "",
+        photo: profile?.photoUrl || "", // Assuming photoUrl is the field for existing photo
       };
 
       if (!form.formState.isDirty) {
@@ -343,6 +349,87 @@ export default function ProfileEditForm({
                   </FormItem>
                 )}
               />
+
+              {/* Photo Upload Section */}
+              <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="photo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <Camera className="h-4 w-4" />
+                        <span>Profile Photo</span>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {/* Current Photo Display */}
+                          {field.value && (
+                            <div className="flex items-center space-x-4">
+                              <img
+                                src={field.value}
+                                alt="Profile"
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => field.onChange("")}
+                              >
+                                Remove Photo
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Photo Upload Input */}
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  // Convert to base64 for storage
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    const base64String = event.target?.result as string;
+                                    field.onChange(base64String);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="hidden"
+                              id="photo-upload"
+                            />
+                            <label
+                              htmlFor="photo-upload"
+                              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
+                              <Upload className="h-4 w-4" />
+                              <span>Upload Photo</span>
+                            </label>
+                            <span className="text-sm text-gray-500">
+                              JPG, PNG, GIF up to 5MB
+                            </span>
+                          </div>
+
+                          {/* Photo URL Input as Alternative */}
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600">Or enter photo URL:</p>
+                            <Input
+                              placeholder="https://example.com/photo.jpg"
+                              value={field.value?.startsWith('http') ? field.value : ''}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}

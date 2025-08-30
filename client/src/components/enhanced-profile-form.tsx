@@ -304,6 +304,7 @@ export default function EnhancedProfileForm({
           fullName: data.name,
           roleOrTitle: data.role,
           summary: data.summary,
+          photo: data.photo,
           languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
         },
         contactDetails: {

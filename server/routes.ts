@@ -196,7 +196,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/profile/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;
-      const profile = await storage.updateProfile(userId, req.body);
+      
+      // Handle photo field - ensure it's properly nested in personalDetails if needed
+      const profileData = { ...req.body };
+      if (profileData.photo && !profileData.personalDetails?.photo) {
+        if (!profileData.personalDetails) {
+          profileData.personalDetails = {};
+        }
+        profileData.personalDetails.photo = profileData.photo;
+      }
+      
+      const profile = await storage.updateProfile(userId, profileData);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }

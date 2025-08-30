@@ -27,6 +27,7 @@ import {
   CheckCircle2,
   Settings,
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -92,6 +93,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { data: currentGoal } = useQuery<Goal>({
     queryKey: [`/api/goals/${currentGoalId}`],
     enabled: !!currentGoalId && !!user,
+  });
+
+  // Fetch profile data to get the photo URL
+  const { data: profile } = useQuery({
+    queryKey: ["/api/profile", userId],
+    enabled: !!user,
   });
 
   return (
@@ -228,7 +235,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                            
               <div
                 className={cn(
-                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors border border-red-200 dark:border-red-800",
+                  "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
                   location === "/admin"
                     ? "bg-red-600 text-white border-red-600"
                     : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"

@@ -556,6 +556,24 @@ function PersonalDetailsEditForm({
                 </FormItem>
               )}
             />
+            {/* Photo upload field */}
+            <FormField
+              control={form.control}
+              name="photo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profile Photo URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Enter URL of your profile photo"
+                      type="url"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
@@ -3867,16 +3885,25 @@ export default function Profile() {
                       <div className="relative">
                         <Avatar className="w-20 h-20">
                           <AvatarImage
-                            src={profile?.personalDetails?.photo || ""}
-                            alt={profile?.personalDetails?.fullName || ""}
+                            src={
+                              profile?.personalDetails?.photo ||
+                              profile?.photo ||
+                              `https://api.dicebear.com/7.x/initials/svg?seed=${
+                                profile?.personalDetails?.fullName ||
+                                `${user?.firstName} ${user?.lastName}`
+                              }`
+                            }
+                            alt="Profile"
                           />
                           <AvatarFallback className="text-xl">
-                            {profile?.personalDetails?.fullName
+                            {(
+                              profile?.personalDetails?.fullName ||
+                              `${user?.firstName} ${user?.lastName}`
+                            )
                               ?.split(" ")
-                              .map((n: string) => n[0])
-                              .join("") ||
-                              user?.firstName?.[0] ||
-                              "U"}
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
                       </div>

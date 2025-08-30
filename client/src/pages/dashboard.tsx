@@ -141,7 +141,7 @@ export default function Home() {
             });
           }
         });
-        
+
         // Show summary toast if multiple badges
         if (data.newBadges.length > 1) {
           setTimeout(() => {
@@ -166,7 +166,7 @@ export default function Home() {
       const timer = setTimeout(() => {
         checkBadgesMutation.mutate(userId);
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [userId, user]);
@@ -438,7 +438,7 @@ export default function Home() {
                     )}
                   </div>
                   <DropdownMenuSeparator />
-                  
+
                   {notifications && Array.isArray(notifications) && notifications.length > 0 ? (
                     notifications.slice(0, 10).map((notification: any) => (
                       <DropdownMenuItem
@@ -531,16 +531,21 @@ export default function Home() {
               <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 border border-gray-200 dark:border-gray-700 flex items-center justify-between ">
                 <div className="flex items-center space-x-4">
                   <div className="px-5 relative ">
-                    <img
-                      className="w-32 h-32 rounded-full object-contain bg-gray-100 dark:bg-gray-800"
+                    {/* Updated Avatar to show profile photo */}
+                    <Avatar className="h-16 w-16">
+                    <AvatarImage
                       src={
                         profile?.personalDetails?.photo ||
-                        "https://img.freepik.com/premium-photo/avatar-icon_665280-58322.jpg"
+                        profile?.photo ||
+                        `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`
                       }
-                      alt={
-                        profile?.personalDetails?.fullName || "Profile picture"
-                      }
+                      alt="Profile"
                     />
+                    <AvatarFallback>
+                      {user?.firstName?.charAt(0) || "U"}
+                      {user?.lastName?.charAt(0) || ""}
+                    </AvatarFallback>
+                  </Avatar>
                   </div>
                   <div>
                     <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
