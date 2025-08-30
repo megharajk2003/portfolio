@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Check, Lock, Play, RotateCcw } from "lucide-react";
 import {
@@ -11,304 +10,240 @@ import {
   Course,
   Enrollment,
 } from "../../../shared/schema";
+import React from "react";
 
 interface LearningModulesProps {
   userId: string;
 }
 
+// A new, reusable component for displaying each module in the list
+const ModuleItem = ({
+  module,
+  status,
+}: {
+  module: LearningModule;
+  status: "completed" | "available" | "locked";
+}) => {
+  const icons = {
+    completed: (
+      <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
+        <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+      </div>
+    ),
+    available: (
+      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
+        <Play className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      </div>
+    ),
+    locked: (
+      <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
+        <Lock className="h-5 w-5 text-slate-400" />
+      </div>
+    ),
+  };
+
+  const content = {
+    completed: (
+      <p className="text-sm text-emerald-600 dark:text-emerald-400">
+        Completed • +{module.xpReward} XP
+      </p>
+    ),
+    available: (
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        Click to start learning
+      </p>
+    ),
+    locked: (
+      <p className="text-sm text-slate-400 dark:text-slate-500">
+        Complete previous modules to unlock
+      </p>
+    ),
+  };
+
+  const action = {
+    completed: (
+      <Button size="sm" variant="ghost">
+        <RotateCcw className="mr-1 h-3 w-3" /> Review
+      </Button>
+    ),
+    available: (
+      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Play className="mr-1 h-3 w-3" /> Start
+      </Button>
+    ),
+    locked: (
+      <Badge
+        variant="outline"
+        className="text-slate-400 border-slate-300 dark:border-slate-600"
+      >
+        +{module.xpReward} XP
+      </Badge>
+    ),
+  };
+
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    status === "available" ? (
+      <Link href={`/module/${module.id}`}>{children}</Link>
+    ) : (
+      <>{children}</>
+    );
+
+  return (
+    <Wrapper>
+      <div
+        className={`flex items-center justify-between p-3 rounded-lg transition-all
+          ${
+            status === "available"
+              ? "hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
+              : ""
+          }
+          ${status === "locked" ? "opacity-60" : ""}
+        `}
+      >
+        <div className="flex items-center space-x-3">
+          {icons[status]}
+          <div>
+            <h5 className="font-medium text-slate-900 dark:text-white">
+              {module.title}
+            </h5>
+            {content[status]}
+          </div>
+        </div>
+        {action[status]}
+      </div>
+    </Wrapper>
+  );
+};
+
 export default function LearningModules({ userId }: LearningModulesProps) {
   const { data: modules = [] } = useQuery<LearningModule[]>({
     queryKey: ["/api/learning-modules"],
   });
-
   const { data: userProgress = [] } = useQuery<UserProgress[]>({
     queryKey: ["/api/user-progress", userId],
   });
-
-  // Get user enrollments for courses
   const { data: userEnrollments = [] } = useQuery<Enrollment[]>({
     queryKey: ["/api/users", userId, "enrollments"],
   });
-
   const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
+  // Memoize progress lookup for performance
+  const moduleProgressMap = React.useMemo(
+    () => new Map(userProgress.map((p) => [p.moduleId, p])),
+    [userProgress]
+  );
+
   const getModuleProgress = (moduleId: string) => {
-    const progress = userProgress.find(
-      (p: UserProgress) => p.moduleId === moduleId
+    return (
+      moduleProgressMap.get(moduleId) || {
+        currentLesson: 0,
+        isCompleted: false,
+        xpEarned: 0,
+      }
     );
-    return progress || { currentLesson: 0, isCompleted: false, xpEarned: 0 };
   };
 
-  // Function to check if a module should be unlocked based on sequential completion
-  const isModuleUnlocked = (moduleIndex: number) => {
-    // First module is always unlocked
-    if (moduleIndex === 0) return true;
+  // Helper function to determine the status of a module
+  const getModuleStatus = (
+    module: LearningModule,
+    index: number
+  ): "completed" | "available" | "locked" => {
+    const progress = getModuleProgress(module.id);
+    if (progress.isCompleted) {
+      return "completed";
+    }
 
     // Check if all previous modules are completed
-    for (let i = 0; i < moduleIndex; i++) {
-      const previousModule = modules[i];
-      const previousProgress = getModuleProgress(previousModule.id);
-      if (!previousProgress.isCompleted) {
-        return false;
+    for (let i = 0; i < index; i++) {
+      if (!getModuleProgress(modules[i].id).isCompleted) {
+        return "locked";
       }
     }
-    return true;
+    return "available";
   };
 
-  const currentModule = modules.find(
-    (module: LearningModule, index: number) => {
-      const progress = getModuleProgress(module.id);
-      return (
-        !progress.isCompleted &&
-        (progress.currentLesson ?? 0) > 0 &&
-        isModuleUnlocked(index)
-      );
-    }
-  );
-
-  const completedModules = modules.filter((module: LearningModule) => {
-    const progress = getModuleProgress(module.id);
-    return progress.isCompleted;
-  });
-
-  const availableModules = modules.filter(
-    (module: LearningModule, index: number) => {
-      const progress = getModuleProgress(module.id);
-      return (
-        !progress.isCompleted &&
-        progress.currentLesson === 0 &&
-        isModuleUnlocked(index)
-      );
-    }
-  );
-
-  const lockedModules = modules.filter(
-    (module: LearningModule, index: number) => {
-      const progress = getModuleProgress(module.id);
-      return !progress.isCompleted && !isModuleUnlocked(index);
-    }
-  );
-
-  // Get enrolled courses (only pending ones, not completed)
-  // Get enrolled courses (only pending ones, not completed)
   const enrolledCourses = courses.filter((course: Course) => {
     const enrollment = userEnrollments.find(
       (e: Enrollment) => e.courseId === course.id
     );
-    // A course is "enrolled and in-progress" if an enrollment exists AND it is NOT completed.
     return enrollment && !enrollment.completedAt;
   });
 
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0 shadow-lg">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">Learning Modules</CardTitle>
+          <CardTitle className="flex items-center text-xl text-blue-700 dark:text-blue-300">
+            <BookOpen className="mr-3 h-6 w-6 text-blue-600" />
+            Learning Modules
+          </CardTitle>
           <Link href="/learning">
-            <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+            <Button
+              variant="ghost"
+              className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
               View All
-            </span>
+            </Button>
           </Link>
         </div>
       </CardHeader>
       <CardContent>
         {/* Enrolled Courses */}
         <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-3 dark:text-white">
+          <h4 className="font-semibold text-slate-900 mb-3 dark:text-white px-1">
             My Enrolled Courses
           </h4>
           {enrolledCourses.length > 0 ? (
-            <>
-              <div className="space-y-3">
-                {enrolledCourses.slice(0, 3).map((course: Course) => (
-                  <div
-                    key={course.id}
-                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3 ">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Play className="h-5 w-5 text-blue-600" />
+            <div className="space-y-3">
+              {enrolledCourses.slice(0, 3).map((course: Course) => (
+                <Link key={course.id} href={`/course/${course.id}/learn`}>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-blue-200 dark:border-blue-700 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Play className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h5 className="font-semibold text-slate-900 dark:text-white text-sm">
+                            {course.title}
+                          </h5>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Course Provider
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h5 className="font-medium text-gray-900 dark:text-white">
-                          {course.title}
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          {"Course Provider"}
-                        </p>
-                      </div>
-                    </div>
-                    <Link href={`/course/${course.id}/learn`}>
                       <Button
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 "
+                        className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
                       >
-                        <Play className="mr-1 h-3 w-3" />
-                        Resume
+                        <Play className="mr-1 h-3 w-3" /> Resume
                       </Button>
-                    </Link>
+                    </div>
                   </div>
-                ))}
-              </div>
-              {enrolledCourses.length > 3 && (
-                <div className="mt-3 text-center">
-                  <Link href="/learning">
-                    <span className="text-sm text-primary font-medium cursor-pointer hover:underline ">
-                      View all {enrolledCourses.length} enrolled courses
-                    </span>
-                  </Link>
-                </div>
-              )}
-            </>
+                </Link>
+              ))}
+            </div>
           ) : (
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <BookOpen className="h-8 w-8 text-blue-600" />
-              </div>
-              <h5 className="font-semibold text-gray-900 mb-2">
-                No enrolled courses yet
-              </h5>
-              <p className="text-sm text-gray-600 mb-4">
-                Discover and enroll in courses to start your learning journey
+            <div className="text-center py-8 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+              <BookOpen className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <p className="text-slate-600 dark:text-slate-300 mb-2 font-medium">
+                No active courses
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                Enroll in a course to start your journey.
               </p>
               <Link href="/learning">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                  <Play className="mr-2 h-4 w-4" />
+                <Button
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
                   Browse Courses
                 </Button>
               </Link>
             </div>
           )}
-        </div>
-
-        {/* Current Module */}
-        {currentModule && (
-          <div className="border-2 border-primary rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold text-gray-900">
-                {currentModule.title}
-              </h4>
-              <Badge>In Progress</Badge>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              {currentModule.description}
-            </p>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-32 bg-gray-200 rounded-full h-2">
-                  {(() => {
-                    const progress = getModuleProgress(currentModule.id);
-                    const totalLessons = Array.isArray(currentModule.lessons)
-                      ? currentModule.lessons.length
-                      : 1;
-                    const progressPercentage =
-                      ((progress.currentLesson ?? 0) / totalLessons) * 100;
-                    return (
-                      <div
-                        className="bg-primary h-2 rounded-full"
-                        style={{ width: `${progressPercentage}%` }}
-                      />
-                    );
-                  })()}
-                </div>
-                <span className="text-sm text-gray-600">
-                  {(() => {
-                    const progress = getModuleProgress(currentModule.id);
-                    const totalLessons = Array.isArray(currentModule.lessons)
-                      ? currentModule.lessons.length
-                      : 1;
-                    return Math.round(
-                      ((progress.currentLesson ?? 0) / totalLessons) * 100
-                    );
-                  })()}
-                  %
-                </span>
-              </div>
-              <Link href={`/module/${currentModule.id}`}>
-                <Button size="sm">
-                  <Play className="mr-1 h-3 w-3" />
-                  Continue
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Module List */}
-        <div className="space-y-3">
-          {/* Completed Modules */}
-          {completedModules.slice(0, 2).map((module: LearningModule) => (
-            <div
-              key={module.id}
-              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Check className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900">{module.title}</h5>
-                  <p className="text-sm text-green-600">
-                    Completed • +{module.xpReward} XP
-                  </p>
-                </div>
-              </div>
-              <Button size="sm" variant="ghost">
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-
-          {/* Available Modules */}
-          {availableModules.slice(0, 2).map((module: LearningModule) => (
-            <Link key={module.id} href={`/module/${module.id}`}>
-              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Play className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-gray-900">
-                      {module.title}
-                    </h5>
-                    <p className="text-sm text-gray-500">
-                      Click to start learning
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="outline">+{module.xpReward} XP</Badge>
-              </div>
-            </Link>
-          ))}
-
-          {/* Locked Modules */}
-          {lockedModules.slice(0, 2).map((module: LearningModule) => (
-            <div
-              key={module.id}
-              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 opacity-60"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-600">{module.title}</h5>
-                  <p className="text-sm text-gray-400">
-                    Complete previous modules to unlock
-                  </p>
-                </div>
-              </div>
-              <Badge
-                variant="outline"
-                className="text-gray-400 border-gray-300"
-              >
-                +{module.xpReward} XP
-              </Badge>
-            </div>
-          ))}
         </div>
       </CardContent>
     </Card>

@@ -1423,15 +1423,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const badges = await storage.getBadges();
       // Transform badges to match frontend interface expectations
-      const transformedBadges = badges.map(badge => ({
+      const transformedBadges = badges.map((badge) => ({
         id: badge.id,
         name: badge.title,
         description: badge.description,
         imageUrl: badge.icon,
         category: badge.type,
         xpValue: badge.xpReward || 0,
-        criteria: typeof badge.criteria === 'string' ? badge.criteria : JSON.stringify(badge.criteria || {}),
-        createdAt: badge.createdAt
+        criteria:
+          typeof badge.criteria === "string"
+            ? badge.criteria
+            : JSON.stringify(badge.criteria || {}),
+        createdAt: badge.createdAt,
       }));
       res.json(transformedBadges);
     } catch (error) {
@@ -1451,7 +1454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         xpReward: req.body.xpValue,
         criteria: req.body.criteria,
         color: "blue", // default color
-        rarity: "common" as const // default rarity
+        rarity: "common" as const, // default rarity
       };
       const badge = await storage.createBadge(badgeData);
       // Transform back to frontend format
@@ -1462,8 +1465,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: badge.icon,
         category: badge.type,
         xpValue: badge.xpReward || 0,
-        criteria: typeof badge.criteria === 'string' ? badge.criteria : JSON.stringify(badge.criteria || {}),
-        createdAt: badge.createdAt
+        criteria:
+          typeof badge.criteria === "string"
+            ? badge.criteria
+            : JSON.stringify(badge.criteria || {}),
+        createdAt: badge.createdAt,
       };
       res.json(transformedBadge);
     } catch (error) {
@@ -1481,7 +1487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         icon: req.body.imageUrl,
         type: req.body.category,
         xpReward: req.body.xpValue,
-        criteria: req.body.criteria
+        criteria: req.body.criteria,
       };
       const badge = await storage.updateBadge(req.params.id, badgeData);
       if (!badge) {
@@ -1495,8 +1501,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: badge.icon,
         category: badge.type,
         xpValue: badge.xpReward || 0,
-        criteria: typeof badge.criteria === 'string' ? badge.criteria : JSON.stringify(badge.criteria || {}),
-        createdAt: badge.createdAt
+        criteria:
+          typeof badge.criteria === "string"
+            ? badge.criteria
+            : JSON.stringify(badge.criteria || {}),
+        createdAt: badge.createdAt,
       };
       res.json(transformedBadge);
     } catch (error) {
@@ -1553,10 +1562,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Convert timestamp strings to Date objects if present
       const instructorData = { ...req.body };
-      if (instructorData.createdAt && typeof instructorData.createdAt === 'string') {
+      if (
+        instructorData.createdAt &&
+        typeof instructorData.createdAt === "string"
+      ) {
         instructorData.createdAt = new Date(instructorData.createdAt);
       }
-      if (instructorData.updatedAt && typeof instructorData.updatedAt === 'string') {
+      if (
+        instructorData.updatedAt &&
+        typeof instructorData.updatedAt === "string"
+      ) {
         instructorData.updatedAt = new Date(instructorData.updatedAt);
       }
 
@@ -1791,12 +1806,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/daily-activity/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const dailyActivityData = await storage.getDailyActivity(userId);
+
+      // Get startDate and endDate from query parameters, or default to current month
+      const startDate =
+        (req.query.startDate as string) ||
+        new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          .toISOString()
+          .split("T")[0];
+      const endDate =
+        (req.query.endDate as string) ||
+        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+          .toISOString()
+          .split("T")[0];
+
+      const dailyActivityData = await storage.getDailyActivity(
+        userId,
+        startDate,
+        endDate
+      );
 
       // Ensure each activity record includes lessonsCompleted
-      const enrichedData = dailyActivityData.map(activity => ({
+      const enrichedData = dailyActivityData.map((activity) => ({
         ...activity,
-        lessonsCompleted: activity.lessonsCompleted || 0
+        lessonsCompleted: activity.lessonsCompleted || 0,
       }));
 
       res.json(enrichedData);
@@ -3375,38 +3407,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get modules for a specific course (admin)
-  app.get("/api/admin/courses/:courseId/modules", requireAdmin, async (req, res) => {
-    try {
-      const modules = await storage.getCourseModules(req.params.courseId);
-      res.json(modules);
-    } catch (error) {
-      console.error("Error fetching course modules:", error);
-      res.status(500).json({ message: "Failed to fetch course modules" });
+  app.get(
+    "/api/admin/courses/:courseId/modules",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const modules = await storage.getCourseModules(req.params.courseId);
+        res.json(modules);
+      } catch (error) {
+        console.error("Error fetching course modules:", error);
+        res.status(500).json({ message: "Failed to fetch course modules" });
+      }
     }
-  });
+  );
 
   // Create module for a specific course (admin)
-  app.post("/api/admin/courses/:courseId/modules", requireAdmin, async (req, res) => {
-    try {
-      const moduleData = {
-        ...req.body,
-        courseId: req.params.courseId,
-        moduleOrder: req.body.moduleOrder || req.body.order || 0
-      };
-      const module = await storage.createModule(moduleData);
-      res.json(module);
-    } catch (error) {
-      console.error("Error creating module:", error);
-      res.status(500).json({ message: "Failed to create module" });
+  app.post(
+    "/api/admin/courses/:courseId/modules",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const moduleData = {
+          ...req.body,
+          courseId: req.params.courseId,
+          moduleOrder: req.body.moduleOrder || req.body.order || 0,
+        };
+        const module = await storage.createModule(moduleData);
+        res.json(module);
+      } catch (error) {
+        console.error("Error creating module:", error);
+        res.status(500).json({ message: "Failed to create module" });
+      }
     }
-  });
+  );
 
   app.post("/api/admin/modules", requireAdmin, async (req, res) => {
     try {
       // Ensure moduleOrder field is set (schema requires module_order to be not null)
       const moduleData = {
         ...req.body,
-        moduleOrder: req.body.moduleOrder || req.body.order || 0
+        moduleOrder: req.body.moduleOrder || req.body.order || 0,
       };
       const module = await storage.createModule(moduleData);
       res.json(module);
@@ -3420,10 +3460,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Convert timestamp strings to Date objects if present
       const moduleData = { ...req.body };
-      if (moduleData.createdAt && typeof moduleData.createdAt === 'string') {
+      if (moduleData.createdAt && typeof moduleData.createdAt === "string") {
         moduleData.createdAt = new Date(moduleData.createdAt);
       }
-      if (moduleData.updatedAt && typeof moduleData.updatedAt === 'string') {
+      if (moduleData.updatedAt && typeof moduleData.updatedAt === "string") {
         moduleData.updatedAt = new Date(moduleData.updatedAt);
       }
 
@@ -3452,21 +3492,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reorder modules for a course
-  app.put("/api/admin/courses/:courseId/modules/reorder", requireAdmin, async (req, res) => {
-    try {
-      const { modules } = req.body;
+  app.put(
+    "/api/admin/courses/:courseId/modules/reorder",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { modules } = req.body;
 
-      // Update each module's order
-      for (const moduleUpdate of modules) {
-        await storage.updateModule(moduleUpdate.id, { moduleOrder: moduleUpdate.order });
+        // Update each module's order
+        for (const moduleUpdate of modules) {
+          await storage.updateModule(moduleUpdate.id, {
+            moduleOrder: moduleUpdate.order,
+          });
+        }
+
+        res.json({ message: "Modules reordered successfully" });
+      } catch (error) {
+        console.error("Error reordering modules:", error);
+        res.status(500).json({ message: "Failed to reorder modules" });
       }
-
-      res.json({ message: "Modules reordered successfully" });
-    } catch (error) {
-      console.error("Error reordering modules:", error);
-      res.status(500).json({ message: "Failed to reorder modules" });
     }
-  });
+  );
 
   // Admin lesson management
   app.get("/api/admin/lessons", requireAdmin, async (req, res) => {
@@ -3480,30 +3526,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get lessons for a specific module (admin)
-  app.get("/api/admin/modules/:moduleId/lessons", requireAdmin, async (req, res) => {
-    try {
-      const lessons = await storage.getModuleLessons(req.params.moduleId);
-      res.json(lessons);
-    } catch (error) {
-      console.error("Error fetching module lessons:", error);
-      res.status(500).json({ message: "Failed to fetch module lessons" });
+  app.get(
+    "/api/admin/modules/:moduleId/lessons",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const lessons = await storage.getModuleLessons(req.params.moduleId);
+        res.json(lessons);
+      } catch (error) {
+        console.error("Error fetching module lessons:", error);
+        res.status(500).json({ message: "Failed to fetch module lessons" });
+      }
     }
-  });
+  );
 
   // Create lesson for a specific module (admin)
-  app.post("/api/admin/modules/:moduleId/lessons", requireAdmin, async (req, res) => {
-    try {
-      const lessonData = {
-        ...req.body,
-        moduleId: req.params.moduleId
-      };
-      const lesson = await storage.createLesson(lessonData);
-      res.json(lesson);
-    } catch (error) {
-      console.error("Error creating lesson:", error);
-      res.status(500).json({ message: "Failed to create lesson" });
+  app.post(
+    "/api/admin/modules/:moduleId/lessons",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const lessonData = {
+          ...req.body,
+          moduleId: req.params.moduleId,
+        };
+        const lesson = await storage.createLesson(lessonData);
+        res.json(lesson);
+      } catch (error) {
+        console.error("Error creating lesson:", error);
+        res.status(500).json({ message: "Failed to create lesson" });
+      }
     }
-  });
+  );
 
   app.post("/api/admin/lessons", requireAdmin, async (req, res) => {
     try {
@@ -3519,10 +3573,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Convert timestamp strings to Date objects if present
       const lessonData = { ...req.body };
-      if (lessonData.createdAt && typeof lessonData.createdAt === 'string') {
+      if (lessonData.createdAt && typeof lessonData.createdAt === "string") {
         lessonData.createdAt = new Date(lessonData.createdAt);
       }
-      if (lessonData.updatedAt && typeof lessonData.updatedAt === 'string') {
+      if (lessonData.updatedAt && typeof lessonData.updatedAt === "string") {
         lessonData.updatedAt = new Date(lessonData.updatedAt);
       }
 
@@ -3551,21 +3605,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reorder lessons for a module
-  app.put("/api/admin/modules/:moduleId/lessons/reorder", requireAdmin, async (req, res) => {
-    try {
-      const { lessons } = req.body;
+  app.put(
+    "/api/admin/modules/:moduleId/lessons/reorder",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { lessons } = req.body;
 
-      // Update each lesson's order
-      for (const lessonUpdate of lessons) {
-        await storage.updateLesson(lessonUpdate.id, { lessonOrder: lessonUpdate.order });
+        // Update each lesson's order
+        for (const lessonUpdate of lessons) {
+          await storage.updateLesson(lessonUpdate.id, {
+            lessonOrder: lessonUpdate.order,
+          });
+        }
+
+        res.json({ message: "Lessons reordered successfully" });
+      } catch (error) {
+        console.error("Error reordering lessons:", error);
+        res.status(500).json({ message: "Failed to reorder lessons" });
       }
-
-      res.json({ message: "Lessons reordered successfully" });
-    } catch (error) {
-      console.error("Error reordering lessons:", error);
-      res.status(500).json({ message: "Failed to reorder lessons" });
     }
-  });
+  );
 
   // Admin course management
   app.get("/api/admin/courses", requireAdmin, async (req, res) => {
@@ -3592,10 +3652,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Convert timestamp strings to Date objects if present
       const courseData = { ...req.body };
-      if (courseData.createdAt && typeof courseData.createdAt === 'string') {
+      if (courseData.createdAt && typeof courseData.createdAt === "string") {
         courseData.createdAt = new Date(courseData.createdAt);
       }
-      if (courseData.updatedAt && typeof courseData.updatedAt === 'string') {
+      if (courseData.updatedAt && typeof courseData.updatedAt === "string") {
         courseData.updatedAt = new Date(courseData.updatedAt);
       }
 

@@ -162,10 +162,12 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
               >
                 {getIconForCategory(category.category)}
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {category.category}
                   </p>
-                  <p className="text-xs text-gray-500">{category.value}% avg</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {category.value}% avg
+                  </p>
                 </div>
               </div>
             ))}
@@ -192,11 +194,11 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
                 <XAxis
                   dataKey="name"
                   tick={{ fontSize: 12 }}
-                  angle={-45}
+                  angle={-35}
                   textAnchor="end"
                   height={60}
                 />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 16 }} />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload && payload[0]) {

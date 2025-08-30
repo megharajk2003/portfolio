@@ -85,8 +85,8 @@ export default function StatsGrid({ userId }: StatsGridProps) {
       title: "Profile Completion",
       value: `${profileCompletion}%`,
       icon: User,
-      color: "text-primary",
-      bgColor: "bg-primary bg-opacity-10",
+      color: "text-blue-600",
+      bgColor: "bg-blue-600 bg-opacity-10",
       progress: profileCompletion,
     },
     {

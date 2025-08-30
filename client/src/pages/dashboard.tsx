@@ -51,7 +51,8 @@ import ActivityCalendar from "@/components/activity-calendar";
 import ProjectsAchievements from "@/components/projects-achievements";
 import QuickActions from "@/components/quick-actions";
 import RealGoalHeatMap from "@/components/real-goal-heat-map";
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // ✅ correct
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -312,7 +313,7 @@ export default function Home() {
     },
   });
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-blue-100 to-blue-300  dark:from-gray-900 dark:via-blue-800 dark:to-gray-900 relative overflow-hidden">
       {sidebarOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
@@ -348,8 +349,8 @@ export default function Home() {
               </Button>
 
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold">
-                  <span className="text-gradient">Welcome back,</span>{" "}
+                <h2 className="text-2xl sm:text-3xl font-bold dark:text-white">
+                  <span className=" dark:text-white">Welcome back,</span>{" "}
                   <span className="text-primary">
                     {user?.firstName ||
                       profile?.personalDetails?.fullName?.split(" ")[0] ||
@@ -558,12 +559,15 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Learning Heat Map */}
             <RealGoalHeatMap />
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 justify-between flex flex-col">
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 border border-gray-200 dark:border-gray-700 flex items-center justify-between ">
-                <div className="flex items-center space-x-4">
-                  <div className="px-5 relative ">
-                    {/* Updated Avatar to show profile photo */}
-                    <Avatar className="h-16 w-16">
+
+            {/* User Profile & Quick Actions Card */}
+            <Card className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-900 dark:to-gray-900 border-slate-700 flex flex-col p-6">
+              {/* User Info */}
+              <div className="grid grid-cols-3 items-center  gap-6">
+                {/* Avatar Section */}
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <Avatar className="h-25 w-25 overflow-hidden rounded-full">
                       <AvatarImage
                         src={
                           profile?.personalDetails?.photo ||
@@ -571,57 +575,60 @@ export default function Home() {
                           `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`
                         }
                         alt="Profile"
+                        className="rounded-full object-cover"
                       />
-                      <AvatarFallback>
+                      <AvatarFallback className="rounded-full text-2xl">
                         {user?.firstName?.charAt(0) || "U"}
                         {user?.lastName?.charAt(0) || ""}
                       </AvatarFallback>
                     </Avatar>
+                    {/* Golden Ring and Glow Effect */}
+                    <div className="absolute inset-0 rounded-full ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900 animate-pulse-slow shadow-[0_0_20px_rgba(251,191,36,0.4)]"></div>
                   </div>
-                  <div>
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {profile?.personalDetails?.fullName ||
-                        `${user?.firstName || ""} ${
-                          user?.lastName || ""
-                        }`.trim() ||
-                        "User Name"}
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400 font-medium">
-                      {profile?.personalDetails?.roleOrTitle ||
-                        "Professional Role"}
-                    </p>
+                </div>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {profile?.contactDetails?.email ||
-                        user?.email ||
-                        "email@example.com"}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400 font-medium">
-                      {profile?.contactDetails?.phone || "Phone"}
-                    </p>
-                  </div>
+                {/* User Name + Role */}
+                <div className="text-center">
+                  <h3 className="text-4xl font-bold text-white">
+                    {profile?.personalDetails?.fullName ||
+                      `${user?.firstName || ""} ${
+                        user?.lastName || ""
+                      }`.trim() ||
+                      "User Name"}
+                  </h3>
+                  <p className="text-slate-300 font-medium">
+                    {profile?.personalDetails?.roleOrTitle || "System Engineer"}
+                  </p>
+                  <p className="text-slate-300 font-medium">
+                    {profile?.contactDetails?.phone || "DOB"}
+                  </p>
+                  <p className="text-slate-300 font-medium">
+                    {profile?.contactDetails?.email || "Email"}
+                  </p>
+                </div>
+
+                {/* Animation Section */}
+                <div className="flex justify-center">
                   <Player
                     autoplay
                     loop
                     src="https://lottie.host/808a860f-b6c9-4e5a-a7e2-659f5a45127c/ebhZk5XZe6.json"
-                    style={{ height: "150px", width: "150px" }} // Adjusted size slightly for this animation
+                    style={{ height: "150px", width: "150px" }}
                   />
                 </div>
               </div>
-              <div className="hidden lg:block">
-                <QuickActions
-                  onAddCertification={() =>
-                    console.log("Dashboard: Navigate to certification form")
-                  }
-                  onAddProject={() =>
-                    console.log("Dashboard: Navigate to project form")
-                  }
-                  onAddExperience={() =>
-                    console.log("Dashboard: Navigate to experience form")
-                  }
-                />
-              </div>
-            </section>
+
+              {/* Quick Actions Component */}
+              <QuickActions
+                onAddCertification={() =>
+                  console.log("Navigate to certification form")
+                }
+                onAddProject={() => console.log("Navigate to project form")}
+                onAddExperience={() =>
+                  console.log("Navigate to experience form")
+                }
+              />
+            </Card>
           </div>
           {/* Stats Cards */}
           <StatsGrid userId={userId} />
@@ -643,9 +650,6 @@ export default function Home() {
 
           {/* Learning Activity - Now before Learning Modules */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Learning Activity
-            </h3>
             <ActivityCalendar userId={userId} />
           </section>
 
@@ -662,17 +666,11 @@ export default function Home() {
 
           {/* Skill Dashboard */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Skill Dashboard
-            </h3>
             <SkillRadarChart userId={userId} />
           </section>
 
           {/* Projects & Achievements */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Projects & Achievements
-            </h3>
             <ProjectsAchievements userId={userId} />
           </section>
         </div>

@@ -5,125 +5,187 @@ interface ActivityCalendarProps {
   userId: string;
 }
 
-// Define the number of days to show in the calendar
-const TOTAL_DAYS = 365;
+const DAY = 24 * 60 * 60 * 1000;
+
+// Local YYYY-MM-DD (no UTC shift)
+const toYMD = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+};
 
 export default function ActivityCalendar({ userId }: ActivityCalendarProps) {
   const { data: dailyActivity = [] } = useQuery<
-    { date: string; xpEarned: number; lessonsCompleted: number; intensity: number }[]
+    { date: string; lessonsCompleted: number }[]
   >({
     queryKey: ["/api/daily-activity", userId],
   });
+  console.log("dailyActivity :;", dailyActivity);
+  // --- 1) Rolling 12 months: from 1st of same month last year -> today (inclusive) ---
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // local midnight
 
-  // Calculate intensity based on lessons completed: 0, 1-2, 3-4, >4
-  const calculateIntensity = (lessonsCompleted: number) => {
-    if (lessonsCompleted === 0) return 0;
-    if (lessonsCompleted >= 1 && lessonsCompleted <= 2) return 1;
-    if (lessonsCompleted >= 3 && lessonsCompleted <= 4) return 2;
-    return 3; // >4 lessons
-  };
+  const startDate = new Date(today.getFullYear() - 1, today.getMonth(), 1); // first of month, last year
+  const endDate = new Date(today); // today
 
-  // Use real activity data with calculated intensity based on lessons
-  const activityData = dailyActivity.map(day => ({
-    ...day,
-    intensity: calculateIntensity(day.lessonsCompleted || 0)
-  }));
+  const daysDiffInclusive =
+    Math.round((endDate.getTime() - startDate.getTime()) / DAY) + 1;
 
-  // --- Helper Functions and Data for Yearly View ---
+  const activityMap = new Map(dailyActivity.map((d) => [d.date, d]));
 
+  const fullCalendarData = Array.from({ length: daysDiffInclusive }).map(
+    (_, i) => {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const dateString = toYMD(d); // local YYYY-MM-DD
+
+      const activity = activityMap.get(dateString);
+      const lessonsCompleted = activity?.lessonsCompleted ?? 0;
+
+      let intensity = 0;
+      if (lessonsCompleted > 0 && lessonsCompleted <= 2) intensity = 1;
+      else if (lessonsCompleted > 2 && lessonsCompleted <= 4) intensity = 2;
+      else if (lessonsCompleted > 4) intensity = 3;
+
+      return { date: dateString, lessonsCompleted, intensity };
+    }
+  );
+
+  // --- 2) Group into weeks (left pad to Monday, right pad to complete last week) ---
+  const startDayOfWeek = (startDate.getDay() + 6) % 7; // Monday=0
+  const leftPad = Array(startDayOfWeek).fill(null);
+
+  // right pad so the very last column is a full 7-row week
+  const totalCellsSoFar = startDayOfWeek + fullCalendarData.length;
+  const rightPadCount = (7 - (totalCellsSoFar % 7)) % 7;
+  const rightPad = Array(rightPadCount).fill(null);
+
+  const paddedDays = [...leftPad, ...fullCalendarData, ...rightPad];
+
+  const weeks: ((typeof fullCalendarData)[number] | null)[][] = [];
+  for (let i = 0; i < paddedDays.length; i += 7) {
+    weeks.push(paddedDays.slice(i, i + 7));
+  }
+
+  // --- 3) Month labels: position using (leftPad + indexOf(1st-of-month)) / 7 ---
+  const monthLabels: { label: string; weekIndex: number }[] = [];
+
+  // Always show label for the starting month
+  monthLabels.push({
+    label: startDate.toLocaleString("default", { month: "short" }),
+    weekIndex: 0,
+  });
+
+  for (let i = 0; i < fullCalendarData.length; i++) {
+    const d = new Date(fullCalendarData[i].date);
+    if (d.getDate() === 1) {
+      const isStartMonth =
+        d.getFullYear() === startDate.getFullYear() &&
+        d.getMonth() === startDate.getMonth();
+      if (isStartMonth) continue;
+
+      const absoluteIndex = startDayOfWeek + i; // include left padding
+      const weekIndex = Math.floor(absoluteIndex / 7);
+
+      const label = d.toLocaleString("default", { month: "short" });
+      // avoid duplicates if the 1st falls in the same week as the previous label
+      if (
+        !monthLabels.length ||
+        monthLabels[monthLabels.length - 1].weekIndex !== weekIndex
+      ) {
+        monthLabels.push({ label, weekIndex });
+      }
+    }
+  }
+
+  // --- Coloring ---
   const getIntensityClass = (intensity: number) => {
     switch (intensity) {
-      case 0:
-        return "bg-gray-200 dark:bg-gray-700";
       case 1:
-        return "bg-blue-200 dark:bg-blue-900";
+        return "bg-sky-300 dark:bg-sky-800";
       case 2:
-        return "bg-blue-400 dark:bg-blue-700";
+        return "bg-sky-500 dark:bg-sky-600";
       case 3:
-        return "bg-blue-600 dark:bg-blue-500";
+        return "bg-sky-700 dark:bg-sky-400";
       default:
-        return "bg-gray-200 dark:bg-gray-700";
+        return "bg-slate-200 dark:bg-slate-800";
     }
   };
 
-  // Get the start date (365 days ago) to calculate the first day's offset
-  const today = new Date();
-  const startDate = new Date();
-  startDate.setDate(today.getDate() - TOTAL_DAYS + 1);
-  const startDayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-  // Create an array of month labels for the header
-  const monthLabels = Array.from({ length: 12 }).map((_, i) => {
-    const month = new Date();
-    month.setMonth(today.getMonth() - 11 + i);
-    return month.toLocaleString("default", { month: "short" });
-  });
+  // Labels aligned to the 7 grid rows (Mon..Sun). Leave Sat/Sun blank if you prefer.
+  const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Learning Activity</CardTitle>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-slate-500 dark:text-slate-400">
             Last year
           </span>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col">
-          {/* Month Labels */}
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 ml-8 mb-2">
-            {monthLabels.map((month) => (
-              <span key={month} className="flex-1 text-center">
-                {month}
-              </span>
+
+      <CardContent className="overflow-x-auto">
+        {/* Calendar grid */}
+        <div className="flex mt-2">
+          {/* Weekday labels */}
+          <div className="grid grid-rows-7 gap-1 text-xs text-slate-500 dark:text-slate-400 mr-2">
+            {weekdayLabels.map((w, i) => (
+              <div key={i} className="h-3 flex items-center">
+                {w}
+              </div>
             ))}
           </div>
 
-          <div className="flex gap-2">
-            {/* Day Labels (M, W, F) */}
-            <div className="grid grid-rows-7 gap-y-[3px] text-xs text-gray-500 dark:text-gray-400 -mt-1">
-              <span className="block h-3">Mon</span>
+          {/* Weeks (month labels + dots share same columns) */}
+          <div className="flex gap-1">
+            {weeks.map((week, weekIndex) => (
+              <div key={weekIndex} className="flex flex-col items-center">
+                {/* Month label */}
+                <div className="h-4 mb-1 flex justify-center">
+                  {monthLabels.find((m) => m.weekIndex === weekIndex)?.label ? (
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {
+                        monthLabels.find((m) => m.weekIndex === weekIndex)
+                          ?.label
+                      }
+                    </span>
+                  ) : (
+                    <span className="text-xs">&nbsp;</span> // keeps column width stable
+                  )}
+                </div>
 
-              <span className="block h-3">Tue</span>
-
-              <span className="block h-3">Wed</span>
-              <span className="block h-3">Thur</span>
-              <span className="block h-3">Fri</span>
-              <span className="block h-3">Sat</span>
-              <span className="block h-3">Sun</span>
-              <span></span>
-            </div>
-
-            {/* GitHub-style contribution grid */}
-            <div className="grid grid-rows-7 grid-flow-col gap-1 w-full">
-              {/* Add empty cells to align the first day of the year correctly */}
-              {Array.from({ length: startDayOfWeek }).map((_, index) => (
-                <div key={`pad-${index}`} className="w-3 h-3 rounded-sm" />
-              ))}
-
-              {/* Map over the activity data */}
-              {activityData.map((day, index) => (
-                <div
-                  key={index}
-                  className={`w-3 h-3 rounded-sm ${getIntensityClass(
-                    day.intensity || 0
-                  )}`}
-                  title={`${day.date}: ${day.lessonsCompleted || 0} lessons completed`}
-                />
-              ))}
-            </div>
+                {/* Dots column */}
+                <div className="grid grid-rows-7 gap-1">
+                  {week.map((day, dayIndex) => (
+                    <div
+                      key={day ? day.date : `pad-${weekIndex}-${dayIndex}`}
+                      className={`w-3 h-3 rounded-full ${
+                        day ? getIntensityClass(day.intensity) : "opacity-0"
+                      }`}
+                      title={
+                        day
+                          ? `${day.date}: ${day.lessonsCompleted} lessons`
+                          : undefined
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex justify-end items-center mt-4 text-xs text-gray-500 dark:text-gray-400 space-x-2">
+        <div className="flex justify-end items-center mt-4 text-xs text-slate-500 dark:text-slate-400 space-x-2">
           <span>Less</span>
           <div className="flex space-x-1">
-            <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded-sm" />
-            <div className="w-3 h-3 bg-blue-200 dark:bg-blue-900 rounded-sm" />
-            <div className="w-3 h-3 bg-blue-400 dark:bg-blue-700 rounded-sm" />
-            <div className="w-3 h-3 bg-blue-600 dark:bg-blue-500 rounded-sm" />
+            <div className="w-3 h-3 bg-slate-200 dark:bg-slate-800 rounded-full" />
+            <div className="w-3 h-3 bg-sky-300 dark:bg-sky-800 rounded-full" />
+            <div className="w-3 h-3 bg-sky-500 dark:bg-sky-600 rounded-full" />
+            <div className="w-3 h-3 bg-sky-700 dark:bg-sky-400 rounded-full" />
           </div>
           <span>More</span>
         </div>
