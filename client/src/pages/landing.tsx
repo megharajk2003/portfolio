@@ -27,7 +27,7 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-100 to-violet-500 dark:from-gray-900 dark:via-blue-800 dark:to-gray-900 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 gradient-primary rounded-full opacity-10 animate-pulse-slow"></div>
@@ -40,7 +40,7 @@ export default function Landing() {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <Rocket className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text dark:text-white text-transparent">
               knowme
             </span>
           </div>
@@ -59,61 +59,73 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          <Badge variant="secondary" className="mb-6 px-4 py-2">
-            <Zap className="w-4 h-4 mr-2" />
-            Portfolio + Learning Platform
-          </Badge>
+      <Card className="mx-auto mt-10 max-w-5xl border-0 shadow-2xl rounded-3xl bg-white/80 dark:bg-gradient-to-br from-grey-800  to-purple-500 backdrop-blur-md">
+        <CardContent className="px-8 py-16 md:px-16 text-center">
+          <section>
+            <Badge
+              variant="secondary"
+              className="mb-6 px-4 py-2 text-sm md:text-base"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Portfolio + Learning Platform
+            </Badge>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            Build Your
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {" "}
-              Career{" "}
-            </span>
-            Portfolio
-          </h1>
+            <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+              Build Your
+              <span className="relative">
+                <span className="relative bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark: bg-gradient-to-r from-blue-400 via-neutral-100 to-purple-500">
+                  {" "}
+                  Career{" "}
+                </span>
+              </span>
+              Portfolio
+            </h1>
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Create stunning portfolios, track your skills, and accelerate your
-            learning with our gamified platform designed for modern
-            professionals.
-          </p>
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
+              Create stunning portfolios, track your skills, and accelerate your
+              learning with our gamified platform designed for modern
+              professionals.
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link href="/auth">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link href="/auth">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all"
+                  data-testid="button-get-started"
+                >
+                  Get Started Free
+                  <ChevronRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                data-testid="button-get-started"
+                variant="outline"
+                className="px-8 py-6 text-lg rounded-full border-2"
+                data-testid="button-view-demo"
               >
-                Get Started Free
-                <ChevronRight className="ml-2 w-5 h-5" />
+                View Demo Portfolio
               </Button>
-            </Link>
-            <Button size="lg" variant="outline" data-testid="button-view-demo">
-              View Demo Portfolio
-            </Button>
-          </div>
+            </div>
 
-          {/* Social Proof */}
-          <div className="flex items-center justify-center space-x-8 text-gray-500 dark:text-gray-400">
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5" />
-              <span>10K+ Users</span>
+            {/* Social Proof */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 dark:text-gray-400 text-sm md:text-base">
+              <div className="flex items-center space-x-2">
+                <Users className="w-5 h-5" />
+                <span>10K+ Users</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Trophy className="w-5 h-5" />
+                <span>50+ Skills</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Star className="w-5 h-5" />
+                <span>4.9 Rating</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Trophy className="w-5 h-5" />
-              <span>50+ Skills</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Star className="w-5 h-5" />
-              <span>4.9 Rating</span>
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        </CardContent>
+      </Card>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20">

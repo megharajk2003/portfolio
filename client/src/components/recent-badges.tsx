@@ -142,12 +142,14 @@ export default function RecentBadges({ userId }: RecentBadgesProps) {
 
   // Sort badges by earned date and take the 4 most recent
   const recentBadges = userBadges
-    .sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime())
+    .sort(
+      (a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
+    )
     .slice(0, 4);
 
   if (isLoading) {
     return (
-      <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
             🏆 Recent Badges
@@ -187,7 +189,9 @@ export default function RecentBadges({ userId }: RecentBadgesProps) {
           <div className="text-center py-8">
             <Trophy className="mx-auto h-12 w-12 text-gray-400 mb-3" />
             <p className="text-gray-500 mb-2">No badges earned yet</p>
-            <p className="text-sm text-gray-400">Complete courses and milestones to earn badges!</p>
+            <p className="text-sm text-gray-400">
+              Complete courses and milestones to earn badges!
+            </p>
             <Link href="/learning">
               <Button className="mt-4" size="sm">
                 Start Learning
@@ -197,9 +201,10 @@ export default function RecentBadges({ userId }: RecentBadgesProps) {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {recentBadges.map((userBadge, index) => {
-              const IconComponent = iconMap[userBadge.badge.icon as keyof typeof iconMap] || Trophy;
+              const IconComponent =
+                iconMap[userBadge.badge.icon as keyof typeof iconMap] || Trophy;
               const rarityStyle = rarityColors[userBadge.badge.rarity];
-              
+
               return (
                 <motion.div
                   key={userBadge.id}
@@ -215,42 +220,48 @@ export default function RecentBadges({ userId }: RecentBadgesProps) {
                 >
                   {/* Rarity indicator */}
                   <div className="absolute top-2 right-2">
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={`text-xs px-2 py-0.5 ${rarityStyle.text} border-current`}
                     >
                       {userBadge.badge.rarity}
                     </Badge>
                   </div>
-                  
+
                   {/* Badge icon */}
                   <div className="flex justify-center mb-2">
-                    <div className={`
+                    <div
+                      className={`
                       w-12 h-12 rounded-full ${rarityStyle.bg} border-2 ${rarityStyle.border}
                       flex items-center justify-center shadow-sm
-                    `}>
-                      <IconComponent className={`h-6 w-6 ${rarityStyle.text}`} />
+                    `}
+                    >
+                      <IconComponent
+                        className={`h-6 w-6 ${rarityStyle.text}`}
+                      />
                     </div>
                   </div>
-                  
+
                   {/* Badge info */}
                   <div className="text-center">
-                    <h4 className={`text-sm font-semibold ${rarityStyle.text} mb-1 line-clamp-2`}>
+                    <h4
+                      className={`text-sm font-semibold ${rarityStyle.text} mb-1 line-clamp-2`}
+                    >
                       {userBadge.badge.title}
                     </h4>
                     <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                       {userBadge.badge.description}
                     </p>
-                    
+
                     {/* XP reward */}
                     {userBadge.badge.xpReward > 0 && (
                       <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
-                        <Star className="h-3 w-3 mr-1" />
-                        +{userBadge.badge.xpReward} XP
+                        <Star className="h-3 w-3 mr-1" />+
+                        {userBadge.badge.xpReward} XP
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Earned date */}
                   <div className="absolute bottom-1 left-1 right-1 text-center">
                     <p className="text-xs text-gray-500">

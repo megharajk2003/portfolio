@@ -35,15 +35,11 @@ import Footer from "@/components/ui/footer";
 import { useAuth } from "@/hooks/useAuth";
 import React from "react";
 
-// Changed to number to match database schema
-
-
-
 export default function CourseDetail() {
   const [, params] = useRoute("/course/:id");
   const { user } = useAuth();
   const CURRENT_USER_ID = user?.id || "";
-  console.log("Current User ID:", CURRENT_USER_ID); // Debugging line
+  console.log("Current User ID:", CURRENT_USER_ID);
   const [activeTab, setActiveTab] = useState("about");
   const courseId = params?.id || "1";
 
@@ -52,7 +48,7 @@ export default function CourseDetail() {
     queryKey: ["/api/courses", courseId],
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/courses/${courseId}`);
-      return response;
+      return response.json ? await response.json() : response;
     },
   });
 
@@ -60,8 +56,11 @@ export default function CourseDetail() {
   const { data: modules = [] } = useQuery<any[]>({
     queryKey: ["/api/courses", courseId, "modules"],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/courses/${courseId}/modules`);
-      return response;
+      const response = await apiRequest(
+        "GET",
+        `/api/courses/${courseId}/modules`
+      );
+      return response.json ? await response.json() : response;
     },
     enabled: !!courseId,
   });
@@ -69,38 +68,16 @@ export default function CourseDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  if (courseLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-gray-100"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading course details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!course) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Course not found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">The course you're looking for doesn't exist.</p>
-          <Link href="/learning">
-            <Button>Back to Learning</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   // Get user enrollments to check enrollment status
   const { data: userEnrollments = [] } = useQuery<any[]>({
     queryKey: ["/api/users", CURRENT_USER_ID, "enrollments"],
     queryFn: async () => {
       if (!CURRENT_USER_ID) return [];
-      const response = await apiRequest("GET", `/api/users/${CURRENT_USER_ID}/enrollments`);
-      return response;
+      const response = await apiRequest(
+        "GET",
+        `/api/users/${CURRENT_USER_ID}/enrollments`
+      );
+      return response.json ? await response.json() : response;
     },
     enabled: !!CURRENT_USER_ID,
   });
@@ -109,8 +86,11 @@ export default function CourseDetail() {
   const { data: courseReviews = [] } = useQuery<any[]>({
     queryKey: ["/api/courses", courseId, "reviews"],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/courses/${courseId}/reviews`);
-      return response;
+      const response = await apiRequest(
+        "GET",
+        `/api/courses/${courseId}/reviews`
+      );
+      return response.json ? await response.json() : response;
     },
   });
 
@@ -181,6 +161,38 @@ export default function CourseDetail() {
     );
   };
 
+  // Move conditional returns here to ensure all hooks are called before any returns
+  if (courseLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-gray-100"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Loading course details...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Course not found
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            The course you're looking for doesn't exist.
+          </p>
+          <Link href="/learning">
+            <Button>Back to Learning</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto pb-8">
@@ -201,10 +213,9 @@ export default function CourseDetail() {
                   "url('https://talentsprint.com/course/generative-ai/images/generativeai-header-bg.webp')",
               }}
             >
-              {/* Course Info - Added white/light text colors for visibility */}
+              {/* Course Info */}
               <div className="lg:col-span-2 space-y-4 text-left">
                 <div className="flex items-center space-x-3">
-                  {/* The IBM logo image here is likely a light color, so it should be fine */}
                   <img
                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/960px-IBM_logo.svg.png"
                     alt={course.provider}
@@ -214,9 +225,7 @@ export default function CourseDetail() {
                     <h1 className="text-3xl font-bold text-white">
                       {course.title}
                     </h1>
-                    <p className="text-gray-300">
-                      {course.description}
-                    </p>
+                    <p className="text-gray-300">{course.description}</p>
                   </div>
                 </div>
 
@@ -224,17 +233,22 @@ export default function CourseDetail() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={course.instructor.profileImageUrl || "/images/instructor.png"}
+                        src={
+                          course.instructor.profileImageUrl ||
+                          "/images/instructor.png"
+                        }
                         alt={`${course.instructor.firstName} ${course.instructor.lastName}`}
                       />
                       <AvatarFallback>
-                        {course.instructor.firstName?.[0]}{course.instructor.lastName?.[0]}
+                        {course.instructor.firstName?.[0]}
+                        {course.instructor.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="text-sm text-gray-400">Instructor:</p>
                       <p className="font-medium text-blue-400 hover:underline cursor-pointer">
-                        {course.instructor.firstName} {course.instructor.lastName}
+                        {course.instructor.firstName}{" "}
+                        {course.instructor.lastName}
                       </p>
                     </div>
                   </div>
@@ -256,7 +270,7 @@ export default function CourseDetail() {
                 </div>
               </div>
 
-              {/* Enrollment Card - This part is on a light background, so no color changes needed */}
+              {/* Enrollment Card */}
               <div className="lg:col-span-1">
                 <Card>
                   <CardContent className="p-6">
@@ -316,14 +330,20 @@ export default function CourseDetail() {
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold flex items-center justify-center">
-                            {courseReviews.length > 0 ? 
-                              (courseReviews.reduce((sum: number, review: any) => sum + review.rating, 0) / courseReviews.length).toFixed(1) 
-                              : "N/A"
-                            }{" "}
+                            {courseReviews.length > 0
+                              ? (
+                                  courseReviews.reduce(
+                                    (sum: number, review: any) =>
+                                      sum + review.rating,
+                                    0
+                                  ) / courseReviews.length
+                                ).toFixed(1)
+                              : "N/A"}{" "}
                             <Star className="h-4 w-4 text-yellow-400 fill-current ml-1" />
                           </div>
                           <div className="text-sm text-gray-600 dark:text-gray-400">
-                            ({courseReviews.length} {courseReviews.length === 1 ? 'review' : 'reviews'})
+                            ({courseReviews.length}{" "}
+                            {courseReviews.length === 1 ? "review" : "reviews"})
                           </div>
                         </div>
                       </div>
@@ -353,9 +373,7 @@ export default function CourseDetail() {
                       <div className="text-center">
                         <div className="flex items-center justify-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          <span className="font-bold">
-                            Self-paced
-                          </span>
+                          <span className="font-bold">Self-paced</span>
                         </div>
                         <div className="text-xs text-gray-500">
                           Complete at your own speed
@@ -392,15 +410,21 @@ export default function CourseDetail() {
                       What you'll learn
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {course.learningOutcomes && course.learningOutcomes.length > 0 ? (
-                        course.learningOutcomes.map((outcome: string, index: number) => (
-                          <div key={index} className="flex items-start space-x-3">
-                            <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
-                              {outcome}
-                            </p>
-                          </div>
-                        ))
+                      {course.learningOutcomes &&
+                      course.learningOutcomes.length > 0 ? (
+                        course.learningOutcomes.map(
+                          (outcome: string, index: number) => (
+                            <div
+                              key={index}
+                              className="flex items-start space-x-3"
+                            >
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
+                              <p className="text-sm text-gray-700 dark:text-gray-300">
+                                {outcome}
+                              </p>
+                            </div>
+                          )
+                        )
                       ) : (
                         <p className="text-gray-600 dark:text-gray-400 col-span-2">
                           Learning outcomes will be updated soon.
@@ -415,26 +439,30 @@ export default function CourseDetail() {
                       Skills you'll gain
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {course.skillsYouWillGain && course.skillsYouWillGain.length > 0 ? (
-                        course.skillsYouWillGain.slice(0, 8).map((skill: string, index: number) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-sm"
-                          >
-                            {skill}
-                          </Badge>
-                        ))
+                      {course.skillsYouWillGain &&
+                      course.skillsYouWillGain.length > 0 ? (
+                        course.skillsYouWillGain
+                          .slice(0, 8)
+                          .map((skill: string, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-sm"
+                            >
+                              {skill}
+                            </Badge>
+                          ))
                       ) : (
                         <p className="text-gray-600 dark:text-gray-400">
                           Skills information will be updated soon.
                         </p>
                       )}
-                      {course.skillsYouWillGain && course.skillsYouWillGain.length > 8 && (
-                        <Button variant="link" className="h-auto p-0 text-sm">
-                          View all skills
-                        </Button>
-                      )}
+                      {course.skillsYouWillGain &&
+                        course.skillsYouWillGain.length > 8 && (
+                          <Button variant="link" className="h-auto p-0 text-sm">
+                            View all skills
+                          </Button>
+                        )}
                     </div>
                   </section>
 
@@ -490,17 +518,22 @@ export default function CourseDetail() {
                       {course.instructor ? (
                         <div className="flex items-center space-x-3 mb-4">
                           <Avatar className="h-12 w-12">
-                            <AvatarImage src={course.instructor.profileImageUrl} />
+                            <AvatarImage
+                              src={course.instructor.profileImageUrl}
+                            />
                             <AvatarFallback>
-                              {course.instructor.firstName?.[0]}{course.instructor.lastName?.[0]}
+                              {course.instructor.firstName?.[0]}
+                              {course.instructor.lastName?.[0]}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <h3 className="font-semibold">
-                              {course.instructor.firstName} {course.instructor.lastName}
+                              {course.instructor.firstName}{" "}
+                              {course.instructor.lastName}
                             </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {course.instructor.expertise || 'Course Instructor'}
+                              {course.instructor.expertise ||
+                                "Course Instructor"}
                             </p>
                           </div>
                         </div>
@@ -558,6 +591,10 @@ export default function CourseDetail() {
                           <div className="w-2 h-2 bg-green-600 rounded-full mt-2 flex-shrink-0"></div>
                           <span>Earn a shareable career certificate</span>
                         </li>
+                        <li className="flex items-start space-x-3">
+                          <div className="w-2 h-2 bg-green-600 rounded-full mt-2 flex-shrink-0"></div>
+                          <span>Earn a shareable career certificate</span>
+                        </li>
                       </ul>
                     </div>
                     <div className="flex justify-center">
@@ -595,7 +632,9 @@ export default function CourseDetail() {
                               {module.description}
                             </p>
                           </div>
-                          <Badge variant="outline">{module.estimatedDuration || 'Self-paced'}</Badge>
+                          <Badge variant="outline">
+                            {module.estimatedDuration || "Self-paced"}
+                          </Badge>
                         </div>
                       </CardHeader>
                       <CardContent>
@@ -606,7 +645,7 @@ export default function CourseDetail() {
                           </div>
                           <div className="flex items-center">
                             <Clock className="h-4 w-4 mr-1" />
-                            {module.estimatedDuration || 'Flexible'}
+                            {module.estimatedDuration || "Flexible"}
                           </div>
                         </div>
                       </CardContent>
@@ -623,13 +662,13 @@ export default function CourseDetail() {
               </div>
             </TabsContent>
 
-            
-
             <TabsContent value="reviews" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Learner reviews</h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {courseReviews.length > 0 ? `Showing ${courseReviews.length} reviews` : 'No reviews yet'}
+                  {courseReviews.length > 0
+                    ? `Showing ${courseReviews.length} reviews`
+                    : "No reviews yet"}
                 </p>
               </div>
 
@@ -641,18 +680,29 @@ export default function CourseDetail() {
                       <div className="flex items-center justify-center mb-2">
                         <Star className="h-6 w-6 text-yellow-400 fill-current mr-1" />
                         <span className="text-3xl font-bold">
-                          {(courseReviews.reduce((sum: number, review: any) => sum + review.rating, 0) / courseReviews.length).toFixed(1)}
+                          {(
+                            courseReviews.reduce(
+                              (sum: number, review: any) => sum + review.rating,
+                              0
+                            ) / courseReviews.length
+                          ).toFixed(1)}
                         </span>
                       </div>
                       <p className="text-gray-600 dark:text-gray-400">
-                        {courseReviews.length} {courseReviews.length === 1 ? 'review' : 'reviews'}
+                        {courseReviews.length}{" "}
+                        {courseReviews.length === 1 ? "review" : "reviews"}
                       </p>
                     </div>
 
                     <div className="space-y-2">
                       {[5, 4, 3, 2, 1].map((starCount) => {
-                        const count = courseReviews.filter((review: any) => review.rating === starCount).length;
-                        const percentage = courseReviews.length > 0 ? (count / courseReviews.length) * 100 : 0;
+                        const count = courseReviews.filter(
+                          (review: any) => review.rating === starCount
+                        ).length;
+                        const percentage =
+                          courseReviews.length > 0
+                            ? (count / courseReviews.length) * 100
+                            : 0;
                         return (
                           <div
                             key={starCount}
@@ -682,23 +732,26 @@ export default function CourseDetail() {
                     </div>
                   </div>
 
-                  {/* Reviews */}
+                  {/* Reviews List */}
                   <div className="lg:col-span-3 space-y-6">
                     {courseReviews.map((review: any) => (
                       <Card key={review.id}>
                         <CardContent className="p-6">
                           <div className="flex items-start space-x-4">
                             <Avatar>
+                              <AvatarImage src={review.user?.profileImageUrl} />
                               <AvatarFallback>
-                                {review.user?.firstName?.[0] || 'U'}{review.user?.lastName?.[0] || ''}
+                                {review.user?.firstName?.[0]}
+                                {review.user?.lastName?.[0]}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
-                              <div className="flex items-center space-x-4 mb-2">
-                                <span className="font-semibold">
-                                  {review.user ? `${review.user.firstName} ${review.user.lastName}` : 'Anonymous'}
-                                </span>
-                                <div className="flex">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold">
+                                  {review.user?.firstName}{" "}
+                                  {review.user?.lastName}
+                                </h4>
+                                <div className="flex items-center">
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
@@ -710,12 +763,14 @@ export default function CourseDetail() {
                                     />
                                   ))}
                                 </div>
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                  {new Date(review.createdAt).toLocaleDateString()}
-                                </span>
                               </div>
-                              <p className="text-gray-700 dark:text-gray-300">
-                                {review.content}
+                              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                                {review.comment}
+                              </p>
+                              <p className="text-sm text-gray-500 mt-2">
+                                {new Date(
+                                  review.createdAt
+                                ).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
@@ -726,18 +781,16 @@ export default function CourseDetail() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                  <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
                     No reviews yet
                   </h3>
                   <p className="text-gray-500">
-                    Be the first to share your experience with this course!
+                    Be the first to review this course!
                   </p>
                 </div>
               )}
             </TabsContent>
-
-            
           </Tabs>
         </div>
       </div>

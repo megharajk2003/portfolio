@@ -116,7 +116,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
       <CardContent>
         {/* Enrolled Courses */}
         <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-3">
+          <h4 className="font-semibold text-gray-900 mb-3 dark:text-white">
             My Enrolled Courses
           </h4>
           {enrolledCourses.length > 0 ? (
@@ -127,12 +127,12 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                     key={course.id}
                     className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 ">
                       <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                         <Play className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <h5 className="font-medium text-gray-900">
+                        <h5 className="font-medium text-gray-900 dark:text-white">
                           {course.title}
                         </h5>
                         <p className="text-sm text-gray-500">
@@ -143,7 +143,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
                     <Link href={`/course/${course.id}/learn`}>
                       <Button
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 "
                       >
                         <Play className="mr-1 h-3 w-3" />
                         Resume
@@ -155,7 +155,7 @@ export default function LearningModules({ userId }: LearningModulesProps) {
               {enrolledCourses.length > 3 && (
                 <div className="mt-3 text-center">
                   <Link href="/learning">
-                    <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                    <span className="text-sm text-primary font-medium cursor-pointer hover:underline ">
                       View all {enrolledCourses.length} enrolled courses
                     </span>
                   </Link>
