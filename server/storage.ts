@@ -327,7 +327,10 @@ export interface IStorage {
   // Badge system methods
   getBadges(): Promise<Badge[]>;
   createBadge(badge: InsertBadge): Promise<Badge>;
-  updateBadge(id: string, badge: Partial<InsertBadge>): Promise<Badge | undefined>;
+  updateBadge(
+    id: string,
+    badge: Partial<InsertBadge>
+  ): Promise<Badge | undefined>;
   deleteBadge(id: string): Promise<boolean>;
   getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]>;
   awardBadge(userBadge: InsertUserBadge): Promise<UserBadge>;
@@ -2121,7 +2124,10 @@ export class PgStorage implements IStorage {
 
   async deleteCourse(id: string): Promise<boolean> {
     try {
-      const result = await db.delete(courses).where(eq(courses.id, id)).returning();
+      const result = await db
+        .delete(courses)
+        .where(eq(courses.id, id))
+        .returning();
       return result.length > 0;
     } catch (error) {
       console.error("Error deleting course:", error);
@@ -2340,7 +2346,10 @@ export class PgStorage implements IStorage {
       return false;
     }
     try {
-      const result = await db.delete(modules).where(eq(modules.id, id)).returning();
+      const result = await db
+        .delete(modules)
+        .where(eq(modules.id, id))
+        .returning();
       return result.length > 0;
     } catch (error) {
       console.error("Error deleting module:", error);
@@ -2389,7 +2398,10 @@ export class PgStorage implements IStorage {
       return false;
     }
     try {
-      const result = await db.delete(lessons).where(eq(lessons.id, id)).returning();
+      const result = await db
+        .delete(lessons)
+        .where(eq(lessons.id, id))
+        .returning();
       return result.length > 0;
     } catch (error) {
       console.error("Error deleting lesson:", error);
@@ -2633,16 +2645,18 @@ export class PgStorage implements IStorage {
         const key = `dailyActivity_${userId}`;
         const activities = this.fallbackData.get(key) || [];
         const existingActivity = activities.find((a: any) => a.date === today);
-        
+
         if (existingActivity) {
-          existingActivity.xpEarned = (existingActivity.xpEarned || 0) + xpEarned;
-          existingActivity.lessonsCompleted = (existingActivity.lessonsCompleted || 0) + 1;
+          existingActivity.xpEarned =
+            (existingActivity.xpEarned || 0) + xpEarned;
+          existingActivity.lessonsCompleted =
+            (existingActivity.lessonsCompleted || 0) + 1;
         } else {
           activities.push({
             date: today,
             xpEarned: xpEarned,
             lessonsCompleted: 1,
-            intensity: 1
+            intensity: 1,
           });
         }
         this.fallbackData.set(key, activities);
@@ -2654,10 +2668,7 @@ export class PgStorage implements IStorage {
         .select()
         .from(dailyActivity)
         .where(
-          and(
-            eq(dailyActivity.userId, userId),
-            eq(dailyActivity.date, today)
-          )
+          and(eq(dailyActivity.userId, userId), eq(dailyActivity.date, today))
         )
         .limit(1);
 
@@ -2678,44 +2689,6 @@ export class PgStorage implements IStorage {
           xpEarned: xpEarned,
           lessonsCompleted: 1,
         });
-      }
-    } catch (error) {
-      console.error("Error updating daily activity:", error);
-    }
-  }te === today);
-
-        if (existingActivity) {
-          existingActivity.xpEarned =
-            (existingActivity.xpEarned || 0) + xpEarned;
-          existingActivity.lessonsCompleted =
-            (existingActivity.lessonsCompleted || 0) + 1;
-        } else {
-          activities.push({
-            userId,
-            date: today,
-            xpEarned,
-            lessonsCompleted: 1,
-            timeSpent: 30, // Default 30 minutes per lesson
-          });
-        }
-        this.fallbackData.set(key, activities);
-      } else {
-        // Update database daily activity
-        await db
-          .insert(dailyActivity)
-          .values({
-            date: today,
-            userId,
-            xpEarned,
-            lessonsCompleted: 1,
-          })
-          .onConflictDoUpdate({
-            target: [dailyActivity.userId, dailyActivity.date],
-            set: {
-              xpEarned: sql`${dailyActivity.xpEarned} + ${xpEarned}`,
-              lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`,
-            },
-          });
       }
     } catch (error) {
       console.error("Error updating daily activity:", error);
@@ -4372,7 +4345,7 @@ export class PgStorage implements IStorage {
         completedTopics: completedTopics,
       });
 
-      // Get category to find goal ID and update goal counters
+      // Update parent goal counters
       const category = await this.getGoalCategory(categoryId);
       if (category) {
         const allCategories = await this.getGoalCategories(category.goalId);
@@ -4392,22 +4365,16 @@ export class PgStorage implements IStorage {
           completedSubtopics: completedSubtopics,
         });
 
-        // Check if goal is now completed and award badges
+        // Check for goal completion and award badges
         if (totalSubtopics > 0 && completedSubtopics >= totalSubtopics) {
-          // Goal is completed, mark it as completed and check for badges
           const updatedGoal = await this.updateGoal(category.goalId, {
             isCompleted: true,
             completedAt: new Date(),
           });
 
           if (updatedGoal) {
-            // Get goal to find the user ID for badge awarding
             const goal = await this.getGoal(category.goalId);
             if (goal) {
-              console.log(
-                `Goal completed: ${goal.name} for user ${goal.userId}`
-              );
-              // Award badges for goal completion milestone
               await this.checkAndAwardBadges(goal.userId, "milestone");
             }
           }
@@ -4804,7 +4771,10 @@ export class PgStorage implements IStorage {
     return created;
   }
 
-  async updateBadge(id: string, badgeData: Partial<InsertBadge>): Promise<Badge | undefined> {
+  async updateBadge(
+    id: string,
+    badgeData: Partial<InsertBadge>
+  ): Promise<Badge | undefined> {
     if (!this.isDbConnected) {
       const badgesData = this.fallbackData.get("badges") || [];
       const index = badgesData.findIndex((b: Badge) => b.id === id);
@@ -4842,7 +4812,10 @@ export class PgStorage implements IStorage {
     }
 
     try {
-      const result = await db.delete(badges).where(eq(badges.id, id)).returning();
+      const result = await db
+        .delete(badges)
+        .where(eq(badges.id, id))
+        .returning();
       return result.length > 0;
     } catch (error) {
       console.error("Error deleting badge:", error);

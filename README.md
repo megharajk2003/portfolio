@@ -10,6 +10,7 @@
 ## 🌟 Key Features
 
 ### 🎯 **Gamified Learning System**
+
 - **Interactive Courses**: Structured learning modules with lessons and progress tracking
 - **Achievement Badges**: 110+ unique badges across 8 categories
 - **XP System**: Experience points for completed activities and milestones
@@ -17,6 +18,7 @@
 - **Progress Analytics**: Detailed learning statistics and insights
 
 ### 📊 **Advanced Portfolio Management**
+
 - **Dynamic Portfolios**: Comprehensive profile builder with multiple sections
 - **Public Showcases**: Shareable portfolio URLs for professional networking
 - **Visibility Controls**: Granular privacy settings for each portfolio section
@@ -24,18 +26,21 @@
 - **Resume Export**: Generate PDF resumes from portfolio data
 
 ### 🎯 **Smart Goal Tracking**
+
 - **Hierarchical Goals**: Goals → Categories → Topics → Subtopics structure
 - **Progress Visualization**: Interactive charts and completion metrics
 - **Achievement Milestones**: Bronze, Silver, Gold, Platinum goal completion tiers
 - **Custom Categories**: Personalized learning paths and objectives
 
 ### 🤖 **AI-Powered Career Tools**
+
 - **Career Chat**: Interactive AI career advisor
 - **Resume Generator**: Intelligent resume creation and optimization
 - **Career Timeline**: Professional growth tracking and planning
 - **Skills Assessment**: AI-driven skill evaluation and recommendations
 
 ### 👑 **Advanced Admin Panel**
+
 - **User Management**: Complete user oversight with profiles, statistics, and notifications
 - **Course Administration**: Create, edit, and manage courses, modules, and lessons
 - **Badge Management**: Design and deploy achievement badges with custom criteria
@@ -46,6 +51,7 @@
 - **Bulk Operations**: Efficient management of multiple users and content items
 
 ### 🏆 **Comprehensive Badge System**
+
 - **8 Badge Categories**: Onboarding, Learning, Skills, Goals, Projects, Streaks, Community, Career
 - **4 Rarity Levels**: Common, Rare, Epic, Legendary
 - **110+ Unique Badges**: From "First Steps" to "SkillStream Superstar"
@@ -54,6 +60,7 @@
 ## 🛠️ Technology Stack
 
 ### **Frontend**
+
 - **React 18** with TypeScript for modern UI development
 - **Vite** for fast development and optimized builds
 - **Wouter** for lightweight client-side routing
@@ -64,6 +71,7 @@
 - **Recharts** for data visualization
 
 ### **Backend**
+
 - **Express.js** with TypeScript for RESTful APIs
 - **Drizzle ORM** for type-safe database operations
 - **PostgreSQL** with Neon serverless deployment
@@ -72,6 +80,7 @@
 - **WebSocket** support for real-time features
 
 ### **Development & Deployment**
+
 - **Replit** for development environment
 - **TypeScript** for type safety across the stack
 - **ESBuild** for fast bundling
@@ -104,6 +113,7 @@ skillstream/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 20.x or higher
 - PostgreSQL database (or use Neon serverless)
 - Git for version control
@@ -111,17 +121,20 @@ skillstream/
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/yourusername/skillstream.git
 cd skillstream
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Environment Setup**
+
 ```bash
 # Copy environment variables
 cp .env.example .env
@@ -132,12 +145,14 @@ SESSION_SECRET=your-secret-key-here
 ```
 
 4. **Database Setup**
+
 ```bash
 # Push database schema
 npm run db:push
 ```
 
 5. **Start Development Server**
+
 ```bash
 npm run dev
 ```
@@ -145,51 +160,21 @@ npm run dev
 The application will be available at `http://localhost:5000`
 
 ### **Admin Access**
+
 ```bash
 # Default admin credentials (change in production)
 Email: admin@email.com
-Password: Admin123
+
 ```
 
-**Note**: Make sure to change these credentials in `server/adminUtils.ts` for production deployment.
-
-## 📸 Application Screenshots
-
-### 🏠 **Dashboard Overview**
-*Main dashboard showing learning progress, recent activities, and quick stats*
-
-### 🎓 **Learning Platform**
-*Course catalog with filtering, search, and enrollment capabilities*
-
-### 🏆 **Badge System**
-*Achievement gallery with earned badges and progress tracking*
-
-### 📊 **Goal Tracker**
-*Interactive goal management with hierarchical structure*
-
-### 👤 **Portfolio Builder**
-*Comprehensive profile editor with real-time preview and photo management*
-
-### 🤖 **AI Career Tools**
-*Intelligent career advisor and resume generation*
-
-### 👑 **Admin Dashboard**
-*Comprehensive admin panel for platform management and oversight*
-
-### 🎮 **Badge Management**
-*Admin interface for creating and managing achievement badges*
-
-### 👥 **User Management**
-*Admin tools for user oversight, notifications, and account management*
-
-### 📚 **Course Administration**
-*Admin interface for course creation, module management, and content oversight*
+**Note**: Make sure to register these first.
 
 ## 🎮 Badge System Overview
 
 SkillStream features an extensive badge system designed to motivate and reward user engagement:
 
 ### **Onboarding & Profile Completion (10 badges)**
+
 - **Welcome Aboard**: Join SkillStream
 - **Profile Pioneer**: Complete 25% of profile
 - **Skill Starter**: Add first 5 skills
@@ -202,28 +187,32 @@ SkillStream features an extensive badge system designed to motivate and reward u
 - **Profile Pro**: Achieve 100% profile completion
 
 ### **Learning & Course Completion (25 badges)**
+
 - **First Steps**: Complete first lesson
 - **Course Starter**: Enroll in first course
 - **Course Conqueror**: Complete first course
 - **Module Master**: Complete first module
 - **Weekend Warrior**: Complete course over weekend
-- *...and 20 more learning milestones*
+- _...and 20 more learning milestones_
 
 ### **Goal Achievement (20 badges)**
+
 - Bronze Tier: 1-20 goals completed
 - Silver Tier: 25-60 goals completed
 - Gold Tier: 75-175 goals completed
 - Platinum Tier: 200-500 goals completed
 
 ### **Skill Mastery (15 badges)**
+
 - **Skill Collector**: 10 skills added
 - **Skill Hoarder**: 25 skills added
 - **Skill Sensei**: 50 skills added
-- *...and more skill-based achievements*
+- _...and more skill-based achievements_
 
 ## 🔧 API Endpoints
 
 ### **Authentication**
+
 ```
 POST   /api/register     # User registration
 POST   /api/login        # User login
@@ -232,6 +221,7 @@ GET    /api/user         # Current user info
 ```
 
 ### **Profile Management**
+
 ```
 GET    /api/profile/:userId           # Get user profile
 POST   /api/profile                  # Create/update profile
@@ -246,6 +236,7 @@ POST   /api/projects                 # Add projects
 ```
 
 ### **Learning & Courses**
+
 ```
 GET    /api/courses                  # List all courses
 GET    /api/course/:id               # Get course details
@@ -256,6 +247,7 @@ POST   /api/lesson-progress          # Update lesson progress
 ```
 
 ### **Goals & Tracking**
+
 ```
 GET    /api/goals/:userId            # Get user goals
 POST   /api/goals                   # Create goal
@@ -266,6 +258,7 @@ POST   /api/topics                  # Create topic
 ```
 
 ### **Badge System**
+
 ```
 GET    /api/badges                  # Get all badges
 GET    /api/users/:userId/badges    # Get user badges
@@ -273,6 +266,7 @@ POST   /api/users/:userId/badges    # Award badge
 ```
 
 ### **Admin Management**
+
 ```
 GET    /api/admin/users             # Get all users (admin)
 GET    /api/admin/users/:id         # Get specific user (admin)
@@ -310,30 +304,35 @@ DELETE /api/admin/instructors/:id   # Delete instructor (admin)
 ## 🎯 Core Features Deep Dive
 
 ### **1. Intelligent Badge System**
+
 - **Automatic Award**: Badges are automatically awarded based on user actions
 - **Progress Tracking**: Real-time tracking of badge criteria completion
 - **Rarity System**: Common to Legendary badge classifications
 - **XP Rewards**: Each badge provides experience points for motivation
 
 ### **2. Portfolio Management**
+
 - **Section-Based**: Organized into personal, contact, and professional sections
 - **Visibility Control**: Public/private settings for each section
 - **Theme Support**: Multiple portfolio layouts and designs
 - **Export Options**: PDF resume generation from portfolio data
 
 ### **3. Goal Tracking System**
+
 - **Hierarchical Structure**: Four-level goal organization
 - **Progress Analytics**: Detailed completion statistics
 - **Custom Categories**: User-defined learning paths
 - **Achievement Tiers**: Bronze to Platinum completion levels
 
 ### **4. AI-Powered Tools**
+
 - **Career Chat**: Intelligent career guidance and advice
 - **Resume Generation**: AI-optimized resume creation
 - **Skills Assessment**: Automated skill evaluation
 - **Career Timeline**: Professional growth tracking
 
 ### **5. Admin Management System**
+
 - **User Administration**: Complete user lifecycle management with profile oversight
 - **Content Management**: Full control over courses, modules, lessons, and learning materials
 - **Badge Engineering**: Create, edit, and deploy achievement badges with custom criteria and rewards
@@ -344,6 +343,7 @@ DELETE /api/admin/instructors/:id   # Delete instructor (admin)
 - **Bulk Operations**: Efficient management tools for handling multiple users and content items
 
 ### **6. Photo Management System**
+
 - **Profile Photos**: Upload and edit user profile pictures
 - **Image Processing**: Automatic image optimization and resizing
 - **Multiple Format Support**: JPEG, PNG, WebP, and other standard formats
@@ -365,6 +365,7 @@ DELETE /api/admin/instructors/:id   # Delete instructor (admin)
 ## 🌐 Database Schema
 
 ### **Key Tables**
+
 - **users**: User authentication and basic info
 - **profiles**: Comprehensive profile data (JSONB)
 - **badges**: Badge definitions and criteria
@@ -384,6 +385,7 @@ DELETE /api/admin/instructors/:id   # Delete instructor (admin)
 - **enrollments**: Course enrollment tracking
 
 ### **JSONB Advantages**
+
 - **Flexible Schema**: Easy addition of new profile fields
 - **Query Performance**: Efficient JSON querying with PostgreSQL
 - **Data Integrity**: Schema validation with Zod
@@ -401,12 +403,14 @@ DELETE /api/admin/instructors/:id   # Delete instructor (admin)
 ## 🧪 Testing Strategy
 
 ### **Frontend Testing**
+
 - Component unit tests with React Testing Library
 - Integration tests for user workflows
 - E2E testing for critical user paths
 - Performance testing with Lighthouse
 
 ### **Backend Testing**
+
 - API endpoint testing with Supertest
 - Database operation testing
 - Authentication flow testing
@@ -415,24 +419,28 @@ DELETE /api/admin/instructors/:id   # Delete instructor (admin)
 ## 📈 Future Roadmap
 
 ### **Phase 1: Enhanced Learning**
+
 - [ ] Video lesson support
 - [ ] Interactive coding challenges
 - [ ] Peer-to-peer learning features
 - [ ] Advanced analytics dashboard
 
 ### **Phase 2: Community Features**
+
 - [ ] Discussion forums
 - [ ] User-generated content
 - [ ] Mentorship matching
 - [ ] Study groups and collaboration
 
 ### **Phase 3: Enterprise Features**
+
 - [ ] Organization accounts
 - [ ] Bulk user management
 - [ ] Custom branding options
 - [ ] Advanced reporting tools
 
 ### **Phase 4: Mobile & Integrations**
+
 - [ ] React Native mobile app
 - [ ] Third-party integrations (GitHub, LinkedIn)
 - [ ] API for external developers
@@ -451,15 +459,12 @@ We welcome contributions to SkillStream! Please follow these steps:
 7. **Open a Pull Request**: Describe your changes clearly
 
 ### **Development Guidelines**
+
 - Use TypeScript for type safety
 - Follow ESLint and Prettier configurations
 - Write comprehensive tests for new features
 - Update documentation for API changes
 - Use conventional commit messages
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -474,12 +479,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support, questions, or feedback:
 
 - **GitHub Issues**: [Create an issue](https://github.com/yourusername/skillstream/issues)
-- **Email**: support@skillstream.com
+- **Email**: akashperumal2003@gmail.com
+
 - **Documentation**: [Full documentation](https://docs.skillstream.com)
 - **Discord**: [Join our community](https://discord.gg/skillstream)
 
 ---
 
-**Made with ❤️ by the SkillStream Team**
-
-*Empowering learners to achieve their goals through gamified education and professional portfolio management.*
+_Empowering learners to achieve their goals through gamified education and professional portfolio management._

@@ -78,14 +78,14 @@ export default function ModulesList() {
   const { data: modules = [], isLoading: isLoadingModules } = useQuery<
     Module[]
   >({
-    queryKey: [`/api/admin/modules`],
+    queryKey: [`/api/admin/courses/${courseId}/modules`],
     enabled: !!courseId,
   });
 
   // Create module mutation
   const createModuleMutation = useMutation({
     mutationFn: async (moduleData: Partial<Module>) => {
-      const response = await fetch(`/api/admin/modules`, {
+      const response = await fetch(`/api/admin/courses/${courseId}/modules`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(moduleData),
@@ -410,7 +410,7 @@ export default function ModulesList() {
                                     <TableCell className="text-right">
                                       <div className="flex justify-end gap-2">
                                         <Link
-                                          href={`/admin/modules/${module.id}/lessons`}
+                                          href={`/admin/courses/${courseId}/modules/${module.id}/lessons`}
                                         >
                                           <Button variant="outline" size="sm">
                                             <BookOpen className="h-4 w-4 mr-1" />

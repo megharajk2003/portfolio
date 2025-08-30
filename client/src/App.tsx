@@ -152,7 +152,7 @@ function Router() {
             component={ModulesList}
           />
           <Route
-            path="/admin/modules/:moduleId/lessons"
+            path="/admin/courses/:courseId/modules/:moduleId/lessons"
             component={LessonsList}
           />
           <Route path="/admin/forum" component={ForumModeration} />

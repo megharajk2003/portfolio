@@ -70,8 +70,7 @@ interface Course {
 
 export default function LessonsList() {
   const { toast } = useToast();
-  const { moduleId } = useParams();
-
+  const { courseId, moduleId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -102,7 +101,9 @@ export default function LessonsList() {
   });
 
   // Fetch lessons for this module
-  const { data: lessons = [], isLoading: isLoadingLessons } = useQuery<Lesson[]>({
+  const { data: lessons = [], isLoading: isLoadingLessons } = useQuery<
+    Lesson[]
+  >({
     queryKey: [`/api/admin/modules/${moduleId}/lessons`],
     enabled: !!moduleId,
   });
@@ -347,16 +348,9 @@ export default function LessonsList() {
         <div className="space-y-6">
           {/* Breadcrumb navigation */}
           <div className="flex items-center space-x-2 flex-wrap">
-            <Link href="/admin/courses">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-1"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Courses
-              </Button>
-            </Link>
+            <Link href="/admin/courses">Courses</Link>
+            <span className="text-muted-foreground">/</span>
+            <Link href={`/admin/courses/${courseId}/modules`}>Modules</Link>
             <span className="text-muted-foreground">/</span>
             {course && (
               <>
