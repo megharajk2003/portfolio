@@ -58,7 +58,7 @@ export default function CourseDetail() {
     queryFn: async () => {
       const response = await apiRequest(
         "GET",
-        `/api/courses/${courseId}/modules`
+        `/api/courses/${courseId}/modules`,
       );
       return response.json ? await response.json() : response;
     },
@@ -75,7 +75,7 @@ export default function CourseDetail() {
       if (!CURRENT_USER_ID) return [];
       const response = await apiRequest(
         "GET",
-        `/api/users/${CURRENT_USER_ID}/enrollments`
+        `/api/users/${CURRENT_USER_ID}/enrollments`,
       );
       return response.json ? await response.json() : response;
     },
@@ -88,7 +88,7 @@ export default function CourseDetail() {
     queryFn: async () => {
       const response = await apiRequest(
         "GET",
-        `/api/courses/${courseId}/reviews`
+        `/api/courses/${courseId}/reviews`,
       );
       return response.json ? await response.json() : response;
     },
@@ -97,7 +97,7 @@ export default function CourseDetail() {
   // Find the specific enrollment record for the current course
   const courseEnrollment = React.useMemo(() => {
     return userEnrollments.find(
-      (enrollment: any) => enrollment.courseId === courseId
+      (enrollment: any) => enrollment.courseId === courseId,
     );
   }, [userEnrollments, courseId]);
 
@@ -207,7 +207,7 @@ export default function CourseDetail() {
             </Link>
 
             <div
-              className="grid grid-cols-1 lg:grid-cols-3 gap-8 bg-cover bg-center rounded-2xl p-8 items-start"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-8 bg-cover bg-center rounded-2xl p-8  s:p-4 items-start"
               style={{
                 backgroundImage:
                   "url('https://talentsprint.com/course/generative-ai/images/generativeai-header-bg.webp')",
@@ -335,7 +335,7 @@ export default function CourseDetail() {
                                   courseReviews.reduce(
                                     (sum: number, review: any) =>
                                       sum + review.rating,
-                                    0
+                                    0,
                                   ) / courseReviews.length
                                 ).toFixed(1)
                               : "N/A"}{" "}
@@ -423,7 +423,7 @@ export default function CourseDetail() {
                                 {outcome}
                               </p>
                             </div>
-                          )
+                          ),
                         )
                       ) : (
                         <p className="text-gray-600 dark:text-gray-400 col-span-2">
@@ -683,7 +683,7 @@ export default function CourseDetail() {
                           {(
                             courseReviews.reduce(
                               (sum: number, review: any) => sum + review.rating,
-                              0
+                              0,
                             ) / courseReviews.length
                           ).toFixed(1)}
                         </span>
@@ -697,7 +697,7 @@ export default function CourseDetail() {
                     <div className="space-y-2">
                       {[5, 4, 3, 2, 1].map((starCount) => {
                         const count = courseReviews.filter(
-                          (review: any) => review.rating === starCount
+                          (review: any) => review.rating === starCount,
                         ).length;
                         const percentage =
                           courseReviews.length > 0
@@ -769,7 +769,7 @@ export default function CourseDetail() {
                               </p>
                               <p className="text-sm text-gray-500 mt-2">
                                 {new Date(
-                                  review.createdAt
+                                  review.createdAt,
                                 ).toLocaleDateString()}
                               </p>
                             </div>

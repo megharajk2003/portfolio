@@ -333,411 +333,71 @@ export default function Home() {
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-30 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start space-x-3 sm:space-x-4">
-              {/* Mobile menu button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden mt-1"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* LEFT SECTION */}
+          <div className="flex items-start gap-3 lg:pl-6 xl:pl-10">
+            {/* Hamburger */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden mt-1"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
 
-              <div className="flex flex-col gap-2 text-left">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold text-gray-500 dark:text-gray-300">
-                    Welcome back,
+            {/* TEXT + MOBILE ACTIONS */}
+            <div className="flex flex-col gap-3">
+              {/* TEXT */}
+              <div>
+                <span className="text-sm text-gray-500">Welcome back,</span>
+
+                <h2 className="text-xl sm:text-2xl font-semibold">
+                  <span className="text-primary">
+                    {user?.firstName || "Professional"}
                   </span>
-                  <h2 className="text-xl sm:text-2xl font-semibold leading-tight text-gray-900 dark:text-white">
-                    <span className="text-primary">
-                      {user?.firstName ||
-                        profile?.personalDetails?.fullName?.split(" ")[0] ||
-                        "Professional"}
-                    </span>
-                    !
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                    Manage your portfolio and continue learning
-                  </p>
-                </div>
+                  !
+                </h2>
 
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap sm:self-start">
-                  {/* PDF Export Button - Hidden on mobile */}
-                  <Button
-                    onClick={handleCheckIn}
-                    disabled={checkInMutation.isPending || hasCheckedInToday}
-                    className={`hidden sm:flex text-white disabled:opacity-50 ${
-                      hasCheckedInToday
-                        ? "bg-green-500 hover:bg-green-500 cursor-not-allowed"
-                        : "bg-yellow-500 hover:bg-yellow-600"
-                    }`}
-                    size="sm"
-                  >
-                    <CircleCheckBig className="mr-2 h-4 w-4" />
-                    {checkInMutation.isPending
-                      ? "Checking in..."
-                      : hasCheckedInToday
-                        ? "Checked In"
-                        : "Daily Check In"}
-                  </Button>
+                <p className="text-sm sm:text-base text-gray-600">
+                  Manage your portfolio and continue learning
+                </p>
+              </div>
 
-                  {/* Mobile check-in button */}
-                  <Button
-                    onClick={handleCheckIn}
-                    disabled={checkInMutation.isPending || hasCheckedInToday}
-                    variant="ghost"
-                    size="icon"
-                    className={`sm:hidden ${
-                      hasCheckedInToday ? "text-green-500" : ""
-                    }`}
-                    title={hasCheckedInToday ? "Checked In" : "Daily Check In"}
-                  >
-                    <CircleCheckBig className="h-4 w-4" />
-                  </Button>
+              {/* MOBILE ACTIONS */}
+              <div className="flex items-center gap-2 flex-wrap lg:hidden">
+                <Button size="sm" className="bg-green-500 text-white">
+                  Checked
+                </Button>
 
-                  {/* Check-in History Button */}
-                  <Button
-                    onClick={() => setShowCheckInHistory(!showCheckInHistory)}
-                    variant="outline"
-                    size="sm"
-                    className="hidden sm:flex"
-                  >
-                    <History className="mr-2 h-4 w-4" />
-                    History
-                    {showCheckInHistory ? (
-                      <ChevronUp className="ml-1 h-3 w-3" />
-                    ) : (
-                      <ChevronDown className="ml-1 h-3 w-3" />
-                    )}
-                  </Button>
+                <Button size="sm" variant="outline">
+                  <History className="mr-1 h-4 w-4" />
+                  History
+                </Button>
 
-                  {/* Mobile History Button */}
-                  <Button
-                    onClick={() => setShowCheckInHistory(!showCheckInHistory)}
-                    variant="ghost"
-                    size="icon"
-                    className="sm:hidden"
-                    title="Check-in History"
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
-
-                  {/* Notifications */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                      >
-                        <Bell className="h-5 w-5" />
-                        {unreadCount && unreadCount.count > 0 && (
-                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                            {unreadCount.count > 9 ? "9+" : unreadCount.count}
-                          </span>
-                        )}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-80 max-h-96 overflow-y-auto"
-                    >
-                      <div className="flex items-center justify-between p-2">
-                        <h3 className="font-semibold">Notifications</h3>
-                        {unreadCount && unreadCount.count > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => markAllAsReadMutation.mutate()}
-                            disabled={markAllAsReadMutation.isPending}
-                          >
-                            Mark all read
-                          </Button>
-                        )}
-                      </div>
-                      <DropdownMenuSeparator />
-
-                      {notifications &&
-                      Array.isArray(notifications) &&
-                      notifications.length > 0 ? (
-                        notifications.slice(0, 10).map((notification: any) => (
-                          <DropdownMenuItem
-                            key={notification.id}
-                            className={`p-3 cursor-pointer ${
-                              !notification.isRead
-                                ? "bg-blue-50 dark:bg-blue-900/20"
-                                : ""
-                            }`}
-                            onClick={() => {
-                              if (!notification.isRead) {
-                                markAsReadMutation.mutate(notification.id);
-                              }
-                              if (notification.actionUrl) {
-                                window.location.href = notification.actionUrl;
-                              }
-                            }}
-                          >
-                            <div className="flex items-start justify-between space-x-3">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <div className="text-sm font-medium truncate">
-                                    {notification.title}
-                                  </div>
-                                  {!notification.isRead && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                  {new Date(
-                                    notification.createdAt,
-                                  ).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </p>
-                              </div>
-                              <div className="flex space-x-1">
-                                {!notification.isRead && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      markAsReadMutation.mutate(
-                                        notification.id,
-                                      );
-                                    }}
-                                    disabled={markAsReadMutation.isPending}
-                                    className="p-1 h-6 w-6"
-                                  >
-                                    <Check className="h-3 w-3" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteNotificationMutation.mutate(
-                                      notification.id,
-                                    );
-                                  }}
-                                  disabled={
-                                    deleteNotificationMutation.isPending
-                                  }
-                                  className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </DropdownMenuItem>
-                        ))
-                      ) : (
-                        <DropdownMenuItem
-                          disabled
-                          className="p-4 text-center text-gray-500"
-                        >
-                          No notifications yet
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <Button size="icon" variant="ghost">
+                  <Bell className="h-5 w-5" />
+                </Button>
               </div>
             </div>
-            {/* PDF Export Button - Hidden on mobile */}
-            <Button
-              onClick={handleCheckIn}
-              disabled={checkInMutation.isPending || hasCheckedInToday}
-              className={`hidden sm:flex text-white disabled:opacity-50 ${
-                hasCheckedInToday
-                  ? "bg-green-500 hover:bg-green-500 cursor-not-allowed"
-                  : "bg-yellow-500 hover:bg-yellow-600"
-              }`}
-              size="sm"
-            >
-              <CircleCheckBig className="mr-2 h-4 w-4" />
-              {checkInMutation.isPending
-                ? "Checking in..."
-                : hasCheckedInToday
-                  ? "Checked In"
-                  : "Daily Check In"}
+          </div>
+
+          {/* DESKTOP ACTIONS */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Button size="sm" className="bg-green-500 text-white">
+              Checked
             </Button>
 
-            {/* Mobile check-in button */}
-            <Button
-              onClick={handleCheckIn}
-              disabled={checkInMutation.isPending || hasCheckedInToday}
-              variant="ghost"
-              size="icon"
-              className={`sm:hidden ${
-                hasCheckedInToday ? "text-green-500" : ""
-              }`}
-              title={hasCheckedInToday ? "Checked In" : "Daily Check In"}
-            >
-              <CircleCheckBig className="h-4 w-4" />
-            </Button>
-
-            {/* Check-in History Button */}
-            <Button
-              onClick={() => setShowCheckInHistory(!showCheckInHistory)}
-              variant="outline"
-              size="sm"
-              className="hidden sm:flex"
-            >
+            <Button size="sm" variant="outline">
               <History className="mr-2 h-4 w-4" />
               History
-              {showCheckInHistory ? (
-                <ChevronUp className="ml-1 h-3 w-3" />
-              ) : (
-                <ChevronDown className="ml-1 h-3 w-3" />
-              )}
             </Button>
 
-            {/* Mobile History Button */}
-            <Button
-              onClick={() => setShowCheckInHistory(!showCheckInHistory)}
-              variant="ghost"
-              size="icon"
-              className="sm:hidden"
-              title="Check-in History"
-            >
-              <History className="h-4 w-4" />
+            <Button size="icon" variant="ghost">
+              <Bell className="h-5 w-5" />
             </Button>
-
-            {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                >
-                  <Bell className="h-5 w-5" />
-                  {unreadCount && unreadCount.count > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {unreadCount.count > 9 ? "9+" : unreadCount.count}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-80 max-h-96 overflow-y-auto"
-              >
-                <div className="flex items-center justify-between p-2">
-                  <h3 className="font-semibold">Notifications</h3>
-                  {unreadCount && unreadCount.count > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => markAllAsReadMutation.mutate()}
-                      disabled={markAllAsReadMutation.isPending}
-                    >
-                      Mark all read
-                    </Button>
-                  )}
-                </div>
-                <DropdownMenuSeparator />
-
-                {notifications &&
-                Array.isArray(notifications) &&
-                notifications.length > 0 ? (
-                  notifications.slice(0, 10).map((notification: any) => (
-                    <DropdownMenuItem
-                      key={notification.id}
-                      className={`p-3 cursor-pointer ${
-                        !notification.isRead
-                          ? "bg-blue-50 dark:bg-blue-900/20"
-                          : ""
-                      }`}
-                      onClick={() => {
-                        if (!notification.isRead) {
-                          markAsReadMutation.mutate(notification.id);
-                        }
-                        if (notification.actionUrl) {
-                          window.location.href = notification.actionUrl;
-                        }
-                      }}
-                    >
-                      <div className="flex items-start justify-between space-x-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <div className="text-sm font-medium truncate">
-                              {notification.title}
-                            </div>
-                            {!notification.isRead && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                            {new Date(
-                              notification.createdAt,
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                        <div className="flex space-x-1">
-                          {!notification.isRead && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                markAsReadMutation.mutate(notification.id);
-                              }}
-                              disabled={markAsReadMutation.isPending}
-                              className="p-1 h-6 w-6"
-                            >
-                              <Check className="h-3 w-3" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteNotificationMutation.mutate(
-                                notification.id,
-                              );
-                            }}
-                            disabled={deleteNotificationMutation.isPending}
-                            className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <DropdownMenuItem
-                    disabled
-                    className="p-4 text-center text-gray-500"
-                  >
-                    No notifications yet
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
-        </header>
+        </div>
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
           {/* Profile Completion Notification */}

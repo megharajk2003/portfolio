@@ -320,61 +320,41 @@ export default function Learning() {
             {filteredCourses.map((course: any) => (
               <Card
                 key={course.id}
-                className="hover:shadow-lg transition-all duration-200 group"
+                className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-[#6d28d9] via-[#7c3aed] to-[#ec4899] text-white"
               >
-                <div className="relative">
-                  <div className="h-32 sm:h-40 bg-gradient-to-br from-blue-400 to-purple-600 rounded-t-lg flex items-center justify-center">
-                    <div className="text-white text-center space-y-1">
-                      <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 mx-auto opacity-80" />
-                      <p className="text-xs opacity-70">Learning Platform</p>
-                    </div>
-                  </div>
-                  <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
-                    {course.isFree ? "Free" : `$${course.price}`}
-                  </Badge>
-                </div>
-
-                <CardHeader className="pb-2 px-4 pt-3">
-                  <div className="space-y-2">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                      {course.level} Level
-                    </p>
-                    <CardTitle className="text-base sm:text-lg leading-tight line-clamp-2">
+                <CardContent className="p-5 space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-semibold leading-tight">
                       {course.title}
-                    </CardTitle>
+                    </h3>
                     {course.subtitle && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <p className="text-sm text-white/90 line-clamp-2">
                         {course.subtitle}
                       </p>
                     )}
                   </div>
-                </CardHeader>
 
-                <CardContent className="space-y-3 px-4 pb-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {course.durationMonths} Months
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Globe className="h-4 w-4" />
-                      Online
-                    </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <Badge className="bg-white/20 text-white border-white/30">
+                      {course.level ?? "Beginner"}
+                    </Badge>
+                    <Badge className="bg-white/20 text-white border-white/30">
+                      {course.language ?? "English"}
+                    </Badge>
+                    <span className="flex items-center gap-1">
+                      {course.durationMonths ?? "1"} months
+                    </span>
+                    <span className="flex items-center gap-1">
+                      • {course.modulesCount ?? course.modules?.length ?? 1} modules
+                    </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {course.description}
-                  </p>
-
-                  <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <Badge variant="outline">{course.language}</Badge>
-                    <Badge variant="secondary">{course.level}</Badge>
-                  </div>
-
-                  <Link href={`/course/${course.id}`}>
-                    <Button className="w-full min-h-[44px]" variant="outline">
-                      View Program
-                      <ExternalLink className="ml-2 h-4 w-4" />
+                  <Link href="/learning">
+                    <Button
+                      variant="secondary"
+                      className="bg-white text-gray-900 hover:bg-gray-100 min-h-[44px] w-full sm:w-auto"
+                    >
+                      ← Back to Courses
                     </Button>
                   </Link>
                 </CardContent>
