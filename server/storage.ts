@@ -95,7 +95,7 @@ import {
 } from "@shared/schema";
 import { getTableColumns } from "drizzle-orm";
 import { db } from "./db";
-import { eq, and, gte, lte, sql, desc, ne, or, isNull } from "drizzle-orm";
+import { eq, and, gte, lte, sql, desc, ne, or, isNull, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -365,7 +365,14 @@ export interface IStorage {
     goalName: string,
     csvData: any[]
   ): Promise<Goal>;
-  getGoalWithCategories(goalId: string): Promise<
+  getUserGoalsSummary(
+    userId: number
+  ): Promise<
+    { id: string; name: string; totalSubtopics: number; completedSubtopics: number }[]
+  >;
+  getGoalDetails(
+    goalId: string
+  ): Promise<
     | (Goal & {
         categories: (GoalCategory & {
           topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
@@ -373,14 +380,13 @@ export interface IStorage {
       })
     | undefined
   >;
-  getUserGoalsWithCategories(userId: number): Promise<
-    (Goal & {
-      categories: (GoalCategory & {
-        totalSubtopics: number;
-        completedSubtopics: number;
-        completedSubtopicTimestamps?: string[];
-      })[];
-    })[]
+  getGoalWithCategories(goalId: string): Promise<
+    | (Goal & {
+        categories: (GoalCategory & {
+          topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+        })[];
+      })
+    | undefined
   >;
   getGoalCategory(id: string): Promise<GoalCategory | undefined>;
   getCategoryTopics(categoryId: string): Promise<GoalTopic[]>;
@@ -3742,89 +3748,82 @@ export class PgStorage implements IStorage {
     }
   }
 
-  async getUserGoals(userId: number): Promise<Goal[]> {
+  // Lightweight summary used by /api/goals – no deep fetch or recompute
+  async getUserGoalsSummary(
+    userId: number
+  ): Promise<
+    { id: string; name: string; totalSubtopics: number; completedSubtopics: number }[]
+  > {
     if (!this.isDbConnected) {
-      return this.fallbackData.get(`goals_${userId}`) || [];
+      const cached = this.fallbackData.get(`goals_${userId}`) || [];
+      return cached.map((g: Goal) => ({
+        id: g.id,
+        name: g.name,
+        totalSubtopics: g.totalSubtopics || 0,
+        completedSubtopics: g.completedSubtopics || 0,
+      }));
     }
 
     try {
-      const userGoals = await db
-        .select()
+      return await db
+        .select({
+          id: goals.id,
+          name: goals.name,
+          totalSubtopics: goals.totalSubtopics,
+          completedSubtopics: goals.completedSubtopics,
+        })
         .from(goals)
         .where(eq(goals.userId, userId))
         .orderBy(desc(goals.createdAt));
-
-      // Calculate subtopic totals for each goal
-      const goalsWithSubtopicTotals = await Promise.all(
-        userGoals.map(async (goal) => {
-          const { totalSubtopics, completedSubtopics } =
-            await this.calculateGoalSubtopicTotals(goal.id);
-          return {
-            ...goal,
-            totalSubtopics,
-            completedSubtopics,
-          };
-        })
-      );
-
-      return goalsWithSubtopicTotals;
     } catch (error) {
-      console.error("Error fetching user goals:", error);
+      console.error("Error fetching user goal summaries:", error);
       return this.fallbackData.get(`goals_${userId}`) || [];
     }
   }
 
-  async getUserGoalsWithCategories(userId: number): Promise<
-    (Goal & {
-      categories: (GoalCategory & {
-        totalSubtopics: number;
-        completedSubtopics: number;
-        completedSubtopicTimestamps?: string[];
-      })[];
-    })[]
-  > {
-    const goals = await this.getUserGoals(userId);
-
-    const goalsWithCategories = await Promise.all(
-      goals.map(async (goal) => {
-        const categories = await this.getGoalCategories(goal.id);
-
-        // For each category, calculate subtopic totals and collect completion timestamps
-        const categoriesWithSubtopicTotals = await Promise.all(
-          categories.map(async (category) => {
-            const topics = await this.getCategoryTopics(category.id);
-            let totalSubtopics = 0;
-            let completedSubtopics = 0;
-            const completedSubtopicTimestamps: string[] = [];
-
-            for (const topic of topics) {
-              const subtopics = await this.getTopicSubtopics(topic.id);
-              totalSubtopics += subtopics.length;
-
-              for (const subtopic of subtopics) {
-                if (subtopic.status === "completed" && subtopic.completedAt) {
-                  completedSubtopics++;
-                  completedSubtopicTimestamps.push(
-                    subtopic.completedAt.toISOString()
-                  );
-                }
-              }
-            }
-
-            return {
-              ...category,
-              totalSubtopics,
-              completedSubtopics,
-              completedSubtopicTimestamps,
-            };
-          })
-        );
-
-        return { ...goal, categories: categoriesWithSubtopicTotals };
+  // Detailed view for a single goal; reads stored counters, no recompute
+  async getGoalDetails(goalId: string): Promise<
+    | (Goal & {
+        categories: (GoalCategory & {
+          topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+        })[];
       })
-    );
+    | undefined
+  > {
+    if (!this.isDbConnected) return this.getGoalWithCategories(goalId);
 
-    return goalsWithCategories;
+    const [goal] = await db.select().from(goals).where(eq(goals.id, goalId));
+    if (!goal) return undefined;
+
+    const categories = await this.getGoalCategories(goalId);
+    const categoryIds = categories.map((c) => c.id);
+
+    const topics = categoryIds.length
+      ? await db
+          .select()
+          .from(goalTopics)
+          .where(inArray(goalTopics.categoryId, categoryIds))
+      : [];
+
+    const topicIds = topics.map((t) => t.id);
+    const subtopics = topicIds.length
+      ? await db
+          .select()
+          .from(goalSubtopics)
+          .where(inArray(goalSubtopics.topicId, topicIds))
+      : [];
+
+    const topicsWithSubtopics = topics.map((topic) => ({
+      ...topic,
+      subtopics: subtopics.filter((s) => s.topicId === topic.id),
+    }));
+
+    const categoriesWithTopics = categories.map((cat) => ({
+      ...cat,
+      topics: topicsWithSubtopics.filter((t) => t.categoryId === cat.id),
+    }));
+
+    return { ...goal, categories: categoriesWithTopics };
   }
 
   // Helper method to calculate subtopic totals for a goal
@@ -4442,6 +4441,12 @@ export class PgStorage implements IStorage {
         },
       ])
       .returning();
+
+    await this.adjustSubtopicCounters(
+      subtopic.topicId,
+      1,
+      subtopic.status === "completed" ? 1 : 0
+    );
     return subtopic;
   }
 
@@ -4493,6 +4498,11 @@ export class PgStorage implements IStorage {
     }
 
     try {
+      const [existing] = await db
+        .select()
+        .from(goalSubtopics)
+        .where(eq(goalSubtopics.id, subtopicId));
+
       const [subtopic] = await db
         .update(goalSubtopics)
         .set(updateData)
@@ -4500,8 +4510,17 @@ export class PgStorage implements IStorage {
         .returning();
 
       if (subtopic) {
-        // Update topic and category counters
-        await this.updateTopicProgressCounters(subtopic.topicId);
+        const wasCompleted = existing?.status === "completed";
+        const isCompleted = status === "completed";
+        const deltaCompleted =
+          wasCompleted === isCompleted ? 0 : isCompleted ? 1 : -1;
+        if (deltaCompleted !== 0) {
+          await this.adjustSubtopicCounters(
+            subtopic.topicId,
+            0,
+            deltaCompleted
+          );
+        }
 
         // Update daily activity when subtopic is completed
         if (status === "completed") {
@@ -4533,13 +4552,78 @@ export class PgStorage implements IStorage {
     }
 
     try {
+      const [existing] = await db
+        .select()
+        .from(goalSubtopics)
+        .where(eq(goalSubtopics.id, subtopicId));
+
       const result = await db
         .delete(goalSubtopics)
         .where(eq(goalSubtopics.id, subtopicId));
+
+      if (existing) {
+        await this.adjustSubtopicCounters(
+          existing.topicId,
+          -1,
+          existing.status === "completed" ? -1 : 0
+        );
+      }
       return result.length > 0;
     } catch (error) {
       console.error("Error deleting subtopic:", error);
       return false;
+    }
+  }
+
+  // Increment/decrement counters for topic -> category -> goal (no recompute loops)
+  private async adjustSubtopicCounters(
+    topicId: string,
+    deltaTotal: number,
+    deltaCompleted: number
+  ): Promise<void> {
+    try {
+      const [topic] = await db
+        .select()
+        .from(goalTopics)
+        .where(eq(goalTopics.id, topicId));
+      if (!topic) return;
+
+      await db
+        .update(goalTopics)
+        .set({
+          totalSubtopics: sql`${goalTopics.totalSubtopics} + ${deltaTotal}`,
+          completedSubtopics:
+            sql`${goalTopics.completedSubtopics} + ${deltaCompleted}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(goalTopics.id, topicId));
+
+      const [category] = await db
+        .select()
+        .from(goalCategories)
+        .where(eq(goalCategories.id, topic.categoryId));
+      if (!category) return;
+
+      await db
+        .update(goalCategories)
+        .set({
+          totalTopics: sql`${goalCategories.totalTopics} + ${deltaTotal}`,
+          completedTopics:
+            sql`${goalCategories.completedTopics} + ${deltaCompleted}`,
+        })
+        .where(eq(goalCategories.id, category.id));
+
+      await db
+        .update(goals)
+        .set({
+          totalSubtopics: sql`${goals.totalSubtopics} + ${deltaTotal}`,
+          completedSubtopics:
+            sql`${goals.completedSubtopics} + ${deltaCompleted}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(goals.id, category.goalId));
+    } catch (error) {
+      console.error("Error adjusting subtopic counters:", error);
     }
   }
 

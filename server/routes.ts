@@ -2833,7 +2833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const goals = await storage.getUserGoalsWithCategories(req.user.id);
+      const goals = await storage.getUserGoalsSummary(req.user.id);
       res.json(goals);
     } catch (error) {
       console.error("Error fetching goals:", error);
@@ -2849,7 +2849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const goalId = req.params.id;
-      const goal = await storage.getGoalWithCategories(goalId);
+      const goal = await storage.getGoalDetails(goalId);
 
       if (!goal) {
         return res.status(404).json({ message: "Goal not found" });
