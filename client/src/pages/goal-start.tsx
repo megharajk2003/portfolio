@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,12 +51,7 @@ interface Goal {
 
 // API functions for goals
 const fetchUserGoals = async () => {
-  const response = await fetch("/api/goals", {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch goals");
-  }
+  const response = await apiRequest("GET", "/api/goals");
   return response.json();
 };
 
@@ -63,16 +59,8 @@ const createGoalFromCSVApi = async (data: {
   goalName: string;
   csvData: any[];
 }) => {
-  const response = await fetch("/api/goals/from-csv", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to create goal from CSV");
-  }
+  // Use the shared API helper so VITE_API_BASE_URL (Render) is applied in prod.
+  const response = await apiRequest("POST", "/api/goals/from-csv", data);
   return response.json();
 };
 

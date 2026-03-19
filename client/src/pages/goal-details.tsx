@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
@@ -73,25 +74,12 @@ interface GoalWithDetails {
 
 // API functions
 const fetchGoalWithCategories = async (goalId: string): Promise<GoalWithDetails> => {
-  const response = await fetch(`/api/goals/${goalId}`, {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch goal details");
-  }
+  const response = await apiRequest("GET", `/api/goals/${goalId}`);
   return response.json();
 };
 
 const updateSubtopicStatus = async (subtopicId: string, status: "pending" | "start" | "completed") => {
-  const response = await fetch(`/api/goal-subtopics/${subtopicId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ status }),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update subtopic status");
-  }
+  const response = await apiRequest("PATCH", `/api/goal-subtopics/${subtopicId}`, { status });
   return response.json();
 };
 

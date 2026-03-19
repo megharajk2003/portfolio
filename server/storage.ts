@@ -3759,13 +3759,13 @@ export class PgStorage implements IStorage {
       return cached.map((g: Goal) => ({
         id: g.id,
         name: g.name,
-        totalSubtopics: g.totalSubtopics || 0,
-        completedSubtopics: g.completedSubtopics || 0,
+        totalSubtopics: g.totalSubtopics ?? 0,
+        completedSubtopics: g.completedSubtopics ?? 0,
       }));
     }
 
     try {
-      return await db
+      const rows = await db
         .select({
           id: goals.id,
           name: goals.name,
@@ -3775,8 +3775,43 @@ export class PgStorage implements IStorage {
         .from(goals)
         .where(eq(goals.userId, userId))
         .orderBy(desc(goals.createdAt));
+
+      return rows.map((g) => ({
+        id: g.id,
+        name: g.name,
+        totalSubtopics: g.totalSubtopics ?? 0,
+        completedSubtopics: g.completedSubtopics ?? 0,
+      }));
     } catch (error) {
       console.error("Error fetching user goal summaries:", error);
+      return this.fallbackData.get(`goals_${userId}`) || [];
+    }
+  }
+
+  // Full goals list (all columns) without recomputation
+  async getUserGoals(userId: number): Promise<Goal[]> {
+    if (!this.isDbConnected) {
+      const cached = this.fallbackData.get(`goals_${userId}`) || [];
+      return cached;
+    }
+
+    try {
+      const rows = await db
+        .select()
+        .from(goals)
+        .where(eq(goals.userId, userId))
+        .orderBy(desc(goals.createdAt));
+
+      // Normalize nullable counters to numbers for downstream usage
+      return rows.map((g) => ({
+        ...g,
+        totalTopics: g.totalTopics ?? 0,
+        completedTopics: g.completedTopics ?? 0,
+        totalSubtopics: g.totalSubtopics ?? 0,
+        completedSubtopics: g.completedSubtopics ?? 0,
+      }));
+    } catch (error) {
+      console.error("Error fetching user goals:", error);
       return this.fallbackData.get(`goals_${userId}`) || [];
     }
   }

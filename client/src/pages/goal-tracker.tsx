@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,8 +32,7 @@ interface Goal {
 
 // --- API FUNCTION ---
 const fetchGoalWithCategories = async (goalId: string): Promise<Goal> => {
-  const response = await fetch(`/api/goals/${goalId}`);
-  if (!response.ok) throw new Error("Failed to fetch goal details");
+  const response = await apiRequest("GET", `/api/goals/${goalId}`);
   return response.json();
 };
 

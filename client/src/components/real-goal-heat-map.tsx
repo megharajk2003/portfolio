@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Target } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import {
   LineChart,
   Line,
@@ -65,20 +66,16 @@ export default function RealGoalHeatMap() {
   const { data: goals = [] } = useQuery<GoalWithDetails[]>({
     queryKey: ["/api/goals-with-details"],
     queryFn: async () => {
-      const response = await fetch("/api/goals", {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch goals");
-      }
+      const response = await apiRequest("GET", "/api/goals");
       const goals = await response.json();
       
       // For each goal, fetch detailed data including subtopics
       const detailedGoals = await Promise.all(
         goals.map(async (goal: any) => {
-          const detailResponse = await fetch(`/api/goals/${goal.id}`, {
-            credentials: "include",
-          });
+          const detailResponse = await apiRequest(
+            "GET",
+            `/api/goals/${goal.id}`,
+          );
           if (!detailResponse.ok) {
             return goal;
           }
