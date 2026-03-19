@@ -14,11 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Target, TrendingUp } from "lucide-react";
-import Sidebar from "@/components/sidebar";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { navigate } from "wouter/use-browser-location";
 import { useLocation } from "wouter";
+import SidebarLayout from "@/components/sidebar-layout";
 
 // Interfaces
 interface GoalTopic {
@@ -112,21 +112,23 @@ export default function CategoryTopics() {
   const category = goalData?.categories?.find(
     (cat: GoalCategory) => cat.id === categoryId
   );
-  const topics = category?.topics || [];
+  const topics: GoalTopic[] = category?.topics ?? [];
 
   const chartState = useMemo(() => {
     if (topics.length === 0) return { series: [] };
 
-    const validTopics = topics.filter((topic) => topic && topic.name);
-    const series = validTopics.map((topic) => ({
+    const validTopics = topics.filter(
+      (topic): topic is GoalTopic => !!topic && !!topic.name,
+    );
+    const series = validTopics.map((topic: GoalTopic) => ({
       name: topic.name,
       data: [] as [number, number][],
     }));
 
     // Collect all completion timestamps from all topics
     const allTimestamps = validTopics
-      .flatMap((topic) =>
-        (topic.completedSubtopicTimestamps || []).map((ts) => ({
+      .flatMap((topic: GoalTopic) =>
+        (topic.completedSubtopicTimestamps || []).map((ts: string) => ({
           topicName: topic.name,
           timestamp: new Date(ts),
         }))
@@ -149,10 +151,12 @@ export default function CategoryTopics() {
     }
 
     const cumulativeCounts: { [key: string]: number } = {};
-    validTopics.forEach((topic) => (cumulativeCounts[topic.name] = 0));
+    validTopics.forEach(
+      (topic: GoalTopic) => (cumulativeCounts[topic.name] = 0),
+    );
 
     // Add starting points for each topic
-    validTopics.forEach((topic) => {
+    validTopics.forEach((topic: GoalTopic) => {
       const seriesIndex = series.findIndex((s) => s.name === topic.name);
       if (seriesIndex > -1 && topic.createdAt) {
         const startDate = new Date(topic.createdAt).getTime();
@@ -161,7 +165,14 @@ export default function CategoryTopics() {
     });
 
     // Build the incremental, cumulative data points from real completion data
-    filteredTimestamps.forEach(({ topicName, timestamp }) => {
+    filteredTimestamps.forEach(
+      ({
+        topicName,
+        timestamp,
+      }: {
+        topicName: string;
+        timestamp: Date;
+      }) => {
       cumulativeCounts[topicName]++;
       const seriesIndex = series.findIndex((s) => s.name === topicName);
       if (seriesIndex > -1) {
@@ -170,7 +181,8 @@ export default function CategoryTopics() {
           cumulativeCounts[topicName],
         ]);
       }
-    });
+    },
+    );
 
     // Extend all lines to current time with final counts
     const now = new Date().getTime();
@@ -212,235 +224,217 @@ export default function CategoryTopics() {
 
   if (!user) {
     return (
-      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
-            <div className="text-center">Please log in to view topics.</div>
-          </div>
+      <SidebarLayout
+        title="Goal Topics"
+        description="Sign in to view your goal progress"
+        contentClassName="max-w-6xl mx-auto"
+      >
+        <div className="text-center text-gray-600 dark:text-gray-300">
+          Please log in to view topics.
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   if (goalLoading) {
     return (
-      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6 space-y-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-64 bg-gray-200 rounded"></div>
-            </div>
-          </div>
+      <SidebarLayout
+        title="Loading topics..."
+        contentClassName="max-w-6xl mx-auto space-y-6"
+      >
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   if (goalError || !goalData || !category) {
     return (
-      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
-            <div className="text-red-600 dark:text-red-400">
-              Error loading data:{" "}
-              {goalError ? (goalError as Error).message : "Category not found"}
-            </div>
-          </div>
+      <SidebarLayout
+        title="Goal Topics"
+        contentClassName="max-w-6xl mx-auto"
+      >
+        <div className="text-red-600 dark:text-red-400">
+          Error loading data:{" "}
+          {goalError ? (goalError as Error).message : "Category not found"}
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                  {category.name}
-                </h2>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigate(`/goal-tracker/${goalId}`);
-                }}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Categories
-              </Button>
-            </div>
-          </div>
-        </header>
-        <div className="container mx-auto p-6 space-y-6">
-          {/* Header */} {/* Topics Grid */}
-          {topics.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {topics.map((topic: GoalTopic) => (
-                <Card
-                  key={topic.id}
-                  className="cursor-pointer transition-all hover:shadow-lg"
-                  onClick={() => navigate(`/subtopic/${topic.id}`)}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-blue-500" />
-                      {topic.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">Progress</span>
-                          <span className="text-sm text-gray-600">
-                            {topic.completedSubtopics} / {topic.totalSubtopics}
-                          </span>
-                        </div>
-                        <Progress
-                          value={
-                            topic.totalSubtopics > 0
-                              ? (topic.completedSubtopics /
-                                  topic.totalSubtopics) *
-                                100
-                              : 0
-                          }
-                          className="h-2"
-                        />
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">
-                          {topic.totalSubtopics > 0
-                            ? Math.round(
-                                (topic.completedSubtopics /
-                                  topic.totalSubtopics) *
-                                  100
-                              )
-                            : 0}
-                          % Complete
-                        </span>
-                        <Badge
-                          className={getStatusColor(
-                            topic.completedSubtopics,
-                            topic.totalSubtopics
-                          )}
-                        >
-                          {getStatusText(
-                            topic.completedSubtopics,
-                            topic.totalSubtopics
-                          )}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No Topics Found
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  This category doesn't have any topics yet.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-          {/* Study Performance Chart */}
-          {topics.length > 0 && (
-            <Card>
+    <SidebarLayout
+      title={category.name}
+      description="Track your completion across this category"
+      actions={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(`/goal-tracker/${goalId}`)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Categories
+        </Button>
+      }
+      contentClassName="max-w-6xl mx-auto space-y-6"
+    >
+      {/* Topics Grid */}
+      {topics.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {topics.map((topic: GoalTopic) => (
+            <Card
+              key={topic.id}
+              className="cursor-pointer transition-all hover:shadow-lg"
+              onClick={() => navigate(`/subtopic/${topic.id}`)}
+            >
               <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Study Performance
-                  </CardTitle>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
-                  This chart shows the cumulative number of subtopics you've
-                  completed for each goal .
-                </p>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-blue-500" />
+                  {topic.name}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {chartState.series.length > 0 ? (
-                  <div className="h-80">
-                    <ReactApexChart
-                      options={
-                        {
-                          chart: {
-                            type: "line",
-                            stacked: false,
-                            height: 320,
-                            zoom: {
-                              type: "x",
-                              enabled: true,
-                              autoScaleYaxis: true,
-                            },
-                            toolbar: { autoSelected: "zoom" },
-                          },
-                          dataLabels: { enabled: false },
-                          stroke: { curve: "stepline", width: 2 },
-                          title: {
-                            text: "Topic Progress Over Time",
-                            align: "left",
-                          },
-                          markers: { size: 0 },
-                          yaxis: {
-                            title: { text: "Completed Subtopics" },
-                            labels: { formatter: (val) => val.toFixed(0) },
-                          },
-                          xaxis: {
-                            type: "datetime",
-                            labels: {
-                              datetimeFormatter: {
-                                year: "yyyy",
-                                month: "MMM 'yy",
-                                day: "dd MMM",
-                                hour: "HH:mm",
-                              },
-                            },
-                          },
-                          tooltip: {
-                            shared: false,
-                            y: {
-                              formatter: (val) => `${val.toFixed(0)} completed`,
-                            },
-                            x: { format: "dd MMM yyyy" },
-                          },
-                          colors: TOPIC_COLORS,
-                          legend: { position: "bottom" },
-                        } as ApexOptions
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium">Progress</span>
+                      <span className="text-sm text-gray-600">
+                        {topic.completedSubtopics} / {topic.totalSubtopics}
+                      </span>
+                    </div>
+                    <Progress
+                      value={
+                        topic.totalSubtopics > 0
+                          ? (topic.completedSubtopics / topic.totalSubtopics) *
+                            100
+                          : 0
                       }
-                      series={chartState.series}
-                      type="line"
-                      height={320}
+                      className="h-2"
                     />
                   </div>
-                ) : (
-                  <div className="h-80 flex items-center justify-center text-gray-500">
-                    No completed subtopics yet. Start completing subtopics to
-                    see progress over time.
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">
+                      {topic.totalSubtopics > 0
+                        ? Math.round(
+                            (topic.completedSubtopics / topic.totalSubtopics) *
+                              100,
+                          )
+                        : 0}
+                      % Complete
+                    </span>
+                    <Badge
+                      className={getStatusColor(
+                        topic.completedSubtopics,
+                        topic.totalSubtopics,
+                      )}
+                    >
+                      {getStatusText(
+                        topic.completedSubtopics,
+                        topic.totalSubtopics,
+                      )}
+                    </Badge>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
-          )}
+          ))}
         </div>
-      </div>
-    </div>
+      ) : (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              No Topics Found
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              This category doesn't have any topics yet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Study Performance Chart */}
+      {topics.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+                Study Performance
+              </CardTitle>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
+              This chart shows the cumulative number of subtopics you've
+              completed for each goal .
+            </p>
+          </CardHeader>
+          <CardContent>
+            {chartState.series.length > 0 ? (
+              <div className="h-80">
+                <ReactApexChart
+                  options={
+                    {
+                      chart: {
+                        type: "line",
+                        stacked: false,
+                        height: 320,
+                        zoom: {
+                          type: "x",
+                          enabled: true,
+                          autoScaleYaxis: true,
+                        },
+                        toolbar: { autoSelected: "zoom" },
+                      },
+                      dataLabels: { enabled: false },
+                      stroke: { curve: "stepline", width: 2 },
+                      title: {
+                        text: "Topic Progress Over Time",
+                        align: "left",
+                      },
+                      markers: { size: 0 },
+                      yaxis: {
+                        title: { text: "Completed Subtopics" },
+                        labels: { formatter: (val) => val.toFixed(0) },
+                      },
+                      xaxis: {
+                        type: "datetime",
+                        labels: {
+                          datetimeFormatter: {
+                            year: "yyyy",
+                            month: "MMM 'yy",
+                            day: "dd MMM",
+                            hour: "HH:mm",
+                          },
+                        },
+                      },
+                      tooltip: {
+                        shared: false,
+                        y: {
+                          formatter: (val) => `${val.toFixed(0)} completed`,
+                        },
+                        x: { format: "dd MMM yyyy" },
+                      },
+                      colors: TOPIC_COLORS,
+                      legend: { position: "bottom" },
+                    } as ApexOptions
+                  }
+                  series={chartState.series}
+                  type="line"
+                  height={320}
+                />
+              </div>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-gray-500">
+                No completed subtopics yet. Start completing subtopics to see
+                progress over time.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </SidebarLayout>
   );
 }

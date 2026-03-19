@@ -24,7 +24,9 @@ export default function EditPortfolio() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: sectionSettings = [] } = useQuery({
+  const { data: sectionSettings = [] } = useQuery<
+    { sectionName: string; isVisible: boolean }[]
+  >({
     queryKey: ["/api/section-settings", CURRENT_USER_ID],
   });
 

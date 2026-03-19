@@ -95,7 +95,7 @@ export default function Home() {
     queryKey: ["/api/daily-activity", userId, today],
     queryFn: async () => {
       const response = await fetch(
-        `/api/daily-activity/${userId}?startDate=${today}&endDate=${today}`
+        `/api/daily-activity/${userId}?startDate=${today}&endDate=${today}`,
       );
       if (!response.ok) return [];
       return response.json();
@@ -114,7 +114,7 @@ export default function Home() {
     queryKey: ["/api/notifications", userId, "count"],
     queryFn: async () => {
       const response = await fetch(
-        `/api/notifications/${userId}/count?unreadOnly=true`
+        `/api/notifications/${userId}/count?unreadOnly=true`,
       );
       if (!response.ok) return { count: 0 };
       return response.json();
@@ -167,7 +167,7 @@ export default function Home() {
     if (userId && user) {
       // Delay badge checking by 1 second to let other data load first
       const timer = setTimeout(() => {
-        checkBadgesMutation.mutate(userId);
+        checkBadgesMutation.mutate(userIdString);
       }, 1000);
 
       return () => clearTimeout(timer);
@@ -183,13 +183,13 @@ export default function Home() {
     queryKey: ["/api/daily-activity", userId, "history"],
     queryFn: async () => {
       const response = await fetch(
-        `/api/daily-activity/${userId}?startDate=${startDate}&endDate=${today}`
+        `/api/daily-activity/${userId}?startDate=${startDate}&endDate=${today}`,
       );
       if (!response.ok) return [];
       const data = await response.json();
       return data.sort(
         (a: any, b: any) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime()
+          new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
     },
   });
@@ -207,7 +207,7 @@ export default function Home() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: parseInt(userId),
+          userId,
           date: today,
           xpEarned: 10, // Daily check-in XP reward
           lessonsCompleted: 0,
@@ -262,7 +262,7 @@ export default function Home() {
         `/api/notifications/${notificationId}/read`,
         {
           method: "PATCH",
-        }
+        },
       );
       if (!response.ok) throw new Error("Failed to mark as read");
       return response.json();
@@ -320,7 +320,6 @@ export default function Home() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
       {/* Sidebar */}
       <div
         className={`
@@ -331,223 +330,412 @@ export default function Home() {
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
-
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start space-x-3 sm:space-x-4">
               {/* Mobile menu button */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden mt-1"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="h-5 w-5" />
               </Button>
 
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold dark:text-white">
-                  <span className=" dark:text-white">Welcome back,</span>{" "}
-                  <span className="text-primary">
-                    {user?.firstName ||
-                      profile?.personalDetails?.fullName?.split(" ")[0] ||
-                      "Professional"}
+              <div className="flex flex-col gap-2 text-left">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-semibold text-gray-500 dark:text-gray-300">
+                    Welcome back,
                   </span>
-                  !
-                </h2>
-                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
-                  Manage your portfolio and continue learning
-                </p>
-              </div>
-            </div>
+                  <h2 className="text-xl sm:text-2xl font-semibold leading-tight text-gray-900 dark:text-white">
+                    <span className="text-primary">
+                      {user?.firstName ||
+                        profile?.personalDetails?.fullName?.split(" ")[0] ||
+                        "Professional"}
+                    </span>
+                    !
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                    Manage your portfolio and continue learning
+                  </p>
+                </div>
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              {/* PDF Export Button - Hidden on mobile */}
-              <Button
-                onClick={handleCheckIn}
-                disabled={checkInMutation.isPending || hasCheckedInToday}
-                className={`hidden sm:flex text-white disabled:opacity-50 ${
-                  hasCheckedInToday
-                    ? "bg-green-500 hover:bg-green-500 cursor-not-allowed"
-                    : "bg-yellow-500 hover:bg-yellow-600"
-                }`}
-                size="sm"
-              >
-                <CircleCheckBig className="mr-2 h-4 w-4" />
-                {checkInMutation.isPending
-                  ? "Checking in..."
-                  : hasCheckedInToday
-                  ? "Checked In"
-                  : "Daily Check In"}
-              </Button>
-
-              {/* Mobile check-in button */}
-              <Button
-                onClick={handleCheckIn}
-                disabled={checkInMutation.isPending || hasCheckedInToday}
-                variant="ghost"
-                size="icon"
-                className={`sm:hidden ${
-                  hasCheckedInToday ? "text-green-500" : ""
-                }`}
-                title={hasCheckedInToday ? "Checked In" : "Daily Check In"}
-              >
-                <CircleCheckBig className="h-4 w-4" />
-              </Button>
-
-              {/* Check-in History Button */}
-              <Button
-                onClick={() => setShowCheckInHistory(!showCheckInHistory)}
-                variant="outline"
-                size="sm"
-                className="hidden sm:flex"
-              >
-                <History className="mr-2 h-4 w-4" />
-                History
-                {showCheckInHistory ? (
-                  <ChevronUp className="ml-1 h-3 w-3" />
-                ) : (
-                  <ChevronDown className="ml-1 h-3 w-3" />
-                )}
-              </Button>
-
-              {/* Mobile History Button */}
-              <Button
-                onClick={() => setShowCheckInHistory(!showCheckInHistory)}
-                variant="ghost"
-                size="icon"
-                className="sm:hidden"
-                title="Check-in History"
-              >
-                <History className="h-4 w-4" />
-              </Button>
-
-              {/* Notifications */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap sm:self-start">
+                  {/* PDF Export Button - Hidden on mobile */}
                   <Button
+                    onClick={handleCheckIn}
+                    disabled={checkInMutation.isPending || hasCheckedInToday}
+                    className={`hidden sm:flex text-white disabled:opacity-50 ${
+                      hasCheckedInToday
+                        ? "bg-green-500 hover:bg-green-500 cursor-not-allowed"
+                        : "bg-yellow-500 hover:bg-yellow-600"
+                    }`}
+                    size="sm"
+                  >
+                    <CircleCheckBig className="mr-2 h-4 w-4" />
+                    {checkInMutation.isPending
+                      ? "Checking in..."
+                      : hasCheckedInToday
+                        ? "Checked In"
+                        : "Daily Check In"}
+                  </Button>
+
+                  {/* Mobile check-in button */}
+                  <Button
+                    onClick={handleCheckIn}
+                    disabled={checkInMutation.isPending || hasCheckedInToday}
                     variant="ghost"
                     size="icon"
-                    className="relative text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                    className={`sm:hidden ${
+                      hasCheckedInToday ? "text-green-500" : ""
+                    }`}
+                    title={hasCheckedInToday ? "Checked In" : "Daily Check In"}
                   >
-                    <Bell className="h-5 w-5" />
-                    {unreadCount && unreadCount.count > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                        {unreadCount.count > 9 ? "9+" : unreadCount.count}
-                      </span>
+                    <CircleCheckBig className="h-4 w-4" />
+                  </Button>
+
+                  {/* Check-in History Button */}
+                  <Button
+                    onClick={() => setShowCheckInHistory(!showCheckInHistory)}
+                    variant="outline"
+                    size="sm"
+                    className="hidden sm:flex"
+                  >
+                    <History className="mr-2 h-4 w-4" />
+                    History
+                    {showCheckInHistory ? (
+                      <ChevronUp className="ml-1 h-3 w-3" />
+                    ) : (
+                      <ChevronDown className="ml-1 h-3 w-3" />
                     )}
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-80 max-h-96 overflow-y-auto"
-                >
-                  <div className="flex items-center justify-between p-2">
-                    <h3 className="font-semibold">Notifications</h3>
-                    {unreadCount && unreadCount.count > 0 && (
+
+                  {/* Mobile History Button */}
+                  <Button
+                    onClick={() => setShowCheckInHistory(!showCheckInHistory)}
+                    variant="ghost"
+                    size="icon"
+                    className="sm:hidden"
+                    title="Check-in History"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+
+                  {/* Notifications */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="sm"
-                        onClick={() => markAllAsReadMutation.mutate()}
-                        disabled={markAllAsReadMutation.isPending}
+                        size="icon"
+                        className="relative text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                       >
-                        Mark all read
+                        <Bell className="h-5 w-5" />
+                        {unreadCount && unreadCount.count > 0 && (
+                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                            {unreadCount.count > 9 ? "9+" : unreadCount.count}
+                          </span>
+                        )}
                       </Button>
-                    )}
-                  </div>
-                  <DropdownMenuSeparator />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-80 max-h-96 overflow-y-auto"
+                    >
+                      <div className="flex items-center justify-between p-2">
+                        <h3 className="font-semibold">Notifications</h3>
+                        {unreadCount && unreadCount.count > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => markAllAsReadMutation.mutate()}
+                            disabled={markAllAsReadMutation.isPending}
+                          >
+                            Mark all read
+                          </Button>
+                        )}
+                      </div>
+                      <DropdownMenuSeparator />
 
-                  {notifications &&
-                  Array.isArray(notifications) &&
-                  notifications.length > 0 ? (
-                    notifications.slice(0, 10).map((notification: any) => (
-                      <DropdownMenuItem
-                        key={notification.id}
-                        className={`p-3 cursor-pointer ${
-                          !notification.isRead
-                            ? "bg-blue-50 dark:bg-blue-900/20"
-                            : ""
-                        }`}
-                        onClick={() => {
-                          if (!notification.isRead) {
-                            markAsReadMutation.mutate(notification.id);
-                          }
-                          if (notification.actionUrl) {
-                            window.location.href = notification.actionUrl;
-                          }
-                        }}
-                      >
-                        <div className="flex items-start justify-between space-x-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <div className="text-sm font-medium truncate">
-                                {notification.title}
+                      {notifications &&
+                      Array.isArray(notifications) &&
+                      notifications.length > 0 ? (
+                        notifications.slice(0, 10).map((notification: any) => (
+                          <DropdownMenuItem
+                            key={notification.id}
+                            className={`p-3 cursor-pointer ${
+                              !notification.isRead
+                                ? "bg-blue-50 dark:bg-blue-900/20"
+                                : ""
+                            }`}
+                            onClick={() => {
+                              if (!notification.isRead) {
+                                markAsReadMutation.mutate(notification.id);
+                              }
+                              if (notification.actionUrl) {
+                                window.location.href = notification.actionUrl;
+                              }
+                            }}
+                          >
+                            <div className="flex items-start justify-between space-x-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <div className="text-sm font-medium truncate">
+                                    {notification.title}
+                                  </div>
+                                  {!notification.isRead && (
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                  {new Date(
+                                    notification.createdAt,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </p>
                               </div>
-                              {!notification.isRead && (
-                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                              )}
+                              <div className="flex space-x-1">
+                                {!notification.isRead && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      markAsReadMutation.mutate(
+                                        notification.id,
+                                      );
+                                    }}
+                                    disabled={markAsReadMutation.isPending}
+                                    className="p-1 h-6 w-6"
+                                  >
+                                    <Check className="h-3 w-3" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteNotificationMutation.mutate(
+                                      notification.id,
+                                    );
+                                  }}
+                                  disabled={
+                                    deleteNotificationMutation.isPending
+                                  }
+                                  className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {new Date(
-                                notification.createdAt
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-                          </div>
-                          <div className="flex space-x-1">
+                          </DropdownMenuItem>
+                        ))
+                      ) : (
+                        <DropdownMenuItem
+                          disabled
+                          className="p-4 text-center text-gray-500"
+                        >
+                          No notifications yet
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+            {/* PDF Export Button - Hidden on mobile */}
+            <Button
+              onClick={handleCheckIn}
+              disabled={checkInMutation.isPending || hasCheckedInToday}
+              className={`hidden sm:flex text-white disabled:opacity-50 ${
+                hasCheckedInToday
+                  ? "bg-green-500 hover:bg-green-500 cursor-not-allowed"
+                  : "bg-yellow-500 hover:bg-yellow-600"
+              }`}
+              size="sm"
+            >
+              <CircleCheckBig className="mr-2 h-4 w-4" />
+              {checkInMutation.isPending
+                ? "Checking in..."
+                : hasCheckedInToday
+                  ? "Checked In"
+                  : "Daily Check In"}
+            </Button>
+
+            {/* Mobile check-in button */}
+            <Button
+              onClick={handleCheckIn}
+              disabled={checkInMutation.isPending || hasCheckedInToday}
+              variant="ghost"
+              size="icon"
+              className={`sm:hidden ${
+                hasCheckedInToday ? "text-green-500" : ""
+              }`}
+              title={hasCheckedInToday ? "Checked In" : "Daily Check In"}
+            >
+              <CircleCheckBig className="h-4 w-4" />
+            </Button>
+
+            {/* Check-in History Button */}
+            <Button
+              onClick={() => setShowCheckInHistory(!showCheckInHistory)}
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex"
+            >
+              <History className="mr-2 h-4 w-4" />
+              History
+              {showCheckInHistory ? (
+                <ChevronUp className="ml-1 h-3 w-3" />
+              ) : (
+                <ChevronDown className="ml-1 h-3 w-3" />
+              )}
+            </Button>
+
+            {/* Mobile History Button */}
+            <Button
+              onClick={() => setShowCheckInHistory(!showCheckInHistory)}
+              variant="ghost"
+              size="icon"
+              className="sm:hidden"
+              title="Check-in History"
+            >
+              <History className="h-4 w-4" />
+            </Button>
+
+            {/* Notifications */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                >
+                  <Bell className="h-5 w-5" />
+                  {unreadCount && unreadCount.count > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {unreadCount.count > 9 ? "9+" : unreadCount.count}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-80 max-h-96 overflow-y-auto"
+              >
+                <div className="flex items-center justify-between p-2">
+                  <h3 className="font-semibold">Notifications</h3>
+                  {unreadCount && unreadCount.count > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => markAllAsReadMutation.mutate()}
+                      disabled={markAllAsReadMutation.isPending}
+                    >
+                      Mark all read
+                    </Button>
+                  )}
+                </div>
+                <DropdownMenuSeparator />
+
+                {notifications &&
+                Array.isArray(notifications) &&
+                notifications.length > 0 ? (
+                  notifications.slice(0, 10).map((notification: any) => (
+                    <DropdownMenuItem
+                      key={notification.id}
+                      className={`p-3 cursor-pointer ${
+                        !notification.isRead
+                          ? "bg-blue-50 dark:bg-blue-900/20"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (!notification.isRead) {
+                          markAsReadMutation.mutate(notification.id);
+                        }
+                        if (notification.actionUrl) {
+                          window.location.href = notification.actionUrl;
+                        }
+                      }}
+                    >
+                      <div className="flex items-start justify-between space-x-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <div className="text-sm font-medium truncate">
+                              {notification.title}
+                            </div>
                             {!notification.isRead && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  markAsReadMutation.mutate(notification.id);
-                                }}
-                                disabled={markAsReadMutation.isPending}
-                                className="p-1 h-6 w-6"
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                             )}
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            {new Date(
+                              notification.createdAt,
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                        <div className="flex space-x-1">
+                          {!notification.isRead && (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                deleteNotificationMutation.mutate(
-                                  notification.id
-                                );
+                                markAsReadMutation.mutate(notification.id);
                               }}
-                              disabled={deleteNotificationMutation.isPending}
-                              className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
+                              disabled={markAsReadMutation.isPending}
+                              className="p-1 h-6 w-6"
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Check className="h-3 w-3" />
                             </Button>
-                          </div>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotificationMutation.mutate(
+                                notification.id,
+                              );
+                            }}
+                            disabled={deleteNotificationMutation.isPending}
+                            className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
-                      </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <DropdownMenuItem
-                      disabled
-                      className="p-4 text-center text-gray-500"
-                    >
-                      No notifications yet
+                      </div>
                     </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                  ))
+                ) : (
+                  <DropdownMenuItem
+                    disabled
+                    className="p-4 text-center text-gray-500"
+                  >
+                    No notifications yet
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -571,7 +759,6 @@ export default function Home() {
                       <AvatarImage
                         src={
                           profile?.personalDetails?.photo ||
-                          profile?.photo ||
                           `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`
                         }
                         alt="Profile"
@@ -631,7 +818,7 @@ export default function Home() {
             </Card>
           </div>
           {/* Stats Cards */}
-          <StatsGrid userId={userId} />
+          <StatsGrid userId={userIdString} />
 
           {/* Quick Actions - Mobile First */}
           <div className="lg:hidden">
@@ -650,13 +837,13 @@ export default function Home() {
 
           {/* Learning Activity - Now before Learning Modules */}
           <section>
-            <ActivityCalendar userId={userId} />
+            <ActivityCalendar userId={userIdString} />
           </section>
 
           {/* Learning Modules and Completed Courses */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <LearningModules userId={userId} />
-            <CompletedCourses userId={userId} />
+            <LearningModules userId={userIdString} />
+            <CompletedCourses userId={userIdString} />
           </div>
 
           {/* Recent Badges */}
@@ -666,21 +853,20 @@ export default function Home() {
 
           {/* Skill Dashboard */}
           <section>
-            <SkillRadarChart userId={userId} />
+            <SkillRadarChart userId={userIdString} />
           </section>
 
           {/* Projects & Achievements */}
           <section>
-            <ProjectsAchievements userId={userId} />
+            <ProjectsAchievements userId={userIdString} />
           </section>
         </div>
 
         {/* Footer */}
         <Footer />
       </main>
-
-      {/* NEW: Check-in History Overlay & Panel */}
-      {/* This is the semi-transparent background */}
+      // {/* NEW: Check-in History Overlay & Panel */}
+      // {/* This is the semi-transparent background */}
       {showCheckInHistory && (
         <div
           className="fixed inset-0 z-40 bg-black/50 "
@@ -688,7 +874,6 @@ export default function Home() {
           aria-hidden="true"
         />
       )}
-
       {/* This is the vertical sidebar itself */}
       <div
         className={`

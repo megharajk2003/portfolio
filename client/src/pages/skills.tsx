@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type skills } from "@shared/schema";
+import { type skills as skillsTable } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
@@ -25,15 +25,15 @@ const CURRENT_USER_ID = "user-1";
 export default function Skills() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { data: skills = [] } = useQuery<(typeof skills.$inferSelect)[]>({
+  const { data: skills = [] } = useQuery<(typeof skillsTable.$inferSelect)[]>({
     queryKey: ["/api/skills", CURRENT_USER_ID],
   });
 
-  const groupedSkills = skills.reduce((acc: any, skill: any) => {
+  type Skill = typeof skillsTable.$inferSelect;
+
+  const groupedSkills = skills.reduce<Record<string, Skill[]>>((acc, skill) => {
     const category = skill.category || "technical";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
+    if (!acc[category]) acc[category] = [];
     acc[category].push(skill);
     return acc;
   }, {});
@@ -144,7 +144,7 @@ export default function Skills() {
             <Card>
               <CardContent className="p-6 text-center">
                 <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {skills.filter((s) => s.category === "technical").length}
+                  {skills.filter((s: Skill) => s.category === "technical").length}
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
                   Technical Skills
@@ -154,7 +154,7 @@ export default function Skills() {
             <Card>
               <CardContent className="p-6 text-center">
                 <div className="text-3xl font-bold text-green-600 mb-2">
-                  {skills.filter((s) => s.category === "soft").length}
+                  {skills.filter((s: Skill) => s.category === "soft").length}
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
                   Soft Skills
@@ -165,7 +165,7 @@ export default function Skills() {
               <CardContent className="p-6 text-center">
                 <div className="text-3xl font-bold text-purple-600 mb-2">
                   {Math.round(
-                    skills.reduce((sum, skill) => sum + skill.level, 0) /
+                    skills.reduce((sum: number, skill: Skill) => sum + skill.level, 0) /
                       skills.length
                   ) || 0}
                   %
@@ -181,7 +181,7 @@ export default function Skills() {
           {Object.keys(groupedSkills).length > 0 ? (
             <div className="space-y-8">
               {Object.entries(groupedSkills).map(
-                ([category, categorySkills]: [string, any]) => {
+                ([category, categorySkills]: [string, Skill[]]) => {
                   const IconComponent = getCategoryIcon(category);
                   return (
                     <div key={category}>
@@ -199,7 +199,7 @@ export default function Skills() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-                        {categorySkills.map((skill: any) => (
+                        {categorySkills.map((skill: Skill) => (
                           <Card
                             key={skill.id}
                             className="group hover:shadow-lg transition-shadow"

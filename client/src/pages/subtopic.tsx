@@ -22,9 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, ListChecks } from "lucide-react";
-import Sidebar from "@/components/sidebar";
 import { useLocation } from "wouter";
 import { navigate } from "wouter/use-browser-location";
+import SidebarLayout from "@/components/sidebar-layout";
 
 // Interfaces
 interface Subtopic {
@@ -59,7 +59,7 @@ interface TopicWithSubtopics {
 
 // API functions
 const fetchTopicSubtopics = async (
-  topicId: string
+  topicId: string,
 ): Promise<TopicWithSubtopics> => {
   const response = await fetch(`/api/goal-topics/${topicId}/subtopics`, {
     credentials: "include",
@@ -72,7 +72,7 @@ const fetchTopicSubtopics = async (
 
 const updateSubtopicStatus = async (
   subtopicId: string,
-  status: "pending" | "start" | "completed"
+  status: "pending" | "start" | "completed",
 ) => {
   const response = await fetch(`/api/goal-subtopics/${subtopicId}`, {
     method: "PATCH",
@@ -118,210 +118,179 @@ export default function SubtopicStatus() {
     onSuccess: () => {
       toast({ title: "Success", description: "Subtopic status updated" });
       refetch();
-      queryClient.invalidateQueries({ queryKey: ["goals"] });
-      queryClient.invalidateQueries({ queryKey: ["category-topics"] });
+      queryClient.invalidateQueries({ queryKey: ["topic-subtopics", topicId] });
     },
-    onError: (error: any) => {
+    onError: (err: Error) => {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Update failed",
+        description: err.message,
         variant: "destructive",
       });
     },
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "start":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "low":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
-    }
+  const goBackToTopics = () => {
+    navigate(`/goal-tracker/${topicData?.category?.goalId}`, { replace: true });
   };
 
   const handleStatusChange = (
     subtopicId: string,
-    newStatus: "pending" | "start" | "completed"
+    status: "pending" | "start" | "completed",
   ) => {
-    updateSubtopicMutation.mutate({ subtopicId, status: newStatus });
-  };
-
-  const goBackToTopics = () => {
-    if (topicData?.category) {
-      navigate(
-        `/goal-tracker/${topicData.category.goalId}/category/${topicData.category.id}`
-      );
-    } else {
-      navigate("/goals");
-    }
+    updateSubtopicMutation.mutate({ subtopicId, status });
   };
 
   if (!user) {
     return (
-      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
-            <div className="text-center">Please log in to view subtopics.</div>
-          </div>
+      <SidebarLayout
+        title="Subtopics"
+        description="Sign in to manage your learning tasks"
+        contentClassName="max-w-6xl mx-auto"
+      >
+        <div className="text-center text-gray-600 dark:text-gray-300">
+          Please log in to view this topic.
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6 space-y-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-64 bg-gray-200 rounded"></div>
-            </div>
-          </div>
+      <SidebarLayout
+        title="Loading subtopics..."
+        contentClassName="max-w-6xl mx-auto space-y-6"
+      >
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   if (error || !topicData) {
     return (
-      <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
-            <div className="text-red-600 dark:text-red-400">
-              Error loading subtopics:{" "}
-              {error ? (error as Error).message : "Topic not found"}
-            </div>
-          </div>
+      <SidebarLayout
+        title="Subtopics"
+        contentClassName="max-w-6xl mx-auto"
+      >
+        <div className="text-red-600 dark:text-red-400">
+          Error loading subtopics:{" "}
+          {error ? (error as Error).message : "Topic not found"}
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900/50">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {topicData.name}
-              </h1>
-            </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goBackToTopics}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Topics
-              </Button>
-            </div>
+    <SidebarLayout
+      title={topicData.name}
+      actions={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={goBackToTopics}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Topics
+        </Button>
+      }
+      contentClassName="max-w-6xl mx-auto space-y-6"
+    >
+      <Card>
+        <CardHeader>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Progress: {topicData.completedSubtopics} / {topicData.totalSubtopics}{" "}
+            completed
           </div>
-        </header>
-        <div className="container mx-auto p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4"></div>
-          </div>
-
-          {/* Subtopics Table */}
-          <Card>
-            <CardHeader>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Progress: {topicData.completedSubtopics} /{" "}
-                {topicData.totalSubtopics} completed
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Topic</TableHead>
-                      <TableHead>Subtopic</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Update Status</TableHead>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Subtopic</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Notes</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topicData.subtopics.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No subtopics found for this topic.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  topicData.subtopics.map((subtopic) => (
+                    <TableRow key={subtopic.id}>
+                      <TableCell className="font-medium">
+                        {subtopic.name}
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          defaultValue={subtopic.status}
+                          onValueChange={(value) =>
+                            handleStatusChange(
+                              subtopic.id,
+                              value as Subtopic["status"],
+                            )
+                          }
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="start">In Progress</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            subtopic.priority === "high"
+                              ? "border-red-500 text-red-600"
+                              : subtopic.priority === "medium"
+                                ? "border-yellow-500 text-yellow-600"
+                                : "border-green-500 text-green-600"
+                          }
+                        >
+                          {subtopic.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600 dark:text-gray-400">
+                        {subtopic.notes || "No notes"}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            handleStatusChange(subtopic.id, "completed")
+                          }
+                        >
+                          <ListChecks className="h-4 w-4 mr-1" />
+                          Mark Done
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={goBackToTopics}>
+                          <ArrowLeft className="h-4 w-4 mr-1" />
+                          Back
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topicData.subtopics.map((subtopic) => (
-                      <TableRow key={subtopic.id}>
-                        <TableCell className="font-medium">
-                          {topicData.category.name}
-                        </TableCell>
-                        <TableCell>{topicData.name}</TableCell>
-                        <TableCell>{subtopic.name}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(subtopic.status)}>
-                            {subtopic.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={subtopic.status}
-                            onValueChange={(
-                              value: "pending" | "start" | "completed"
-                            ) => handleStatusChange(subtopic.id, value)}
-                            disabled={updateSubtopicMutation.isPending}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="start">Start</SelectItem>
-                              <SelectItem value="completed">
-                                Completed
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {topicData.subtopics.length === 0 && (
-                <div className="text-center py-8">
-                  <ListChecks className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    No Subtopics Found
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    This topic doesn't have any subtopics yet.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </SidebarLayout>
   );
 }

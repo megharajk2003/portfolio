@@ -110,35 +110,35 @@ export default function AdminDashboard() {
   // Delete handlers
   const handleDeleteCourse = async (id: string) => {
     if (confirm('Are you sure you want to delete this course?')) {
-      await apiRequest(`/api/admin/courses/${id}`, undefined, { method: 'DELETE' });
+      await apiRequest('DELETE', `/api/admin/courses/${id}`);
       refetchCourses();
     }
   };
 
   const handleDeleteModule = async (id: string) => {
     if (confirm('Are you sure you want to delete this module?')) {
-      await apiRequest(`/api/admin/modules/${id}`, undefined, { method: 'DELETE' });
+      await apiRequest('DELETE', `/api/admin/modules/${id}`);
       refetchModules();
     }
   };
 
   const handleDeleteLesson = async (id: string) => {
     if (confirm('Are you sure you want to delete this lesson?')) {
-      await apiRequest(`/api/admin/lessons/${id}`, undefined, { method: 'DELETE' });
+      await apiRequest('DELETE', `/api/admin/lessons/${id}`);
       refetchLessons();
     }
   };
 
   const handleDeleteForumPost = async (id: string) => {
     if (confirm('Are you sure you want to delete this forum post?')) {
-      await apiRequest(`/api/admin/forum/posts/${id}`, undefined, { method: 'DELETE' });
+      await apiRequest('DELETE', `/api/admin/forum/posts/${id}`);
       refetchPosts();
     }
   };
 
   const handleDeleteForumReply = async (id: string) => {
     if (confirm('Are you sure you want to delete this forum reply?')) {
-      await apiRequest(`/api/admin/forum/replies/${id}`, undefined, { method: 'DELETE' });
+      await apiRequest('DELETE', `/api/admin/forum/replies/${id}`);
       refetchReplies();
     }
   };

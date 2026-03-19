@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Target, TrendingUp } from "lucide-react";
-import Sidebar from "@/components/sidebar";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { useLocation } from "wouter";
 import { navigate } from "wouter/use-browser-location";
+import SidebarLayout from "@/components/sidebar-layout";
 // --- INTERFACES ---
 interface GoalCategory {
   id: string;
@@ -144,110 +144,94 @@ export default function GoalTracker() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50/50">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <header className="sticky top-0 z-30 bg-white border-b px-6 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {goal ? `${goal.name.toUpperCase()} Categories` : "Categories"}
-            </h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/goals")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" /> Back to Goals
-            </Button>
-          </div>
-        </header>
-        <div className="container mx-auto p-6 space-y-6">
-          {goalLoading && <div>Loading...</div>}
-          {goalError && (
-            <div className="text-red-500">
-              Error: {(goalError as Error).message}
-            </div>
-          )}
+    <SidebarLayout
+      title={goal ? `${goal.name} Categories` : "Categories"}
+      description="Monitor completion across each goal category"
+      actions={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/goals")}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Goals
+        </Button>
+      }
+      contentClassName="max-w-6xl mx-auto space-y-6"
+    >
+      {goalLoading && <div>Loading...</div>}
+      {goalError && (
+        <div className="text-red-500">Error: {(goalError as Error).message}</div>
+      )}
 
-          {!goalLoading && !goalError && (
-            <>
-              <div className="space-y-4">
-                {categories.map((category: GoalCategory) => (
-                  <Card
-                    key={category.id}
-                    className="cursor-pointer transition-all hover:shadow-lg"
-                    onClick={() =>
-                      navigate(
-                        `/goal-tracker/${goalId}/category/${category.id}`
-                      )
-                    }
-                  >
-                    <CardHeader>
-                      <CardTitle>{category.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div>
-                          {/* This is the part that was missing */}
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium">
-                              Overall Progress
-                            </span>
-                            <span className="text-sm text-gray-600">
-                              {category.completedSubtopics || 0} /{" "}
-                              {category.totalSubtopics || 0} Subtopics
-                            </span>
-                          </div>
-                          <Progress
-                            value={
-                              (category.completedSubtopics /
-                                category.totalSubtopics) *
-                                100 || 0
-                            }
-                            className="h-2"
-                          />
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">
-                            {Math.round(
-                              (category.completedSubtopics /
-                                category.totalSubtopics) *
-                                100
-                            ) || 0}
-                            % Complete
-                          </span>
-                          <Badge
-                            className={getStatusColor(
-                              category.completedSubtopics,
-                              category.totalSubtopics
-                            )}
-                          >
-                            {getStatusText(
-                              category.completedSubtopics,
-                              category.totalSubtopics
-                            )}
-                          </Badge>
-                        </div>
+      {!goalLoading && !goalError && (
+        <>
+          <div className="space-y-4">
+            {categories.map((category: GoalCategory) => (
+              <Card
+                key={category.id}
+                className="cursor-pointer transition-all hover:shadow-lg"
+                onClick={() =>
+                  navigate(`/goal-tracker/${goalId}/category/${category.id}`)
+                }
+              >
+                <CardHeader>
+                  <CardTitle>{category.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Overall Progress</span>
+                        <span className="text-sm text-gray-600">
+                          {category.completedSubtopics || 0} /{" "}
+                          {category.totalSubtopics || 0} Subtopics
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              {categories.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Category Progress Trend</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ApexCategoryProgressChart categories={categories} />
-                  </CardContent>
-                </Card>
-              )}
-            </>
+                      <Progress
+                        value={
+                          (category.completedSubtopics / category.totalSubtopics) * 100 ||
+                          0
+                        }
+                        className="h-2"
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">
+                        {Math.round(
+                          (category.completedSubtopics / category.totalSubtopics) * 100,
+                        ) || 0}
+                        % Complete
+                      </span>
+                      <Badge
+                        className={getStatusColor(
+                          category.completedSubtopics,
+                          category.totalSubtopics,
+                        )}
+                      >
+                        {getStatusText(
+                          category.completedSubtopics,
+                          category.totalSubtopics,
+                        )}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {categories.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Category Progress Trend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ApexCategoryProgressChart categories={categories} />
+              </CardContent>
+            </Card>
           )}
-        </div>
-      </div>
-    </div>
+        </>
+      )}
+    </SidebarLayout>
   );
 }
