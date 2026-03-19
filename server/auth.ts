@@ -38,13 +38,16 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: isProd,
+      secure: true, // always secure; relies on proxy trust in prod
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
+      sameSite: "none", // required for cross-site (Vercel -> Render)
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
+    proxy: true,
+    name: "connect.sid",
   };
 
+  // Needed so Express knows the original protocol and sets secure cookies correctly behind proxies (Render/Cloudflare)
   app.set("trust proxy", 1);
   app.use(session(sessionSettings));
   app.use(passport.initialize());
