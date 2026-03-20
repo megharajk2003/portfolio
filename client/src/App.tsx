@@ -1,5 +1,5 @@
 import { Switch, Route, useLocation } from "wouter";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -48,6 +48,8 @@ function Router() {
   const isAuthenticated = !!user;
   const [location, navigate] = useLocation();
   const { toast } = useToast();
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstall, setShowInstall] = useState(false);
 
   // Redirect to dashboard when user is authenticated and on root path
   useEffect(() => {
@@ -78,7 +80,7 @@ function Router() {
       "/admin",
     ];
     const isProtectedRoute = protectedRoutes.some((route) =>
-      location.startsWith(route)
+      location.startsWith(route),
     );
 
     // Add a small delay to ensure authentication state is fully loaded
@@ -91,7 +93,7 @@ function Router() {
           "isAuthenticated:",
           isAuthenticated,
           "location:",
-          location
+          location,
         );
         toast({
           title: "Authentication Required",

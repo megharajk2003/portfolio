@@ -1,17 +1,34 @@
-# Toast Positioning Modification
+# PWA Installation Fix - TODO Steps
 
-## Goal: Make all toast notifications appear at the top of the screen
+## Plan Breakdown (Approved ✅)
 
-### Steps:
+### Step 1: Install Dependencies [COMPLETE ✅]
 
-- [x] Analyze current toast implementation
-- [x] Identify ToastViewport component in toast.tsx
-- [x] Understand current responsive positioning (top on mobile, bottom-right on desktop)
-- [ ] Modify ToastViewport className to always position toasts at the top
-- [ ] Remove responsive behavior that moves toasts to bottom-right
-- [ ] Adjust flex direction for proper top positioning
-- [ ] Verify changes work correctly
+- `npm install vite-plugin-pwa -D`
 
-### Files to modify:
+### Step 2: Update vite.config.ts [COMPLETE ✅]
 
-- client/src/components/ui/toast.tsx (ToastViewport component)
+- Add VitePWA plugin with precaching
+
+### Step 3: Fix Icon Consistency [COMPLETE ✅]
+
+- Update manifest & index.html to use consistent .png casing
+
+### Step 4: Enhance App.tsx [PENDING]
+
+- Add beforeinstallprompt handling & install button
+
+### Step 5: Test Installation [PENDING]
+
+- `npm run dev`
+- Chrome DevTools → Application → Verify "installable: yes"
+- Test install prompt
+
+### Step 6: Production Build Test [PENDING]
+
+- `npm run build && npm run preview`
+
+---
+
+**Progress: 4/6 complete (PWA UI added, minor TS warnings to ignore)**  
+_Updates marked as [COMPLETE] after each step._
