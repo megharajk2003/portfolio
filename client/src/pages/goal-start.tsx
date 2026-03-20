@@ -59,6 +59,7 @@ interface Goal {
   createdAt: string;
   updatedAt: string;
   categories?: GoalCategory[];
+  categoriesCount?: number;
 }
 
 // API functions for goals
@@ -537,7 +538,9 @@ export default function GoalStart() {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
                             <div className="font-bold text-lg text-blue-600">
-                              {goal.categories?.length || 0}
+                              {goal.categories?.length ??
+                                goal.categoriesCount ??
+                                0}
                             </div>
                             <div className="text-white-600">Categories</div>
                           </div>

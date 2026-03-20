@@ -382,8 +382,11 @@ export interface IStorage {
     {
       id: string;
       name: string;
+      createdAt?: Date;
+      updatedAt?: Date;
       totalSubtopics: number;
       completedSubtopics: number;
+      categoriesCount: number;
     }[]
   >;
   getGoalDetails(goalId: string): Promise<
@@ -3819,8 +3822,11 @@ export class PgStorage implements IStorage {
     {
       id: string;
       name: string;
+      createdAt?: Date;
+      updatedAt?: Date;
       totalSubtopics: number;
       completedSubtopics: number;
+      categoriesCount: number;
     }[]
   > {
     if (!this.isDbConnected) {
@@ -3828,8 +3834,11 @@ export class PgStorage implements IStorage {
       return cached.map((g: Goal) => ({
         id: g.id,
         name: g.name,
+        createdAt: g.createdAt ?? undefined,
+        updatedAt: g.updatedAt ?? undefined,
         totalSubtopics: g.totalSubtopics ?? 0,
         completedSubtopics: g.completedSubtopics ?? 0,
+        categoriesCount: 0,
       }));
     }
 
@@ -3838,22 +3847,46 @@ export class PgStorage implements IStorage {
         .select({
           id: goals.id,
           name: goals.name,
+          createdAt: goals.createdAt,
+          updatedAt: goals.updatedAt,
           totalSubtopics: goals.totalSubtopics,
           completedSubtopics: goals.completedSubtopics,
+          categoriesCount: sql<number>`count(distinct ${goalCategories.id})`,
         })
         .from(goals)
+        .leftJoin(goalCategories, eq(goalCategories.goalId, goals.id))
         .where(eq(goals.userId, userId))
+        .groupBy(
+          goals.id,
+          goals.name,
+          goals.createdAt,
+          goals.updatedAt,
+          goals.totalSubtopics,
+          goals.completedSubtopics,
+        )
         .orderBy(desc(goals.createdAt));
 
       return rows.map((g) => ({
         id: g.id,
         name: g.name,
+        createdAt: g.createdAt ?? undefined,
+        updatedAt: g.updatedAt ?? undefined,
         totalSubtopics: g.totalSubtopics ?? 0,
         completedSubtopics: g.completedSubtopics ?? 0,
+        categoriesCount: g.categoriesCount ?? 0,
       }));
     } catch (error) {
       console.error("Error fetching user goal summaries:", error);
-      return this.fallbackData.get(`goals_${userId}`) || [];
+      const cached = this.fallbackData.get(`goals_${userId}`) || [];
+      return cached.map((g: Goal) => ({
+        id: g.id,
+        name: g.name,
+        createdAt: g.createdAt ?? undefined,
+        updatedAt: g.updatedAt ?? undefined,
+        totalSubtopics: g.totalSubtopics ?? 0,
+        completedSubtopics: g.completedSubtopics ?? 0,
+        categoriesCount: 0,
+      }));
     }
   }
 
