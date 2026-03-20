@@ -3097,10 +3097,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/goal-subtopics/:subtopicId", async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
       const { subtopicId } = req.params;
       const { status, notes } = req.body;
 
@@ -3130,12 +3126,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Subtopic management routes
-  app.put("/api/subtopics/:id/status", async (req, res) => {
+  app.put("/api/subtopics/:id/status", requireAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
       const subtopicId = req.params.id;
       const { status, notes } = req.body;
 
@@ -3188,12 +3180,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/topics/:id/subtopics", async (req, res) => {
+  app.get("/api/topics/:id/subtopics", requireAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
       const topicId = req.params.id;
       const subtopics = await storage.getTopicSubtopics(topicId);
       res.json(subtopics);
@@ -3203,12 +3191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/topics/:id/subtopics", async (req, res) => {
+  app.post("/api/topics/:id/subtopics", requireAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
       const topicId = req.params.id;
       const subtopicData = {
         ...req.body,
@@ -3223,12 +3207,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/subtopics/:id", async (req, res) => {
+  app.delete("/api/subtopics/:id", requireAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
       const subtopicId = req.params.id;
       const deleted = await storage.deleteSubtopic(subtopicId);
       res.json({ success: deleted });

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Table,
   TableBody,
@@ -58,15 +59,11 @@ interface TopicWithSubtopics {
 }
 
 // API functions
-const fetchTopicSubtopics = async (
-  topicId: string,
-): Promise<TopicWithSubtopics> => {
-  const response = await fetch(`/api/goal-topics/${topicId}/subtopics`, {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch subtopics");
-  }
+const fetchsubtopics = async (topicId: string) => {
+  const response = await apiRequest(
+    "GET",
+    `api/goal-topics/${topicId}/subtopics`,
+  );
   return response.json();
 };
 
@@ -74,15 +71,11 @@ const updateSubtopicStatus = async (
   subtopicId: string,
   status: "pending" | "start" | "completed",
 ) => {
-  const response = await fetch(`/api/goal-subtopics/${subtopicId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ status }),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update subtopic status");
-  }
+  const response = await apiRequest(
+    "PATCH",
+    `/api/goal-subtopics/${subtopicId}`,
+    { status },
+  );
   return response.json();
 };
 
@@ -100,9 +93,9 @@ export default function SubtopicStatus() {
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useQuery<TopicWithSubtopics>({
     queryKey: ["topic-subtopics", topicId],
-    queryFn: () => fetchTopicSubtopics(topicId),
+    queryFn: () => fetchsubtopics(topicId),
     enabled: !!topicId && !!user,
   });
 
@@ -170,10 +163,7 @@ export default function SubtopicStatus() {
 
   if (error || !topicData) {
     return (
-      <SidebarLayout
-        title="Subtopics"
-        contentClassName="max-w-6xl mx-auto"
-      >
+      <SidebarLayout title="Subtopics" contentClassName="max-w-6xl mx-auto">
         <div className="text-red-600 dark:text-red-400">
           Error loading subtopics:{" "}
           {error ? (error as Error).message : "Topic not found"}
@@ -201,8 +191,8 @@ export default function SubtopicStatus() {
       <Card>
         <CardHeader>
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            Progress: {topicData.completedSubtopics} / {topicData.totalSubtopics}{" "}
-            completed
+            Progress: {topicData.completedSubtopics} /{" "}
+            {topicData.totalSubtopics} completed
           </div>
         </CardHeader>
         <CardContent>
@@ -212,9 +202,6 @@ export default function SubtopicStatus() {
                 <TableRow>
                   <TableHead>Subtopic</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -249,39 +236,6 @@ export default function SubtopicStatus() {
                             <SelectItem value="completed">Completed</SelectItem>
                           </SelectContent>
                         </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            subtopic.priority === "high"
-                              ? "border-red-500 text-red-600"
-                              : subtopic.priority === "medium"
-                                ? "border-yellow-500 text-yellow-600"
-                                : "border-green-500 text-green-600"
-                          }
-                        >
-                          {subtopic.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-gray-600 dark:text-gray-400">
-                        {subtopic.notes || "No notes"}
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            handleStatusChange(subtopic.id, "completed")
-                          }
-                        >
-                          <ListChecks className="h-4 w-4 mr-1" />
-                          Mark Done
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={goBackToTopics}>
-                          <ArrowLeft className="h-4 w-4 mr-1" />
-                          Back
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

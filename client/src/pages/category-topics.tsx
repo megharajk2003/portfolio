@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Select,
   SelectContent,
@@ -73,16 +74,11 @@ const TOPIC_COLORS = [
 ];
 
 // API functions
+// API functions
 const fetchGoalWithCategories = async (goalId: string) => {
-  const response = await fetch(`/api/goals/${goalId}`, {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch goal with categories");
-  }
+  const response = await apiRequest("GET", `/api/goals/${goalId}`);
   return response.json();
 };
-
 export default function CategoryTopics() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -110,7 +106,7 @@ export default function CategoryTopics() {
 
   // Extract the specific category and its topics from the goal data
   const category = goalData?.categories?.find(
-    (cat: GoalCategory) => cat.id === categoryId
+    (cat: GoalCategory) => cat.id === categoryId,
   );
   const topics: GoalTopic[] = category?.topics ?? [];
 
@@ -131,7 +127,7 @@ export default function CategoryTopics() {
         (topic.completedSubtopicTimestamps || []).map((ts: string) => ({
           topicName: topic.name,
           timestamp: new Date(ts),
-        }))
+        })),
       )
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
@@ -166,22 +162,16 @@ export default function CategoryTopics() {
 
     // Build the incremental, cumulative data points from real completion data
     filteredTimestamps.forEach(
-      ({
-        topicName,
-        timestamp,
-      }: {
-        topicName: string;
-        timestamp: Date;
-      }) => {
-      cumulativeCounts[topicName]++;
-      const seriesIndex = series.findIndex((s) => s.name === topicName);
-      if (seriesIndex > -1) {
-        series[seriesIndex].data.push([
-          timestamp.getTime(),
-          cumulativeCounts[topicName],
-        ]);
-      }
-    },
+      ({ topicName, timestamp }: { topicName: string; timestamp: Date }) => {
+        cumulativeCounts[topicName]++;
+        const seriesIndex = series.findIndex((s) => s.name === topicName);
+        if (seriesIndex > -1) {
+          series[seriesIndex].data.push([
+            timestamp.getTime(),
+            cumulativeCounts[topicName],
+          ]);
+        }
+      },
     );
 
     // Extend all lines to current time with final counts
@@ -198,7 +188,7 @@ export default function CategoryTopics() {
 
   const getStatusColor = (
     completedSubtopics: number,
-    totalSubtopics: number
+    totalSubtopics: number,
   ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
@@ -211,7 +201,7 @@ export default function CategoryTopics() {
 
   const getStatusText = (
     completedSubtopics: number,
-    totalSubtopics: number
+    totalSubtopics: number,
   ) => {
     if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
       return "Completed";
@@ -229,7 +219,7 @@ export default function CategoryTopics() {
         description="Sign in to view your goal progress"
         contentClassName="max-w-6xl mx-auto"
       >
-        <div className="text-center text-gray-600 dark:text-gray-300">
+        <div className="text-center text-white-600 dark:text-white-300">
           Please log in to view topics.
         </div>
       </SidebarLayout>
@@ -243,8 +233,8 @@ export default function CategoryTopics() {
         contentClassName="max-w-6xl mx-auto space-y-6"
       >
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-white-200 rounded w-1/3"></div>
+          <div className="h-64 bg-white-200 rounded"></div>
         </div>
       </SidebarLayout>
     );
@@ -252,10 +242,7 @@ export default function CategoryTopics() {
 
   if (goalError || !goalData || !category) {
     return (
-      <SidebarLayout
-        title="Goal Topics"
-        contentClassName="max-w-6xl mx-auto"
-      >
+      <SidebarLayout title="Goal Topics" contentClassName="max-w-6xl mx-auto">
         <div className="text-red-600 dark:text-red-400">
           Error loading data:{" "}
           {goalError ? (goalError as Error).message : "Category not found"}
@@ -301,7 +288,7 @@ export default function CategoryTopics() {
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium">Progress</span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-white-600">
                         {topic.completedSubtopics} / {topic.totalSubtopics}
                       </span>
                     </div>
@@ -316,7 +303,7 @@ export default function CategoryTopics() {
                     />
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">
+                    <span className="text-white-600">
                       {topic.totalSubtopics > 0
                         ? Math.round(
                             (topic.completedSubtopics / topic.totalSubtopics) *
@@ -345,11 +332,11 @@ export default function CategoryTopics() {
       ) : (
         <Card>
           <CardContent className="p-6 text-center">
-            <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <Target className="h-12 w-12 text-white-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white-900 dark:text-white-100 mb-2">
               No Topics Found
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-white-600 dark:text-white-400">
               This category doesn't have any topics yet.
             </p>
           </CardContent>
@@ -366,7 +353,7 @@ export default function CategoryTopics() {
                 Study Performance
               </CardTitle>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
+            <p className="text-sm text-white-600 dark:text-white-400 pt-2">
               This chart shows the cumulative number of subtopics you've
               completed for each goal .
             </p>
@@ -427,7 +414,7 @@ export default function CategoryTopics() {
                 />
               </div>
             ) : (
-              <div className="h-80 flex items-center justify-center text-gray-500">
+              <div className="h-80 flex items-center justify-center text-white-500">
                 No completed subtopics yet. Start completing subtopics to see
                 progress over time.
               </div>

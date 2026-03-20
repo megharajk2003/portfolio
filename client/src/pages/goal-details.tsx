@@ -84,13 +84,7 @@ const updateSubtopicStatus = async (subtopicId: string, status: "pending" | "sta
 };
 
 const deleteGoal = async (goalId: string) => {
-  const response = await fetch(`/api/goals/${goalId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete goal");
-  }
+  const response = await apiRequest("DELETE", `/api/goals/${goalId}`);
   return response.json();
 };
 

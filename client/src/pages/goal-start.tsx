@@ -141,7 +141,7 @@ const ApexGoalPieChart: React.FC<{ goals: Goal[] }> = ({ goals }) => {
 
   if (series.length === 0) {
     return (
-      <div className="h-[300px] flex items-center justify-center text-gray-500">
+      <div className="h-[300px] flex items-center justify-center text-white-500">
         No completed subtopics yet.
       </div>
     );
@@ -287,8 +287,8 @@ export default function GoalStart() {
         contentClassName="max-w-6xl mx-auto space-y-6"
       >
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-white-200 rounded w-1/3"></div>
+          <div className="h-64 bg-white-200 rounded"></div>
         </div>
       </SidebarLayout>
     );
@@ -332,8 +332,9 @@ export default function GoalStart() {
                   accept=".csv"
                   onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
                 />
-                <p className="text-sm text-gray-600 mt-2">
-                  CSV should contain columns: Category, Topics, Sub-topics, Status.
+                <p className="text-sm text-white-600 mt-2">
+                  CSV should contain columns: Category, Topics, Sub-topics,
+                  Status.
                 </p>
               </div>
               <Button
@@ -357,9 +358,9 @@ export default function GoalStart() {
             <Card key={i}>
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-4">
-                  <div className="h-6 bg-gray-200 rounded w-2/3"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-20 bg-gray-200 rounded"></div>
+                  <div className="h-6 bg-white-200 rounded w-2/3"></div>
+                  <div className="h-4 bg-white-200 rounded w-1/2"></div>
+                  <div className="h-20 bg-white-200 rounded"></div>
                 </div>
               </CardContent>
             </Card>
@@ -383,14 +384,15 @@ export default function GoalStart() {
         <Card>
           <CardContent className="p-8 text-center">
             <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-2xl font-semibold text-white-900 dark:text-white-100 mb-2">
               Start Your Learning Journey
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Upload your first CSV file to begin tracking your preparation goals.
-              Support for TNPSC, SSC, UPSC, Banking, and other competitive exams.
+            <p className="text-white-600 dark:text-white-400 mb-6">
+              Upload your first CSV file to begin tracking your preparation
+              goals. Support for TNPSC, SSC, UPSC, Banking, and other
+              competitive exams.
             </p>
-            <div className="text-sm text-gray-500 mb-4">
+            <div className="text-sm text-white-500 mb-4">
               CSV Format: Category, Topics, Sub-topics, Status
             </div>
           </CardContent>
@@ -419,7 +421,7 @@ export default function GoalStart() {
                       <div className="text-2xl">{getTypeIcon(goal.name)}</div>
                       <div>
                         <div className="text-xl font-bold">{goal.name}</div>
-                        <div className="text-sm text-gray-600 font-normal">
+                        <div className="text-sm text-white-600 font-normal">
                           {getTypeDescription(goal.name)}
                         </div>
                       </div>
@@ -429,31 +431,34 @@ export default function GoalStart() {
                     <div className="space-y-4">
                       {/* Stats Summary */}
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
                           <div className="font-bold text-lg text-blue-600">
                             {goal.categories?.length || 0}
                           </div>
-                          <div className="text-gray-600">Categories</div>
+                          <div className="text-white-600">Categories</div>
                         </div>
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
                           <div className="font-bold text-lg text-green-600">
                             {goal.totalSubtopics || 0}
                           </div>
-                          <div className="text-gray-600">Subtopics</div>
+                          <div className="text-white-600">Subtopics</div>
                         </div>
                       </div>
 
                       {/* Progress Overview */}
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">Overall Progress</span>
-                          <span className="text-sm text-gray-600">
-                            {goal.completedSubtopics || 0} / {goal.totalSubtopics || 0}
+                          <span className="text-sm font-medium">
+                            Overall Progress
+                          </span>
+                          <span className="text-sm text-white-600">
+                            {goal.completedSubtopics || 0} /{" "}
+                            {goal.totalSubtopics || 0}
                           </span>
                         </div>
                         <Progress value={progressPercentage} className="h-3" />
                         <div className="flex justify-between items-center mt-2">
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-white-600">
                             {Math.round(progressPercentage)}% Complete
                           </span>
                           <Badge
@@ -473,38 +478,40 @@ export default function GoalStart() {
                       {/* Categories Preview */}
                       {goal.categories && goal.categories.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <span className="text-sm font-medium text-white-700 dark:text-white-300">
                             Categories:
                           </span>
-                          {goal.categories.slice(0, 2).map((category: GoalCategory) => (
-                            <div
-                              key={category.id}
-                              className="p-2 bg-white dark:bg-gray-700 rounded-md border text-sm"
-                              data-testid={`preview-category-${category.id}`}
-                            >
-                              <div className="flex justify-between items-center mb-1">
-                                <span className="font-medium truncate">
-                                  {category.name}
-                                </span>
-                                <span className="text-xs text-gray-500 ml-2">
-                                  {category.completedSubtopics || 0}/
-                                  {category.totalSubtopics || 0}
-                                </span>
+                          {goal.categories
+                            .slice(0, 2)
+                            .map((category: GoalCategory) => (
+                              <div
+                                key={category.id}
+                                className="p-2 bg-white dark:bg-white-700 rounded-md border text-sm"
+                                data-testid={`preview-category-${category.id}`}
+                              >
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="font-medium truncate">
+                                    {category.name}
+                                  </span>
+                                  <span className="text-xs text-white-500 ml-2">
+                                    {category.completedSubtopics || 0}/
+                                    {category.totalSubtopics || 0}
+                                  </span>
+                                </div>
+                                <Progress
+                                  value={
+                                    category.totalSubtopics > 0
+                                      ? ((category.completedSubtopics || 0) /
+                                          category.totalSubtopics) *
+                                        100
+                                      : 0
+                                  }
+                                  className="h-1"
+                                />
                               </div>
-                              <Progress
-                                value={
-                                  category.totalSubtopics > 0
-                                    ? ((category.completedSubtopics || 0) /
-                                        category.totalSubtopics) *
-                                      100
-                                    : 0
-                                }
-                                className="h-1"
-                              />
-                            </div>
-                          ))}
+                            ))}
                           {goal.categories.length > 2 && (
-                            <div className="text-xs text-gray-500 text-center pt-1">
+                            <div className="text-xs text-white-500 text-center pt-1">
                               +{goal.categories.length - 2} more categories
                             </div>
                           )}
@@ -519,7 +526,7 @@ export default function GoalStart() {
 
           {/* Analytics Overview Section */}
           <div className="space-y-8">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <h2 className="text-2xl font-semibold text-white-900 dark:text-white-100">
               Analytics Overview
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

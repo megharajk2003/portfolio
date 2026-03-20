@@ -347,19 +347,19 @@ export default function Home() {
             </Button>
 
             {/* TEXT + MOBILE ACTIONS */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 pt-4">
               {/* TEXT */}
               <div>
-                <span className="text-sm text-gray-500">Welcome back,</span>
+                <span className="text-xl text-white-500">Welcome back,</span>
 
-                <h2 className="text-xl sm:text-2xl font-semibold">
+                <h2 className="text-4xl sm:text-2xl font-semibold">
                   <span className="text-primary">
                     {user?.firstName || "Professional"}
                   </span>
                   !
                 </h2>
 
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-sm sm:text-base text-white-600">
                   Manage your portfolio and continue learning
                 </p>
               </div>
@@ -546,8 +546,8 @@ export default function Home() {
         {/* Panel Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center space-x-2">
-            <History className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <History className="h-5 w-5 text-white-500 dark:text-white-400" />
+            <h3 className="text-lg font-semibold text-white-900 dark:text-white">
               Check-in History
             </h3>
           </div>
@@ -571,7 +571,7 @@ export default function Home() {
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="font-medium text-gray-900 dark:text-white text-sm">
+                    <span className="font-medium text-white-900 dark:text-white text-sm">
                       {new Date(activity.date).toLocaleDateString("en-US", {
                         weekday: "long",
                         month: "short",
@@ -590,7 +590,7 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-16 text-white-500 dark:text-white-400">
                 <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No check-in history yet</p>
                 <p className="text-sm">

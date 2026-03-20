@@ -95,7 +95,18 @@ import {
 } from "@shared/schema";
 import { getTableColumns } from "drizzle-orm";
 import { db } from "./db";
-import { eq, and, gte, lte, sql, desc, ne, or, isNull, inArray } from "drizzle-orm";
+import {
+  eq,
+  and,
+  gte,
+  lte,
+  sql,
+  desc,
+  ne,
+  or,
+  isNull,
+  inArray,
+} from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -113,7 +124,7 @@ export interface IStorage {
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(
     userId: string,
-    profile: Partial<InsertProfile>
+    profile: Partial<InsertProfile>,
   ): Promise<Profile | undefined>;
 
   // Learning and Gamification
@@ -123,34 +134,34 @@ export interface IStorage {
   getUserProgress(userId: number): Promise<UserProgress[]>;
   getUserProgressForModule(
     userId: number,
-    moduleId: string
+    moduleId: string,
   ): Promise<UserProgress | undefined>;
   createUserProgress(progress: InsertUserProgress): Promise<UserProgress>;
   updateUserProgress(
     userId: number,
     moduleId: string,
-    progress: Partial<UserProgress>
+    progress: Partial<UserProgress>,
   ): Promise<UserProgress | undefined>;
 
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(
     userId: number,
-    stats: Partial<UserStats>
+    stats: Partial<UserStats>,
   ): Promise<UserStats | undefined>;
 
   getDailyActivity(
     userId: number,
     startDate: string,
-    endDate: string
+    endDate: string,
   ): Promise<DailyActivity[]>;
   createDailyActivity(activity: InsertDailyActivity): Promise<DailyActivity>;
 
   getSectionSettings(
     userId: number,
-    sectionName: string
+    sectionName: string,
   ): Promise<SectionSettings | undefined>;
   upsertSectionSettings(
-    settings: InsertSectionSettings
+    settings: InsertSectionSettings,
   ): Promise<SectionSettings>;
 
   // Portfolio section storage
@@ -211,7 +222,7 @@ export interface IStorage {
   createGeneratedResume(data: InsertGeneratedResume): Promise<GeneratedResume>;
   updateGeneratedResume(
     id: string,
-    data: Partial<InsertGeneratedResume>
+    data: Partial<InsertGeneratedResume>,
   ): Promise<GeneratedResume | undefined>;
   deleteGeneratedResume(id: string): Promise<boolean>;
 
@@ -220,7 +231,7 @@ export interface IStorage {
   createChatSession(data: InsertChatSession): Promise<ChatSession>;
   updateChatSession(
     id: string,
-    data: Partial<InsertChatSession>
+    data: Partial<InsertChatSession>,
   ): Promise<ChatSession | undefined>;
 
   // Forum methods
@@ -231,7 +242,7 @@ export interface IStorage {
   createForumPost(data: InsertForumPost): Promise<ForumPost>;
   updateForumPost(
     id: string,
-    data: Partial<InsertForumPost>
+    data: Partial<InsertForumPost>,
   ): Promise<ForumPost | undefined>;
   deleteForumPost(id: string): Promise<boolean>;
 
@@ -239,18 +250,18 @@ export interface IStorage {
   createForumReply(data: InsertForumReply): Promise<ForumReply>;
   updateForumReply(
     id: string,
-    data: Partial<InsertForumReply>
+    data: Partial<InsertForumReply>,
   ): Promise<ForumReply | undefined>;
   deleteForumReply(id: string): Promise<boolean>;
   getAllForumReplies(): Promise<(ForumReply & { user: User })[]>;
 
   toggleForumLike(
-    data: InsertForumLike
+    data: InsertForumLike,
   ): Promise<{ liked: boolean; likesCount: number }>;
   getForumLike(
     userId: number,
     postId?: string,
-    replyId?: string
+    replyId?: string,
   ): Promise<ForumLike | undefined>;
 
   // New learning platform methods
@@ -259,7 +270,7 @@ export interface IStorage {
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(
     id: string,
-    course: Partial<InsertCourse>
+    course: Partial<InsertCourse>,
   ): Promise<Course | undefined>;
   deleteCourse(id: string): Promise<boolean>;
 
@@ -272,7 +283,7 @@ export interface IStorage {
   createInstructor(instructor: InsertInstructor): Promise<Instructor>;
   updateInstructor(
     id: string,
-    instructor: Partial<InsertInstructor>
+    instructor: Partial<InsertInstructor>,
   ): Promise<Instructor | undefined>;
   deleteInstructor(id: string): Promise<boolean>;
 
@@ -282,7 +293,7 @@ export interface IStorage {
   getAllModules(): Promise<Module[]>;
   updateModule(
     id: string,
-    module: Partial<InsertModule>
+    module: Partial<InsertModule>,
   ): Promise<Module | undefined>;
   deleteModule(id: string): Promise<boolean>;
 
@@ -292,7 +303,7 @@ export interface IStorage {
   getAllLessons(): Promise<Lesson[]>;
   updateLesson(
     id: string,
-    lesson: Partial<InsertLesson>
+    lesson: Partial<InsertLesson>,
   ): Promise<Lesson | undefined>;
   deleteLesson(id: string): Promise<boolean>;
 
@@ -301,7 +312,7 @@ export interface IStorage {
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
   updateEnrollment(
     id: string,
-    enrollment: Partial<InsertEnrollment>
+    enrollment: Partial<InsertEnrollment>,
   ): Promise<Enrollment | undefined>;
 
   getCourseReviews(courseId: string): Promise<Review[]>;
@@ -310,18 +321,18 @@ export interface IStorage {
   // Lesson Progress methods
   getLessonProgress(
     userId: number,
-    moduleId: string
+    moduleId: string,
   ): Promise<LessonProgress[]>;
   getLessonProgressByIndex(
     userId: number,
     moduleId: string,
-    lessonIndex: number
+    lessonIndex: number,
   ): Promise<LessonProgress | undefined>;
   createLessonProgress(progress: InsertLessonProgress): Promise<LessonProgress>;
   completeLessonProgress(
     userId: number,
     moduleId: string,
-    lessonIndex: number
+    lessonIndex: number,
   ): Promise<LessonProgress>;
 
   // Badge system methods
@@ -329,7 +340,7 @@ export interface IStorage {
   createBadge(badge: InsertBadge): Promise<Badge>;
   updateBadge(
     id: string,
-    badge: Partial<InsertBadge>
+    badge: Partial<InsertBadge>,
   ): Promise<Badge | undefined>;
   deleteBadge(id: string): Promise<boolean>;
   getUserBadges(userId: number): Promise<(UserBadge & { badge: Badge })[]>;
@@ -337,13 +348,13 @@ export interface IStorage {
   checkAndAwardBadges(
     userId: number,
     type: string,
-    relatedId?: string
+    relatedId?: string,
   ): Promise<UserBadge[]>;
 
   // Course completion checking
   checkCourseCompletion(
     userId: number,
-    courseId: string
+    courseId: string,
   ): Promise<{
     isCompleted: boolean;
     completedAt?: Date;
@@ -357,22 +368,25 @@ export interface IStorage {
   getGoal(id: string): Promise<Goal | undefined>;
   updateGoal(
     id: string,
-    goalData: Partial<InsertGoal>
+    goalData: Partial<InsertGoal>,
   ): Promise<Goal | undefined>;
   deleteGoal(id: string): Promise<boolean>;
   createGoalFromCSV(
     userId: number,
     goalName: string,
-    csvData: any[]
+    csvData: any[],
   ): Promise<Goal>;
   getUserGoalsSummary(
-    userId: number
+    userId: number,
   ): Promise<
-    { id: string; name: string; totalSubtopics: number; completedSubtopics: number }[]
+    {
+      id: string;
+      name: string;
+      totalSubtopics: number;
+      completedSubtopics: number;
+    }[]
   >;
-  getGoalDetails(
-    goalId: string
-  ): Promise<
+  getGoalDetails(goalId: string): Promise<
     | (Goal & {
         categories: (GoalCategory & {
           topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
@@ -383,18 +397,24 @@ export interface IStorage {
   getGoalWithCategories(goalId: string): Promise<
     | (Goal & {
         categories: (GoalCategory & {
-          topics: (GoalTopic & { subtopics: GoalSubtopic[] })[];
+          topics: (GoalTopic & {
+            subtopics: GoalSubtopic[];
+            completedSubtopicTimestamps?: string[];
+          })[];
+          completedSubtopicTimestamps?: string[];
         })[];
+        completedSubtopicTimestamps?: string[];
       })
     | undefined
   >;
+  getUserGoalsWithCategories(userId: number): Promise<any[]>;
   getGoalCategory(id: string): Promise<GoalCategory | undefined>;
   getCategoryTopics(categoryId: string): Promise<GoalTopic[]>;
   getGoalTopic(id: string): Promise<GoalTopic | undefined>;
   updateTopicStatus(
     topicId: string,
     status: "pending" | "start" | "completed",
-    notes?: string
+    notes?: string,
   ): Promise<GoalTopic | undefined>;
   // Subtopic methods
   createGoalSubtopic(subtopicData: InsertGoalSubtopic): Promise<GoalSubtopic>;
@@ -402,7 +422,7 @@ export interface IStorage {
   updateSubtopicStatus(
     subtopicId: string,
     status: "pending" | "start" | "completed",
-    notes?: string
+    notes?: string,
   ): Promise<GoalSubtopic | undefined>;
   deleteSubtopic(subtopicId: string): Promise<boolean>;
 
@@ -887,7 +907,7 @@ export class PgStorage implements IStorage {
 
   async updateProfile(
     userId: string,
-    updates: Partial<InsertProfile>
+    updates: Partial<InsertProfile>,
   ): Promise<Profile | undefined> {
     try {
       const [updated] = await db
@@ -932,7 +952,7 @@ export class PgStorage implements IStorage {
 
   async getUserProgressForModule(
     userId: number,
-    moduleId: string
+    moduleId: string,
   ): Promise<UserProgress | undefined> {
     if (!this.isDbConnected) {
       const key = `userProgress_${userId}`;
@@ -945,14 +965,14 @@ export class PgStorage implements IStorage {
       .where(
         and(
           eq(userProgress.userId, userId),
-          eq(userProgress.moduleId, moduleId)
-        )
+          eq(userProgress.moduleId, moduleId),
+        ),
       );
     return result[0];
   }
 
   async createUserProgress(
-    progressData: InsertUserProgress
+    progressData: InsertUserProgress,
   ): Promise<UserProgress> {
     const [progress] = await db
       .insert(userProgress)
@@ -967,7 +987,7 @@ export class PgStorage implements IStorage {
   async updateUserProgress(
     userId: number,
     moduleId: string,
-    updates: Partial<UserProgress>
+    updates: Partial<UserProgress>,
   ): Promise<UserProgress | undefined> {
     const [updated] = await db
       .update(userProgress)
@@ -975,8 +995,8 @@ export class PgStorage implements IStorage {
       .where(
         and(
           eq(userProgress.userId, userId),
-          eq(userProgress.moduleId, moduleId)
-        )
+          eq(userProgress.moduleId, moduleId),
+        ),
       )
       .returning();
     return updated;
@@ -993,7 +1013,7 @@ export class PgStorage implements IStorage {
 
   async updateUserStats(
     userId: number,
-    statsUpdates: Partial<UserStats>
+    statsUpdates: Partial<UserStats>,
   ): Promise<UserStats | undefined> {
     const existing = await this.getUserStats(userId);
 
@@ -1023,7 +1043,7 @@ export class PgStorage implements IStorage {
   async getDailyActivity(
     userId: number,
     startDate: string,
-    endDate: string
+    endDate: string,
   ): Promise<DailyActivity[]> {
     if (!this.isDbConnected) {
       const key = `dailyActivity_${userId}`;
@@ -1032,7 +1052,7 @@ export class PgStorage implements IStorage {
       return activities
         .filter(
           (activity: any) =>
-            activity.date >= startDate && activity.date <= endDate
+            activity.date >= startDate && activity.date <= endDate,
         )
         .sort((a: any, b: any) => a.date.localeCompare(b.date));
     }
@@ -1044,8 +1064,8 @@ export class PgStorage implements IStorage {
           and(
             eq(dailyActivity.userId, userId),
             gte(dailyActivity.date, startDate),
-            lte(dailyActivity.date, endDate)
-          )
+            lte(dailyActivity.date, endDate),
+          ),
         );
     } catch (error) {
       console.error("Error fetching daily activity:", error);
@@ -1054,7 +1074,7 @@ export class PgStorage implements IStorage {
   }
 
   async createDailyActivity(
-    activityData: InsertDailyActivity
+    activityData: InsertDailyActivity,
   ): Promise<DailyActivity> {
     const [activity] = await db
       .insert(dailyActivity)
@@ -1069,7 +1089,7 @@ export class PgStorage implements IStorage {
   // Section settings
   async getSectionSettings(
     userId: number,
-    sectionName: string
+    sectionName: string,
   ): Promise<SectionSettings | undefined> {
     const result = await db
       .select()
@@ -1077,14 +1097,14 @@ export class PgStorage implements IStorage {
       .where(
         and(
           eq(sectionSettings.userId, userId),
-          eq(sectionSettings.sectionName, sectionName)
-        )
+          eq(sectionSettings.sectionName, sectionName),
+        ),
       );
     return result[0];
   }
 
   async upsertSectionSettings(
-    settingsData: InsertSectionSettings
+    settingsData: InsertSectionSettings,
   ): Promise<SectionSettings> {
     const [settings] = await db
       .insert(sectionSettings)
@@ -1111,12 +1131,12 @@ export class PgStorage implements IStorage {
         .from(workExperience)
         .where(eq(workExperience.userId, parseInt(userId)));
       console.log(
-        `Retrieved ${workExperienceRecords.length} work experience records from database`
+        `Retrieved ${workExperienceRecords.length} work experience records from database`,
       );
       return workExperienceRecords;
     } catch (error) {
       console.log(
-        "Database error, using fallback storage for getWorkExperience"
+        "Database error, using fallback storage for getWorkExperience",
       );
       const key = `workExperience_${userId}`;
       return this.fallbackData.get(key) || [];
@@ -1154,7 +1174,7 @@ export class PgStorage implements IStorage {
       this.fallbackData.set(key, [...currentExperience, newExperience]);
       console.log(
         "Created work experience entry in fallback storage:",
-        newExperience
+        newExperience,
       );
       return newExperience;
     }
@@ -1166,11 +1186,11 @@ export class PgStorage implements IStorage {
     try {
       console.log(
         `💼 STORAGE updateWorkExperience - Received data for ID ${id}:`,
-        data
+        data,
       );
       console.log(
         `💼 STORAGE updateWorkExperience - UpdateData after removing userId:`,
-        updateData
+        updateData,
       );
 
       const [updatedExperience] = await db
@@ -1185,17 +1205,17 @@ export class PgStorage implements IStorage {
 
       console.log(
         "💼 STORAGE updateWorkExperience - Updated work experience record in database:",
-        updatedExperience
+        updatedExperience,
       );
       return updatedExperience;
     } catch (error) {
       console.log(
-        "Database error, using fallback storage for updateWorkExperience"
+        "Database error, using fallback storage for updateWorkExperience",
       );
       const key = `workExperience_${userId}`;
       const currentExperience = this.fallbackData.get(key) || [];
       const updatedExperience = currentExperience.map((exp: any) =>
-        exp.id === id ? { ...exp, ...updateData } : exp
+        exp.id === id ? { ...exp, ...updateData } : exp,
       );
       this.fallbackData.set(key, updatedExperience);
       return { ...updateData, id };
@@ -1215,12 +1235,12 @@ export class PgStorage implements IStorage {
 
       console.log(
         "Deleted work experience record from database:",
-        deletedExperience[0]
+        deletedExperience[0],
       );
       return true;
     } catch (error) {
       console.log(
-        "Database error, using fallback storage for deleteWorkExperience"
+        "Database error, using fallback storage for deleteWorkExperience",
       );
       const entries = Array.from(this.fallbackData.entries());
       for (const [key, experienceList] of entries) {
@@ -1229,16 +1249,16 @@ export class PgStorage implements IStorage {
           Array.isArray(experienceList)
         ) {
           const experienceExists = experienceList.some(
-            (exp: any) => exp.id === id
+            (exp: any) => exp.id === id,
           );
           if (experienceExists) {
             const updatedExperience = experienceList.filter(
-              (exp: any) => exp.id !== id
+              (exp: any) => exp.id !== id,
             );
             this.fallbackData.set(key, updatedExperience);
             console.log(
               "Deleted work experience entry from fallback storage:",
-              id
+              id,
             );
             return true;
           }
@@ -1258,7 +1278,7 @@ export class PgStorage implements IStorage {
         .where(eq(education.userId, parseInt(userId)));
 
       console.log(
-        `Retrieved ${educationRecords.length} education records from dedicated table`
+        `Retrieved ${educationRecords.length} education records from dedicated table`,
       );
 
       // If no records in dedicated table, try to get from profile's otherDetails
@@ -1269,7 +1289,7 @@ export class PgStorage implements IStorage {
           Array.isArray(profile.otherDetails.education)
         ) {
           console.log(
-            `Retrieved ${profile.otherDetails.education.length} education records from profile JSONB`
+            `Retrieved ${profile.otherDetails.education.length} education records from profile JSONB`,
           );
           return profile.otherDetails.education;
         }
@@ -1338,7 +1358,7 @@ export class PgStorage implements IStorage {
       const key = `education_${userId}`;
       const currentEducation = this.fallbackData.get(key) || [];
       const updatedEducation = currentEducation.map((edu: any) =>
-        edu.id === id ? { ...edu, ...updateData } : edu
+        edu.id === id ? { ...edu, ...updateData } : edu,
       );
       this.fallbackData.set(key, updatedEducation);
       console.log("Updated education entry in fallback storage:", {
@@ -1362,7 +1382,7 @@ export class PgStorage implements IStorage {
 
       console.log(
         "Deleted education record from database:",
-        deletedEducation[0]
+        deletedEducation[0],
       );
       return true;
     } catch (error) {
@@ -1372,11 +1392,11 @@ export class PgStorage implements IStorage {
       for (const [key, educationList] of entries) {
         if (key.startsWith("education_") && Array.isArray(educationList)) {
           const educationExists = educationList.some(
-            (edu: any) => edu.id === id
+            (edu: any) => edu.id === id,
           );
           if (educationExists) {
             const updatedEducation = educationList.filter(
-              (edu: any) => edu.id !== id
+              (edu: any) => edu.id !== id,
             );
             this.fallbackData.set(key, updatedEducation);
             console.log("Deleted education entry from fallback storage:", id);
@@ -1396,7 +1416,7 @@ export class PgStorage implements IStorage {
         .from(skills)
         .where(eq(skills.userId, parseInt(userId)));
       console.log(
-        `Retrieved ${skillsRecords.length} skills records from database`
+        `Retrieved ${skillsRecords.length} skills records from database`,
       );
       return skillsRecords;
     } catch (error) {
@@ -1461,7 +1481,7 @@ export class PgStorage implements IStorage {
       const key = `skills_${userId}`;
       const currentSkills = this.fallbackData.get(key) || [];
       const updatedSkills = currentSkills.map((skill: any) =>
-        skill.id === id ? { ...skill, ...updateData } : skill
+        skill.id === id ? { ...skill, ...updateData } : skill,
       );
       this.fallbackData.set(key, updatedSkills);
       return { ...updateData, id };
@@ -1489,7 +1509,7 @@ export class PgStorage implements IStorage {
           const skillExists = skillsList.some((skill: any) => skill.id === id);
           if (skillExists) {
             const updatedSkills = skillsList.filter(
-              (skill: any) => skill.id !== id
+              (skill: any) => skill.id !== id,
             );
             this.fallbackData.set(key, updatedSkills);
             console.log("Deleted skill entry from fallback storage:", id);
@@ -1509,7 +1529,7 @@ export class PgStorage implements IStorage {
         .from(projects)
         .where(eq(projects.userId, parseInt(userId)));
       console.log(
-        `Retrieved ${projectsRecords.length} projects records from database`
+        `Retrieved ${projectsRecords.length} projects records from database`,
       );
       return projectsRecords;
     } catch (error) {
@@ -1574,7 +1594,7 @@ export class PgStorage implements IStorage {
       const key = `projects_${userId}`;
       const currentProjects = this.fallbackData.get(key) || [];
       const updatedProjects = currentProjects.map((proj: any) =>
-        proj.id === id ? { ...proj, ...updateData } : proj
+        proj.id === id ? { ...proj, ...updateData } : proj,
       );
       this.fallbackData.set(key, updatedProjects);
       return { ...updateData, id };
@@ -1600,11 +1620,11 @@ export class PgStorage implements IStorage {
       for (const [key, projectsList] of entries) {
         if (key.startsWith("projects_") && Array.isArray(projectsList)) {
           const projectExists = projectsList.some(
-            (proj: any) => proj.id === id
+            (proj: any) => proj.id === id,
           );
           if (projectExists) {
             const updatedProjects = projectsList.filter(
-              (proj: any) => proj.id !== id
+              (proj: any) => proj.id !== id,
             );
             this.fallbackData.set(key, updatedProjects);
             console.log("Deleted project entry from fallback storage:", id);
@@ -1624,12 +1644,12 @@ export class PgStorage implements IStorage {
         .from(certifications)
         .where(eq(certifications.userId, parseInt(userId)));
       console.log(
-        `Retrieved ${certificationsRecords.length} certifications records from database`
+        `Retrieved ${certificationsRecords.length} certifications records from database`,
       );
       return certificationsRecords;
     } catch (error) {
       console.log(
-        "Database error, using fallback storage for getCertifications"
+        "Database error, using fallback storage for getCertifications",
       );
       const key = `certifications_${userId}`;
       return this.fallbackData.get(key) || [];
@@ -1654,7 +1674,7 @@ export class PgStorage implements IStorage {
         .returning();
       console.log(
         "Created certification record in database:",
-        newCertification
+        newCertification,
       );
       return newCertification;
     } catch (error) {
@@ -1670,7 +1690,7 @@ export class PgStorage implements IStorage {
       this.fallbackData.set(key, [...currentCertifications, newCertification]);
       console.log(
         "Created certification entry in fallback storage:",
-        newCertification
+        newCertification,
       );
       return newCertification;
     }
@@ -1692,17 +1712,17 @@ export class PgStorage implements IStorage {
 
       console.log(
         "Updated certification record in database:",
-        updatedCertification
+        updatedCertification,
       );
       return updatedCertification;
     } catch (error) {
       console.log(
-        "Database error, using fallback storage for updateCertification"
+        "Database error, using fallback storage for updateCertification",
       );
       const key = `certifications_${userId}`;
       const currentCertifications = this.fallbackData.get(key) || [];
       const updatedCertifications = currentCertifications.map((cert: any) =>
-        cert.id === id ? { ...cert, ...updateData } : cert
+        cert.id === id ? { ...cert, ...updateData } : cert,
       );
       this.fallbackData.set(key, updatedCertifications);
       return { ...updateData, id };
@@ -1722,12 +1742,12 @@ export class PgStorage implements IStorage {
 
       console.log(
         "Deleted certification record from database:",
-        deletedCertification[0]
+        deletedCertification[0],
       );
       return true;
     } catch (error) {
       console.log(
-        "Database error, using fallback storage for deleteCertification"
+        "Database error, using fallback storage for deleteCertification",
       );
       const entries = Array.from(this.fallbackData.entries());
       for (const [key, certificationsList] of entries) {
@@ -1736,16 +1756,16 @@ export class PgStorage implements IStorage {
           Array.isArray(certificationsList)
         ) {
           const certificationExists = certificationsList.some(
-            (cert: any) => cert.id === id
+            (cert: any) => cert.id === id,
           );
           if (certificationExists) {
             const updatedCertifications = certificationsList.filter(
-              (cert: any) => cert.id !== id
+              (cert: any) => cert.id !== id,
             );
             this.fallbackData.set(key, updatedCertifications);
             console.log(
               "Deleted certification entry from fallback storage:",
-              id
+              id,
             );
             return true;
           }
@@ -1762,16 +1782,16 @@ export class PgStorage implements IStorage {
     console.log("Storage getAchievements - profile:", profile);
     console.log(
       "Storage getAchievements - otherDetails:",
-      profile?.otherDetails
+      profile?.otherDetails,
     );
     console.log(
       "Storage getAchievements - achievements:",
-      profile?.otherDetails?.achievements
+      profile?.otherDetails?.achievements,
     );
     const achievements = profile?.otherDetails?.achievements || [];
     console.log(
       "Storage getAchievements - returning achievements:",
-      achievements
+      achievements,
     );
     return achievements;
   }
@@ -1808,7 +1828,7 @@ export class PgStorage implements IStorage {
     const currentAchievements = currentOtherDetails.achievements || [];
 
     const updatedAchievements = currentAchievements.map((ach: any) =>
-      ach.id === id ? { ...ach, ...updateData } : ach
+      ach.id === id ? { ...ach, ...updateData } : ach,
     );
 
     const updatedOtherDetails = {
@@ -1829,7 +1849,7 @@ export class PgStorage implements IStorage {
 
       if (achievementExists) {
         const updatedAchievements = achievements.filter(
-          (ach: any) => ach.id !== id
+          (ach: any) => ach.id !== id,
         );
         const updatedOtherDetails = {
           ...profile.otherDetails,
@@ -1886,7 +1906,7 @@ export class PgStorage implements IStorage {
       currentOtherDetails.publicationsOrCreativeWorks || [];
 
     const updatedPublications = currentPublications.map((pub: any) =>
-      pub.id === id ? { ...pub, ...updateData } : pub
+      pub.id === id ? { ...pub, ...updateData } : pub,
     );
 
     const updatedOtherDetails = {
@@ -1908,7 +1928,7 @@ export class PgStorage implements IStorage {
 
       if (publicationExists) {
         const updatedPublications = publications.filter(
-          (pub: any) => pub.id !== id
+          (pub: any) => pub.id !== id,
         );
         const updatedOtherDetails = {
           ...profile.otherDetails,
@@ -1963,7 +1983,7 @@ export class PgStorage implements IStorage {
     const currentOrganizations = currentOtherDetails.organizations || [];
 
     const updatedOrganizations = currentOrganizations.map((org: any) =>
-      org.id === id ? { ...org, ...updateData } : org
+      org.id === id ? { ...org, ...updateData } : org,
     );
 
     const updatedOtherDetails = {
@@ -1981,12 +2001,12 @@ export class PgStorage implements IStorage {
     for (const profile of allProfiles) {
       const organizations = profile.otherDetails?.organizations || [];
       const organizationExists = organizations.some(
-        (org: any) => org.id === id
+        (org: any) => org.id === id,
       );
 
       if (organizationExists) {
         const updatedOrganizations = organizations.filter(
-          (org: any) => org.id !== id
+          (org: any) => org.id !== id,
         );
         const updatedOtherDetails = {
           ...profile.otherDetails,
@@ -2041,7 +2061,7 @@ export class PgStorage implements IStorage {
     const currentVolunteer = currentOtherDetails.volunteerExperience || [];
 
     const updatedVolunteer = currentVolunteer.map((vol: any) =>
-      vol.id === id ? { ...vol, ...updateData } : vol
+      vol.id === id ? { ...vol, ...updateData } : vol,
     );
 
     const updatedOtherDetails = {
@@ -2108,7 +2128,7 @@ export class PgStorage implements IStorage {
 
   async updateCourse(
     id: string,
-    courseData: Partial<InsertCourse>
+    courseData: Partial<InsertCourse>,
   ): Promise<Course | undefined> {
     if (!this.isDbConnected) {
       const allCourses = this.fallbackData.get("courses") || [];
@@ -2198,7 +2218,7 @@ export class PgStorage implements IStorage {
   }
 
   async createInstructor(
-    instructorData: InsertInstructor
+    instructorData: InsertInstructor,
   ): Promise<Instructor> {
     if (!this.isDbConnected) {
       const instructor = { ...instructorData, id: randomUUID() };
@@ -2216,7 +2236,7 @@ export class PgStorage implements IStorage {
 
   async updateInstructor(
     id: string,
-    instructorData: Partial<InsertInstructor>
+    instructorData: Partial<InsertInstructor>,
   ): Promise<Instructor | undefined> {
     if (!this.isDbConnected) {
       const allInstructors = this.fallbackData.get("instructors") || [];
@@ -2320,7 +2340,7 @@ export class PgStorage implements IStorage {
 
   async updateModule(
     id: string,
-    moduleData: Partial<InsertModule>
+    moduleData: Partial<InsertModule>,
   ): Promise<Module | undefined> {
     if (!this.isDbConnected) {
       const allModules = this.fallbackData.get("modules") || [];
@@ -2372,7 +2392,7 @@ export class PgStorage implements IStorage {
 
   async updateLesson(
     id: string,
-    lessonData: Partial<InsertLesson>
+    lessonData: Partial<InsertLesson>,
   ): Promise<Lesson | undefined> {
     if (!this.isDbConnected) {
       const allLessons = this.fallbackData.get("lessons") || [];
@@ -2419,7 +2439,7 @@ export class PgStorage implements IStorage {
 
   // 👇 Update the return type here
   async getUserEnrollments(
-    userId: number
+    userId: number,
   ): Promise<(Enrollment & { course: Course })[]> {
     if (!this.isDbConnected) {
       // ... your fallback logic
@@ -2447,7 +2467,7 @@ export class PgStorage implements IStorage {
   }
 
   async createEnrollment(
-    enrollmentData: InsertEnrollment
+    enrollmentData: InsertEnrollment,
   ): Promise<Enrollment> {
     if (!this.isDbConnected) {
       const enrollment = { ...enrollmentData, id: randomUUID() };
@@ -2465,7 +2485,7 @@ export class PgStorage implements IStorage {
 
   async updateEnrollment(
     id: string,
-    enrollmentData: Partial<InsertEnrollment>
+    enrollmentData: Partial<InsertEnrollment>,
   ): Promise<Enrollment | undefined> {
     if (!this.isDbConnected) {
       const allEnrollments = this.fallbackData.get("enrollments") || [];
@@ -2511,7 +2531,7 @@ export class PgStorage implements IStorage {
   // Lesson Progress implementations
   async getLessonProgress(
     userId: number,
-    moduleId: string
+    moduleId: string,
   ): Promise<LessonProgress[]> {
     if (!this.isDbConnected) {
       const key = `lessonProgress_${userId}_${moduleId}`;
@@ -2523,15 +2543,15 @@ export class PgStorage implements IStorage {
       .where(
         and(
           eq(lessonProgress.userId, userId),
-          eq(lessonProgress.moduleId, moduleId)
-        )
+          eq(lessonProgress.moduleId, moduleId),
+        ),
       );
   }
 
   async getLessonProgressByIndex(
     userId: number,
     moduleId: string,
-    lessonIndex: number
+    lessonIndex: number,
   ): Promise<LessonProgress | undefined> {
     if (!this.isDbConnected) {
       const key = `lessonProgress_${userId}_${moduleId}`;
@@ -2545,14 +2565,14 @@ export class PgStorage implements IStorage {
         and(
           eq(lessonProgress.userId, userId),
           eq(lessonProgress.moduleId, moduleId),
-          eq(lessonProgress.lessonIndex, lessonIndex)
-        )
+          eq(lessonProgress.lessonIndex, lessonIndex),
+        ),
       );
     return result[0];
   }
 
   async createLessonProgress(
-    progressData: InsertLessonProgress
+    progressData: InsertLessonProgress,
   ): Promise<LessonProgress> {
     if (!this.isDbConnected) {
       const progress = {
@@ -2576,12 +2596,12 @@ export class PgStorage implements IStorage {
   async completeLessonProgress(
     userId: number,
     moduleId: string,
-    lessonIndex: number
+    lessonIndex: number,
   ): Promise<LessonProgress> {
     const existing = await this.getLessonProgressByIndex(
       userId,
       moduleId,
-      lessonIndex
+      lessonIndex,
     );
 
     let completedProgress: LessonProgress;
@@ -2594,11 +2614,11 @@ export class PgStorage implements IStorage {
         const updatedList = progressList.map((p: any) =>
           p.lessonIndex === lessonIndex
             ? { ...p, isCompleted: true, completedAt: new Date() }
-            : p
+            : p,
         );
         this.fallbackData.set(key, updatedList);
         completedProgress = updatedList.find(
-          (p: any) => p.lessonIndex === lessonIndex
+          (p: any) => p.lessonIndex === lessonIndex,
         );
       } else {
         const [updated] = await db
@@ -2630,7 +2650,7 @@ export class PgStorage implements IStorage {
     // Update daily activity with real XP
     await this.updateDailyActivityForLessonCompletion(
       userId,
-      completedProgress.xpEarned || 10
+      completedProgress.xpEarned || 10,
     );
 
     // Check if all lessons in the module are completed
@@ -2642,7 +2662,7 @@ export class PgStorage implements IStorage {
   // Helper method to update daily activity when lessons are completed
   private async updateDailyActivityForLessonCompletion(
     userId: number,
-    xpEarned: number
+    xpEarned: number,
   ): Promise<void> {
     try {
       const today = new Date().toISOString().split("T")[0];
@@ -2674,7 +2694,7 @@ export class PgStorage implements IStorage {
         .select()
         .from(dailyActivity)
         .where(
-          and(eq(dailyActivity.userId, userId), eq(dailyActivity.date, today))
+          and(eq(dailyActivity.userId, userId), eq(dailyActivity.date, today)),
         )
         .limit(1);
 
@@ -2703,7 +2723,7 @@ export class PgStorage implements IStorage {
 
   // Helper method to update daily activity when subtopics are completed
   private async updateDailyActivityForSubtopicCompletion(
-    topicId: string
+    topicId: string,
   ): Promise<void> {
     try {
       // Get the goal from the topic to find the userId
@@ -2757,7 +2777,7 @@ export class PgStorage implements IStorage {
     } catch (error) {
       console.error(
         "Error updating daily activity for subtopic completion:",
-        error
+        error,
       );
     }
   }
@@ -2765,7 +2785,7 @@ export class PgStorage implements IStorage {
   // Helper method to check if all lessons are completed and mark module as completed
   private async checkAndCompleteModule(
     userId: number,
-    moduleId: string
+    moduleId: string,
   ): Promise<void> {
     try {
       // Get lessons for this module from the courses/modules endpoint
@@ -2779,19 +2799,19 @@ export class PgStorage implements IStorage {
       const completedLessons = allProgress.filter((p) => p.isCompleted).length;
 
       console.log(
-        `Checking module completion: ${completedLessons}/${totalLessons} lessons completed`
+        `Checking module completion: ${completedLessons}/${totalLessons} lessons completed`,
       );
 
       // If all lessons are completed, mark the module as completed
       if (completedLessons >= totalLessons) {
         console.log(
-          `All lessons completed, marking module ${moduleId} as completed for user ${userId}`
+          `All lessons completed, marking module ${moduleId} as completed for user ${userId}`,
         );
 
         // Get or create module progress
         let moduleProgress = await this.getUserProgressForModule(
           userId,
-          moduleId
+          moduleId,
         );
 
         if (moduleProgress) {
@@ -2807,7 +2827,7 @@ export class PgStorage implements IStorage {
                     completedAt: new Date(),
                     currentLesson: totalLessons,
                   }
-                : p
+                : p,
             );
             this.fallbackData.set(key, updatedList);
             console.log(`Updated module progress in fallback storage`);
@@ -2822,8 +2842,8 @@ export class PgStorage implements IStorage {
               .where(
                 and(
                   eq(userProgress.userId, userId),
-                  eq(userProgress.moduleId, moduleId)
-                )
+                  eq(userProgress.moduleId, moduleId),
+                ),
               );
             console.log(`Updated module progress in database`);
           }
@@ -2852,7 +2872,7 @@ export class PgStorage implements IStorage {
   // Helper method to check if all modules are completed and mark course as completed
   private async checkAndCompleteCourse(
     userId: number,
-    moduleId: string
+    moduleId: string,
   ): Promise<void> {
     try {
       // Get the module to find the courseId
@@ -2868,28 +2888,28 @@ export class PgStorage implements IStorage {
       // Check if all modules are completed
       const allUserProgress = await this.getUserProgress(userId);
       const courseModuleProgress = allUserProgress.filter((p) =>
-        allModules.some((m) => m.id === p.moduleId)
+        allModules.some((m) => m.id === p.moduleId),
       );
 
       const completedModules = courseModuleProgress.filter(
-        (p) => p.isCompleted
+        (p) => p.isCompleted,
       ).length;
       const totalModules = allModules.length;
 
       console.log(
-        `Checking course completion: ${completedModules}/${totalModules} modules completed`
+        `Checking course completion: ${completedModules}/${totalModules} modules completed`,
       );
 
       // If all modules are completed, mark course as completed and award XP
       if (completedModules >= totalModules) {
         console.log(
-          `All modules completed, marking course ${courseId} as completed for user ${userId}`
+          `All modules completed, marking course ${courseId} as completed for user ${userId}`,
         );
 
         // Get or create enrollment record and mark as completed
         const enrollments = await this.getUserEnrollments(userId);
         const courseEnrollment = enrollments.find(
-          (e) => e.courseId === courseId
+          (e) => e.courseId === courseId,
         );
 
         if (courseEnrollment) {
@@ -2908,7 +2928,7 @@ export class PgStorage implements IStorage {
         });
 
         console.log(
-          `Awarded ${courseCompletionXP} XP for course completion to user ${userId}`
+          `Awarded ${courseCompletionXP} XP for course completion to user ${userId}`,
         );
 
         // Check and award course completion badge if available
@@ -2921,7 +2941,7 @@ export class PgStorage implements IStorage {
 
   async checkCourseCompletion(
     userId: number,
-    courseId: string
+    courseId: string,
   ): Promise<{
     isCompleted: boolean;
     completedAt?: Date;
@@ -2993,7 +3013,7 @@ export class PgStorage implements IStorage {
   }
 
   async createCareerAdvisory(
-    data: InsertCareerAdvisory
+    data: InsertCareerAdvisory,
   ): Promise<CareerAdvisory> {
     if (!this.isDbConnected) {
       const id = randomUUID();
@@ -3032,7 +3052,7 @@ export class PgStorage implements IStorage {
   }
 
   async createCareerTimeline(
-    data: InsertCareerTimeline
+    data: InsertCareerTimeline,
   ): Promise<CareerTimeline> {
     if (!this.isDbConnected) {
       const id = randomUUID();
@@ -3091,7 +3111,7 @@ export class PgStorage implements IStorage {
   }
 
   async createGeneratedResume(
-    data: InsertGeneratedResume
+    data: InsertGeneratedResume,
   ): Promise<GeneratedResume> {
     if (!this.isDbConnected) {
       const id = randomUUID();
@@ -3120,7 +3140,7 @@ export class PgStorage implements IStorage {
 
   async updateGeneratedResume(
     id: string,
-    data: Partial<InsertGeneratedResume>
+    data: Partial<InsertGeneratedResume>,
   ): Promise<GeneratedResume | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
@@ -3240,7 +3260,7 @@ export class PgStorage implements IStorage {
 
   async updateChatSession(
     id: string,
-    data: Partial<InsertChatSession>
+    data: Partial<InsertChatSession>,
   ): Promise<ChatSession | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
@@ -3300,7 +3320,7 @@ export class PgStorage implements IStorage {
   }
 
   async getForumPost(
-    id: string
+    id: string,
   ): Promise<(ForumPost & { user: User }) | undefined> {
     if (!this.isDbConnected) {
       const posts = this.fallbackData.get("forumPosts") || [];
@@ -3351,7 +3371,7 @@ export class PgStorage implements IStorage {
 
   async updateForumPost(
     id: string,
-    data: Partial<InsertForumPost>
+    data: Partial<InsertForumPost>,
   ): Promise<ForumPost | undefined> {
     if (!this.isDbConnected) {
       const posts = this.fallbackData.get("forumPosts") || [];
@@ -3400,7 +3420,7 @@ export class PgStorage implements IStorage {
   }
 
   async getForumReplies(
-    postId: string
+    postId: string,
   ): Promise<(ForumReply & { user: User })[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`forumReplies_${postId}`) || [];
@@ -3411,7 +3431,7 @@ export class PgStorage implements IStorage {
         .from(forumReplies)
         .innerJoin(users, eq(forumReplies.userId, users.id))
         .where(
-          and(eq(forumReplies.postId, postId), eq(forumReplies.isActive, true))
+          and(eq(forumReplies.postId, postId), eq(forumReplies.isActive, true)),
         )
         .orderBy(forumReplies.createdAt);
 
@@ -3479,7 +3499,7 @@ export class PgStorage implements IStorage {
 
   async updateForumReply(
     id: string,
-    data: Partial<InsertForumReply>
+    data: Partial<InsertForumReply>,
   ): Promise<ForumReply | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
@@ -3526,12 +3546,12 @@ export class PgStorage implements IStorage {
             // Update reply count
             const posts = this.fallbackData.get("forumPosts") || [];
             const postIndex = posts.findIndex(
-              (p: any) => p.id === reply.postId
+              (p: any) => p.id === reply.postId,
             );
             if (postIndex !== -1) {
               posts[postIndex].repliesCount = Math.max(
                 0,
-                (posts[postIndex].repliesCount || 0) - 1
+                (posts[postIndex].repliesCount || 0) - 1,
               );
               this.fallbackData.set("forumPosts", posts);
             }
@@ -3598,7 +3618,7 @@ export class PgStorage implements IStorage {
   }
 
   async toggleForumLike(
-    data: InsertForumLike
+    data: InsertForumLike,
   ): Promise<{ liked: boolean; likesCount: number }> {
     if (!this.isDbConnected) {
       // Simplified in-memory implementation
@@ -3616,8 +3636,8 @@ export class PgStorage implements IStorage {
               : sql`${forumLikes.postId} IS NULL`,
             data.replyId
               ? eq(forumLikes.replyId, data.replyId)
-              : sql`${forumLikes.replyId} IS NULL`
-          )
+              : sql`${forumLikes.replyId} IS NULL`,
+          ),
         );
 
       if (existingLike.length > 0) {
@@ -3694,7 +3714,7 @@ export class PgStorage implements IStorage {
   async getForumLike(
     userId: number,
     postId?: string,
-    replyId?: string
+    replyId?: string,
   ): Promise<ForumLike | undefined> {
     if (!this.isDbConnected) {
       return undefined;
@@ -3711,8 +3731,8 @@ export class PgStorage implements IStorage {
               : sql`${forumLikes.postId} IS NULL`,
             replyId
               ? eq(forumLikes.replyId, replyId)
-              : sql`${forumLikes.replyId} IS NULL`
-          )
+              : sql`${forumLikes.replyId} IS NULL`,
+          ),
         );
 
       return result[0] || undefined;
@@ -3750,9 +3770,14 @@ export class PgStorage implements IStorage {
 
   // Lightweight summary used by /api/goals – no deep fetch or recompute
   async getUserGoalsSummary(
-    userId: number
+    userId: number,
   ): Promise<
-    { id: string; name: string; totalSubtopics: number; completedSubtopics: number }[]
+    {
+      id: string;
+      name: string;
+      totalSubtopics: number;
+      completedSubtopics: number;
+    }[]
   > {
     if (!this.isDbConnected) {
       const cached = this.fallbackData.get(`goals_${userId}`) || [];
@@ -3863,7 +3888,7 @@ export class PgStorage implements IStorage {
 
   // Helper method to calculate subtopic totals for a goal
   private async calculateGoalSubtopicTotals(
-    goalId: string
+    goalId: string,
   ): Promise<{ totalSubtopics: number; completedSubtopics: number }> {
     try {
       const categories = await this.getGoalCategories(goalId);
@@ -3876,7 +3901,7 @@ export class PgStorage implements IStorage {
           const subtopics = await this.getTopicSubtopics(topic.id);
           totalSubtopics += subtopics.length;
           completedSubtopics += subtopics.filter(
-            (s) => s.status === "completed"
+            (s) => s.status === "completed",
           ).length;
         }
       }
@@ -3911,7 +3936,7 @@ export class PgStorage implements IStorage {
 
   async updateGoal(
     id: string,
-    goalData: Partial<InsertGoal>
+    goalData: Partial<InsertGoal>,
   ): Promise<Goal | undefined> {
     if (!this.isDbConnected) {
       for (const key of this.fallbackData.keys()) {
@@ -3976,7 +4001,7 @@ export class PgStorage implements IStorage {
   async createGoalFromCSV(
     userId: number,
     goalName: string,
-    csvData: any[]
+    csvData: any[],
   ): Promise<Goal> {
     try {
       // Check if csvData is already an array of parsed objects or if it needs to be parsed
@@ -4094,7 +4119,7 @@ export class PgStorage implements IStorage {
       for (const [topicKey, topicId] of topicMap) {
         const subtopics = await this.getTopicSubtopics(topicId);
         const completedSubtopics = subtopics.filter(
-          (s) => s.status === "completed"
+          (s) => s.status === "completed",
         ).length;
 
         if (this.isDbConnected) {
@@ -4114,11 +4139,11 @@ export class PgStorage implements IStorage {
         const topics = await this.getCategoryTopics(categoryId);
         const totalSubtopics = topics.reduce(
           (sum, topic) => sum + (topic.totalSubtopics || 0),
-          0
+          0,
         );
         const completedSubtopics = topics.reduce(
           (sum, topic) => sum + (topic.completedSubtopics || 0),
-          0
+          0,
         );
 
         await this.updateGoalCategory(categoryId, {
@@ -4140,7 +4165,7 @@ export class PgStorage implements IStorage {
           const subtopics = await this.getTopicSubtopics(topic.id);
           totalSubtopicsInGoal += subtopics.length;
           completedSubtopicsInGoal += subtopics.filter(
-            (s) => s.status === "completed"
+            (s) => s.status === "completed",
           ).length;
         }
       }
@@ -4150,11 +4175,11 @@ export class PgStorage implements IStorage {
         completedSubtopics: completedSubtopicsInGoal,
         totalTopics: allCategories.reduce(
           (sum, cat) => sum + (cat.totalTopics || 0),
-          0
+          0,
         ),
         completedTopics: allCategories.reduce(
           (sum, cat) => sum + (cat.completedTopics || 0),
-          0
+          0,
         ),
       });
 
@@ -4178,6 +4203,7 @@ export class PgStorage implements IStorage {
           })[];
           completedSubtopicTimestamps?: string[];
         })[];
+        completedSubtopicTimestamps?: string[];
       })
     | undefined
   > {
@@ -4185,6 +4211,7 @@ export class PgStorage implements IStorage {
     if (!goal) return undefined;
 
     const categories = await this.getGoalCategories(goalId);
+    let goalCompletedTimestamps: string[] = [];
 
     const categoriesWithDetails = await Promise.all(
       categories.map(async (category) => {
@@ -4195,7 +4222,7 @@ export class PgStorage implements IStorage {
           topics.map(async (topic) => {
             const subtopics = await this.getTopicSubtopics(topic.id);
             const completedSubtopics = subtopics.filter(
-              (s) => s.status === "completed"
+              (s) => s.status === "completed",
             );
 
             const topicCompletedTimestamps = completedSubtopics
@@ -4212,17 +4239,20 @@ export class PgStorage implements IStorage {
               completedSubtopics: completedSubtopics.length,
               completedSubtopicTimestamps: topicCompletedTimestamps,
             };
-          })
+          }),
         );
 
         const categoryTotalSubtopics = topicsWithDetails.reduce(
           (sum, t) => sum + t.totalSubtopics,
-          0
+          0,
         );
         const categoryCompletedSubtopics = topicsWithDetails.reduce(
           (sum, t) => sum + t.completedSubtopics,
-          0
+          0,
         );
+
+        // Add category timestamps to goal timestamps
+        goalCompletedTimestamps.push(...categoryCompletedTimestamps);
 
         // Return the category enriched with the calculated data
         return {
@@ -4232,10 +4262,26 @@ export class PgStorage implements IStorage {
           completedSubtopics: categoryCompletedSubtopics,
           completedSubtopicTimestamps: categoryCompletedTimestamps,
         };
-      })
+      }),
     );
 
     return { ...goal, categories: categoriesWithDetails };
+  }
+
+  async getUserGoalsWithCategories(userId: number): Promise<any[]> {
+    const userGoals = await this.getUserGoals(userId);
+    if (!userGoals || userGoals.length === 0) {
+      return [];
+    }
+
+    const detailedGoals = await Promise.all(
+      userGoals.map(async (goal) => {
+        const goalDetails = await this.getGoalWithCategories(goal.id);
+        return goalDetails;
+      }),
+    );
+
+    return detailedGoals.filter((g) => g !== undefined);
   }
 
   // ... other code
@@ -4243,7 +4289,7 @@ export class PgStorage implements IStorage {
   async updateTopicStatus(
     topicId: string,
     status: "pending" | "start" | "completed",
-    notes?: string
+    notes?: string,
   ): Promise<GoalTopic | undefined> {
     // This method is deprecated - status is now managed at subtopic level
     // Return the topic for compatibility
@@ -4276,7 +4322,7 @@ export class PgStorage implements IStorage {
 
   // Helper methods for goal management
   private async createGoalCategory(
-    categoryData: InsertGoalCategory
+    categoryData: InsertGoalCategory,
   ): Promise<GoalCategory> {
     if (!this.isDbConnected) {
       const newCategory = {
@@ -4312,7 +4358,7 @@ export class PgStorage implements IStorage {
 
   private async updateGoalCategory(
     id: string,
-    data: Partial<InsertGoalCategory>
+    data: Partial<InsertGoalCategory>,
   ): Promise<GoalCategory | undefined> {
     if (!this.isDbConnected) {
       // Implementation for fallback storage
@@ -4329,7 +4375,7 @@ export class PgStorage implements IStorage {
   }
 
   private async createGoalTopic(
-    topicData: InsertGoalTopic
+    topicData: InsertGoalTopic,
   ): Promise<GoalTopic> {
     if (!this.isDbConnected) {
       const newTopic = {
@@ -4366,11 +4412,11 @@ export class PgStorage implements IStorage {
       const topics = await this.getCategoryTopics(categoryId);
       const completedTopics = topics.reduce(
         (sum, topic) => sum + (topic.completedSubtopics || 0),
-        0
+        0,
       );
       const totalTopics = topics.reduce(
         (sum, topic) => sum + (topic.totalSubtopics || 0),
-        0
+        0,
       );
 
       // Update category counters
@@ -4385,11 +4431,11 @@ export class PgStorage implements IStorage {
         const allCategories = await this.getGoalCategories(category.goalId);
         const totalSubtopics = allCategories.reduce(
           (sum, cat) => sum + (cat.totalTopics || 0),
-          0
+          0,
         );
         const completedSubtopics = allCategories.reduce(
           (sum, cat) => sum + (cat.completedTopics || 0),
-          0
+          0,
         );
 
         await this.updateGoal(category.goalId, {
@@ -4450,7 +4496,7 @@ export class PgStorage implements IStorage {
 
   // Subtopic management methods
   async createGoalSubtopic(
-    subtopicData: InsertGoalSubtopic
+    subtopicData: InsertGoalSubtopic,
   ): Promise<GoalSubtopic> {
     if (!this.isDbConnected) {
       const newSubtopic = {
@@ -4480,7 +4526,7 @@ export class PgStorage implements IStorage {
     await this.adjustSubtopicCounters(
       subtopic.topicId,
       1,
-      subtopic.status === "completed" ? 1 : 0
+      subtopic.status === "completed" ? 1 : 0,
     );
     return subtopic;
   }
@@ -4500,7 +4546,7 @@ export class PgStorage implements IStorage {
   async updateSubtopicStatus(
     subtopicId: string,
     status: "pending" | "start" | "completed",
-    notes?: string
+    notes?: string,
   ): Promise<GoalSubtopic | undefined> {
     const updateData = {
       status,
@@ -4521,7 +4567,7 @@ export class PgStorage implements IStorage {
             // Update daily activity when subtopic is completed
             if (status === "completed") {
               await this.updateDailyActivityForSubtopicCompletion(
-                subtopics[index].topicId
+                subtopics[index].topicId,
               );
             }
 
@@ -4553,7 +4599,7 @@ export class PgStorage implements IStorage {
           await this.adjustSubtopicCounters(
             subtopic.topicId,
             0,
-            deltaCompleted
+            deltaCompleted,
           );
         }
 
@@ -4600,7 +4646,7 @@ export class PgStorage implements IStorage {
         await this.adjustSubtopicCounters(
           existing.topicId,
           -1,
-          existing.status === "completed" ? -1 : 0
+          existing.status === "completed" ? -1 : 0,
         );
       }
       return result.length > 0;
@@ -4614,7 +4660,7 @@ export class PgStorage implements IStorage {
   private async adjustSubtopicCounters(
     topicId: string,
     deltaTotal: number,
-    deltaCompleted: number
+    deltaCompleted: number,
   ): Promise<void> {
     try {
       const [topic] = await db
@@ -4627,8 +4673,7 @@ export class PgStorage implements IStorage {
         .update(goalTopics)
         .set({
           totalSubtopics: sql`${goalTopics.totalSubtopics} + ${deltaTotal}`,
-          completedSubtopics:
-            sql`${goalTopics.completedSubtopics} + ${deltaCompleted}`,
+          completedSubtopics: sql`${goalTopics.completedSubtopics} + ${deltaCompleted}`,
           updatedAt: new Date(),
         })
         .where(eq(goalTopics.id, topicId));
@@ -4643,8 +4688,7 @@ export class PgStorage implements IStorage {
         .update(goalCategories)
         .set({
           totalTopics: sql`${goalCategories.totalTopics} + ${deltaTotal}`,
-          completedTopics:
-            sql`${goalCategories.completedTopics} + ${deltaCompleted}`,
+          completedTopics: sql`${goalCategories.completedTopics} + ${deltaCompleted}`,
         })
         .where(eq(goalCategories.id, category.id));
 
@@ -4652,8 +4696,7 @@ export class PgStorage implements IStorage {
         .update(goals)
         .set({
           totalSubtopics: sql`${goals.totalSubtopics} + ${deltaTotal}`,
-          completedSubtopics:
-            sql`${goals.completedSubtopics} + ${deltaCompleted}`,
+          completedSubtopics: sql`${goals.completedSubtopics} + ${deltaCompleted}`,
           updatedAt: new Date(),
         })
         .where(eq(goals.id, category.goalId));
@@ -4666,7 +4709,7 @@ export class PgStorage implements IStorage {
     try {
       const subtopics = await this.getTopicSubtopics(topicId);
       const completedSubtopics = subtopics.filter(
-        (s) => s.status === "completed"
+        (s) => s.status === "completed",
       ).length;
 
       // Update topic counters
@@ -4695,7 +4738,7 @@ export class PgStorage implements IStorage {
   // Notifications implementation
   async getNotifications(
     userId: number,
-    limit: number = 50
+    limit: number = 50,
   ): Promise<Notification[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get(`notifications_${userId}`) || [];
@@ -4725,7 +4768,10 @@ export class PgStorage implements IStorage {
         .select()
         .from(notifications)
         .where(
-          and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+          and(
+            eq(notifications.userId, userId),
+            eq(notifications.isRead, false),
+          ),
         )
         .orderBy(desc(notifications.createdAt));
       return result;
@@ -4736,7 +4782,7 @@ export class PgStorage implements IStorage {
   }
 
   async createNotification(
-    notification: InsertNotification
+    notification: InsertNotification,
   ): Promise<Notification> {
     if (!this.isDbConnected) {
       const newNotification = {
@@ -4802,7 +4848,10 @@ export class PgStorage implements IStorage {
         .update(notifications)
         .set({ isRead: true })
         .where(
-          and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+          and(
+            eq(notifications.userId, userId),
+            eq(notifications.isRead, false),
+          ),
         );
       return true;
     } catch (error) {
@@ -4838,7 +4887,7 @@ export class PgStorage implements IStorage {
 
   async getNotificationCount(
     userId: number,
-    unreadOnly: boolean = false
+    unreadOnly: boolean = false,
   ): Promise<number> {
     if (!this.isDbConnected) {
       const userNotifications =
@@ -4892,7 +4941,7 @@ export class PgStorage implements IStorage {
 
   async updateBadge(
     id: string,
-    badgeData: Partial<InsertBadge>
+    badgeData: Partial<InsertBadge>,
   ): Promise<Badge | undefined> {
     if (!this.isDbConnected) {
       const badgesData = this.fallbackData.get("badges") || [];
@@ -4943,7 +4992,7 @@ export class PgStorage implements IStorage {
   }
 
   async getUserBadges(
-    userId: number
+    userId: number,
   ): Promise<(UserBadge & { badge: Badge })[]> {
     if (!this.isDbConnected) {
       const userBadgesData =
@@ -4966,7 +5015,7 @@ export class PgStorage implements IStorage {
         rows.map((row) => ({
           ...row.user_badges,
           badge: row.badges!,
-        }))
+        })),
       );
   }
 
@@ -4993,7 +5042,7 @@ export class PgStorage implements IStorage {
   async checkAndAwardBadges(
     userId: number,
     type: string = "all",
-    relatedId?: string
+    relatedId?: string,
   ): Promise<UserBadge[]> {
     try {
       const allBadges = await this.getBadges();
@@ -5101,7 +5150,7 @@ export class PgStorage implements IStorage {
   private async checkBadgeCriteria(
     badge: Badge,
     userData: any,
-    relatedId?: string
+    relatedId?: string,
   ): Promise<boolean> {
     if (!badge.criteria) return false;
 
