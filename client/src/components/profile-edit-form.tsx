@@ -155,28 +155,45 @@ export default function ProfileEditForm({
     );
     if (user || existingProfile) {
       const profile = existingProfile; // No need for type assertion now
+      const personalDetails = (profile as any)?.personalDetails;
+      const contactDetails = (profile as any)?.contactDetails;
+      const otherDetails = (profile as any)?.otherDetails;
+
+      const formatLocation = (location: any): string => {
+        if (!location) return "";
+        if (typeof location === "string") return location;
+        const parts = [location.city, location.state, location.country].filter(Boolean);
+        return parts.join(", ");
+      };
+
       const formData: Partial<ProfileFormData> = {
         name:
-          profile?.name ||
+          personalDetails?.fullName ||
           `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
-        role: profile?.role || "",
-        email: profile?.email || user?.email || "",
-        phone: profile?.phone || "",
-        location: profile?.location || "",
-        summary: profile?.summary || "",
-        githubUrl: profile?.githubUrl || "",
-        linkedinUrl: profile?.linkedinUrl || "",
-        portfolioUrl: profile?.portfolioUrl || "",
-        leetcodeUrl: profile?.leetcodeUrl || "",
-        otherLinks: profile?.otherLinks || [],
-        languages: profile?.languages || [],
-        achievements: profile?.achievements || [],
-        certificates: profile?.certificates || [],
-        organizations: profile?.organizations || [],
-        educationSummary: profile?.educationSummary || "",
-        skillsSummary: profile?.skillsSummary || "",
-        internshipExperience: profile?.internshipExperience || "",
-        photo: profile?.photoUrl || "", // Assuming photoUrl is the field for existing photo
+        role: personalDetails?.roleOrTitle || "",
+        email: contactDetails?.email || user?.email || "",
+        phone: contactDetails?.phone || "",
+        location: formatLocation(personalDetails?.location),
+        summary: personalDetails?.summary || "",
+        githubUrl: contactDetails?.githubOrPortfolio || "",
+        linkedinUrl: contactDetails?.linkedin || "",
+        portfolioUrl: contactDetails?.website || "",
+        leetcodeUrl: contactDetails?.otherProfiles?.leetcode || "",
+        otherLinks: contactDetails?.otherProfiles?.otherLinks || [],
+        languages: personalDetails?.languagesKnown || [],
+        achievements: (otherDetails?.achievements || []).map((a: any) =>
+          typeof a === "string" ? a : a?.title,
+        ).filter(Boolean),
+        certificates: (otherDetails?.certifications || []).map((c: any) =>
+          typeof c === "string" ? c : c?.title,
+        ).filter(Boolean),
+        organizations: (otherDetails?.organizations || []).map((o: any) =>
+          typeof o === "string" ? o : o?.name,
+        ).filter(Boolean),
+        educationSummary: otherDetails?.educationSummary || "",
+        skillsSummary: otherDetails?.skillsSummary || "",
+        internshipExperience: otherDetails?.internshipExperience || "",
+        photo: personalDetails?.photo || "",
       };
 
       if (!form.formState.isDirty) {
@@ -196,7 +213,54 @@ export default function ProfileEditForm({
         // This case should be handled by the !userId check, but it's a good safeguard.
         throw new Error("User ID is invalid.");
       }
-      const payload = { ...data, userId: numericUserId };
+      const parseLocation = (value: string) => {
+        const parts = value.split(",").map((p) => p.trim()).filter(Boolean);
+        if (parts.length === 0) return undefined;
+        if (parts.length === 1) return { city: parts[0] };
+        if (parts.length === 2) return { city: parts[0], state: parts[1] };
+        return { city: parts[0], state: parts[1], country: parts.slice(2).join(", ") };
+      };
+
+      const payload = {
+        userId: numericUserId,
+        personalDetails: {
+          fullName: data.name,
+          roleOrTitle: data.role,
+          summary: data.summary,
+          photo: data.photo || undefined,
+          languagesKnown: data.languages || [],
+          location: parseLocation(data.location),
+        },
+        contactDetails: {
+          email: data.email || undefined,
+          phone: data.phone || undefined,
+          linkedin: data.linkedinUrl || undefined,
+          githubOrPortfolio: data.githubUrl || undefined,
+          website: data.portfolioUrl || undefined,
+          otherProfiles: {
+            leetcode: data.leetcodeUrl || undefined,
+            otherLinks: data.otherLinks || [],
+          },
+        },
+        otherDetails: {
+          achievements: (data.achievements || []).map((title) => ({
+            title,
+            isVisible: true,
+          })),
+          certifications: (data.certificates || []).map((title) => ({
+            title,
+            organization: "",
+            year: new Date().getFullYear(),
+            url: undefined,
+          })),
+          organizations: (data.organizations || []).map((name) => ({
+            name,
+            role: "",
+            year: "",
+            contribution: "",
+          })),
+        },
+      };
       console.log(" createProfileMutation payload:", payload);
       return apiRequest("POST", "/api/profile", payload);
     },
@@ -223,8 +287,56 @@ export default function ProfileEditForm({
   const updateProfileMutation = useMutation({
     // FIX: The data passed here should only be the form fields, not the userId.
     mutationFn: (data: Partial<ProfileFormData>) => {
-      console.log(" updateProfileMutation payload:", data);
-      return apiRequest("PATCH", `/api/profile/${userId}`, data);
+      const parseLocation = (value?: string) => {
+        if (!value) return undefined;
+        const parts = value.split(",").map((p) => p.trim()).filter(Boolean);
+        if (parts.length === 0) return undefined;
+        if (parts.length === 1) return { city: parts[0] };
+        if (parts.length === 2) return { city: parts[0], state: parts[1] };
+        return { city: parts[0], state: parts[1], country: parts.slice(2).join(", ") };
+      };
+
+      const payload = {
+        personalDetails: {
+          fullName: data.name,
+          roleOrTitle: data.role,
+          summary: data.summary,
+          photo: data.photo || undefined,
+          languagesKnown: data.languages || [],
+          location: parseLocation(data.location),
+        },
+        contactDetails: {
+          email: data.email || undefined,
+          phone: data.phone || undefined,
+          linkedin: data.linkedinUrl || undefined,
+          githubOrPortfolio: data.githubUrl || undefined,
+          website: data.portfolioUrl || undefined,
+          otherProfiles: {
+            leetcode: data.leetcodeUrl || undefined,
+            otherLinks: data.otherLinks || [],
+          },
+        },
+        otherDetails: {
+          achievements: (data.achievements || []).map((title) => ({
+            title,
+            isVisible: true,
+          })),
+          certifications: (data.certificates || []).map((title) => ({
+            title,
+            organization: "",
+            year: new Date().getFullYear(),
+            url: undefined,
+          })),
+          organizations: (data.organizations || []).map((name) => ({
+            name,
+            role: "",
+            year: "",
+            contribution: "",
+          })),
+        },
+      };
+      console.log(" updateProfileMutation payload:", payload);
+      return apiRequest("PATCH", `/api/profile/${userId}`, payload);
     },
     onSuccess: (result) => {
       console.log(" updateProfileMutation success:", result);

@@ -64,7 +64,6 @@ export default function ModulesList() {
     description: "",
     durationHours: 1,
     order: 0,
-    moduleOrder: 0, // Add moduleOrder field to match database schema
     courseId: courseId,
   });
 
@@ -238,7 +237,6 @@ export default function ModulesList() {
       description: "",
       durationHours: 1,
       order: modules.length,
-      moduleOrder: modules.length, // Add moduleOrder field to match database schema
       courseId: courseId,
     });
   };

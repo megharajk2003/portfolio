@@ -165,7 +165,10 @@ export default function Skills() {
               <CardContent className="p-6 text-center">
                 <div className="text-3xl font-bold text-purple-600 mb-2">
                   {Math.round(
-                    skills.reduce((sum: number, skill: Skill) => sum + skill.level, 0) /
+                    skills.reduce(
+                      (sum: number, skill: Skill) => sum + (skill.level ?? 0),
+                      0,
+                    ) /
                       skills.length
                   ) || 0}
                   %
@@ -234,7 +237,7 @@ export default function Skills() {
                                       <Star
                                         key={i}
                                         className={`h-3 w-3 ${
-                                          i < Math.floor(skill.level / 20)
+                                          i < Math.floor((skill.level ?? 0) / 20) 
                                             ? "text-yellow-400 fill-current"
                                             : "text-gray-300"
                                         }`}
@@ -246,7 +249,7 @@ export default function Skills() {
                                   </span>
                                 </div>
 
-                                {skill.level >= 80 && (
+                                {(skill.level ?? 0) >= 80 && (
                                   <Badge
                                     variant="outline"
                                     className="text-xs bg-green-50 text-green-700 border-green-200"
@@ -254,7 +257,8 @@ export default function Skills() {
                                     Expert
                                   </Badge>
                                 )}
-                                {skill.level >= 60 && skill.level < 80 && (
+                                {(skill.level ?? 0) >= 60 &&
+                                  (skill.level ?? 0) < 80 && (
                                   <Badge
                                     variant="outline"
                                     className="text-xs bg-blue-50 text-blue-700 border-blue-200"
@@ -262,7 +266,8 @@ export default function Skills() {
                                     Advanced
                                   </Badge>
                                 )}
-                                {skill.level >= 40 && skill.level < 60 && (
+                                {(skill.level ?? 0) >= 40 &&
+                                  (skill.level ?? 0) < 60 && (
                                   <Badge
                                     variant="outline"
                                     className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200"
@@ -270,7 +275,7 @@ export default function Skills() {
                                     Intermediate
                                   </Badge>
                                 )}
-                                {skill.level < 40 && (
+                                {(skill.level ?? 0) < 40 && (
                                   <Badge
                                     variant="outline"
                                     className="text-xs bg-gray-50 text-gray-700 border-gray-200"

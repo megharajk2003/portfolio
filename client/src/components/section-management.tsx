@@ -56,7 +56,9 @@ export default function SectionManagement({ userId }: SectionManagementProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: sectionSettings = [] } = useQuery({
+  const { data: sectionSettings = [] } = useQuery<
+    Array<{ sectionName: string; isVisible: boolean }>
+  >({
     queryKey: ["/api/section-settings", userId],
   });
 
@@ -79,7 +81,10 @@ export default function SectionManagement({ userId }: SectionManagementProps) {
   });
 
   const getSectionSettings = (sectionKey: string) => {
-    const setting = sectionSettings.find(s => s.sectionName === sectionKey);
+    const setting = sectionSettings.find(
+      (s: { sectionName: string; isVisible: boolean }) =>
+        s.sectionName === sectionKey,
+    );
     return setting ? setting.isVisible : true;
   };
 

@@ -101,7 +101,12 @@ export default function ProjectsAchievements({
                   </p>
                   {project.toolsOrMethods && (
                     <div className="flex flex-wrap gap-2 pt-3">
-                      {project.toolsOrMethods.split(",").map((tool) => (
+                      {(Array.isArray(project.toolsOrMethods)
+                        ? project.toolsOrMethods
+                        : typeof (project as any).toolsOrMethods === "string"
+                          ? ((project as any).toolsOrMethods as string).split(",")
+                          : []
+                      ).map((tool: string) => (
                         <Badge key={tool} variant="secondary">
                           {tool.trim()}
                         </Badge>

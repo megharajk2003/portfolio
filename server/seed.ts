@@ -16,8 +16,8 @@ async function seedDatabase() {
     const [user] = await db
       .insert(users)
       .values({
-        id: "user_sample_1",
         email: "megharaj@example.com",
+        password: "demo-password-change-me",
         firstName: "Megharaj",
         lastName: "K",
         profileImageUrl: null,
@@ -29,13 +29,22 @@ async function seedDatabase() {
     // Create sample profile
     await db.insert(profiles).values({
       userId: user.id,
-      name: "Megharaj K",
-      role: "Full Stack Developer",
-      email: "megharaj@example.com",
-      phone: "+91 12345 67890",
-      location: "Tamil Nadu, India",
-      summary:
-        "Passionate full-stack developer with experience in MERN stack and modern web technologies.",
+      personalDetails: {
+        fullName: "Megharaj K",
+        roleOrTitle: "Full Stack Developer",
+        summary:
+          "Passionate full-stack developer with experience in MERN stack and modern web technologies.",
+        location: {
+          state: "Tamil Nadu",
+          country: "India",
+        },
+      },
+      contactDetails: {
+        email: "megharaj@example.com",
+        phone: "+91 12345 67890",
+        githubOrPortfolio: "https://github.com/megharaj",
+        linkedin: "https://linkedin.com/in/megharaj",
+      },
       portfolioTheme: "modern",
       isPublic: true,
     });
@@ -97,9 +106,10 @@ async function seedDatabase() {
         userId: user.id,
         title: project.title,
         description: project.description,
-        technologies: project.technologies,
-        link: project.link,
-        githubLink: project.githubLink,
+        domain: "Technology",
+        toolsOrMethods: project.technologies.join(", "),
+        url: project.link,
+        githubUrl: project.githubLink,
         isVisible: true,
       });
     }
@@ -138,8 +148,9 @@ async function seedDatabase() {
     // Create sample work experience
     await db.insert(workExperience).values({
       userId: user.id,
-      title: "Software Developer Intern",
       company: "ABC Tech Solutions",
+      position: "Software Developer Intern",
+      location: "Tamil Nadu, India",
       startDate: "2024-06",
       endDate: "2024-12",
       description:

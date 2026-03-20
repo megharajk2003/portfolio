@@ -361,10 +361,10 @@ export default function SimpleComprehensiveForm({
             })
           ),
           achievements: (otherDetails.achievements || []).map(
-            (achievement: string, index: number) => ({
-              id: `achievement-${index}`,
-              title: achievement,
-              isVisible: true,
+            (achievement: any, index: number) => ({
+              id: achievement?.id || `achievement-${index}`,
+              title: typeof achievement === "string" ? achievement : achievement?.title,
+              isVisible: achievement?.isVisible ?? true,
             })
           ),
           // Add other sections as needed

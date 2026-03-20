@@ -299,14 +299,13 @@ export default function EnhancedProfileForm({
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<BasicProfileData>) => {
       // Structure the data according to the profile schema
-      const profileData = {
-        personalDetails: {
-          fullName: data.name,
-          roleOrTitle: data.role,
-          summary: data.summary,
-          photo: data.photo,
-          languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
-        },
+        const profileData = {
+          personalDetails: {
+            fullName: data.name,
+            roleOrTitle: data.role,
+            summary: data.summary,
+            languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
+          },
         contactDetails: {
           email: data.email,
           phone: data.phone,

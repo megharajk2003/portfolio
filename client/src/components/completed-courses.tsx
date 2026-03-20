@@ -127,7 +127,7 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
             You can add this to your backend query later if needed. */}
                     <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400">
                       <BookOpen className="h-3 w-3 mr-1" />
-                      {enrollment.course.totalLessons || 0} lessons mastered
+                      {(enrollment.course as any).totalLessons ?? 0} lessons mastered
                     </div>
                   </div>
                   <div className="ml-4 flex-shrink-0">

@@ -6,8 +6,15 @@ interface SkillChartProps {
   userId: string;
 }
 
+interface SkillItem {
+  id: string;
+  name: string;
+  level: number;
+  userId: string;
+}
+
 export default function SkillChart({ userId }: SkillChartProps) {
-  const { data: skills = [] } = useQuery({
+  const { data: skills = [] } = useQuery<SkillItem[]>({
     queryKey: ["/api/skills", userId],
   });
 

@@ -61,7 +61,7 @@ export default function AdminCourseForm({ course, onSubmit, onCancel, isLoading 
     // Convert arrays from strings if needed
     const processedData = {
       ...data,
-      price: data.isFree ? null : data.price,
+      price: data.isFree ? undefined : data.price || undefined,
       whatYouWillLearn: Array.isArray(data.whatYouWillLearn) 
         ? data.whatYouWillLearn 
         : data.whatYouWillLearn ? [data.whatYouWillLearn] : [],
