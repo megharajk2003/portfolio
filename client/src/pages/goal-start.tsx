@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import Papa from "papaparse";
 import { apiRequest } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Target, Upload, BookOpen, TrendingUp } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2, Upload, BookOpen, TrendingUp } from "lucide-react";
 import GoalHeatMap from "@/components/goal-heat-map";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
@@ -59,8 +71,18 @@ const createGoalFromCSVApi = async (data: {
   goalName: string;
   csvData: any[];
 }) => {
-  // Use the shared API helper so VITE_API_BASE_URL (Render) is applied in prod.
   const response = await apiRequest("POST", "/api/goals/from-csv", data);
+  return response.json();
+};
+
+const deleteGoalApi = async (goalId: string) => {
+  const response = await apiRequest("DELETE", `/api/goals/${goalId}`);
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({ message: "An unexpected error occurred" }));
+    throw new Error(errorData.message || "Failed to delete goal");
+  }
   return response.json();
 };
 
@@ -155,6 +177,7 @@ const ApexGoalPieChart: React.FC<{ goals: Goal[] }> = ({ goals }) => {
 export default function GoalStart() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch user goals
   const {
@@ -166,6 +189,25 @@ export default function GoalStart() {
     queryFn: fetchUserGoals,
     enabled: !!user,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteGoalApi,
+    onSuccess: () => {
+      toast({ title: "Success!", description: "Goal deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Deletion failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteGoal = (goalId: string) => {
+    deleteMutation.mutate(goalId);
+  };
 
   // Use goals directly instead of grouping by type
   const sortedGoals = useMemo(() => {
@@ -193,18 +235,81 @@ export default function GoalStart() {
             );
             return;
           }
-          const headers = lines[0]
-            .split(",")
-            .map((h) => h.trim().toLowerCase());
-          const data = lines.slice(1).map((line) => {
-            const values = line.split(",").map((v) => v.trim());
-            const row: any = {};
-            headers.forEach((header, index) => {
-              row[header] = values[index] || "";
-            });
-            return row;
+          // Use PapaParse for proper CSV parsing (handles quoted fields)
+          Papa.parse(text, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              if (results.errors.length > 0) {
+                reject(
+                  new Error(
+                    `CSV parsing errors: ${results.errors.map((e) => e.message).join(", ")}`,
+                  ),
+                );
+                return;
+              }
+
+              const normalizeHeader = (h: string) =>
+                h.replace(/^\uFEFF/, "").trim().toLowerCase();
+              const fields = (results.meta.fields || []).map(normalizeHeader);
+              const required = [
+                "category",
+                "topics",
+                "sub-topics",
+                "status",
+                "priority",
+              ];
+              const missing = required.filter((h) => !fields.includes(h));
+              if (missing.length > 0) {
+                reject(
+                  new Error(
+                    `Invalid CSV headers. Expected: Category, Topics, Sub-topics, Status, Priority. Missing: ${missing.join(", ")}`,
+                  ),
+                );
+                return;
+              }
+
+              if (results.data.length === 0) {
+                reject(new Error("CSV is empty or has no valid data rows"));
+              } else {
+                // Normalize headers to match backend expectations
+                const data = results.data.map((row: any) => {
+                  const normalizedRow: any = {};
+                  const normalizeCell = (value: unknown) => {
+                    if (typeof value !== "string") return value;
+                    const trimmed = value.replace(/^\uFEFF/, "").trim();
+                    if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                      return trimmed.slice(1, -1).trim();
+                    }
+                    return trimmed;
+                  };
+                  Object.keys(row).forEach((key) => {
+                    const normalizedKey = key.trim().toLowerCase();
+                    const standardKey =
+                      normalizedKey === "sub-topics" ||
+                      normalizedKey === "subtopic" ||
+                      normalizedKey === "sub_topics"
+                        ? "sub-topics"
+                        : normalizedKey === "topics" ||
+                            normalizedKey === "topic"
+                          ? "topics"
+                          : normalizedKey === "category"
+                            ? "category"
+                            : normalizedKey === "status"
+                              ? "status"
+                              : normalizedKey === "priority"
+                                ? "priority"
+                                : normalizedKey;
+                    normalizedRow[standardKey] = normalizeCell(row[key]);
+                  });
+                  return normalizedRow;
+                });
+                resolve(data);
+              }
+            },
+            error: (error: Error) => reject(error),
           });
-          resolve(data);
+          return; // Stop original logic
         } catch (error) {
           reject(new Error("Failed to parse CSV file"));
         }
@@ -234,14 +339,13 @@ export default function GoalStart() {
       setCsvFile(null);
       setGoalName("");
       window.location.reload();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({
         title: "Upload failed",
-        description: error.message,
+        description: err.message,
         variant: "destructive",
       });
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -333,8 +437,8 @@ export default function GoalStart() {
                   onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
                 />
                 <p className="text-sm text-white-600 mt-2">
-                  CSV should contain columns: Category, Topics, Sub-topics,
-                  Status.
+                  CSV must contain columns: Category, Topics, Sub-topics, Status,
+                  Priority.
                 </p>
               </div>
               <Button
@@ -410,116 +514,159 @@ export default function GoalStart() {
                   : 0;
 
               return (
-                <Card
-                  key={goal.id}
-                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-l-4 border-l-blue-500"
-                  onClick={() => navigate(`/goal-tracker/${goal.id}`)}
-                  data-testid={`card-goal-${goal.id}`}
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="text-2xl">{getTypeIcon(goal.name)}</div>
-                      <div>
-                        <div className="text-xl font-bold">{goal.name}</div>
-                        <div className="text-sm text-white-600 font-normal">
-                          {getTypeDescription(goal.name)}
-                        </div>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      {/* Stats Summary */}
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
-                          <div className="font-bold text-lg text-blue-600">
-                            {goal.categories?.length || 0}
+                <div key={goal.id} className="relative">
+                  <Card
+                    className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-l-4 border-l-blue-500"
+                    onClick={() => navigate(`/goal-tracker/${goal.id}`)}
+                    data-testid={`card-goal-${goal.id}`}
+                  >
+                    <CardHeader className="pb-3 flex-row justify-between items-start">
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="text-2xl">{getTypeIcon(goal.name)}</div>
+                        <div>
+                          <div className="text-xl font-bold">{goal.name}</div>
+                          <div className="text-sm text-white-600 font-normal">
+                            {getTypeDescription(goal.name)}
                           </div>
-                          <div className="text-white-600">Categories</div>
                         </div>
-                        <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
-                          <div className="font-bold text-lg text-green-600">
-                            {goal.totalSubtopics || 0}
-                          </div>
-                          <div className="text-white-600">Subtopics</div>
-                        </div>
-                      </div>
-
-                      {/* Progress Overview */}
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">
-                            Overall Progress
-                          </span>
-                          <span className="text-sm text-white-600">
-                            {goal.completedSubtopics || 0} /{" "}
-                            {goal.totalSubtopics || 0}
-                          </span>
-                        </div>
-                        <Progress value={progressPercentage} className="h-3" />
-                        <div className="flex justify-between items-center mt-2">
-                          <span className="text-sm text-white-600">
-                            {Math.round(progressPercentage)}% Complete
-                          </span>
-                          <Badge
-                            className={getStatusColor(
-                              goal.completedSubtopics || 0,
-                              goal.totalSubtopics || 0,
-                            )}
-                          >
-                            {getStatusText(
-                              goal.completedSubtopics || 0,
-                              goal.totalSubtopics || 0,
-                            )}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Categories Preview */}
-                      {goal.categories && goal.categories.length > 0 && (
-                        <div className="space-y-2">
-                          <span className="text-sm font-medium text-white-700 dark:text-white-300">
-                            Categories:
-                          </span>
-                          {goal.categories
-                            .slice(0, 2)
-                            .map((category: GoalCategory) => (
-                              <div
-                                key={category.id}
-                                className="p-2 bg-white dark:bg-white-700 rounded-md border text-sm"
-                                data-testid={`preview-category-${category.id}`}
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="font-medium truncate">
-                                    {category.name}
-                                  </span>
-                                  <span className="text-xs text-white-500 ml-2">
-                                    {category.completedSubtopics || 0}/
-                                    {category.totalSubtopics || 0}
-                                  </span>
-                                </div>
-                                <Progress
-                                  value={
-                                    category.totalSubtopics > 0
-                                      ? ((category.completedSubtopics || 0) /
-                                          category.totalSubtopics) *
-                                        100
-                                      : 0
-                                  }
-                                  className="h-1"
-                                />
-                              </div>
-                            ))}
-                          {goal.categories.length > 2 && (
-                            <div className="text-xs text-white-500 text-center pt-1">
-                              +{goal.categories.length - 2} more categories
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-4">
+                        {/* Stats Summary */}
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
+                            <div className="font-bold text-lg text-blue-600">
+                              {goal.categories?.length || 0}
                             </div>
-                          )}
+                            <div className="text-white-600">Categories</div>
+                          </div>
+                          <div className="text-center p-3 bg-white-50 dark:bg-white-800 rounded-lg">
+                            <div className="font-bold text-lg text-green-600">
+                              {goal.totalSubtopics || 0}
+                            </div>
+                            <div className="text-white-600">Subtopics</div>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+
+                        {/* Progress Overview */}
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium">
+                              Overall Progress
+                            </span>
+                            <span className="text-sm text-white-600">
+                              {goal.completedSubtopics || 0} /{" "}
+                              {goal.totalSubtopics || 0}
+                            </span>
+                          </div>
+                          <Progress
+                            value={progressPercentage}
+                            className="h-3"
+                          />
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-sm text-white-600">
+                              {Math.round(progressPercentage)}% Complete
+                            </span>
+                            <Badge
+                              className={getStatusColor(
+                                goal.completedSubtopics || 0,
+                                goal.totalSubtopics || 0,
+                              )}
+                            >
+                              {getStatusText(
+                                goal.completedSubtopics || 0,
+                                goal.totalSubtopics || 0,
+                              )}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Categories Preview */}
+                        {goal.categories && goal.categories.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium text-white-700 dark:text-white-300">
+                              Categories:
+                            </span>
+                            {goal.categories
+                              .slice(0, 2)
+                              .map((category: GoalCategory) => (
+                                <div
+                                  key={category.id}
+                                  className="p-2 bg-white dark:bg-white-700 rounded-md border text-sm"
+                                  data-testid={`preview-category-${category.id}`}
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="font-medium truncate">
+                                      {category.name}
+                                    </span>
+                                    <span className="text-xs text-white-500 ml-2">
+                                      {category.completedSubtopics || 0}/
+                                      {category.totalSubtopics || 0}
+                                    </span>
+                                  </div>
+                                  <Progress
+                                    value={
+                                      category.totalSubtopics > 0
+                                        ? ((category.completedSubtopics || 0) /
+                                            category.totalSubtopics) *
+                                          100
+                                        : 0
+                                    }
+                                    className="h-1"
+                                  />
+                                </div>
+                              ))}
+                            {goal.categories.length > 2 && (
+                              <div className="text-xs text-white-500 text-center pt-1">
+                                +{goal.categories.length - 2} more categories
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <div className="absolute top-2 right-2">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the goal and all of its associated data.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteGoal(goal.id);
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
               );
             })}
           </div>

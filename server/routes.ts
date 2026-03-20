@@ -2849,7 +2849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const goalId = req.params.id;
-      const goal = await storage.getGoalDetails(goalId);
+      const goal = await storage.getGoalWithCategories(goalId);
 
       if (!goal) {
         return res.status(404).json({ message: "Goal not found" });
@@ -2906,18 +2906,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Validate CSV data structure
-      const requiredFields = ["category", "topic", "status"];
-      const hasValidStructure = csvData.every((row) =>
-        requiredFields.some(
-          (field) =>
-            row[field] || row[field.charAt(0).toUpperCase() + field.slice(1)]
-        )
-      );
+      // Validate CSV data structure (allow header variations)
+      const firstRow = csvData.find((r) => r && typeof r === "object");
+      const hasAnyKey = (row: any, keys: string[]) =>
+        keys.some((k) => row?.[k] !== undefined && row?.[k] !== null && `${row[k]}`.trim() !== "");
 
-      if (!hasValidStructure) {
+      const hasCategory = hasAnyKey(firstRow, ["category", "Category"]);
+      const hasTopics = hasAnyKey(firstRow, ["topics", "Topics", "topic", "Topic"]);
+      const hasSubtopics = hasAnyKey(firstRow, [
+        "sub-topics",
+        "Sub-topics",
+        "subtopics",
+        "Subtopics",
+        "sub_topics",
+        "Sub_topics",
+        "subtopic",
+        "Subtopic",
+      ]);
+      const hasStatus = hasAnyKey(firstRow, ["status", "Status"]);
+      const hasPriority = hasAnyKey(firstRow, ["priority", "Priority"]);
+
+      if (
+        !firstRow ||
+        !hasCategory ||
+        !hasTopics ||
+        !hasSubtopics ||
+        !hasStatus ||
+        !hasPriority
+      ) {
         return res.status(400).json({
-          message: "CSV must contain Category, Topic, and Status columns",
+          message:
+            "CSV must contain Category, Topics, Sub-topics, Status, and Priority columns",
         });
       }
 
@@ -2926,7 +2945,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         goalName,
         csvData
       );
-      res.status(201).json(goal);
+
+      // Return enriched goal so the UI can render categories/topics immediately
+      const enrichedGoal = await storage.getGoalWithCategories(goal.id);
+      res.status(201).json(enrichedGoal ?? goal);
     } catch (error) {
       console.error("Error creating goal from CSV:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -3162,7 +3184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           if (isCompleted) {
-            await createNotificationHelper(req.user.id, {
+            await createNotificationHelper(req.user!.id, {
               type: "goal_completed",
               title: "Goal Completed! 🎯",
               message: `Congratulations! You've completed your goal: "${goal.name}". Time to set your next challenge!`,

@@ -1,34 +1,19 @@
-# PWA Installation Fix - TODO Steps
+# CSV Goal Upload Fix - 5 Column Format ✅
 
-## Plan Breakdown (Approved ✅)
+## Current Status
 
-### Step 1: Install Dependencies [COMPLETE ✅]
+- [x] **Plan Approved** - Update `createGoalFromCSV()` for new format
+- [x] **Step 1** - Edit `server/storage.ts` ✅
+- [ ] **Step 2** - Test CSV Upload → `npm run dev` + `goal-start.tsx`
+- [ ] **Step 3** - Verify Hierarchy → `goal-details.tsx`
+- [ ] **Step 4** - Test counters → Dashboard
+- [x] **Step 5** - ✅ Complete
 
-- `npm install vite-plugin-pwa -D`
+## ✅ FIXED:
 
-### Step 2: Update vite.config.ts [COMPLETE ✅]
+```
+"Category","Topics","Sub-topics","Status","Priority"
+"General Studies","Geography","Earth location","pending","medium"
+```
 
-- Add VitePWA plugin with precaching
-
-### Step 3: Fix Icon Consistency [COMPLETE ✅]
-
-- Update manifest & index.html to use consistent .png casing
-
-### Step 4: Enhance App.tsx [PENDING]
-
-- Add beforeinstallprompt handling & install button
-
-### Step 5: Test Installation [PENDING]
-
-- `npm run dev`
-- Chrome DevTools → Application → Verify "installable: yes"
-- Test install prompt
-
-### Step 6: Production Build Test [PENDING]
-
-- `npm run build && npm run preview`
-
----
-
-**Progress: 4/6 complete (PWA UI added, minor TS warnings to ignore)**  
-_Updates marked as [COMPLETE] after each step._
+**Test now:** `npm run dev` → Goal Start → Upload CSV → Check Dashboard/Goal Details

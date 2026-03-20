@@ -376,9 +376,7 @@ export interface IStorage {
     goalName: string,
     csvData: any[],
   ): Promise<Goal>;
-  getUserGoalsSummary(
-    userId: number,
-  ): Promise<
+  getUserGoalsSummary(userId: number): Promise<
     {
       id: string;
       name: string;
@@ -3769,9 +3767,7 @@ export class PgStorage implements IStorage {
   }
 
   // Lightweight summary used by /api/goals – no deep fetch or recompute
-  async getUserGoalsSummary(
-    userId: number,
-  ): Promise<
+  async getUserGoalsSummary(userId: number): Promise<
     {
       id: string;
       name: string;
@@ -4004,183 +4000,143 @@ export class PgStorage implements IStorage {
     csvData: any[],
   ): Promise<Goal> {
     try {
-      // Check if csvData is already an array of parsed objects or if it needs to be parsed
+      // Parse CSV data - handle both raw arrays and PapaParse results
       let processedData = csvData;
 
-      // If the first row has a stringified JSON structure, parse it
-      if (
-        typeof csvData[0] === "string" ||
-        (csvData[0] &&
-          typeof csvData[0] === "object" &&
-          !csvData[0].category &&
-          !csvData[0].topic)
-      ) {
-        try {
-          // Try to parse the data if it's a JSON string
-          if (typeof csvData[0] === "string") {
-            processedData = JSON.parse(csvData[0]);
-          } else if (csvData[0] && csvData[0].csvData) {
-            // If the data is wrapped in an object with csvData property
-            processedData = JSON.parse(csvData[0].csvData);
-          }
-        } catch (parseError) {
-          processedData = csvData;
-        }
+      if (typeof csvData[0] === "string") {
+        // Raw CSV string - use PapaParse
+        const Papa = await import("papaparse");
+        const parseResult = Papa.parse(csvData[0], {
+          header: true,
+          skipEmptyLines: true,
+          dynamicTyping: false,
+        });
+        processedData = parseResult.data;
       }
 
-      // Create the main goal
+      // Validate CSV has required columns
+      const requiredColumns = [
+        "category",
+        "topics",
+        "sub-topics",
+        "status",
+        "priority",
+      ];
+      const hasRequiredColumns =
+        processedData.length > 0 &&
+        requiredColumns.every(
+          (col) =>
+            processedData[0].hasOwnProperty(col.toLowerCase()) ||
+            processedData[0].hasOwnProperty(col.replace("-", "_")),
+        );
+
+      if (!hasRequiredColumns) {
+        throw new Error(
+          `CSV must contain columns: ${requiredColumns.join(", ")}`,
+        );
+      }
+
+      // Create main goal
       const goalData: InsertGoal = {
         userId,
         name: goalName,
-        description: `Goal created from CSV with ${processedData.length} subtopics`,
+        description: `TNPSC Goal: ${processedData.length} subtopics imported`,
         csvData: processedData,
-        totalTopics: 0, // Will be calculated after processing
+        totalTopics: 0,
         completedTopics: 0,
+        totalSubtopics: 0,
+        completedSubtopics: 0,
       };
-
       const goal = await this.createGoal(goalData);
 
-      // Process CSV data and create categories, topics, and subtopics
+      // Process hierarchy: Category → Topics → Sub-topics
       const categoryMap = new Map<string, string>();
       const topicMap = new Map<string, string>();
 
-      for (const row of processedData) {
-        const categoryName = row.Category || row.category || "General";
-        const topicName =
-          row.Topics || row.Topic || row.topic || "Untitled Topic";
-        const subtopicName =
-          row["Sub-topics"] ||
-          row.Subtopic ||
-          row.subtopic ||
-          row.subtopic ||
-          topicName;
-        const status = (row.Status || row.status || "pending").toLowerCase();
+      for (const row of processedData.filter(Boolean)) {
+        // Normalize column names (handle variations)
+        const categoryName = String(
+          row.category ?? row.Category ?? "General Studies",
+        ).trim();
+        const topics = String(row.topics ?? row.Topics ?? row.topic ?? "").trim();
+        const subtopics = String(
+          row["sub-topics"] ??
+            row["Sub-topics"] ??
+            row.subtopics ??
+            row["sub_topics"] ??
+            row.subtopic ??
+            "",
+        ).trim();
+        const status = String(row.status ?? row.Status ?? "pending")
+          .toLowerCase()
+          .trim();
+        const priority = String(row.priority ?? row.Priority ?? "medium")
+          .toLowerCase()
+          .trim();
 
-        // Create or get category
+        if (!topics || !subtopics) continue;
+
+        // Create/get category
         let categoryId = categoryMap.get(categoryName);
         if (!categoryId) {
           const categoryData: InsertGoalCategory = {
             goalId: goal.id,
             name: categoryName,
-            description: `Category for ${categoryName}`,
             totalTopics: 0,
             completedTopics: 0,
           };
-
-          const category = await this.createGoalCategory(categoryData);
-          categoryId = category.id;
+          const newCategory = await this.createGoalCategory(categoryData);
+          categoryId = newCategory.id;
           categoryMap.set(categoryName, categoryId);
         }
 
-        // Create or get topic
-        const topicKey = `${categoryId}-${topicName}`;
+        // Create/get topic
+        const topicKey = `${categoryId}:${topics}`;
         let topicId = topicMap.get(topicKey);
         if (!topicId) {
           const topicData: InsertGoalTopic = {
             categoryId,
-            name: topicName,
-            description: `Topic for ${topicName}`,
+            name: topics,
             totalSubtopics: 0,
             completedSubtopics: 0,
           };
-
-          const topic = await this.createGoalTopic(topicData);
-          topicId = topic.id;
+          const newTopic = await this.createGoalTopic(topicData);
+          topicId = newTopic.id;
           topicMap.set(topicKey, topicId);
         }
 
-        // Create subtopic with the status
-        const priority = (
-          row.priority ||
-          row.Priority ||
-          "medium"
-        ).toLowerCase();
+        // Create subtopic with status & priority
+        const normalizedStatus: "pending" | "start" | "completed" = [
+          "pending",
+          "start",
+          "completed",
+        ].includes(status)
+          ? (status as any)
+          : "pending";
+
+        const normalizedPriority: "low" | "medium" | "high" = [
+          "low",
+          "medium",
+          "high",
+        ].includes(priority)
+          ? (priority as any)
+          : "medium";
+
         const subtopicData: InsertGoalSubtopic = {
           topicId,
-          name: subtopicName.trim(),
-          description: row.description || row.Description || null,
-          status: ["pending", "start", "completed"].includes(status)
-            ? (status as "pending" | "start" | "completed")
-            : "pending",
-          priority: ["low", "medium", "high"].includes(priority)
-            ? (priority as "low" | "medium" | "high")
-            : "medium",
-          notes: row.notes || row.Notes || null,
-          dueDate:
-            row.dueDate || row.DueDate
-              ? new Date(row.dueDate || row.DueDate)
-              : null,
+          name: subtopics,
+          status: normalizedStatus,
+          priority: normalizedPriority,
         };
 
         await this.createGoalSubtopic(subtopicData);
       }
 
-      // Update all counters after processing all data
-      for (const [topicKey, topicId] of topicMap) {
-        const subtopics = await this.getTopicSubtopics(topicId);
-        const completedSubtopics = subtopics.filter(
-          (s) => s.status === "completed",
-        ).length;
-
-        if (this.isDbConnected) {
-          await db
-            .update(goalTopics)
-            .set({
-              totalSubtopics: subtopics.length,
-              completedSubtopics,
-              updatedAt: new Date(),
-            })
-            .where(eq(goalTopics.id, topicId));
-        }
-      }
-
-      // Update category topic counts
-      for (const [categoryName, categoryId] of categoryMap) {
-        const topics = await this.getCategoryTopics(categoryId);
-        const totalSubtopics = topics.reduce(
-          (sum, topic) => sum + (topic.totalSubtopics || 0),
-          0,
-        );
-        const completedSubtopics = topics.reduce(
-          (sum, topic) => sum + (topic.completedSubtopics || 0),
-          0,
-        );
-
-        await this.updateGoalCategory(categoryId, {
-          totalTopics: topics.length,
-          completedTopics: completedSubtopics, // Total completed subtopics in category
-        });
-      }
-
-      // Update goal counts
-      const allCategories = await this.getGoalCategories(goal.id);
-
-      // Calculate total subtopics from all topics in all categories
-      let totalSubtopicsInGoal = 0;
-      let completedSubtopicsInGoal = 0;
-
-      for (const category of allCategories) {
-        const topics = await this.getCategoryTopics(category.id);
-        for (const topic of topics) {
-          const subtopics = await this.getTopicSubtopics(topic.id);
-          totalSubtopicsInGoal += subtopics.length;
-          completedSubtopicsInGoal += subtopics.filter(
-            (s) => s.status === "completed",
-          ).length;
-        }
-      }
-
+      // Update goal counters after all subtopics created
+      const totals = await this.calculateGoalSubtopicTotals(goal.id);
       await this.updateGoal(goal.id, {
-        totalSubtopics: totalSubtopicsInGoal,
-        completedSubtopics: completedSubtopicsInGoal,
-        totalTopics: allCategories.reduce(
-          (sum, cat) => sum + (cat.totalTopics || 0),
-          0,
-        ),
-        completedTopics: allCategories.reduce(
-          (sum, cat) => sum + (cat.completedTopics || 0),
-          0,
-        ),
+        totalSubtopics: totals.totalSubtopics,
+        completedSubtopics: totals.completedSubtopics,
       });
 
       return goal;
@@ -4265,7 +4221,11 @@ export class PgStorage implements IStorage {
       }),
     );
 
-    return { ...goal, categories: categoriesWithDetails };
+    return {
+      ...goal,
+      categories: categoriesWithDetails,
+      completedSubtopicTimestamps: goalCompletedTimestamps,
+    };
   }
 
   async getUserGoalsWithCategories(userId: number): Promise<any[]> {
