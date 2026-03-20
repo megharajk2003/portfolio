@@ -1,17 +1,29 @@
 import React, { useMemo } from "react";
 import { apiRequest } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Target, TrendingUp } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { useLocation } from "wouter";
 import { navigate } from "wouter/use-browser-location";
 import SidebarLayout from "@/components/sidebar-layout";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 // --- INTERFACES ---
 interface GoalCategory {
   id: string;
@@ -33,6 +45,11 @@ interface Goal {
 // --- API FUNCTION ---
 const fetchGoalWithCategories = async (goalId: string): Promise<Goal> => {
   const response = await apiRequest("GET", `/api/goals/${goalId}`);
+  return response.json();
+};
+
+const deleteGoalApi = async (goalId: string) => {
+  const response = await apiRequest("DELETE", `/api/goals/${goalId}`);
   return response.json();
 };
 
@@ -116,6 +133,7 @@ const ApexCategoryProgressChart: React.FC<{ categories: GoalCategory[] }> = ({
 
 export default function GoalTracker() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [location] = useLocation();
   const goalId = location.split("/")[2];
 
@@ -127,6 +145,21 @@ export default function GoalTracker() {
     queryKey: ["goal", goalId],
     queryFn: () => fetchGoalWithCategories(goalId),
     enabled: !!goalId && !!user,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteGoalApi(goalId),
+    onSuccess: () => {
+      toast({ title: "Deleted", description: "Goal deleted successfully" });
+      navigate("/goals");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Deletion failed",
+        description: error?.message || "Failed to delete goal",
+        variant: "destructive",
+      });
+    },
   });
 
   const categories = goal?.categories || [];
@@ -148,14 +181,48 @@ export default function GoalTracker() {
       title={goal ? `${goal.name} Categories` : "Categories"}
       description="Monitor completion across each goal category"
       actions={
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/goals")}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Goals
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/goals")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to Goals
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={!goalId || deleteMutation.isPending}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                {deleteMutation.isPending ? "Deleting..." : "Delete Goal"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this goal?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  goal and all its categories, topics, and subtopics.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deleteMutation.mutate()}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       }
       contentClassName="max-w-6xl mx-auto space-y-6"
     >

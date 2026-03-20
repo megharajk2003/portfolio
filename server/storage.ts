@@ -109,6 +109,8 @@ import {
 } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
+type CourseWithCategories = Course & { categories: Category[] };
+
 export interface IStorage {
   sessionStore: any;
 
@@ -265,8 +267,8 @@ export interface IStorage {
   ): Promise<ForumLike | undefined>;
 
   // New learning platform methods
-  getCourses(): Promise<Course[]>;
-  getCourse(id: string): Promise<Course | undefined>;
+  getCourses(): Promise<CourseWithCategories[]>;
+  getCourse(id: string): Promise<CourseWithCategories | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(
     id: string,
@@ -2096,20 +2098,66 @@ export class PgStorage implements IStorage {
   }
 
   // New learning platform implementations
-  async getCourses(): Promise<Course[]> {
+  async getCourses(): Promise<CourseWithCategories[]> {
     if (!this.isDbConnected) {
       return this.fallbackData.get("courses") || [];
     }
-    return await db.select().from(courses);
+    const rows = await db
+      .select()
+      .from(courses)
+      .leftJoin(courseCategories, eq(courses.id, courseCategories.courseId))
+      .leftJoin(categories, eq(courseCategories.categoryId, categories.id));
+
+    const coursesById = new Map<string, CourseWithCategories>();
+
+    for (const row of rows) {
+      const course = row.courses;
+      const category = row.categories;
+
+      const existing = coursesById.get(course.id);
+      if (existing) {
+        if (
+          category &&
+          !existing.categories.some((c) => c.id === category.id)
+        ) {
+          existing.categories.push(category);
+        }
+        continue;
+      }
+
+      coursesById.set(course.id, {
+        ...course,
+        categories: category ? [category] : [],
+      });
+    }
+
+    return Array.from(coursesById.values());
   }
 
-  async getCourse(id: string): Promise<Course | undefined> {
+  async getCourse(id: string): Promise<CourseWithCategories | undefined> {
     if (!this.isDbConnected) {
       const allCourses = this.fallbackData.get("courses") || [];
       return allCourses.find((c: any) => c.id === id);
     }
-    const result = await db.select().from(courses).where(eq(courses.id, id));
-    return result[0];
+    const rows = await db
+      .select()
+      .from(courses)
+      .leftJoin(courseCategories, eq(courses.id, courseCategories.courseId))
+      .leftJoin(categories, eq(courseCategories.categoryId, categories.id))
+      .where(eq(courses.id, id));
+
+    if (rows.length === 0) return undefined;
+
+    const course = rows[0].courses;
+    const courseCategoriesList: Category[] = [];
+    for (const row of rows) {
+      const category = row.categories;
+      if (category && !courseCategoriesList.some((c) => c.id === category.id)) {
+        courseCategoriesList.push(category);
+      }
+    }
+
+    return { ...course, categories: courseCategoriesList };
   }
 
   async createCourse(courseData: InsertCourse): Promise<Course> {
