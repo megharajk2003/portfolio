@@ -11,18 +11,37 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
       },
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+      includeAssets: [
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "masked-icon.svg",
+        "icon-skillstream.png",
+        "icon-192.png",
+        "icon-512.png",
+      ],
       manifest: {
+        name: "SkillStream",
+        short_name: "SkillStream",
+        start_url: "/",
+        display: "standalone",
+        background_color: "#0f172a",
+        theme_color: "#0f172a",
         icons: [
           {
-            src: "icon-skillstream.png",
-            sizes: "1024x1024",
+            src: "icon-192.png",
+            sizes: "192x192",
             type: "image/png",
             purpose: "any maskable",
           },
           {
             src: "icon-512.png",
             sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+          {
+            src: "icon-skillstream.png",
+            sizes: "1024x1024",
             type: "image/png",
             purpose: "any maskable",
           },
