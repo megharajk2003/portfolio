@@ -80,7 +80,7 @@ export default function CourseLearn() {
           `/api/modules/${module.id}/lessons`,
           {
             credentials: "include",
-          }
+          },
         );
         const lessons = lessonsResponse.ok ? await lessonsResponse.json() : [];
 
@@ -89,14 +89,14 @@ export default function CourseLearn() {
           `/api/lesson-progress/${user.id}/${module.id}`,
           {
             credentials: "include",
-          }
+          },
         );
         const progress = progressResponse.ok
           ? await progressResponse.json()
           : [];
 
         const completedLessons = progress.filter(
-          (p: any) => p.isCompleted
+          (p: any) => p.isCompleted,
         ).length;
         const totalLessons = lessons.length;
 
@@ -149,7 +149,7 @@ export default function CourseLearn() {
       if (!previousModule) return false;
 
       const previousModuleData = allModulesData.find(
-        (md: any) => md.moduleId === previousModule.id
+        (md: any) => md.moduleId === previousModule.id,
       );
 
       if (!previousModuleData) return false;
@@ -166,7 +166,7 @@ export default function CourseLearn() {
   const isLessonUnlocked = (lessonIndex: number, moduleIndex: number = 0) => {
     // Find current module index
     const currentModuleIndex = modules.findIndex(
-      (m: any) => m.id === selectedModuleId
+      (m: any) => m.id === selectedModuleId,
     );
 
     // Check if this module is unlocked
@@ -190,10 +190,10 @@ export default function CourseLearn() {
   };
 
   const selectedLesson = lessons.find(
-    (lesson: any) => lesson.id === selectedLessonId
+    (lesson: any) => lesson.id === selectedLessonId,
   );
   const currentLessonIndex = lessons.findIndex(
-    (lesson: any) => lesson.id === selectedLessonId
+    (lesson: any) => lesson.id === selectedLessonId,
   );
 
   const goToNextLesson = () => {
@@ -206,7 +206,7 @@ export default function CourseLearn() {
     } else {
       // Last lesson of current module - try to move to next module
       const currentModuleIndex = modules.findIndex(
-        (m) => m.id === selectedModuleId
+        (m) => m.id === selectedModuleId,
       );
       if (currentModuleIndex < modules.length - 1) {
         const nextModule = modules[currentModuleIndex + 1];
@@ -229,7 +229,7 @@ export default function CourseLearn() {
   // Check if current lesson is the last lesson of the last module
   const isLastLessonOfCourse = () => {
     const currentModuleIndex = modules.findIndex(
-      (m) => m.id === selectedModuleId
+      (m) => m.id === selectedModuleId,
     );
     const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
     const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
@@ -265,7 +265,7 @@ export default function CourseLearn() {
 
       // Only show lesson/module completion messages, not course completion
       const currentModuleIndex = modules.findIndex(
-        (m) => m.id === selectedModuleId
+        (m) => m.id === selectedModuleId,
       );
       const isLastLessonInModule = currentLessonIndex === lessons.length - 1;
       const isLastModuleInCourse = currentModuleIndex === modules.length - 1;
@@ -300,7 +300,7 @@ export default function CourseLearn() {
 
     // Find the enrollment/progress record for the current course
     const courseEnrollment = userProgress.find(
-      (enrollment: any) => enrollment.courseId === courseId
+      (enrollment: any) => enrollment.courseId === courseId,
     );
 
     // The course is completed if the record exists and has a completion date
@@ -318,26 +318,26 @@ export default function CourseLearn() {
       };
       console.log(
         "🚀 [finishCourseMutation] Attempting to finish course with payload:",
-        payload
+        payload,
       ); // Complete the lesson and officially finish the course
 
       try {
         const response = await apiRequest(
           `/api/course-completion/finish`,
           "POST",
-          payload
+          payload,
         );
         // --- DEBUG: Log the successful response from the API ---
         console.log(
           "✅ [finishCourseMutation] API call successful, response:",
-          response
+          response,
         );
         return response;
       } catch (error) {
         // --- DEBUG: Log any error during the API request itself ---
         console.error(
           "🔥 [finishCourseMutation] API request failed inside mutationFn:",
-          error
+          error,
         );
         throw error; // It's important to re-throw the error so onError is triggered
       }
@@ -346,7 +346,7 @@ export default function CourseLearn() {
       // --- DEBUG: This runs if the mutationFn promise resolves successfully ---
       console.log(
         "🎉 [finishCourseMutation] onSuccess callback triggered with data:",
-        data
+        data,
       ); // Invalidate all related queries to ensure fresh data
 
       queryClient.invalidateQueries({
@@ -374,7 +374,7 @@ export default function CourseLearn() {
       // --- DEBUG: This runs if the mutationFn promise rejects (fails) ---
       console.error(
         "❌ [finishCourseMutation] onError callback triggered with error:",
-        error
+        error,
       );
 
       toast({
@@ -439,7 +439,7 @@ export default function CourseLearn() {
                 {modules.map((module: any, moduleIndex: number) => {
                   const moduleUnlocked = isModuleUnlocked(moduleIndex);
                   const moduleData = allModulesData.find(
-                    (md: any) => md.moduleId === module.id
+                    (md: any) => md.moduleId === module.id,
                   );
                   const completedCount = moduleData?.completedLessons || 0;
                   const totalCount = moduleData?.totalLessons || 0;
@@ -592,7 +592,7 @@ export default function CourseLearn() {
                       <iframe
                         src={selectedLesson.videoUrl.replace(
                           "watch?v=",
-                          "embed/"
+                          "embed/",
                         )}
                         title={selectedLesson.title}
                         className="w-full h-full rounded-lg"
@@ -639,8 +639,8 @@ export default function CourseLearn() {
                           {isCourseCompleted
                             ? "Course Completed"
                             : finishCourseMutation.isPending
-                            ? "Finishing Course..."
-                            : "🎉 Finish Course"}
+                              ? "Finishing Course..."
+                              : "🎉 Finish Course"}
                         </Button>
                       ) : (
                         <Button
@@ -689,8 +689,8 @@ export default function CourseLearn() {
                           {isCourseCompleted
                             ? "Course Completed"
                             : finishCourseMutation.isPending
-                            ? "Finishing Course..."
-                            : "🎉 Finish Course"}
+                              ? "Finishing Course..."
+                              : "🎉 Finish Course"}
                         </Button>
                       </div>
                     ) : (
@@ -729,7 +729,7 @@ export default function CourseLearn() {
 
                         // If last lesson in module, check if next module is available
                         const currentModuleIndex = modules.findIndex(
-                          (m) => m.id === selectedModuleId
+                          (m) => m.id === selectedModuleId,
                         );
                         if (currentModuleIndex < modules.length - 1) {
                           return !isModuleUnlocked(currentModuleIndex + 1);

@@ -264,7 +264,7 @@ export default function SimpleComprehensiveForm({
       } else if (user) {
         personalForm.setValue(
           "fullName",
-          `${user.firstName || ""} ${user.lastName || ""}`.trim()
+          `${user.firstName || ""} ${user.lastName || ""}`.trim(),
         );
       }
 
@@ -297,7 +297,7 @@ export default function SimpleComprehensiveForm({
               description: edu.degree,
               year: edu.yearOfPassing?.toString(),
               isVisible: true,
-            })
+            }),
           ),
           workExperience: (otherDetails.workExperience || []).map(
             (exp: any, index: number) => ({
@@ -309,7 +309,7 @@ export default function SimpleComprehensiveForm({
               responsibilities: exp.responsibilities,
               skills: exp.skillsOrToolsUsed,
               isVisible: true,
-            })
+            }),
           ),
           skills: {
             technical: (otherDetails.skills?.technical || []).map(
@@ -317,28 +317,28 @@ export default function SimpleComprehensiveForm({
                 id: `tech-${index}`,
                 title: skill,
                 isVisible: true,
-              })
+              }),
             ),
             domainSpecific: (otherDetails.skills?.domainSpecific || []).map(
               (skill: string, index: number) => ({
                 id: `domain-${index}`,
                 title: skill,
                 isVisible: true,
-              })
+              }),
             ),
             soft: (otherDetails.skills?.soft || []).map(
               (skill: string, index: number) => ({
                 id: `soft-${index}`,
                 title: skill,
                 isVisible: true,
-              })
+              }),
             ),
             tools: (otherDetails.skills?.tools || []).map(
               (skill: string, index: number) => ({
                 id: `tool-${index}`,
                 title: skill,
                 isVisible: true,
-              })
+              }),
             ),
           },
           certifications: (otherDetails.certifications || []).map(
@@ -348,7 +348,7 @@ export default function SimpleComprehensiveForm({
               organization: cert.organization,
               year: cert.year?.toString(),
               isVisible: true,
-            })
+            }),
           ),
           projects: (otherDetails.projects || []).map(
             (project: any, index: number) => ({
@@ -358,14 +358,17 @@ export default function SimpleComprehensiveForm({
               subtitle: project.domain,
               skills: project.toolsOrMethods,
               isVisible: true,
-            })
+            }),
           ),
           achievements: (otherDetails.achievements || []).map(
             (achievement: any, index: number) => ({
               id: achievement?.id || `achievement-${index}`,
-              title: typeof achievement === "string" ? achievement : achievement?.title,
+              title:
+                typeof achievement === "string"
+                  ? achievement
+                  : achievement?.title,
               isVisible: achievement?.isVisible ?? true,
-            })
+            }),
           ),
           // Add other sections as needed
         }));
@@ -507,7 +510,7 @@ export default function SimpleComprehensiveForm({
 
   const handleAddEntry = (
     sectionKey: keyof typeof sections,
-    subsection?: string
+    subsection?: string,
   ) => {
     const newEntry = {
       id: `${sectionKey}-${subsection || ""}-${Date.now()}`,
@@ -534,7 +537,7 @@ export default function SimpleComprehensiveForm({
   const handleDeleteEntry = (
     sectionKey: keyof typeof sections,
     entryId: string,
-    subsection?: string
+    subsection?: string,
   ) => {
     if (sectionKey === "skills" && subsection) {
       setSections((prev) => ({
@@ -542,7 +545,7 @@ export default function SimpleComprehensiveForm({
         skills: {
           ...prev.skills,
           [subsection]: (prev.skills as any)[subsection].filter(
-            (entry: SectionEntry) => entry.id !== entryId
+            (entry: SectionEntry) => entry.id !== entryId,
           ),
         },
       }));
@@ -550,7 +553,7 @@ export default function SimpleComprehensiveForm({
       setSections((prev) => ({
         ...prev,
         [sectionKey]: (prev[sectionKey] as SectionEntry[]).filter(
-          (entry: SectionEntry) => entry.id !== entryId
+          (entry: SectionEntry) => entry.id !== entryId,
         ),
       }));
     }
@@ -559,7 +562,7 @@ export default function SimpleComprehensiveForm({
   const handleSelectSuggestion = (
     sectionKey: keyof typeof sections,
     suggestion: string,
-    subsection?: string
+    subsection?: string,
   ) => {
     const newEntry = {
       id: `${sectionKey}-${subsection || ""}-${Date.now()}`,

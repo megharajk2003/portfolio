@@ -78,7 +78,7 @@ export default function GoalHeatMap() {
             console.warn(`Error fetching details for goal ${goal.id}:`, error);
             return goal;
           }
-        })
+        }),
       );
 
       return detailedGoals;
@@ -102,7 +102,7 @@ export default function GoalHeatMap() {
                 topic.subtopics.forEach((subtopic) => {
                   if (subtopic.status === "completed" && subtopic.completedAt) {
                     console.log(
-                      `Found completed subtopic: ${subtopic.name} at ${subtopic.completedAt}`
+                      `Found completed subtopic: ${subtopic.name} at ${subtopic.completedAt}`,
                     ); // Debug log
                     allCompletions.push({
                       goalName: goal.name,
@@ -116,13 +116,13 @@ export default function GoalHeatMap() {
         });
       }
       console.log(
-        `Goal: ${goal.name}, totalSubtopics (API): ${goal.totalSubtopics}, recalculated: ${goal.categories}`
+        `Goal: ${goal.name}, totalSubtopics (API): ${goal.totalSubtopics}, recalculated: ${goal.categories}`,
       );
     });
 
     console.log(
       `Total completions found: ${allCompletions.length}`,
-      allCompletions
+      allCompletions,
     ); // Debug log
 
     // If no real completion data exists, return empty series
@@ -132,7 +132,7 @@ export default function GoalHeatMap() {
 
     // Sort chronologically
     allCompletions.sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
     );
 
     // Create series for each goal with real completion data

@@ -4,9 +4,13 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  User, Briefcase, GraduationCap, Cog, 
-  FolderOpen, Award 
+import {
+  User,
+  Briefcase,
+  GraduationCap,
+  Cog,
+  FolderOpen,
+  Award,
 } from "lucide-react";
 
 interface SectionManagementProps {
@@ -63,13 +67,25 @@ export default function SectionManagement({ userId }: SectionManagementProps) {
   });
 
   const updateSectionMutation = useMutation({
-    mutationFn: async ({ sectionName, isVisible }: { sectionName: string; isVisible: boolean }) => {
-      return apiRequest("PATCH", `/api/section-settings/${userId}/${sectionName}`, {
-        isVisible,
-      });
+    mutationFn: async ({
+      sectionName,
+      isVisible,
+    }: {
+      sectionName: string;
+      isVisible: boolean;
+    }) => {
+      return apiRequest(
+        "PATCH",
+        `/api/section-settings/${userId}/${sectionName}`,
+        {
+          isVisible,
+        },
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/section-settings", userId] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/section-settings", userId],
+      });
     },
     onError: () => {
       toast({
@@ -128,8 +144,12 @@ export default function SectionManagement({ userId }: SectionManagementProps) {
                 <div className="flex items-center space-x-3">
                   <IconComponent className="h-5 w-5 text-primary" />
                   <div>
-                    <h4 className="font-medium text-gray-900">{section.label}</h4>
-                    <p className="text-sm text-gray-500">{section.description}</p>
+                    <h4 className="font-medium text-gray-900">
+                      {section.label}
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      {section.description}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -138,7 +158,9 @@ export default function SectionManagement({ userId }: SectionManagementProps) {
                   </Badge>
                   <Switch
                     checked={isVisible}
-                    onCheckedChange={(checked) => handleToggleSection(section.key, checked)}
+                    onCheckedChange={(checked) =>
+                      handleToggleSection(section.key, checked)
+                    }
                     disabled={updateSectionMutation.isPending}
                   />
                 </div>

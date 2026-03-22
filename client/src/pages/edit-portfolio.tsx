@@ -7,17 +7,54 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Briefcase, GraduationCap, Cog, FolderOpen, Award } from "lucide-react";
+import {
+  User,
+  Briefcase,
+  GraduationCap,
+  Cog,
+  FolderOpen,
+  Award,
+} from "lucide-react";
 
 const CURRENT_USER_ID = "user-1";
 
 const portfolioSections = [
-  { key: "personal", label: "Personal Details", icon: User, description: "Name, contact, photo" },
-  { key: "work", label: "Work Experience", icon: Briefcase, description: "Professional experience" },
-  { key: "education", label: "Education", icon: GraduationCap, description: "Academic background" },
-  { key: "skills", label: "Skills", icon: Cog, description: "Technical and soft skills" },
-  { key: "projects", label: "Projects", icon: FolderOpen, description: "Portfolio projects" },
-  { key: "certifications", label: "Certifications", icon: Award, description: "Professional certifications" },
+  {
+    key: "personal",
+    label: "Personal Details",
+    icon: User,
+    description: "Name, contact, photo",
+  },
+  {
+    key: "work",
+    label: "Work Experience",
+    icon: Briefcase,
+    description: "Professional experience",
+  },
+  {
+    key: "education",
+    label: "Education",
+    icon: GraduationCap,
+    description: "Academic background",
+  },
+  {
+    key: "skills",
+    label: "Skills",
+    icon: Cog,
+    description: "Technical and soft skills",
+  },
+  {
+    key: "projects",
+    label: "Projects",
+    icon: FolderOpen,
+    description: "Portfolio projects",
+  },
+  {
+    key: "certifications",
+    label: "Certifications",
+    icon: Award,
+    description: "Professional certifications",
+  },
 ];
 
 export default function EditPortfolio() {
@@ -31,13 +68,25 @@ export default function EditPortfolio() {
   });
 
   const updateSectionMutation = useMutation({
-    mutationFn: async ({ sectionName, isVisible }: { sectionName: string; isVisible: boolean }) => {
-      return apiRequest("PATCH", `/api/section-settings/${CURRENT_USER_ID}/${sectionName}`, {
-        isVisible,
-      });
+    mutationFn: async ({
+      sectionName,
+      isVisible,
+    }: {
+      sectionName: string;
+      isVisible: boolean;
+    }) => {
+      return apiRequest(
+        "PATCH",
+        `/api/section-settings/${CURRENT_USER_ID}/${sectionName}`,
+        {
+          isVisible,
+        },
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/section-settings", CURRENT_USER_ID] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/section-settings", CURRENT_USER_ID],
+      });
       toast({
         title: "Section updated",
         description: "Portfolio section visibility updated successfully.",
@@ -53,7 +102,7 @@ export default function EditPortfolio() {
   });
 
   const getSectionSettings = (sectionKey: string) => {
-    const setting = sectionSettings.find(s => s.sectionName === sectionKey);
+    const setting = sectionSettings.find((s) => s.sectionName === sectionKey);
     return setting ? setting.isVisible : true;
   };
 
@@ -79,8 +128,12 @@ export default function EditPortfolio() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Portfolio</h1>
-            <p className="text-gray-600 mt-1">Toggle section visibility and manage your portfolio</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Edit Portfolio
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Toggle section visibility and manage your portfolio
+            </p>
           </div>
           <div className="flex space-x-4">
             <Link href="/portfolio">
@@ -96,7 +149,9 @@ export default function EditPortfolio() {
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               Portfolio Sections
-              <span className="text-sm font-normal text-gray-500">Toggle visibility</span>
+              <span className="text-sm font-normal text-gray-500">
+                Toggle visibility
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -114,8 +169,12 @@ export default function EditPortfolio() {
                     <div className="flex items-center space-x-3">
                       <IconComponent className="h-5 w-5 text-primary" />
                       <div>
-                        <h4 className="font-medium text-gray-900">{section.label}</h4>
-                        <p className="text-sm text-gray-500">{section.description}</p>
+                        <h4 className="font-medium text-gray-900">
+                          {section.label}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {section.description}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -124,7 +183,9 @@ export default function EditPortfolio() {
                       </Badge>
                       <Switch
                         checked={isVisible}
-                        onCheckedChange={(checked) => handleToggleSection(section.key, checked)}
+                        onCheckedChange={(checked) =>
+                          handleToggleSection(section.key, checked)
+                        }
                         disabled={updateSectionMutation.isPending}
                       />
                     </div>
@@ -137,9 +198,7 @@ export default function EditPortfolio() {
 
         <div className="mt-8 flex justify-center">
           <Button size="lg" asChild>
-            <Link href="/portfolio/megharaj">
-              Preview Portfolio
-            </Link>
+            <Link href="/portfolio/megharaj">Preview Portfolio</Link>
           </Button>
         </div>
       </div>

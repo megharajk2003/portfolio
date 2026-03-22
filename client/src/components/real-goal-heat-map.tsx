@@ -12,7 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
+  Legend,
 } from "recharts";
 
 interface GoalSubtopic {
@@ -49,16 +49,16 @@ interface ChartDataPoint {
 }
 
 const GOAL_COLORS = [
-  '#3b82f6', // blue
-  '#10b981', // green
-  '#f59e0b', // yellow
-  '#ef4444', // red
-  '#8b5cf6', // purple
-  '#f97316', // orange
-  '#06b6d4', // cyan
-  '#84cc16', // lime
-  '#ec4899', // pink
-  '#6b7280', // gray
+  "#3b82f6", // blue
+  "#10b981", // green
+  "#f59e0b", // yellow
+  "#ef4444", // red
+  "#8b5cf6", // purple
+  "#f97316", // orange
+  "#06b6d4", // cyan
+  "#84cc16", // lime
+  "#ec4899", // pink
+  "#6b7280", // gray
 ];
 
 export default function RealGoalHeatMap() {
@@ -68,7 +68,7 @@ export default function RealGoalHeatMap() {
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/goals");
       const goals = await response.json();
-      
+
       // For each goal, fetch detailed data including subtopics
       const detailedGoals = await Promise.all(
         goals.map(async (goal: any) => {
@@ -80,11 +80,11 @@ export default function RealGoalHeatMap() {
             return goal;
           }
           return detailResponse.json();
-        })
+        }),
       );
-      
+
       return detailedGoals;
-    }
+    },
   });
 
   const chartData = useMemo(() => {
@@ -96,17 +96,24 @@ export default function RealGoalHeatMap() {
 
     // Initialize the last 14 days
     for (let i = 13; i >= 0; i--) {
-      const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+      const date = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - i,
+      );
       const timestamp = date.getTime();
-      const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      const dateLabel = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+      });
 
       const dataPoint: ChartDataPoint = {
         date: timestamp,
-        dateLabel: dateLabel
+        dateLabel: dateLabel,
       };
 
       // Initialize all goals with 0 completed topics for this day
-      goals.forEach(goal => {
+      goals.forEach((goal) => {
         dataPoint[goal.name] = 0;
       });
 
@@ -114,28 +121,28 @@ export default function RealGoalHeatMap() {
     }
 
     // Process each goal to populate the chart data with REAL completion data
-    goals.forEach(goal => {
+    goals.forEach((goal) => {
       // Collect all completed subtopics with their completion dates
       const completedSubtopics: { date: Date; count: number }[] = [];
-      
-      goal.categories.forEach(category => {
-        category.topics.forEach(topic => {
-          topic.subtopics.forEach(subtopic => {
+
+      goal.categories.forEach((category) => {
+        category.topics.forEach((topic) => {
+          topic.subtopics.forEach((subtopic) => {
             if (subtopic.status === "completed" && subtopic.completedAt) {
               const completionDate = new Date(subtopic.completedAt);
               completionDate.setHours(0, 0, 0, 0); // Normalize to start of day
-              
+
               // Find existing entry for this date or create new one
-              const existingEntry = completedSubtopics.find(entry => 
-                entry.date.getTime() === completionDate.getTime()
+              const existingEntry = completedSubtopics.find(
+                (entry) => entry.date.getTime() === completionDate.getTime(),
               );
-              
+
               if (existingEntry) {
                 existingEntry.count += 1;
               } else {
                 completedSubtopics.push({
                   date: completionDate,
-                  count: 1
+                  count: 1,
                 });
               }
             }
@@ -148,16 +155,19 @@ export default function RealGoalHeatMap() {
 
       // Calculate cumulative progress for each day in the 2-week period
       let cumulativeCompleted = 0;
-      daysData.forEach(dayData => {
+      daysData.forEach((dayData) => {
         const dayDate = new Date(dayData.date); // dayData.date is now a timestamp
         dayDate.setHours(0, 0, 0, 0);
 
         // Add completions from this day
-        const completionsOnThisDay = completedSubtopics.filter(completion => 
-          completion.date.getTime() === dayDate.getTime()
+        const completionsOnThisDay = completedSubtopics.filter(
+          (completion) => completion.date.getTime() === dayDate.getTime(),
         );
-        
-        const completionsToday = completionsOnThisDay.reduce((sum, comp) => sum + comp.count, 0);
+
+        const completionsToday = completionsOnThisDay.reduce(
+          (sum, comp) => sum + comp.count,
+          0,
+        );
         cumulativeCompleted += completionsToday;
 
         dayData[goal.name] = cumulativeCompleted;
@@ -168,10 +178,22 @@ export default function RealGoalHeatMap() {
   }, [goals]);
 
   const totalGoals = goals.length;
-  const totalCompletedSubtopics = goals.reduce((total, goal) => 
-    total + goal.categories.reduce((catTotal, category) => 
-      catTotal + category.topics.reduce((topicTotal, topic) => 
-        topicTotal + topic.subtopics.filter(s => s.status === "completed").length, 0), 0), 0);
+  const totalCompletedSubtopics = goals.reduce(
+    (total, goal) =>
+      total +
+      goal.categories.reduce(
+        (catTotal, category) =>
+          catTotal +
+          category.topics.reduce(
+            (topicTotal, topic) =>
+              topicTotal +
+              topic.subtopics.filter((s) => s.status === "completed").length,
+            0,
+          ),
+        0,
+      ),
+    0,
+  );
 
   return (
     <Card className="w-full">
@@ -193,32 +215,45 @@ export default function RealGoalHeatMap() {
           {chartData.length > 0 ? (
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-                  <XAxis 
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200 dark:stroke-gray-700"
+                  />
+                  <XAxis
                     dataKey="date"
                     type="number"
                     scale="time"
-                    domain={['dataMin', 'dataMax']}
+                    domain={["dataMin", "dataMax"]}
                     tickFormatter={(timestamp) => {
                       const date = new Date(timestamp);
-                      return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+                      return date.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "2-digit",
+                      });
                     }}
                     className="text-gray-600 dark:text-white"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }}
+                    axisLine={{ stroke: "hsl(var(--foreground))" }}
+                    tickLine={{ stroke: "hsl(var(--foreground))" }}
                   />
-                  <YAxis 
+                  <YAxis
                     className="text-gray-600 dark:text-white"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }}
+                    axisLine={{ stroke: "hsl(var(--foreground))" }}
+                    tickLine={{ stroke: "hsl(var(--foreground))" }}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
-                    labelStyle={{ color: '#374151', fontWeight: 'semibold' }}
+                    labelStyle={{ color: "#374151", fontWeight: "semibold" }}
                   />
                   <Legend />
                   {goals.map((goal, index) => (
@@ -240,11 +275,14 @@ export default function RealGoalHeatMap() {
               <div className="text-center">
                 <Target className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>No goal data available</p>
-                <p className="text-sm">Create some goals and start completing subtopics to see your progress!</p>
+                <p className="text-sm">
+                  Create some goals and start completing subtopics to see your
+                  progress!
+                </p>
               </div>
             </div>
           )}
-          
+
           {totalCompletedSubtopics > 0 && (
             <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg p-4">
               <div className="flex items-center justify-between">

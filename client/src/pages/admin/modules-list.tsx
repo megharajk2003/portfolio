@@ -192,7 +192,7 @@ export default function ModulesList() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ modules: updatedModules }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -221,7 +221,7 @@ export default function ModulesList() {
 
   // Handle form input changes
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({

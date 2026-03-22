@@ -65,7 +65,7 @@ export default function ForumModeration() {
   const { data: posts = [], isLoading: isLoadingPosts } = useQuery<ForumPost[]>(
     {
       queryKey: ["/api/admin/forum/posts"],
-    }
+    },
   );
 
   // Fetch replies for a specific post

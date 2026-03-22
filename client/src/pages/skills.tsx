@@ -144,7 +144,10 @@ export default function Skills() {
             <Card>
               <CardContent className="p-6 text-center">
                 <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {skills.filter((s: Skill) => s.category === "technical").length}
+                  {
+                    skills.filter((s: Skill) => s.category === "technical")
+                      .length
+                  }
                 </div>
                 <div className="text-gray-600 dark:text-white">
                   Technical Skills
@@ -168,8 +171,7 @@ export default function Skills() {
                     skills.reduce(
                       (sum: number, skill: Skill) => sum + (skill.level ?? 0),
                       0,
-                    ) /
-                      skills.length
+                    ) / skills.length,
                   ) || 0}
                   %
                 </div>
@@ -237,7 +239,8 @@ export default function Skills() {
                                       <Star
                                         key={i}
                                         className={`h-3 w-3 ${
-                                          i < Math.floor((skill.level ?? 0) / 20) 
+                                          i <
+                                          Math.floor((skill.level ?? 0) / 20)
                                             ? "text-yellow-400 fill-current"
                                             : "text-gray-300"
                                         }`}
@@ -259,22 +262,22 @@ export default function Skills() {
                                 )}
                                 {(skill.level ?? 0) >= 60 &&
                                   (skill.level ?? 0) < 80 && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs bg-blue-50 text-blue-700 border-blue-200"
-                                  >
-                                    Advanced
-                                  </Badge>
-                                )}
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                                    >
+                                      Advanced
+                                    </Badge>
+                                  )}
                                 {(skill.level ?? 0) >= 40 &&
                                   (skill.level ?? 0) < 60 && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200"
-                                  >
-                                    Intermediate
-                                  </Badge>
-                                )}
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200"
+                                    >
+                                      Intermediate
+                                    </Badge>
+                                  )}
                                 {(skill.level ?? 0) < 40 && (
                                   <Badge
                                     variant="outline"
@@ -290,7 +293,7 @@ export default function Skills() {
                       </div>
                     </div>
                   );
-                }
+                },
               )}
             </div>
           ) : (

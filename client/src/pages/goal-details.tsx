@@ -24,7 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Target, Edit2, Trash2, Plus, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Target,
+  Edit2,
+  Trash2,
+  Plus,
+  CheckCircle2,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
 import GoalProgressChart from "@/components/goal-progress-chart";
@@ -73,13 +80,22 @@ interface GoalWithDetails {
 }
 
 // API functions
-const fetchGoalWithCategories = async (goalId: string): Promise<GoalWithDetails> => {
+const fetchGoalWithCategories = async (
+  goalId: string,
+): Promise<GoalWithDetails> => {
   const response = await apiRequest("GET", `/api/goals/${goalId}`);
   return response.json();
 };
 
-const updateSubtopicStatus = async (subtopicId: string, status: "pending" | "start" | "completed") => {
-  const response = await apiRequest("PATCH", `/api/goal-subtopics/${subtopicId}`, { status });
+const updateSubtopicStatus = async (
+  subtopicId: string,
+  status: "pending" | "start" | "completed",
+) => {
+  const response = await apiRequest(
+    "PATCH",
+    `/api/goal-subtopics/${subtopicId}`,
+    { status },
+  );
   return response.json();
 };
 
@@ -100,11 +116,11 @@ export default function GoalDetails() {
   const goalId = location.split("/")[2]; // /goal-details/{goalId}
 
   // Fetch goal details
-  const { 
-    data: goal, 
-    isLoading, 
+  const {
+    data: goal,
+    isLoading,
     error,
-    refetch 
+    refetch,
   } = useQuery({
     queryKey: ["goal", goalId],
     queryFn: () => fetchGoalWithCategories(goalId),
@@ -113,8 +129,13 @@ export default function GoalDetails() {
 
   // Update subtopic status mutation
   const updateSubtopicMutation = useMutation({
-    mutationFn: ({ subtopicId, status }: { subtopicId: string; status: "pending" | "start" | "completed" }) =>
-      updateSubtopicStatus(subtopicId, status),
+    mutationFn: ({
+      subtopicId,
+      status,
+    }: {
+      subtopicId: string;
+      status: "pending" | "start" | "completed";
+    }) => updateSubtopicStatus(subtopicId, status),
     onSuccess: () => {
       toast({ title: "Success", description: "Subtopic status updated" });
       refetch();
@@ -172,7 +193,10 @@ export default function GoalDetails() {
     }
   };
 
-  const handleSubtopicStatusToggle = (subtopicId: string, currentStatus: string) => {
+  const handleSubtopicStatusToggle = (
+    subtopicId: string,
+    currentStatus: string,
+  ) => {
     let newStatus: "pending" | "start" | "completed";
     switch (currentStatus) {
       case "pending":
@@ -187,12 +211,16 @@ export default function GoalDetails() {
       default:
         newStatus = "start";
     }
-    
+
     updateSubtopicMutation.mutate({ subtopicId, status: newStatus });
   };
 
   const handleDeleteGoal = () => {
-    if (window.confirm("Are you sure you want to delete this goal? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this goal? This action cannot be undone.",
+      )
+    ) {
       deleteGoalMutation.mutate(goalId);
     }
   };
@@ -203,7 +231,9 @@ export default function GoalDetails() {
         <Sidebar />
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
-            <div className="text-center">Please log in to view goal details.</div>
+            <div className="text-center">
+              Please log in to view goal details.
+            </div>
           </div>
         </div>
       </div>
@@ -233,7 +263,8 @@ export default function GoalDetails() {
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
             <div className="text-red-600 dark:text-red-400">
-              Error loading goal: {error ? (error as Error).message : "Goal not found"}
+              Error loading goal:{" "}
+              {error ? (error as Error).message : "Goal not found"}
             </div>
           </div>
         </div>
@@ -334,11 +365,18 @@ export default function GoalDetails() {
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Overall Progress</span>
                   <span className="text-sm text-gray-600">
-                    {Math.round((goal.completedSubtopics / goal.totalSubtopics) * 100)}%
+                    {Math.round(
+                      (goal.completedSubtopics / goal.totalSubtopics) * 100,
+                    )}
+                    %
                   </span>
                 </div>
                 <Progress
-                  value={goal.totalSubtopics > 0 ? (goal.completedSubtopics / goal.totalSubtopics) * 100 : 0}
+                  value={
+                    goal.totalSubtopics > 0
+                      ? (goal.completedSubtopics / goal.totalSubtopics) * 100
+                      : 0
+                  }
                   className="h-2"
                 />
               </div>
@@ -377,14 +415,16 @@ export default function GoalDetails() {
                           <Progress
                             value={
                               topic.totalSubtopics > 0
-                                ? (topic.completedSubtopics / topic.totalSubtopics) * 100
+                                ? (topic.completedSubtopics /
+                                    topic.totalSubtopics) *
+                                  100
                                 : 0
                             }
                             className="w-20 h-2"
                           />
                         </div>
                       </div>
-                      
+
                       {topic.subtopics.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                           {topic.subtopics.map((subtopic) => (
@@ -405,7 +445,9 @@ export default function GoalDetails() {
                                   </Badge>
                                   <Badge
                                     variant="outline"
-                                    className={getPriorityColor(subtopic.priority)}
+                                    className={getPriorityColor(
+                                      subtopic.priority,
+                                    )}
                                   >
                                     {subtopic.priority}
                                   </Badge>
@@ -415,7 +457,10 @@ export default function GoalDetails() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() =>
-                                  handleSubtopicStatusToggle(subtopic.id, subtopic.status)
+                                  handleSubtopicStatusToggle(
+                                    subtopic.id,
+                                    subtopic.status,
+                                  )
                                 }
                                 disabled={updateSubtopicMutation.isPending}
                                 className="ml-2"
@@ -441,7 +486,8 @@ export default function GoalDetails() {
                   No Categories Found
                 </h3>
                 <p className="text-gray-600 dark:text-white">
-                  This goal doesn't have any categories or topics yet. Try uploading a CSV file to populate it.
+                  This goal doesn't have any categories or topics yet. Try
+                  uploading a CSV file to populate it.
                 </p>
               </CardContent>
             </Card>

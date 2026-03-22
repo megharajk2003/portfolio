@@ -403,7 +403,7 @@ export default function ModuleDetail() {
             <Button
               onClick={() => {
                 const firstUnlockedLesson = lessons.findIndex((_, index) =>
-                  isLessonUnlocked(index)
+                  isLessonUnlocked(index),
                 );
                 if (firstUnlockedLesson !== -1) {
                   document

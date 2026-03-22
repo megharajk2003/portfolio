@@ -45,20 +45,24 @@ export default function RecentActivity({ userId }: RecentActivityProps) {
         <div className="space-y-4">
           {mockActivities.map((activity) => {
             const IconComponent = activity.icon;
-            
+
             return (
               <div key={activity.id} className="flex items-start space-x-3">
-                <div className={`w-8 h-8 ${activity.iconBg} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}>
+                <div
+                  className={`w-8 h-8 ${activity.iconBg} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}
+                >
                   <IconComponent className={`${activity.iconColor} h-4 w-4`} />
                 </div>
                 <div className="flex-1">
                   <p className="text-gray-900">
                     <span className="font-medium">
-                      {activity.title.split(' ')[0]}
-                    </span>{' '}
-                    {activity.title.split(' ').slice(1).join(' ')}
+                      {activity.title.split(" ")[0]}
+                    </span>{" "}
+                    {activity.title.split(" ").slice(1).join(" ")}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">{activity.description}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {activity.description}
+                  </p>
                 </div>
               </div>
             );

@@ -39,7 +39,7 @@ export default function AuthPage() {
     } catch (error) {
       console.error(
         isLoginView ? "Login failed:" : "Registration failed:",
-        error
+        error,
       );
       // Implement a more user-friendly error display here (e.g., a toast notification)
     }

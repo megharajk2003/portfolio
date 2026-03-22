@@ -541,7 +541,7 @@ export default function PublicPortfolio() {
                                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                                     <span>{achievement}</span>
                                   </li>
-                                )
+                                ),
                               )}
                             </ul>
                           </div>
@@ -566,7 +566,7 @@ export default function PublicPortfolio() {
                       <div className="text-3xl font-bold text-blue-600 mb-2">
                         {
                           visibleSkills.filter(
-                            (s) => s.category === "technical"
+                            (s) => s.category === "technical",
                           ).length
                         }
                       </div>
@@ -594,11 +594,11 @@ export default function PublicPortfolio() {
                         {Math.round(
                           (visibleSkills.reduce(
                             (sum, skill) => sum + skill.level,
-                            0
+                            0,
                           ) /
                             visibleSkills.length /
                             5) *
-                            100
+                            100,
                         ) || 0}
                         %
                       </div>
@@ -614,7 +614,7 @@ export default function PublicPortfolio() {
                 <div className="space-y-8">
                   {/* Technical Skills */}
                   {visibleSkills.filter(
-                    (skill) => skill.category === "technical"
+                    (skill) => skill.category === "technical",
                   ).length > 0 && (
                     <div>
                       <div className="flex items-center space-x-3 mb-4">
@@ -628,7 +628,7 @@ export default function PublicPortfolio() {
                         >
                           {
                             visibleSkills.filter(
-                              (skill) => skill.category === "technical"
+                              (skill) => skill.category === "technical",
                             ).length
                           }
                         </Badge>
@@ -723,7 +723,7 @@ export default function PublicPortfolio() {
                         >
                           {
                             visibleSkills.filter(
-                              (skill) => skill.category === "soft"
+                              (skill) => skill.category === "soft",
                             ).length
                           }
                         </Badge>
@@ -1116,7 +1116,7 @@ export default function PublicPortfolio() {
                                         key={i}
                                         className="h-4 w-4 text-yellow-400 fill-current"
                                       />
-                                    )
+                                    ),
                                   )}
                                 </div>
                               </div>

@@ -110,14 +110,14 @@ export default function Learning() {
     "Software & Tech",
   ].map((name) => ({ id: name, name, count: 0, icon: BookOpen }));
 
-  const categoriesWithCounts = (categories.length ? categories : fallbackCategories).map(
-    (category: any) => ({
-      ...category,
-      count: courses.filter((c: any) =>
-        c.categories?.some((cat: any) => cat.id === category.id),
-      ).length,
-    }),
-  );
+  const categoriesWithCounts = (
+    categories.length ? categories : fallbackCategories
+  ).map((category: any) => ({
+    ...category,
+    count: courses.filter((c: any) =>
+      c.categories?.some((cat: any) => cat.id === category.id),
+    ).length,
+  }));
 
   const skills = useMemo(() => {
     const map = new Map<string, number>();
@@ -345,7 +345,8 @@ export default function Learning() {
                       {course.durationMonths ?? "1"} months
                     </span>
                     <span className="flex items-center gap-1">
-                      • {course.modulesCount ?? course.modules?.length ?? 1} modules
+                      • {course.modulesCount ?? course.modules?.length ?? 1}{" "}
+                      modules
                     </span>
                   </div>
 

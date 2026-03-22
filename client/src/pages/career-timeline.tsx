@@ -78,7 +78,7 @@ export default function CareerTimeline() {
       console.log("🗑️ [CLIENT] Deleting timeline:", timelineId);
       const response = await apiRequest(
         "DELETE",
-        `/api/career-timeline/${timelineId}`
+        `/api/career-timeline/${timelineId}`,
       );
       const result = await response.json();
       console.log("✅ [CLIENT] Timeline deletion response:", result);
@@ -331,7 +331,7 @@ export default function CareerTimeline() {
                                         {phase.milestones.map(
                                           (
                                             milestone: string,
-                                            mIndex: number
+                                            mIndex: number,
                                           ) => (
                                             <li
                                               key={mIndex}
@@ -344,7 +344,7 @@ export default function CareerTimeline() {
                                                 {milestone}
                                               </span>
                                             </li>
-                                          )
+                                          ),
                                         )}
                                       </ul>
                                     </div>
@@ -365,7 +365,7 @@ export default function CareerTimeline() {
                                           >
                                             {skill}
                                           </Badge>
-                                        )
+                                        ),
                                       )}
                                     </div>
                                   </div>

@@ -31,7 +31,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Edit, Trash2, Search, BookOpen, Settings } from "lucide-react";
+import {
+  PlusCircle,
+  Edit,
+  Trash2,
+  Search,
+  BookOpen,
+  Settings,
+} from "lucide-react";
 import { Link } from "wouter";
 import Sidebar from "@/components/sidebar";
 
@@ -239,7 +246,7 @@ export default function CoursesManagement() {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -404,7 +411,7 @@ export default function CoursesManagement() {
                   ) : (
                     filteredCourses.map((course) => {
                       const instructor = instructors.find(
-                        (i) => i.id === course.instructorId
+                        (i) => i.id === course.instructorId,
                       );
                       return (
                         <TableRow key={course.id}>
@@ -619,7 +626,7 @@ export default function CoursesManagement() {
                     onValueChange={(value) =>
                       handleSelectChange(
                         "status",
-                        value as "Published" | "Draft"
+                        value as "Published" | "Draft",
                       )
                     }
                   >
@@ -777,7 +784,7 @@ export default function CoursesManagement() {
                     onValueChange={(value) =>
                       handleSelectChange(
                         "status",
-                        value as "Published" | "Draft"
+                        value as "Published" | "Draft",
                       )
                     }
                   >
@@ -854,20 +861,23 @@ export default function CoursesManagement() {
             <DialogHeader>
               <DialogTitle>Manage Course Details</DialogTitle>
               <DialogDescription>
-                Update comprehensive course information including media, learning outcomes, and scheduling.
+                Update comprehensive course information including media,
+                learning outcomes, and scheduling.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-6 py-4">
               {/* Media & Visual Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Media & Visual Information</h3>
+                <h3 className="text-lg font-semibold">
+                  Media & Visual Information
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="coverImageUrl">Cover Image URL</Label>
                     <Input
                       id="coverImageUrl"
                       name="coverImageUrl"
-                      value={formData.coverImageUrl || ''}
+                      value={formData.coverImageUrl || ""}
                       onChange={handleInputChange}
                       placeholder="https://example.com/course-image.jpg"
                     />
@@ -877,7 +887,7 @@ export default function CoursesManagement() {
                     <Input
                       id="promoVideoUrl"
                       name="promoVideoUrl"
-                      value={formData.promoVideoUrl || ''}
+                      value={formData.promoVideoUrl || ""}
                       onChange={handleInputChange}
                       placeholder="https://youtube.com/watch?v=..."
                     />
@@ -887,8 +897,10 @@ export default function CoursesManagement() {
                   <div>
                     <Label htmlFor="language">Course Language</Label>
                     <Select
-                      value={formData.language || 'English'}
-                      onValueChange={(value) => handleSelectChange("language", value)}
+                      value={formData.language || "English"}
+                      onValueChange={(value) =>
+                        handleSelectChange("language", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select language" />
@@ -910,7 +922,7 @@ export default function CoursesManagement() {
                     <Input
                       id="scheduleInfo"
                       name="scheduleInfo"
-                      value={formData.scheduleInfo || ''}
+                      value={formData.scheduleInfo || ""}
                       onChange={handleInputChange}
                       placeholder="e.g., 3 hours/week, flexible schedule"
                     />
@@ -920,7 +932,9 @@ export default function CoursesManagement() {
 
               {/* Learning Outcomes & Skills */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Learning Outcomes & Skills</h3>
+                <h3 className="text-lg font-semibold">
+                  Learning Outcomes & Skills
+                </h3>
 
                 {/* What You Will Learn */}
                 <div>
@@ -931,9 +945,14 @@ export default function CoursesManagement() {
                         <Input
                           value={item}
                           onChange={(e) => {
-                            const updated = [...(formData.whatYouWillLearn || [])];
+                            const updated = [
+                              ...(formData.whatYouWillLearn || []),
+                            ];
                             updated[index] = e.target.value;
-                            setFormData(prev => ({ ...prev, whatYouWillLearn: updated }));
+                            setFormData((prev) => ({
+                              ...prev,
+                              whatYouWillLearn: updated,
+                            }));
                           }}
                           placeholder="Enter learning outcome"
                           className="flex-1"
@@ -943,8 +962,13 @@ export default function CoursesManagement() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const updated = (formData.whatYouWillLearn || []).filter((_, i) => i !== index);
-                            setFormData(prev => ({ ...prev, whatYouWillLearn: updated }));
+                            const updated = (
+                              formData.whatYouWillLearn || []
+                            ).filter((_, i) => i !== index);
+                            setFormData((prev) => ({
+                              ...prev,
+                              whatYouWillLearn: updated,
+                            }));
                           }}
                         >
                           Remove
@@ -956,9 +980,12 @@ export default function CoursesManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
-                          whatYouWillLearn: [...(prev.whatYouWillLearn || []), '']
+                          whatYouWillLearn: [
+                            ...(prev.whatYouWillLearn || []),
+                            "",
+                          ],
                         }));
                       }}
                     >
@@ -977,9 +1004,14 @@ export default function CoursesManagement() {
                         <Input
                           value={skill}
                           onChange={(e) => {
-                            const updated = [...(formData.skillsYouWillGain || [])];
+                            const updated = [
+                              ...(formData.skillsYouWillGain || []),
+                            ];
                             updated[index] = e.target.value;
-                            setFormData(prev => ({ ...prev, skillsYouWillGain: updated }));
+                            setFormData((prev) => ({
+                              ...prev,
+                              skillsYouWillGain: updated,
+                            }));
                           }}
                           placeholder="Enter skill"
                           className="flex-1"
@@ -989,8 +1021,13 @@ export default function CoursesManagement() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const updated = (formData.skillsYouWillGain || []).filter((_, i) => i !== index);
-                            setFormData(prev => ({ ...prev, skillsYouWillGain: updated }));
+                            const updated = (
+                              formData.skillsYouWillGain || []
+                            ).filter((_, i) => i !== index);
+                            setFormData((prev) => ({
+                              ...prev,
+                              skillsYouWillGain: updated,
+                            }));
                           }}
                         >
                           Remove
@@ -1002,9 +1039,12 @@ export default function CoursesManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
-                          skillsYouWillGain: [...(prev.skillsYouWillGain || []), '']
+                          skillsYouWillGain: [
+                            ...(prev.skillsYouWillGain || []),
+                            "",
+                          ],
                         }));
                       }}
                     >
@@ -1025,7 +1065,10 @@ export default function CoursesManagement() {
                           onChange={(e) => {
                             const updated = [...(formData.detailsToKnow || [])];
                             updated[index] = e.target.value;
-                            setFormData(prev => ({ ...prev, detailsToKnow: updated }));
+                            setFormData((prev) => ({
+                              ...prev,
+                              detailsToKnow: updated,
+                            }));
                           }}
                           placeholder="Enter important detail"
                           className="flex-1"
@@ -1035,8 +1078,13 @@ export default function CoursesManagement() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const updated = (formData.detailsToKnow || []).filter((_, i) => i !== index);
-                            setFormData(prev => ({ ...prev, detailsToKnow: updated }));
+                            const updated = (
+                              formData.detailsToKnow || []
+                            ).filter((_, i) => i !== index);
+                            setFormData((prev) => ({
+                              ...prev,
+                              detailsToKnow: updated,
+                            }));
                           }}
                         >
                           Remove
@@ -1048,9 +1096,9 @@ export default function CoursesManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
-                          detailsToKnow: [...(prev.detailsToKnow || []), '']
+                          detailsToKnow: [...(prev.detailsToKnow || []), ""],
                         }));
                       }}
                     >

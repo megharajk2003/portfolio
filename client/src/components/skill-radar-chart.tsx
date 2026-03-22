@@ -39,13 +39,16 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
   };
 
   // Calculate average skill levels by category
-  const skillsByCategory = skills.reduce((acc, skill) => {
-    if (!acc[skill.category || "technical"]) {
-      acc[skill.category || "technical"] = [];
-    }
-    acc[skill.category || "technical"].push(skill.level);
-    return acc;
-  }, {} as Record<string, number[]>);
+  const skillsByCategory = skills.reduce(
+    (acc, skill) => {
+      if (!acc[skill.category || "technical"]) {
+        acc[skill.category || "technical"] = [];
+      }
+      acc[skill.category || "technical"].push(skill.level);
+      return acc;
+    },
+    {} as Record<string, number[]>,
+  );
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -69,7 +72,7 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
       const averageLevel =
         (levels as number[]).reduce(
           (sum: number, level: number) => sum + level,
-          0
+          0,
         ) / levels.length;
       const averagePercentage = levelToPercentage(averageLevel);
       return {
@@ -82,7 +85,7 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
         innerRadius: 20 + index * 15,
         outerRadius: 60 + index * 10,
       };
-    }
+    },
   );
 
   const getIconForCategory = (category: string) => {

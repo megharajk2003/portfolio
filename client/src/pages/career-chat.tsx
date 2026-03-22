@@ -35,7 +35,7 @@ export default function CareerChat() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    null
+    null,
   );
   const [newSessionTitle, setNewSessionTitle] = useState("");
   const [message, setMessage] = useState("");
@@ -65,11 +65,11 @@ export default function CareerChat() {
       if (!selectedSessionId) return null;
       console.log(
         "🔍 [FRONTEND] Fetching session details for:",
-        selectedSessionId
+        selectedSessionId,
       );
       const response = await apiRequest(
         "GET",
-        `/api/chat-sessions/session/${selectedSessionId}`
+        `/api/chat-sessions/session/${selectedSessionId}`,
       );
       const sessionData = await response.json();
       console.log("📋 [FRONTEND] Session data received:", sessionData);
@@ -113,12 +113,12 @@ export default function CareerChat() {
       return apiRequest(
         "POST",
         `/api/chat-sessions/${data.sessionId}/message`,
-        { message: data.message }
+        { message: data.message },
       );
     },
     onSuccess: () => {
       console.log(
-        "✅ [FRONTEND] Message sent successfully, invalidating queries..."
+        "✅ [FRONTEND] Message sent successfully, invalidating queries...",
       );
       queryClient.invalidateQueries({
         queryKey: ["/api/chat-sessions/session", selectedSessionId],
@@ -348,7 +348,7 @@ export default function CareerChat() {
                       <Badge variant="outline">
                         <Calendar className="h-3 w-3 mr-1" />
                         {new Date(
-                          (currentSession as any).createdAt
+                          (currentSession as any).createdAt,
                         ).toLocaleDateString()}
                       </Badge>
                       <Badge variant="outline">
@@ -426,7 +426,7 @@ export default function CareerChat() {
                                   </div>
                                 </div>
                               </div>
-                            )
+                            ),
                           )}
                           <div ref={messagesEndRef} />
                         </div>

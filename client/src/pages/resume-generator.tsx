@@ -534,7 +534,7 @@ export default function ResumeGenerator() {
                                                 {exp.responsibilities.map(
                                                   (
                                                     resp: string,
-                                                    rIndex: number
+                                                    rIndex: number,
                                                   ) => (
                                                     <li
                                                       key={rIndex}
@@ -545,12 +545,12 @@ export default function ResumeGenerator() {
                                                       </span>
                                                       <span>{resp}</span>
                                                     </li>
-                                                  )
+                                                  ),
                                                 )}
                                               </ul>
                                             )}
                                         </div>
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 </div>
@@ -575,7 +575,7 @@ export default function ResumeGenerator() {
                                             {skillGroup.items.map(
                                               (
                                                 skill: string,
-                                                sIndex: number
+                                                sIndex: number,
                                               ) => (
                                                 <Badge
                                                   key={sIndex}
@@ -584,11 +584,11 @@ export default function ResumeGenerator() {
                                                 >
                                                   {skill}
                                                 </Badge>
-                                              )
+                                              ),
                                             )}
                                           </div>
                                         </div>
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 </div>
@@ -738,12 +738,12 @@ export default function ResumeGenerator() {
                                           {exp.responsibilities.map(
                                             (resp: string, rIndex: number) => (
                                               <li key={rIndex}>{resp}</li>
-                                            )
+                                            ),
                                           )}
                                         </ul>
                                       )}
                                   </div>
-                                )
+                                ),
                               )}
                             </div>
                           </div>
@@ -773,11 +773,11 @@ export default function ResumeGenerator() {
                                           >
                                             {skill}
                                           </Badge>
-                                        )
+                                        ),
                                       )}
                                     </div>
                                   </div>
-                                )
+                                ),
                               )}
                             </div>
                           </div>

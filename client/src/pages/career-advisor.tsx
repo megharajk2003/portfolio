@@ -311,7 +311,7 @@ export default function CareerAdvisor() {
                                     {rec}
                                   </span>
                                 </li>
-                              )
+                              ),
                             )}
                           </ul>
                         </div>
@@ -334,7 +334,7 @@ export default function CareerAdvisor() {
                                 >
                                   {skill}
                                 </Badge>
-                              )
+                              ),
                             )}
                           </div>
                         </div>
@@ -357,7 +357,7 @@ export default function CareerAdvisor() {
                                   <ArrowRight className="h-3 w-3 text-blue-600 mt-0.5 flex-shrink-0" />
                                   {step}
                                 </li>
-                              )
+                              ),
                             )}
                           </ul>
                         </div>

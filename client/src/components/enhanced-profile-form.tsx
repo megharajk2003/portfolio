@@ -268,10 +268,10 @@ export default function EnhancedProfileForm({
           },
           achievements: sections.achievements.map((a: SectionEntry) => a.title),
           certifications: sections.certificates.map(
-            (c: SectionEntry) => c.title
+            (c: SectionEntry) => c.title,
           ),
           organizations: sections.organizations.map(
-            (o: SectionEntry) => o.title
+            (o: SectionEntry) => o.title,
           ),
         },
       };
@@ -299,13 +299,13 @@ export default function EnhancedProfileForm({
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<BasicProfileData>) => {
       // Structure the data according to the profile schema
-        const profileData = {
-          personalDetails: {
-            fullName: data.name,
-            roleOrTitle: data.role,
-            summary: data.summary,
-            languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
-          },
+      const profileData = {
+        personalDetails: {
+          fullName: data.name,
+          roleOrTitle: data.role,
+          summary: data.summary,
+          languagesKnown: sections.languages.map((l: SectionEntry) => l.title),
+        },
         contactDetails: {
           email: data.email,
           phone: data.phone,
@@ -319,10 +319,10 @@ export default function EnhancedProfileForm({
           },
           achievements: sections.achievements.map((a: SectionEntry) => a.title),
           certifications: sections.certificates.map(
-            (c: SectionEntry) => c.title
+            (c: SectionEntry) => c.title,
           ),
           organizations: sections.organizations.map(
-            (o: SectionEntry) => o.title
+            (o: SectionEntry) => o.title,
           ),
         },
       };
@@ -385,7 +385,7 @@ export default function EnhancedProfileForm({
 
   const handleDeleteEntry = (
     sectionKey: keyof typeof sections,
-    entryId: string
+    entryId: string,
   ) => {
     setSections((prev) => ({
       ...prev,
@@ -395,7 +395,7 @@ export default function EnhancedProfileForm({
 
   const handleSelectSuggestion = (
     sectionKey: keyof typeof sections,
-    suggestion: string
+    suggestion: string,
   ) => {
     const newEntry = {
       id: `${sectionKey}-${Date.now()}`,

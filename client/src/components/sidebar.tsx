@@ -114,9 +114,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               knowme
             </h1>
-            <p className="text-sm text-gray-500 dark:text-white">
-              Dashboard
-            </p>
+            <p className="text-sm text-gray-500 dark:text-white">Dashboard</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

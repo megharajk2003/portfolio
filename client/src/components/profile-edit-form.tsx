@@ -151,7 +151,7 @@ export default function ProfileEditForm({
       " useEffect triggered. User:",
       user,
       "ExistingProfile:",
-      existingProfile
+      existingProfile,
     );
     if (user || existingProfile) {
       const profile = existingProfile; // No need for type assertion now
@@ -162,7 +162,9 @@ export default function ProfileEditForm({
       const formatLocation = (location: any): string => {
         if (!location) return "";
         if (typeof location === "string") return location;
-        const parts = [location.city, location.state, location.country].filter(Boolean);
+        const parts = [location.city, location.state, location.country].filter(
+          Boolean,
+        );
         return parts.join(", ");
       };
 
@@ -181,15 +183,15 @@ export default function ProfileEditForm({
         leetcodeUrl: contactDetails?.otherProfiles?.leetcode || "",
         otherLinks: contactDetails?.otherProfiles?.otherLinks || [],
         languages: personalDetails?.languagesKnown || [],
-        achievements: (otherDetails?.achievements || []).map((a: any) =>
-          typeof a === "string" ? a : a?.title,
-        ).filter(Boolean),
-        certificates: (otherDetails?.certifications || []).map((c: any) =>
-          typeof c === "string" ? c : c?.title,
-        ).filter(Boolean),
-        organizations: (otherDetails?.organizations || []).map((o: any) =>
-          typeof o === "string" ? o : o?.name,
-        ).filter(Boolean),
+        achievements: (otherDetails?.achievements || [])
+          .map((a: any) => (typeof a === "string" ? a : a?.title))
+          .filter(Boolean),
+        certificates: (otherDetails?.certifications || [])
+          .map((c: any) => (typeof c === "string" ? c : c?.title))
+          .filter(Boolean),
+        organizations: (otherDetails?.organizations || [])
+          .map((o: any) => (typeof o === "string" ? o : o?.name))
+          .filter(Boolean),
         educationSummary: otherDetails?.educationSummary || "",
         skillsSummary: otherDetails?.skillsSummary || "",
         internshipExperience: otherDetails?.internshipExperience || "",
@@ -214,11 +216,18 @@ export default function ProfileEditForm({
         throw new Error("User ID is invalid.");
       }
       const parseLocation = (value: string) => {
-        const parts = value.split(",").map((p) => p.trim()).filter(Boolean);
+        const parts = value
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
         if (parts.length === 0) return undefined;
         if (parts.length === 1) return { city: parts[0] };
         if (parts.length === 2) return { city: parts[0], state: parts[1] };
-        return { city: parts[0], state: parts[1], country: parts.slice(2).join(", ") };
+        return {
+          city: parts[0],
+          state: parts[1],
+          country: parts.slice(2).join(", "),
+        };
       };
 
       const payload = {
@@ -289,11 +298,18 @@ export default function ProfileEditForm({
     mutationFn: (data: Partial<ProfileFormData>) => {
       const parseLocation = (value?: string) => {
         if (!value) return undefined;
-        const parts = value.split(",").map((p) => p.trim()).filter(Boolean);
+        const parts = value
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
         if (parts.length === 0) return undefined;
         if (parts.length === 1) return { city: parts[0] };
         if (parts.length === 2) return { city: parts[0], state: parts[1] };
-        return { city: parts[0], state: parts[1], country: parts.slice(2).join(", ") };
+        return {
+          city: parts[0],
+          state: parts[1],
+          country: parts.slice(2).join(", "),
+        };
       };
 
       const payload = {
@@ -436,7 +452,7 @@ export default function ProfileEditForm({
               },
               (errors) => {
                 console.error(" Validation errors:", errors);
-              }
+              },
             )}
             className="space-y-6"
           >
@@ -505,7 +521,8 @@ export default function ProfileEditForm({
                                   // Convert to base64 for storage
                                   const reader = new FileReader();
                                   reader.onload = (event) => {
-                                    const base64String = event.target?.result as string;
+                                    const base64String = event.target
+                                      ?.result as string;
                                     field.onChange(base64String);
                                   };
                                   reader.readAsDataURL(file);
@@ -528,10 +545,16 @@ export default function ProfileEditForm({
 
                           {/* Photo URL Input as Alternative */}
                           <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Or enter photo URL:</p>
+                            <p className="text-sm text-gray-600">
+                              Or enter photo URL:
+                            </p>
                             <Input
                               placeholder="https://example.com/photo.jpg"
-                              value={field.value?.startsWith('http') ? field.value : ''}
+                              value={
+                                field.value?.startsWith("http")
+                                  ? field.value
+                                  : ""
+                              }
                               onChange={(e) => field.onChange(e.target.value)}
                             />
                           </div>

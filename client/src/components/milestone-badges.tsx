@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Trophy, 
-  Award, 
-  Star, 
-  Crown, 
-  Target, 
-  Zap, 
-  BookOpen, 
-  Users, 
+import {
+  Trophy,
+  Award,
+  Star,
+  Crown,
+  Target,
+  Zap,
+  BookOpen,
+  Users,
   Calendar,
   Flame,
   CheckCircle2,
-  Gift
+  Gift,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -86,7 +86,8 @@ export default function MilestoneBadges({ userId }: MilestoneBadgesProps) {
   // Sort badges by rarity and earned date
   const sortedBadges = userBadges.sort((a, b) => {
     const rarityOrder = { legendary: 4, epic: 3, rare: 2, common: 1 };
-    const rarityDiff = rarityOrder[b.badge.rarity] - rarityOrder[a.badge.rarity];
+    const rarityDiff =
+      rarityOrder[b.badge.rarity] - rarityOrder[a.badge.rarity];
     if (rarityDiff !== 0) return rarityDiff;
     return new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime();
   });
@@ -129,14 +130,17 @@ export default function MilestoneBadges({ userId }: MilestoneBadgesProps) {
           <div className="text-center py-8">
             <Trophy className="mx-auto h-12 w-12 text-gray-400 mb-3" />
             <p className="text-gray-500 mb-2">No badges earned yet</p>
-            <p className="text-sm text-gray-400">Complete courses and milestones to earn badges!</p>
+            <p className="text-sm text-gray-400">
+              Complete courses and milestones to earn badges!
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {sortedBadges.map((userBadge, index) => {
-              const IconComponent = iconMap[userBadge.badge.icon as keyof typeof iconMap] || Trophy;
+              const IconComponent =
+                iconMap[userBadge.badge.icon as keyof typeof iconMap] || Trophy;
               const rarityStyle = rarityColors[userBadge.badge.rarity];
-              
+
               return (
                 <motion.div
                   key={userBadge.id}
@@ -151,42 +155,48 @@ export default function MilestoneBadges({ userId }: MilestoneBadgesProps) {
                 >
                   {/* Rarity indicator */}
                   <div className="absolute top-2 right-2">
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={`text-xs px-2 py-0.5 ${rarityStyle.text} border-current`}
                     >
                       {userBadge.badge.rarity}
                     </Badge>
                   </div>
-                  
+
                   {/* Badge icon */}
                   <div className="flex justify-center mb-2">
-                    <div className={`
+                    <div
+                      className={`
                       w-12 h-12 rounded-full ${rarityStyle.bg} border-2 ${rarityStyle.border}
                       flex items-center justify-center shadow-sm
-                    `}>
-                      <IconComponent className={`h-6 w-6 ${rarityStyle.text}`} />
+                    `}
+                    >
+                      <IconComponent
+                        className={`h-6 w-6 ${rarityStyle.text}`}
+                      />
                     </div>
                   </div>
-                  
+
                   {/* Badge info */}
                   <div className="text-center">
-                    <h4 className={`text-sm font-semibold ${rarityStyle.text} mb-1 line-clamp-2`}>
+                    <h4
+                      className={`text-sm font-semibold ${rarityStyle.text} mb-1 line-clamp-2`}
+                    >
                       {userBadge.badge.title}
                     </h4>
                     <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                       {userBadge.badge.description}
                     </p>
-                    
+
                     {/* XP reward */}
                     {userBadge.badge.xpReward > 0 && (
                       <div className="flex items-center justify-center text-xs text-emerald-600 font-medium">
-                        <Star className="h-3 w-3 mr-1" />
-                        +{userBadge.badge.xpReward} XP
+                        <Star className="h-3 w-3 mr-1" />+
+                        {userBadge.badge.xpReward} XP
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Earned date */}
                   <div className="absolute bottom-1 left-1 right-1 text-center">
                     <p className="text-xs text-gray-500">

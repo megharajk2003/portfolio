@@ -104,12 +104,12 @@ export default function GoalTracker() {
           <div className="flex items-center justify-between">
             <div>
               <h1
-                className="text-3xl font-bold text-gray-900 dark:text-gray-100  dark:text-white"
+                className="text-3xl font-bold text-white-900 dark:text-white-100  dark:text-white"
                 data-testid="page-title"
               >
                 Goal Tracker
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-white-600 dark:text-white-400 mt-2">
                 Upload CSV files and track your progress with interactive
                 visualizations
               </p>
@@ -151,7 +151,7 @@ export default function GoalTracker() {
                         }
                         data-testid="input-csv-file"
                       />
-                      <p className="text-sm text-gray-600 mt-2">
+                      <p className="text-sm text-white-600 mt-2">
                         CSV should contain columns: Category, Topic, Status
                       </p>
                     </div>
@@ -174,16 +174,16 @@ export default function GoalTracker() {
           {goalsLoading ? (
             <div className="text-center py-8" data-testid="loading-goals">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading your goals...</p>
+              <p className="text-white-600 mt-2">Loading your goals...</p>
             </div>
           ) : goals.length === 0 ? (
             <Card data-testid="empty-state">
               <CardContent className="text-center py-12">
-                <FileSpreadsheet className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <FileSpreadsheet className="h-16 w-16 text-white-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-white-900 dark:text-white-100 mb-2">
                   No goals yet
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-white-600 dark:text-white-400 mb-4">
                   Upload a CSV file to create your first goal and start tracking
                   your progress
                 </p>
@@ -209,7 +209,7 @@ export default function GoalTracker() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm font-medium">Progress</span>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-white-600">
                             {goal.completedSubtopics} / {goal.totalSubtopics}
                           </span>
                         </div>
@@ -224,7 +224,7 @@ export default function GoalTracker() {
                       </div>
 
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">
+                        <span className="text-white-600">
                           {goal.totalSubtopics > 0 ? Math.round(
                             (goal.completedSubtopics / goal.totalSubtopics) *
                               100
@@ -310,7 +310,7 @@ export default function GoalTracker() {
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400 pt-2">
+                <p className="text-sm text-white-600 dark:text-white-400 pt-2">
                   This chart shows the cumulative number of subtopics you've
                   completed for each goal{" "}
                   {selectedMonth !== "all"

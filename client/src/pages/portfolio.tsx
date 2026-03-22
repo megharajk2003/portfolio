@@ -13,7 +13,7 @@ export default function Portfolio() {
   });
 
   // Extract username from email (part before @)
-  const username = user?.email?.split('@')[0] || 'user';
+  const username = user?.email?.split("@")[0] || "user";
 
   return (
     <SidebarLayout

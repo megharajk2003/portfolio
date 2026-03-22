@@ -23,7 +23,9 @@ interface TopicProgressChartProps {
   categoryId: string;
 }
 
-export default function TopicProgressChart({ categoryId }: TopicProgressChartProps) {
+export default function TopicProgressChart({
+  categoryId,
+}: TopicProgressChartProps) {
   const { data: topics = [] } = useQuery<GoalTopic[]>({
     queryKey: [`/api/goal-categories/${categoryId}/topics`],
     enabled: !!categoryId,
@@ -33,15 +35,19 @@ export default function TopicProgressChart({ categoryId }: TopicProgressChartPro
     if (topics.length === 0) return { series: [] };
 
     // Collect all real completion data from all topics
-    const allCompletions: { topicName: string; timestamp: Date; }[] = [];
-    
-    topics.forEach(topic => {
+    const allCompletions: { topicName: string; timestamp: Date }[] = [];
+
+    topics.forEach((topic) => {
       if (topic && topic.subtopics && Array.isArray(topic.subtopics)) {
-        topic.subtopics.forEach(subtopic => {
-          if (subtopic && subtopic.status === "completed" && subtopic.completedAt) {
+        topic.subtopics.forEach((subtopic) => {
+          if (
+            subtopic &&
+            subtopic.status === "completed" &&
+            subtopic.completedAt
+          ) {
             allCompletions.push({
               topicName: topic.name,
-              timestamp: new Date(subtopic.completedAt)
+              timestamp: new Date(subtopic.completedAt),
             });
           }
         });
@@ -54,23 +60,25 @@ export default function TopicProgressChart({ categoryId }: TopicProgressChartPro
     }
 
     // Sort chronologically
-    allCompletions.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    allCompletions.sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
 
     // Create series for each topic with real completion data
-    const series = topics.map(topic => ({
+    const series = topics.map((topic) => ({
       name: topic.name,
-      data: [] as [number, number][]
+      data: [] as [number, number][],
     }));
 
     // Initialize cumulative counters
     const cumulativeCounts: { [topicName: string]: number } = {};
-    topics.forEach(topic => (cumulativeCounts[topic.name] = 0));
+    topics.forEach((topic) => (cumulativeCounts[topic.name] = 0));
 
     // Add starting points at first completion with 0 for all topics
     if (allCompletions.length > 0) {
       const startTime = allCompletions[0].timestamp.getTime() - 86400000; // 1 day before first completion
-      topics.forEach(topic => {
-        const seriesIndex = series.findIndex(s => s.name === topic.name);
+      topics.forEach((topic) => {
+        const seriesIndex = series.findIndex((s) => s.name === topic.name);
         series[seriesIndex].data.push([startTime, 0]);
       });
     }
@@ -78,50 +86,64 @@ export default function TopicProgressChart({ categoryId }: TopicProgressChartPro
     // Process each completion to build cumulative progress
     allCompletions.forEach(({ topicName, timestamp }) => {
       cumulativeCounts[topicName]++;
-      const seriesIndex = series.findIndex(s => s.name === topicName);
-      
+      const seriesIndex = series.findIndex((s) => s.name === topicName);
+
       if (seriesIndex > -1) {
-        series[seriesIndex].data.push([timestamp.getTime(), cumulativeCounts[topicName]]);
+        series[seriesIndex].data.push([
+          timestamp.getTime(),
+          cumulativeCounts[topicName],
+        ]);
       }
     });
 
     // Extend all series to current time with final counts
     const now = new Date().getTime();
-    series.forEach(s => {
+    series.forEach((s) => {
       if (s.data.length > 0 && s.data[s.data.length - 1][0] < now) {
         s.data.push([now, s.data[s.data.length - 1][1]]);
       }
     });
 
-    return { series: series.filter(s => s.data.length > 1) }; // Only include topics with actual progress
+    return { series: series.filter((s) => s.data.length > 1) }; // Only include topics with actual progress
   }, [topics]);
 
   const options: ApexOptions = {
     chart: {
-      type: 'line',
+      type: "line",
       stacked: false,
       height: 350,
-      zoom: { type: 'x', enabled: true, autoScaleYaxis: true },
-      toolbar: { autoSelected: 'zoom' },
+      zoom: { type: "x", enabled: true, autoScaleYaxis: true },
+      toolbar: { autoSelected: "zoom" },
     },
     dataLabels: { enabled: false },
     markers: { size: 4 },
     title: {
-      text: 'Topic Progress Over Time',
-      align: 'left'
+      text: "Topic Progress Over Time",
+      align: "left",
     },
     yaxis: {
-      title: { text: 'Completed Subtopics' },
+      title: { text: "Completed Subtopics" },
       labels: { formatter: (val) => val.toFixed(0) },
     },
-    xaxis: { type: 'datetime' },
+    xaxis: { type: "datetime" },
     tooltip: {
       shared: false,
       y: { formatter: (val) => `${val.toFixed(0)} completed` },
-      x: { format: 'dd MMM yyyy HH:mm' }
+      x: { format: "dd MMM yyyy HH:mm" },
     },
-    stroke: { curve: 'stepline', width: 2 },
-    colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1']
+    stroke: { curve: "stepline", width: 2 },
+    colors: [
+      "#3b82f6",
+      "#10b981",
+      "#f59e0b",
+      "#ef4444",
+      "#8b5cf6",
+      "#06b6d4",
+      "#84cc16",
+      "#f97316",
+      "#ec4899",
+      "#6366f1",
+    ],
   };
 
   return (
@@ -132,22 +154,24 @@ export default function TopicProgressChart({ categoryId }: TopicProgressChartPro
           Real Topic Progress
         </CardTitle>
         <p className="text-sm text-gray-600 dark:text-white">
-          Shows actual completion progress for each topic based on real subtopic completion timestamps.
+          Shows actual completion progress for each topic based on real subtopic
+          completion timestamps.
         </p>
       </CardHeader>
       <CardContent>
         {chartData.series.length > 0 ? (
           <div className="h-80">
-            <ReactApexChart 
-              options={options} 
-              series={chartData.series} 
-              type="line" 
-              height={320} 
+            <ReactApexChart
+              options={options}
+              series={chartData.series}
+              type="line"
+              height={320}
             />
           </div>
         ) : (
           <div className="h-80 flex items-center justify-center text-gray-500">
-            No completed subtopics yet for any topics. Start completing subtopics to see progress over time.
+            No completed subtopics yet for any topics. Start completing
+            subtopics to see progress over time.
           </div>
         )}
       </CardContent>

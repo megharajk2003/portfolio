@@ -68,7 +68,7 @@ const ApexCategoryProgressChart: React.FC<{ categories: GoalCategory[] }> = ({
         (cat.completedSubtopicTimestamps || []).map((ts) => ({
           catName: cat.name,
           timestamp: new Date(ts),
-        }))
+        })),
       )
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
@@ -228,7 +228,9 @@ export default function GoalTracker() {
     >
       {goalLoading && <div>Loading...</div>}
       {goalError && (
-        <div className="text-red-500">Error: {(goalError as Error).message}</div>
+        <div className="text-red-500">
+          Error: {(goalError as Error).message}
+        </div>
       )}
 
       {!goalLoading && !goalError && (
@@ -249,7 +251,9 @@ export default function GoalTracker() {
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">Overall Progress</span>
+                        <span className="text-sm font-medium">
+                          Overall Progress
+                        </span>
                         <span className="text-sm text-gray-600">
                           {category.completedSubtopics || 0} /{" "}
                           {category.totalSubtopics || 0} Subtopics
@@ -257,8 +261,9 @@ export default function GoalTracker() {
                       </div>
                       <Progress
                         value={
-                          (category.completedSubtopics / category.totalSubtopics) * 100 ||
-                          0
+                          (category.completedSubtopics /
+                            category.totalSubtopics) *
+                            100 || 0
                         }
                         className="h-2"
                       />
@@ -266,7 +271,9 @@ export default function GoalTracker() {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">
                         {Math.round(
-                          (category.completedSubtopics / category.totalSubtopics) * 100,
+                          (category.completedSubtopics /
+                            category.totalSubtopics) *
+                            100,
                         ) || 0}
                         % Complete
                       </span>

@@ -2,11 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  ResponsiveContainer
-} from "recharts";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 
 interface Goal {
   id: string;
@@ -27,7 +23,7 @@ interface ChartDataPoint {
 
 export default function CompactGoalHeatMap() {
   const { data: goals = [] } = useQuery<Goal[]>({
-    queryKey: ["/api/goals"]
+    queryKey: ["/api/goals"],
   });
 
   const chartData = useMemo(() => {
@@ -38,38 +34,50 @@ export default function CompactGoalHeatMap() {
     // Initialize the last 5 months
     for (let i = 4; i >= 0; i--) {
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const monthName = date.toLocaleDateString("en-US", { month: "short" });
 
       monthsData.push({
         date: monthKey,
         month: monthName,
-        totalCompleted: 0
+        totalCompleted: 0,
       });
     }
 
     // Calculate cumulative progress for all goals combined
-    goals.forEach(goal => {
+    goals.forEach((goal) => {
       // Normalize dates to just the calendar day (ignore time)
       const createdDate = new Date(goal.createdAt);
       const updatedDate = new Date(goal.updatedAt);
-      
+
       // Normalize both dates to start of day for proper comparison
-      const createdNormalized = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate());
-      const updatedNormalized = new Date(updatedDate.getFullYear(), updatedDate.getMonth(), updatedDate.getDate());
+      const createdNormalized = new Date(
+        createdDate.getFullYear(),
+        createdDate.getMonth(),
+        createdDate.getDate(),
+      );
+      const updatedNormalized = new Date(
+        updatedDate.getFullYear(),
+        updatedDate.getMonth(),
+        updatedDate.getDate(),
+      );
 
       // Find the month when the goal was created (using normalized dates)
-      const createdMonthIndex = monthsData.findIndex(month => {
-        const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === createdNormalized.getFullYear() && 
-               monthDate.getMonth() === createdNormalized.getMonth();
+      const createdMonthIndex = monthsData.findIndex((month) => {
+        const monthDate = new Date(month.date + "-01");
+        return (
+          monthDate.getFullYear() === createdNormalized.getFullYear() &&
+          monthDate.getMonth() === createdNormalized.getMonth()
+        );
       });
 
       // Find the month when the goal was last updated (using normalized dates)
-      const updatedMonthIndex = monthsData.findIndex(month => {
-        const monthDate = new Date(month.date + '-01');
-        return monthDate.getFullYear() === updatedNormalized.getFullYear() && 
-               monthDate.getMonth() === updatedNormalized.getMonth();
+      const updatedMonthIndex = monthsData.findIndex((month) => {
+        const monthDate = new Date(month.date + "-01");
+        return (
+          monthDate.getFullYear() === updatedNormalized.getFullYear() &&
+          monthDate.getMonth() === updatedNormalized.getMonth()
+        );
       });
 
       if (createdMonthIndex !== -1) {
@@ -88,7 +96,10 @@ export default function CompactGoalHeatMap() {
   }, [goals]);
 
   const totalGoals = goals.length;
-  const totalCompleted = goals.reduce((sum, goal) => sum + goal.completedTopics, 0);
+  const totalCompleted = goals.reduce(
+    (sum, goal) => sum + goal.completedTopics,
+    0,
+  );
 
   return (
     <Card className="w-full" data-testid="compact-goal-heat-map">
@@ -132,11 +143,15 @@ export default function CompactGoalHeatMap() {
             </div>
             <div className="text-center">
               <div className="font-semibold text-green-600">
-                {chartData.length > 1 ? 
-                  (chartData[chartData.length - 1].totalCompleted - chartData[chartData.length - 2].totalCompleted >= 0 ? '+' : '') +
-                  (chartData[chartData.length - 1].totalCompleted - chartData[chartData.length - 2].totalCompleted)
-                  : '0'
-                }
+                {chartData.length > 1
+                  ? (chartData[chartData.length - 1].totalCompleted -
+                      chartData[chartData.length - 2].totalCompleted >=
+                    0
+                      ? "+"
+                      : "") +
+                    (chartData[chartData.length - 1].totalCompleted -
+                      chartData[chartData.length - 2].totalCompleted)
+                  : "0"}
               </div>
               <div>This Month</div>
             </div>

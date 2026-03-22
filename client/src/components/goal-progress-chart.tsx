@@ -61,17 +61,21 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
 
     // Collect all subtopics with completion dates
     const completedSubtopics: { date: Date; name: string }[] = [];
-    
+
     if (goal.categories && Array.isArray(goal.categories)) {
-      goal.categories.forEach(category => {
+      goal.categories.forEach((category) => {
         if (category && category.topics && Array.isArray(category.topics)) {
-          category.topics.forEach(topic => {
+          category.topics.forEach((topic) => {
             if (topic && topic.subtopics && Array.isArray(topic.subtopics)) {
-              topic.subtopics.forEach(subtopic => {
-                if (subtopic && subtopic.status === "completed" && subtopic.completedAt) {
+              topic.subtopics.forEach((subtopic) => {
+                if (
+                  subtopic &&
+                  subtopic.status === "completed" &&
+                  subtopic.completedAt
+                ) {
                   completedSubtopics.push({
                     date: new Date(subtopic.completedAt),
-                    name: subtopic.name
+                    name: subtopic.name,
                   });
                 }
               });
@@ -86,34 +90,34 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
 
     // Create cumulative data points
     const dataPoints: ChartDataPoint[] = [];
-    
+
     if (completedSubtopics.length === 0) {
       // If no completed subtopics, show goal creation date with 0 progress
       const goalCreatedDate = new Date(goal.createdAt);
       const today = new Date();
-      
+
       dataPoints.push({
         x: goalCreatedDate.getTime(),
-        y: 0
+        y: 0,
       });
-      
+
       dataPoints.push({
         x: today.getTime(),
-        y: 0
+        y: 0,
       });
     } else {
       // Add goal creation as starting point
       const goalCreatedDate = new Date(goal.createdAt);
       dataPoints.push({
         x: goalCreatedDate.getTime(),
-        y: 0
+        y: 0,
       });
 
       // Add each completion as an incremental step
       completedSubtopics.forEach((completion, index) => {
         dataPoints.push({
           x: completion.date.getTime(),
-          y: index + 1
+          y: index + 1,
         });
       });
     }
@@ -125,10 +129,13 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
     if (!goal || !goal.categories) return 0;
     return goal.categories.reduce((total, category) => {
       if (!category || !category.topics) return total;
-      return total + category.topics.reduce((topicTotal, topic) => {
-        if (!topic || !topic.subtopics) return topicTotal;
-        return topicTotal + topic.subtopics.length;
-      }, 0);
+      return (
+        total +
+        category.topics.reduce((topicTotal, topic) => {
+          if (!topic || !topic.subtopics) return topicTotal;
+          return topicTotal + topic.subtopics.length;
+        }, 0)
+      );
     }, 0);
   }, [goal]);
 
@@ -136,61 +143,69 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
     if (!goal || !goal.categories) return 0;
     return goal.categories.reduce((total, category) => {
       if (!category || !category.topics) return total;
-      return total + category.topics.reduce((topicTotal, topic) => {
-        if (!topic || !topic.subtopics) return topicTotal;
-        return topicTotal + topic.subtopics.filter(s => s && s.status === "completed").length;
-      }, 0);
+      return (
+        total +
+        category.topics.reduce((topicTotal, topic) => {
+          if (!topic || !topic.subtopics) return topicTotal;
+          return (
+            topicTotal +
+            topic.subtopics.filter((s) => s && s.status === "completed").length
+          );
+        }, 0)
+      );
     }, 0);
   }, [goal]);
 
   const state = {
-    series: [{
-      name: 'Completed Topics',
-      data: chartData
-    }],
+    series: [
+      {
+        name: "Completed Topics",
+        data: chartData,
+      },
+    ],
     options: {
       chart: {
-        type: 'area' as const,
+        type: "area" as const,
         stacked: false,
         height: 350,
         zoom: {
-          type: 'x' as const,
+          type: "x" as const,
           enabled: true,
-          autoScaleYaxis: true
+          autoScaleYaxis: true,
         },
         toolbar: {
-          autoSelected: 'zoom' as const
-        }
+          autoSelected: "zoom" as const,
+        },
       },
       dataLabels: {
-        enabled: false
+        enabled: false,
       },
       markers: {
         size: 4,
-        colors: ['#3b82f6'],
-        strokeColors: '#fff',
+        colors: ["#3b82f6"],
+        strokeColors: "#fff",
         strokeWidth: 2,
         hover: {
           size: 6,
-        }
+        },
       },
       title: {
-        text: 'Goal Progress Over Time',
-        align: 'left' as const,
+        text: "Goal Progress Over Time",
+        align: "left" as const,
         style: {
-          color: '#374151',
-          fontSize: '16px',
-          fontWeight: 600
-        }
+          color: "#374151",
+          fontSize: "16px",
+          fontWeight: 600,
+        },
       },
       fill: {
-        type: 'gradient',
+        type: "gradient",
         gradient: {
           shadeIntensity: 1,
           inverseColors: false,
           opacityFrom: 0.6,
           opacityTo: 0.1,
-          stops: [0, 90, 100]
+          stops: [0, 90, 100],
         },
       },
       yaxis: {
@@ -199,48 +214,48 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
             return Math.round(val).toString();
           },
           style: {
-            colors: ['#6b7280']
-          }
+            colors: ["#6b7280"],
+          },
         },
         title: {
-          text: 'Completed Subtopics',
+          text: "Completed Subtopics",
           style: {
-            color: '#374151',
-            fontSize: '14px',
-            fontWeight: 500
-          }
+            color: "#374151",
+            fontSize: "14px",
+            fontWeight: 500,
+          },
         },
         min: 0,
-        max: Math.max(totalSubtopics, 1)
+        max: Math.max(totalSubtopics, 1),
       },
       xaxis: {
-        type: 'datetime' as const,
+        type: "datetime" as const,
         labels: {
           style: {
-            colors: ['#6b7280']
-          }
-        }
+            colors: ["#6b7280"],
+          },
+        },
       },
       tooltip: {
         shared: false,
         y: {
           formatter: function (val: number) {
             return `${Math.round(val)} completed`;
-          }
+          },
         },
         x: {
-          format: 'dd MMM yyyy'
-        }
+          format: "dd MMM yyyy",
+        },
       },
       stroke: {
-        curve: 'straight' as const,
+        curve: "straight" as const,
         width: 2,
-        colors: ['#3b82f6']
+        colors: ["#3b82f6"],
       },
       grid: {
-        borderColor: '#e5e7eb',
-        strokeDashArray: 3
-      }
+        borderColor: "#e5e7eb",
+        strokeDashArray: 3,
+      },
     },
   };
 
@@ -272,16 +287,22 @@ export default function GoalProgressChart({ goalId }: GoalProgressChartProps) {
         <div className="flex gap-4 text-sm text-gray-600">
           <span>Completed: {completedCount}</span>
           <span>Total: {totalSubtopics}</span>
-          <span>Progress: {totalSubtopics > 0 ? Math.round((completedCount / totalSubtopics) * 100) : 0}%</span>
+          <span>
+            Progress:{" "}
+            {totalSubtopics > 0
+              ? Math.round((completedCount / totalSubtopics) * 100)
+              : 0}
+            %
+          </span>
         </div>
       </CardHeader>
       <CardContent>
         <div className="h-[350px]">
-          <ReactApexChart 
-            options={state.options} 
-            series={state.series} 
-            type="area" 
-            height={350} 
+          <ReactApexChart
+            options={state.options}
+            series={state.series}
+            type="area"
+            height={350}
           />
         </div>
       </CardContent>

@@ -192,60 +192,63 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
   const earnedBadgeIds = new Set(userBadges.map((ub) => ub.badgeId));
 
   // Group badges by category
-  const groupedBadges = allBadges.reduce((acc, badge) => {
-    let category = "Other";
+  const groupedBadges = allBadges.reduce(
+    (acc, badge) => {
+      let category = "Other";
 
-    // Categorize badges based on title keywords and type
-    if (
-      badge.title.includes("Profile") ||
-      badge.title.includes("Welcome") ||
-      badge.title.includes("Bio") ||
-      badge.title.includes("Picture") ||
-      badge.title.includes("Experience") ||
-      badge.title.includes("Education")
-    ) {
-      category = "Onboarding & Profile";
-    } else if (
-      badge.title.includes("Course") ||
-      badge.title.includes("Lesson") ||
-      badge.title.includes("Learning") ||
-      badge.title.includes("Module") ||
-      badge.type === "course_completion"
-    ) {
-      category = "Learning & Courses";
-    } else if (badge.title.includes("Goal")) {
-      category = "Goals & Milestones";
-    } else if (
-      badge.type === "streak" ||
-      badge.title.includes("Streak") ||
-      badge.title.includes("Daily") ||
-      badge.title.includes("Weekly")
-    ) {
-      category = "Streaks & Consistency";
-    } else if (
-      badge.title.includes("Forum") ||
-      badge.title.includes("Community")
-    ) {
-      category = "Community & Engagement";
-    } else if (
-      badge.title.includes("Badge") ||
-      badge.title.includes("Superstar") ||
-      badge.title.includes("Career") ||
-      badge.title.includes("Resume")
-    ) {
-      category = "Special Achievements";
-    } else if (
-      badge.title.includes("Skill") ||
-      badge.title.includes("Project") ||
-      badge.title.includes("Portfolio")
-    ) {
-      category = "Skills & Projects";
-    }
+      // Categorize badges based on title keywords and type
+      if (
+        badge.title.includes("Profile") ||
+        badge.title.includes("Welcome") ||
+        badge.title.includes("Bio") ||
+        badge.title.includes("Picture") ||
+        badge.title.includes("Experience") ||
+        badge.title.includes("Education")
+      ) {
+        category = "Onboarding & Profile";
+      } else if (
+        badge.title.includes("Course") ||
+        badge.title.includes("Lesson") ||
+        badge.title.includes("Learning") ||
+        badge.title.includes("Module") ||
+        badge.type === "course_completion"
+      ) {
+        category = "Learning & Courses";
+      } else if (badge.title.includes("Goal")) {
+        category = "Goals & Milestones";
+      } else if (
+        badge.type === "streak" ||
+        badge.title.includes("Streak") ||
+        badge.title.includes("Daily") ||
+        badge.title.includes("Weekly")
+      ) {
+        category = "Streaks & Consistency";
+      } else if (
+        badge.title.includes("Forum") ||
+        badge.title.includes("Community")
+      ) {
+        category = "Community & Engagement";
+      } else if (
+        badge.title.includes("Badge") ||
+        badge.title.includes("Superstar") ||
+        badge.title.includes("Career") ||
+        badge.title.includes("Resume")
+      ) {
+        category = "Special Achievements";
+      } else if (
+        badge.title.includes("Skill") ||
+        badge.title.includes("Project") ||
+        badge.title.includes("Portfolio")
+      ) {
+        category = "Skills & Projects";
+      }
 
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(badge);
-    return acc;
-  }, {} as Record<string, Badge[]>);
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(badge);
+      return acc;
+    },
+    {} as Record<string, Badge[]>,
+  );
 
   // Sort badges within each category by rarity and then by name
   Object.keys(groupedBadges).forEach((category) => {
@@ -291,10 +294,10 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
                 completionPercentage >= 75
                   ? "bg-green-500"
                   : completionPercentage >= 50
-                  ? "bg-yellow-500"
-                  : completionPercentage >= 25
-                  ? "bg-orange-500"
-                  : "bg-gray-500"
+                    ? "bg-yellow-500"
+                    : completionPercentage >= 25
+                      ? "bg-orange-500"
+                      : "bg-gray-500"
               } text-white`}
             >
               {completionPercentage}%
@@ -306,7 +309,7 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
         <div className="space-y-6">
           {Object.entries(groupedBadges).map(([category, badges]) => {
             const categoryEarned = badges.filter((badge) =>
-              earnedBadgeIds.has(badge.id)
+              earnedBadgeIds.has(badge.id),
             ).length;
             const categoryTotal = badges.length;
 

@@ -384,7 +384,7 @@ function PersonalDetailsEditForm({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ personalDetails: data }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -623,7 +623,7 @@ function ContactDetailsEditForm({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contactDetails: data }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -1734,7 +1734,7 @@ function AddEntryForm({
               (data) => {
                 console.log(
                   "✅ Form validation passed, calling onSubmit with data:",
-                  data
+                  data,
                 );
                 onSubmit(data);
               },
@@ -1742,7 +1742,7 @@ function AddEntryForm({
                 console.error("❌ Form validation errors:", errors);
                 console.log("📋 Current form values:", form.getValues());
                 console.log("🔍 Form state:", form.formState);
-              }
+              },
             )}
             className="space-y-4"
           >
@@ -1989,7 +1989,7 @@ function EditEntryForm({
                       {...field}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseInt(e.target.value) : undefined
+                          e.target.value ? parseInt(e.target.value) : undefined,
                         )
                       }
                       placeholder="2024"
@@ -2069,7 +2069,7 @@ function EditEntryForm({
                       {...field}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseInt(e.target.value) : undefined
+                          e.target.value ? parseInt(e.target.value) : undefined,
                         )
                       }
                       placeholder="2024"
@@ -2652,7 +2652,7 @@ function EditEntryForm({
                 console.error("❌ Edit form validation errors:", errors);
                 console.log("📋 Current form values:", form.getValues());
                 console.log("🔍 Form state:", form.formState);
-              }
+              },
             )}
             className="space-y-4"
           >
@@ -2887,7 +2887,7 @@ function CategoryStats({ categories }: { categories: AcademicCategory[] }) {
   const totalItems = categories.reduce((sum, cat) => sum + cat.count, 0);
   const completedCategories = categories.filter((cat) => cat.count > 0).length;
   const completionPercentage = Math.round(
-    (completedCategories / categories.length) * 100
+    (completedCategories / categories.length) * 100,
   );
 
   return (
@@ -2941,7 +2941,7 @@ export default function Profile() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [categories, setCategories] = useState<AcademicCategory[]>(
-    getInitialCategories()
+    getInitialCategories(),
   );
   const [activeForm, setActiveForm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -3062,8 +3062,8 @@ export default function Profile() {
   const toggleCategory = (categoryId: string) => {
     setCategories((prev) =>
       prev.map((cat) =>
-        cat.id === categoryId ? { ...cat, isExpanded: !cat.isExpanded } : cat
-      )
+        cat.id === categoryId ? { ...cat, isExpanded: !cat.isExpanded } : cat,
+      ),
     );
   };
 
@@ -3162,7 +3162,7 @@ export default function Profile() {
         "item:",
         itemId,
         "with data:",
-        data
+        data,
       );
       setIsSubmitting(true);
 
@@ -3283,12 +3283,12 @@ export default function Profile() {
             items: cat.items.map((item) =>
               item.id === itemId
                 ? { ...item, isVisible: !item.isVisible }
-                : item
+                : item,
             ),
           };
         }
         return cat;
-      })
+      }),
     );
   };
 
@@ -3555,7 +3555,7 @@ export default function Profile() {
                                 <Badge key={index} variant="secondary">
                                   {lang}
                                 </Badge>
-                              )
+                              ),
                             )}
                           </div>
                         </div>
@@ -3785,16 +3785,16 @@ export default function Profile() {
                                 onClick={() => {
                                   console.log(
                                     "🎯 Add Entry button clicked for category:",
-                                    category.id
+                                    category.id,
                                   );
                                   console.log(
                                     "🎯 Current activeForm state:",
-                                    activeForm
+                                    activeForm,
                                   );
                                   setActiveForm(category.id);
                                   console.log(
                                     "🎯 Setting activeForm to:",
-                                    category.id
+                                    category.id,
                                   );
                                 }}
                                 data-testid={`button-add-${category.id}`}
@@ -3813,14 +3813,14 @@ export default function Profile() {
                               "🎨 Rendering form for category:",
                               category.id,
                               "activeForm:",
-                              activeForm
+                              activeForm,
                             )}
                             <AddEntryForm
                               category={category}
                               onAdd={(data) => {
                                 console.log(
                                   "📋 Form submitted with data:",
-                                  data
+                                  data,
                                 );
                                 addEntry(category.id, data);
                               }}
@@ -3840,7 +3840,7 @@ export default function Profile() {
                                 "✏️ Rendering edit form for category:",
                                 category.id,
                                 "item:",
-                                editingItem.item
+                                editingItem.item,
                               )}
                               <EditEntryForm
                                 category={category}
@@ -3848,12 +3848,12 @@ export default function Profile() {
                                 onUpdate={(data) => {
                                   console.log(
                                     "📝 Edit form submitted with data:",
-                                    data
+                                    data,
                                   );
                                   updateEntry(
                                     category.id,
                                     editingItem.item.id,
-                                    data
+                                    data,
                                   );
                                 }}
                                 onCancel={() => {
@@ -4014,7 +4014,7 @@ export default function Profile() {
                                 <Badge key={index} variant="secondary">
                                   {lang}
                                 </Badge>
-                              )
+                              ),
                             )}
                           </div>
                         </div>
@@ -4204,7 +4204,7 @@ export default function Profile() {
                     <div className="space-y-4">
                       {["technical", "soft", "tools"].map((category) => {
                         const categorySkills = skillsData.filter(
-                          (skill) => skill.category === category
+                          (skill) => skill.category === category,
                         );
                         if (categorySkills.length === 0) return null;
 

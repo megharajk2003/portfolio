@@ -105,17 +105,16 @@ export function SidebarLayout({
               </div>
 
               {actions && (
-                <div className="flex flex-wrap gap-2 justify-end">{actions}</div>
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {actions}
+                </div>
               )}
             </div>
           </header>
         )}
 
         <div
-          className={cn(
-            "flex-1 px-4 sm:px-6 lg:px-8 py-6",
-            contentClassName,
-          )}
+          className={cn("flex-1 px-4 sm:px-6 lg:px-8 py-6", contentClassName)}
         >
           {children}
         </div>

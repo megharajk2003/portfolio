@@ -153,7 +153,7 @@ function PostCard({ post }: { post: ForumPost }) {
         {
           content,
           userId: user?.id,
-        }
+        },
       );
       return res.json();
     },
@@ -451,7 +451,7 @@ export default function Forum() {
         post.user.firstName
           .toLowerCase()
           .includes(searchQuery.toLowerCase())) ||
-      post.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      post.user.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (isLoading) {
@@ -531,7 +531,7 @@ export default function Forum() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-white">
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-1" />
                 {posts.length} posts
