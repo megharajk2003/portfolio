@@ -172,7 +172,7 @@ export default function ProfileCompletionNotification() {
                   ? "Complete Your Profile"
                   : "Profile Setup Required"}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-600 dark:text-white mt-1">
                 {isMinimallyComplete
                   ? "Add more details to make your profile stand out to employers."
                   : "Complete your profile to unlock all features and improve your visibility."}
@@ -180,7 +180,7 @@ export default function ProfileCompletionNotification() {
 
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-gray-700 dark:text-white">
                     Profile Completion
                   </span>
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -197,7 +197,7 @@ export default function ProfileCompletionNotification() {
 
               {missingFields.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <p className="text-xs font-medium text-gray-700 dark:text-white mb-2">
                     Missing Information:
                   </p>
                   <div className="flex flex-wrap gap-1">

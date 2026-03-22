@@ -81,7 +81,7 @@ export default function Landing() {
               Portfolio
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 dark:text-white mb-10 max-w-2xl mx-auto">
               Create stunning portfolios, track your skills, and accelerate your
               learning with our gamified platform designed for modern
               professionals.
@@ -109,7 +109,7 @@ export default function Landing() {
             </div>
 
             {/* Social Proof */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 dark:text-gray-400 text-sm md:text-base">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 dark:text-white text-sm md:text-base">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5" />
                 <span>10K+ Users</span>
@@ -133,7 +133,7 @@ export default function Landing() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Everything You Need to Succeed
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-white max-w-2xl mx-auto">
             From portfolio creation to skill development, we've got you covered.
           </p>
         </div>

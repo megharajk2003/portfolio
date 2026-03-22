@@ -114,7 +114,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               knowme
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dark:text-white">
               Dashboard
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
                 isActive
                   ? "bg-primary text-white"
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700",
+                  : "text-gray-600 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700",
               )}
               onClick={() => onClose && onClose()}
             >
@@ -206,7 +206,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         {isAdmin && (
           <>
             <div className="px-4 py-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-gray-500 dark:text-white uppercase tracking-wider">
                 Admin Area
               </p>
             </div>

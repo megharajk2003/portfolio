@@ -34,7 +34,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-white">
                 © {currentYear} Megharaj K. All rights reserved.
               </p>
             </div>
@@ -67,7 +67,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
               knowme
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md">
+            <p className="text-gray-600 dark:text-white mb-4 max-w-md">
               Build your professional portfolio and advance your career with our
               comprehensive learning management platform.
             </p>
@@ -96,7 +96,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
               <li>
                 <a
                   href="/"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Dashboard
                 </a>
@@ -104,7 +104,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
               <li>
                 <a
                   href="/learning"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Learning
                 </a>
@@ -112,7 +112,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
               <li>
                 <a
                   href="/profile"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Profile
                 </a>
@@ -120,7 +120,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
               <li>
                 <a
                   href="/skills"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Skills
                 </a>
@@ -134,14 +134,14 @@ export default function Footer({ variant = "default" }: FooterProps) {
               Support
             </h4>
             <ul className="space-y-2">
-              <li className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
+              <li className="flex items-center text-gray-600 dark:text-white text-sm">
                 <Mail className="h-4 w-4 mr-2" />
                 support@knowme.com
               </li>
               <li>
                 <a
                   href="/help"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Help Center
                 </a>
@@ -149,7 +149,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
               <li>
                 <a
                   href="/privacy"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Privacy Policy
                 </a>
@@ -157,7 +157,7 @@ export default function Footer({ variant = "default" }: FooterProps) {
               <li>
                 <a
                   href="/terms"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors text-sm"
+                  className="text-gray-600 dark:text-white hover:text-blue-600 transition-colors text-sm"
                 >
                   Terms of Service
                 </a>
@@ -168,10 +168,10 @@ export default function Footer({ variant = "default" }: FooterProps) {
 
         <div className="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-white text-sm">
               © {currentYear} knowme. All rights reserved.
             </p>
-            <p className="text-gray-600 dark:text-gray-400 text-sm flex items-center mt-4 md:mt-0">
+            <p className="text-gray-600 dark:text-white text-sm flex items-center mt-4 md:mt-0">
               Made with <Heart className="h-4 w-4 mx-1 text-red-500" /> for
               learners
             </p>

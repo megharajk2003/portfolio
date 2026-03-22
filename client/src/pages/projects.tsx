@@ -68,7 +68,7 @@ export default function Projects() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   Projects
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
+                <p className="text-gray-600 dark:text-white mt-1 text-sm sm:text-base">
                   Showcase your work and achievements
                 </p>
               </div>
@@ -79,7 +79,7 @@ export default function Projects() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  className="text-gray-600 hover:text-gray-900 dark:text-white dark:hover:text-white"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -132,7 +132,7 @@ export default function Projects() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {project.description && (
-                      <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
+                      <p className="text-gray-600 dark:text-white text-sm line-clamp-3">
                         {project.description}
                       </p>
                     )}
@@ -202,7 +202,7 @@ export default function Projects() {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                   No projects added yet
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-gray-600 dark:text-white mb-6">
                   Showcase your work by adding your projects, applications, and
                   side projects.
                 </p>

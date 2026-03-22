@@ -283,7 +283,7 @@ export default function BadgeManagement() {
     };
     return (
       colors[category] ||
-      "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+      "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white"
     );
   };
 

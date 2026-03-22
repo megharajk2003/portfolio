@@ -63,7 +63,7 @@ export function SectionManager({
 
       <CardContent className="space-y-3">
         {!Array.isArray(entries) || entries.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-gray-500 dark:text-white">
             <p className="mb-4">No {title.toLowerCase()} added yet</p>
           </div>
         ) : (

@@ -60,7 +60,7 @@ export default function Skills() {
       case "creative":
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white";
     }
   };
 
@@ -104,7 +104,7 @@ export default function Skills() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   Skills
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
+                <p className="text-gray-600 dark:text-white mt-1 text-sm sm:text-base">
                   Manage your technical and soft skills
                 </p>
               </div>
@@ -115,7 +115,7 @@ export default function Skills() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  className="text-gray-600 hover:text-gray-900 dark:text-white dark:hover:text-white"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -146,7 +146,7 @@ export default function Skills() {
                 <div className="text-3xl font-bold text-blue-600 mb-2">
                   {skills.filter((s: Skill) => s.category === "technical").length}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-white">
                   Technical Skills
                 </div>
               </CardContent>
@@ -156,7 +156,7 @@ export default function Skills() {
                 <div className="text-3xl font-bold text-green-600 mb-2">
                   {skills.filter((s: Skill) => s.category === "soft").length}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-white">
                   Soft Skills
                 </div>
               </CardContent>
@@ -173,7 +173,7 @@ export default function Skills() {
                   ) || 0}
                   %
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-white">
                   Average Level
                 </div>
               </CardContent>
@@ -300,7 +300,7 @@ export default function Skills() {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                   No skills added yet
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-gray-600 dark:text-white mb-6">
                   Start building your skill profile by adding your technical and
                   soft skills.
                 </p>

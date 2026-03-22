@@ -165,7 +165,7 @@ export default function SkillRadarChart({ userId }: SkillRadarChartProps) {
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {category.category}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-white">
                     {category.value}% avg
                   </p>
                 </div>

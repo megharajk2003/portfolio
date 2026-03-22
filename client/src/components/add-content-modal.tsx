@@ -182,14 +182,14 @@ export function AddContentModal({
             >
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
-                  <div className="text-gray-600 dark:text-gray-400 mt-1">
+                  <div className="text-gray-600 dark:text-white mt-1">
                     {category.icon}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">
                       {category.title}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <p className="text-sm text-gray-600 dark:text-white leading-relaxed">
                       {category.description}
                     </p>
                   </div>

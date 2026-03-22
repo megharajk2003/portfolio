@@ -220,7 +220,7 @@ export default function GoalHeatMap() {
           <TrendingUp className="h-5 w-5 text-blue-500" />
           Real Study Performance
         </CardTitle>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-white">
           This chart shows actual completion progress based on real subtopic
           completion timestamps.
         </p>

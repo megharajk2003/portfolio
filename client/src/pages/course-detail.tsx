@@ -167,7 +167,7 @@ export default function CourseDetail() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-gray-100"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-gray-600 dark:text-white">
             Loading course details...
           </p>
         </div>
@@ -179,10 +179,10 @@ export default function CourseDetail() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Course not found
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dark:text-white mb-4">
             The course you're looking for doesn't exist.
           </p>
           <Link href="/learning">
@@ -311,7 +311,7 @@ export default function CourseDetail() {
                         )}
                       </Button>
                     )}
-                    <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="text-center text-sm text-gray-600 dark:text-white mb-4">
                       Starts {course.startDate}
                     </p>
 
@@ -321,7 +321,7 @@ export default function CourseDetail() {
                           <div className="text-2xl font-bold">
                             {modules.length}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-600 dark:text-white">
                             modules
                           </div>
                           <div className="text-xs text-gray-500">
@@ -341,7 +341,7 @@ export default function CourseDetail() {
                               : "N/A"}{" "}
                             <Star className="h-4 w-4 text-yellow-400 fill-current ml-1" />
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-600 dark:text-white">
                             ({courseReviews.length}{" "}
                             {courseReviews.length === 1 ? "review" : "reviews"})
                           </div>
@@ -419,14 +419,14 @@ export default function CourseDetail() {
                               className="flex items-start space-x-3"
                             >
                               <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                              <p className="text-sm text-gray-700 dark:text-gray-300">
+                              <p className="text-sm text-gray-700 dark:text-white">
                                 {outcome}
                               </p>
                             </div>
                           ),
                         )
                       ) : (
-                        <p className="text-gray-600 dark:text-gray-400 col-span-2">
+                        <p className="text-gray-600 dark:text-white col-span-2">
                           Learning outcomes will be updated soon.
                         </p>
                       )}
@@ -453,7 +453,7 @@ export default function CourseDetail() {
                             </Badge>
                           ))
                       ) : (
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-gray-600 dark:text-white">
                           Skills information will be updated soon.
                         </p>
                       )}
@@ -477,7 +477,7 @@ export default function CourseDetail() {
                         <h3 className="font-semibold mb-2">
                           Shareable certificate
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-white">
                           Add to your LinkedIn profile
                         </p>
                       </div>
@@ -486,7 +486,7 @@ export default function CourseDetail() {
                           <FileText className="h-8 w-8 text-blue-600" />
                         </div>
                         <h3 className="font-semibold mb-2">Assessments</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-white">
                           Interactive assignments
                         </p>
                       </div>
@@ -531,14 +531,14 @@ export default function CourseDetail() {
                               {course.instructor.firstName}{" "}
                               {course.instructor.lastName}
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-gray-600 dark:text-white">
                               {course.instructor.expertise ||
                                 "Course Instructor"}
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-gray-600 dark:text-white mb-4">
                           Instructor information will be updated soon.
                         </p>
                       )}
@@ -558,11 +558,11 @@ export default function CourseDetail() {
                   <h2 className="text-2xl font-bold">
                     Build your subject-matter expertise
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-white">
                     This course is available as part of{" "}
                     <strong>multiple programs</strong>
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-white">
                     When you enroll in this course, you'll also be asked to
                     select a specific program.
                   </p>
@@ -608,7 +608,7 @@ export default function CourseDetail() {
                     <h3 className="text-xl font-bold">
                       There are {modules.length} modules in this course
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-600 dark:text-white">
                       {course.fullDescription || course.description}
                     </p>
                   </section>
@@ -628,7 +628,7 @@ export default function CourseDetail() {
                             <CardTitle className="text-lg">
                               Module {index + 1}: {module.title}
                             </CardTitle>
-                            <p className="text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-gray-600 dark:text-white mt-1">
                               {module.description}
                             </p>
                           </div>
@@ -638,7 +638,7 @@ export default function CourseDetail() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-white">
                           <div className="flex items-center">
                             <BookOpen className="h-4 w-4 mr-1" />
                             {module.lessonCount || 0} lessons
@@ -654,7 +654,7 @@ export default function CourseDetail() {
                 ) : (
                   <div className="text-center py-8">
                     <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-600 dark:text-white">
                       No modules available yet.
                     </p>
                   </div>
@@ -665,7 +665,7 @@ export default function CourseDetail() {
             <TabsContent value="reviews" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Learner reviews</h2>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-white">
                   {courseReviews.length > 0
                     ? `Showing ${courseReviews.length} reviews`
                     : "No reviews yet"}
@@ -688,7 +688,7 @@ export default function CourseDetail() {
                           ).toFixed(1)}
                         </span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <p className="text-gray-600 dark:text-white">
                         {courseReviews.length}{" "}
                         {courseReviews.length === 1 ? "review" : "reviews"}
                       </p>
@@ -723,7 +723,7 @@ export default function CourseDetail() {
                                 style={{ width: `${percentage}%` }}
                               ></div>
                             </div>
-                            <span className="text-sm text-gray-600 dark:text-gray-400 w-12">
+                            <span className="text-sm text-gray-600 dark:text-white w-12">
                               {percentage.toFixed(0)}%
                             </span>
                           </div>
@@ -764,7 +764,7 @@ export default function CourseDetail() {
                                   ))}
                                 </div>
                               </div>
-                              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                              <p className="text-gray-600 dark:text-white mt-2">
                                 {review.comment}
                               </p>
                               <p className="text-sm text-gray-500 mt-2">
@@ -782,7 +782,7 @@ export default function CourseDetail() {
               ) : (
                 <div className="text-center py-12">
                   <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-600 dark:text-white mb-2">
                     No reviews yet
                   </h3>
                   <p className="text-gray-500">

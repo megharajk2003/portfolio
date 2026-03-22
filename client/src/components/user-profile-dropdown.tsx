@@ -73,7 +73,7 @@ export function UserProfileDropdown() {
               </Avatar>
               <div>
                 {displayName}
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p className="text-xs text-gray-500 dark:text-white truncate">
                   {user.email[0].toUpperCase() + user.email.slice(1)}
                 </p>
               </div>

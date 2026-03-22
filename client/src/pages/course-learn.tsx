@@ -610,7 +610,7 @@ export default function CourseLearn() {
                       <h3 className="text-lg font-semibold mb-4">
                         Lesson Content
                       </h3>
-                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      <p className="text-gray-700 dark:text-white whitespace-pre-wrap">
                         {selectedLesson.content}
                       </p>
                     </div>
@@ -661,10 +661,10 @@ export default function CourseLearn() {
                       <div className="text-center">
                         <div className="mb-4">
                           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          <p className="text-lg font-semibold text-gray-900 dark:text-white">
                             Final Lesson Complete!
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-gray-600 dark:text-white">
                             {isCourseCompleted
                               ? "You have already completed this course."
                               : "Ready to finish the entire course?"}
@@ -696,7 +696,7 @@ export default function CourseLearn() {
                     ) : (
                       <div className="text-center">
                         <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-white">
                           Lesson completed!
                         </p>
                       </div>

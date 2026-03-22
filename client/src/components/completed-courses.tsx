@@ -89,10 +89,10 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
         {totalCompleted === 0 ? (
           <div className="text-center py-8">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 mb-2">
+            <p className="text-gray-500 dark:text-white mb-2">
               No completed courses yet
             </p>
-            <p className="text-sm text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-gray-400 dark:text-white">
               Complete all lessons in a course to see it here
             </p>
           </div>
@@ -110,12 +110,12 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
                   <div className="flex-1">
                     <div className="flex items-center mb-2">
                       <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" />
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
                         {/* 👇 FIX: Access the title from the nested course object */}
                         {enrollment.course.title}
                       </h4>
                     </div>
-                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    <div className="flex items-center text-xs text-gray-500 dark:text-white mb-2">
                       <Calendar className="h-3 w-3 mr-1" />
                       Completed{" "}
                       {/* 👇 FIX: Use the correct property 'completedAt' */}
@@ -150,11 +150,11 @@ export default function CompletedCourses({ userId }: CompletedCoursesProps) {
                   <div className="flex-1">
                     <div className="flex items-center mb-2">
                       <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" />
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
                         {goal.name}
                       </h4>
                     </div>
-                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    <div className="flex items-center text-xs text-gray-500 dark:text-white mb-2">
                       <Calendar className="h-3 w-3 mr-1" />
                       Completed{" "}
                       {goal.updatedAt

@@ -206,7 +206,7 @@ function PostCard({ post }: { post: ForumPost }) {
               </Badge>
             </div>
             <p
-              className="text-sm text-gray-600 dark:text-gray-400"
+              className="text-sm text-gray-600 dark:text-white"
               data-testid={`text-post-author-${post.id}`}
             >
               by {post.user.firstName || post.user.email}
@@ -216,7 +216,7 @@ function PostCard({ post }: { post: ForumPost }) {
       </CardHeader>
       <CardContent>
         <p
-          className="text-gray-800 dark:text-gray-200 mb-4 whitespace-pre-wrap"
+          className="text-gray-800 dark:text-white mb-4 whitespace-pre-wrap"
           data-testid={`text-post-content-${post.id}`}
         >
           {post.content}
@@ -300,7 +300,7 @@ function PostCard({ post }: { post: ForumPost }) {
                       </span>
                     </div>
                     <p
-                      className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
+                      className="text-sm text-gray-700 dark:text-white whitespace-pre-wrap"
                       data-testid={`text-reply-content-${reply.id}`}
                     >
                       {reply.content}
@@ -525,7 +525,7 @@ export default function Forum() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   Community Forum
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
+                <p className="text-gray-600 dark:text-white mt-1 text-sm sm:text-base">
                   Connect with other learners and share your experiences
                 </p>
               </div>
@@ -571,7 +571,7 @@ export default function Forum() {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           No posts found
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-gray-600 dark:text-white mb-4">
                           Try adjusting your search terms or browse all posts.
                         </p>
                       </>
@@ -580,7 +580,7 @@ export default function Forum() {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           No posts yet
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-gray-600 dark:text-white mb-4">
                           Be the first to start a conversation in the community
                           forum!
                         </p>

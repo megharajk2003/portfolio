@@ -313,7 +313,7 @@ export default function AllBadgesDisplay({ userId }: AllBadgesDisplayProps) {
             return (
               <div key={category} className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {category}
                   </h3>
                   <Badge variant="outline" className="text-sm">

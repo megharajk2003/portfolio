@@ -420,7 +420,7 @@ export default function ProfileEditForm({
           </span>
         </CardTitle>
         {!existingProfile && (
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-white">
             Complete your profile to unlock all features and improve your
             visibility.
           </p>

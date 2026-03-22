@@ -154,7 +154,7 @@ export default function PublicPortfolio() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Loading Portfolio...
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-white">
             Please wait while we load the portfolio.
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function PublicPortfolio() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Portfolio Not Found
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-white">
             The portfolio for "{username}" could not be found.
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function PublicPortfolio() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Loading Portfolio...
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-white">
             Loading portfolio data for "{userData?.firstName || username}"...
           </p>
         </div>
@@ -215,11 +215,11 @@ export default function PublicPortfolio() {
                         {profile?.personalDetails?.fullName || "Professional"}
                       </span>
                     </h1>
-                    <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
+                    <p className="text-2xl text-gray-600 dark:text-white font-medium">
                       {profile?.personalDetails?.roleOrTitle ||
                         "Full Stack Developer & UI/UX Designer"}
                     </p>
-                    <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
+                    <p className="text-lg text-gray-600 dark:text-white leading-relaxed max-w-lg">
                       {profile?.personalDetails?.summary ||
                         "Passionate about creating exceptional digital experiences. I specialize in building scalable web applications and crafting intuitive user interfaces that solve real-world problems."}
                     </p>
@@ -280,7 +280,7 @@ export default function PublicPortfolio() {
               <div className="text-4xl font-bold text-blue-600 mb-2">
                 {portfolioStats.projectsCompleted}+
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-white">
                 Projects Completed
               </div>
             </div>
@@ -288,7 +288,7 @@ export default function PublicPortfolio() {
               <div className="text-4xl font-bold text-green-600 mb-2">
                 {portfolioStats.yearsExperience}+
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-white">
                 Years Experience
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function PublicPortfolio() {
               <div className="text-4xl font-bold text-purple-600 mb-2">
                 {portfolioStats.clientsSatisfied}+
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-white">
                 Happy Clients
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function PublicPortfolio() {
               <div className="text-4xl font-bold text-orange-600 mb-2">
                 {portfolioStats.certificationsEarned}+
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-white">
                 Certifications
               </div>
             </div>
@@ -365,7 +365,7 @@ export default function PublicPortfolio() {
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                     About Me
                   </h2>
-                  <div className="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <div className="space-y-4 text-gray-600 dark:text-white leading-relaxed">
                     <p>
                       {profile?.personalDetails?.summary ||
                         "I'm a passionate full-stack developer with over 5 years of experience creating digital solutions that make a difference. My journey began with a curiosity about how things work, which led me to discover the power of code to transform ideas into reality."}
@@ -392,25 +392,25 @@ export default function PublicPortfolio() {
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <Target className="h-5 w-5 text-blue-600" />
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-gray-700 dark:text-white">
                           User-first approach
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Heart className="h-5 w-5 text-red-600" />
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-gray-700 dark:text-white">
                           Quality over quantity
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Users className="h-5 w-5 text-green-600" />
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-gray-700 dark:text-white">
                           Collaborative mindset
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <TrendingUp className="h-5 w-5 text-purple-600" />
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-gray-700 dark:text-white">
                           Continuous learning
                         </span>
                       </div>
@@ -521,7 +521,7 @@ export default function PublicPortfolio() {
                         </div>
 
                         {exp.description && (
-                          <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                          <p className="text-gray-600 dark:text-white mb-4 leading-relaxed">
                             {exp.description}
                           </p>
                         )}
@@ -536,7 +536,7 @@ export default function PublicPortfolio() {
                                 (achievement: string, i: number) => (
                                   <li
                                     key={i}
-                                    className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400"
+                                    className="flex items-start space-x-2 text-sm text-gray-600 dark:text-white"
                                   >
                                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                                     <span>{achievement}</span>
@@ -570,7 +570,7 @@ export default function PublicPortfolio() {
                           ).length
                         }
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-gray-600 dark:text-white">
                         Technical Skills
                       </div>
                     </CardContent>
@@ -583,7 +583,7 @@ export default function PublicPortfolio() {
                             .length
                         }
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-gray-600 dark:text-white">
                         Soft Skills
                       </div>
                     </CardContent>
@@ -603,7 +603,7 @@ export default function PublicPortfolio() {
                         %
                       </div>
 
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-gray-600 dark:text-white">
                         Average Level
                       </div>
                     </CardContent>
@@ -887,13 +887,13 @@ export default function PublicPortfolio() {
                         </div>
 
                         {project.description && (
-                          <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                          <p className="text-gray-600 dark:text-white mb-4 leading-relaxed">
                             {project.description}
                           </p>
                         )}
                         {project.domain && (
                           <>
-                            <div className="flex items-center gap-2 mb-4 text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-2 mb-4 text-gray-600 dark:text-white">
                               <Laptop className="h-4 w-4" />
                               <span>{project.domain}</span>
                             </div>
@@ -979,7 +979,7 @@ export default function PublicPortfolio() {
                               </p>
 
                               {edu.description && (
-                                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                <p className="text-gray-600 dark:text-white text-sm">
                                   {edu.description}
                                 </p>
                               )}
@@ -1039,7 +1039,7 @@ export default function PublicPortfolio() {
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                     Let's Work Together
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                  <p className="text-gray-600 dark:text-white mb-8 leading-relaxed">
                     I'm always interested in hearing about new opportunities and
                     exciting projects. Whether you have a project in mind or
                     just want to chat about technology, feel free to reach out.
@@ -1056,7 +1056,7 @@ export default function PublicPortfolio() {
                             <h3 className="font-semibold text-gray-900 dark:text-white">
                               Email
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400">
+                            <p className="text-gray-600 dark:text-white">
                               {profile?.contactDetails?.email ||
                                 "megharaj@example.com"}
                             </p>
@@ -1120,7 +1120,7 @@ export default function PublicPortfolio() {
                                   )}
                                 </div>
                               </div>
-                              <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 italic">
+                              <p className="text-gray-600 dark:text-white text-sm mb-3 italic">
                                 "{testimonial.quote}"
                               </p>
                               <div>
@@ -1148,7 +1148,7 @@ export default function PublicPortfolio() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-white">
                 © 2024 {profile?.personalDetails?.fullName || "Megharaj K"}. All
                 rights reserved.
               </p>

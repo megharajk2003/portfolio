@@ -131,7 +131,7 @@ export default function TopicProgressChart({ categoryId }: TopicProgressChartPro
           <TrendingUp className="h-5 w-5 text-blue-500" />
           Real Topic Progress
         </CardTitle>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-white">
           Shows actual completion progress for each topic based on real subtopic completion timestamps.
         </p>
       </CardHeader>

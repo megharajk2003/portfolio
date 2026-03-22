@@ -180,7 +180,7 @@ export default function RealGoalHeatMap() {
           <TrendingUp className="h-5 w-5 text-blue-500" />
           Real Goal Progress (Last 2 Weeks)
         </CardTitle>
-        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-white">
           <Badge variant="outline" className="flex items-center gap-1">
             <Target className="h-3 w-3" />
             {totalGoals} Goals
@@ -204,11 +204,11 @@ export default function RealGoalHeatMap() {
                       const date = new Date(timestamp);
                       return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
                     }}
-                    className="text-gray-600 dark:text-gray-400"
+                    className="text-gray-600 dark:text-white"
                     tick={{ fontSize: 12 }}
                   />
                   <YAxis 
-                    className="text-gray-600 dark:text-gray-400"
+                    className="text-gray-600 dark:text-white"
                     tick={{ fontSize: 12 }}
                   />
                   <Tooltip 
@@ -236,7 +236,7 @@ export default function RealGoalHeatMap() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-80 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="h-80 flex items-center justify-center text-gray-500 dark:text-white">
               <div className="text-center">
                 <Target className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>No goal data available</p>
@@ -249,10 +249,10 @@ export default function RealGoalHeatMap() {
             <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                  <h4 className="font-semibold text-gray-900 dark:text-white">
                     Recent Progress
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600 dark:text-white">
                     Based on actual completion dates from your subtopics
                   </p>
                 </div>
@@ -260,7 +260,7 @@ export default function RealGoalHeatMap() {
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     {totalCompletedSubtopics}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-600 dark:text-white">
                     Completed
                   </div>
                 </div>

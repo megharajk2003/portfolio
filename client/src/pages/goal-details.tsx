@@ -153,9 +153,9 @@ export default function GoalDetails() {
       case "start":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
       case "pending":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white";
     }
   };
 
@@ -168,7 +168,7 @@ export default function GoalDetails() {
       case "low":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white";
     }
   };
 
@@ -259,11 +259,11 @@ export default function GoalDetails() {
                 Back to Goals
               </Button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                   {goal.name}
                 </h1>
                 {goal.description && (
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-gray-600 dark:text-white mt-1">
                     {goal.description}
                   </p>
                 )}
@@ -301,7 +301,7 @@ export default function GoalDetails() {
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     {goal.categories.length}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-600 dark:text-white">
                     Categories
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export default function GoalDetails() {
                   <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {goal.totalTopics}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-600 dark:text-white">
                     Topics
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export default function GoalDetails() {
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                     {goal.totalSubtopics}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-600 dark:text-white">
                     Subtopics
                   </div>
                 </div>
@@ -325,7 +325,7 @@ export default function GoalDetails() {
                   <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                     {goal.completedSubtopics}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-600 dark:text-white">
                     Completed
                   </div>
                 </div>
@@ -360,7 +360,7 @@ export default function GoalDetails() {
                     </Badge>
                   </CardTitle>
                   {category.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-white">
                       {category.description}
                     </p>
                   )}
@@ -437,10 +437,10 @@ export default function GoalDetails() {
             <Card>
               <CardContent className="p-6 text-center">
                 <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   No Categories Found
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-white">
                   This goal doesn't have any categories or topics yet. Try uploading a CSV file to populate it.
                 </p>
               </CardContent>

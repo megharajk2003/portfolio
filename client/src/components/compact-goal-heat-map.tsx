@@ -117,9 +117,9 @@ export default function CompactGoalHeatMap() {
           </div>
 
           {/* Stats */}
-          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex justify-between text-xs text-gray-600 dark:text-white">
             <div className="text-center">
-              <div className="font-semibold text-gray-900 dark:text-gray-100">
+              <div className="font-semibold text-gray-900 dark:text-white">
                 {totalGoals}
               </div>
               <div>Goals</div>

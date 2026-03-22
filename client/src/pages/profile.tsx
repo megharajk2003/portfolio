@@ -1124,7 +1124,7 @@ function AddEntryForm({
                           field.onChange(parseInt(e.target.value))
                         }
                       />
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-600 dark:text-white">
                         Level {field.value}:{" "}
                         {
                           [
@@ -2802,7 +2802,7 @@ function ItemCard({
             <h4 className="font-semibold text-gray-900 dark:text-white">
               {getItemTitle()}
             </h4>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-white text-sm">
               {getItemDescription()}
             </p>
           </div>
@@ -2867,7 +2867,7 @@ function EmptyState({
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
         No {category.title.toLowerCase()} added yet
       </h3>
-      <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+      <p className="text-gray-500 dark:text-white mb-6 max-w-md mx-auto">
         {category.description}. Start building your profile by adding your first
         entry.
       </p>
@@ -3351,7 +3351,7 @@ export default function Profile() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   Profile
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
+                <p className="text-gray-600 dark:text-white mt-1 text-sm sm:text-base">
                   Manage your profile information and academic details
                 </p>
               </div>
@@ -3383,7 +3383,7 @@ export default function Profile() {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Profile Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-gray-600 dark:text-white mt-1">
                 Manage your profile information, education, skills, and
                 experience
               </p>
@@ -3461,7 +3461,7 @@ export default function Profile() {
                       </div>
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Full Name
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3473,7 +3473,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Role/Title
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3482,7 +3482,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Date of Birth
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3490,7 +3490,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Gender
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3498,7 +3498,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Nationality
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3507,7 +3507,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Location
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3526,17 +3526,17 @@ export default function Profile() {
 
                     {profile?.personalDetails?.summary ? (
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           Professional Summary
                         </label>
-                        <p className="text-gray-700 dark:text-gray-300 mt-1">
+                        <p className="text-gray-700 dark:text-white mt-1">
                           {profile.personalDetails.summary}
                         </p>
                       </div>
                     ) : (
                       <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
                         <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        <p className="text-gray-500 dark:text-white text-sm">
                           Add a professional summary to highlight your
                           experience and goals.
                         </p>
@@ -3546,7 +3546,7 @@ export default function Profile() {
                     {profile?.personalDetails?.languagesKnown &&
                       profile.personalDetails.languagesKnown.length > 0 && (
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Languages Known
                           </label>
                           <div className="flex flex-wrap gap-2 mt-1">
@@ -3599,7 +3599,7 @@ export default function Profile() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           Email Address
                         </label>
                         <p className="text-lg text-gray-900 dark:text-white">
@@ -3609,7 +3609,7 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           Phone Number
                         </label>
                         <p className="text-lg text-gray-900 dark:text-white">
@@ -3617,7 +3617,7 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           Website
                         </label>
                         <p className="text-lg text-gray-900 dark:text-white">
@@ -3636,7 +3636,7 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           LinkedIn
                         </label>
                         <p className="text-lg text-gray-900 dark:text-white">
@@ -3655,7 +3655,7 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           GitHub/Portfolio
                         </label>
                         <p className="text-lg text-gray-900 dark:text-white">
@@ -3674,7 +3674,7 @@ export default function Profile() {
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           Twitter
                         </label>
                         <p className="text-lg text-gray-900 dark:text-white">
@@ -3729,7 +3729,7 @@ export default function Profile() {
                             <CardTitle className="text-lg">
                               {category.title}
                             </CardTitle>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-500 dark:text-white mt-1">
                               {category.description}
                             </p>
                           </div>
@@ -3920,7 +3920,7 @@ export default function Profile() {
                       </div>
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Full Name
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3932,7 +3932,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Role/Title
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3941,7 +3941,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Date of Birth
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3949,7 +3949,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Gender
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3957,7 +3957,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Nationality
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3966,7 +3966,7 @@ export default function Profile() {
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Location
                           </label>
                           <p className="text-lg text-gray-900 dark:text-white">
@@ -3985,17 +3985,17 @@ export default function Profile() {
 
                     {profile?.personalDetails?.summary ? (
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <label className="text-sm font-medium text-gray-500 dark:text-white">
                           Professional Summary
                         </label>
-                        <p className="text-gray-700 dark:text-gray-300 mt-1">
+                        <p className="text-gray-700 dark:text-white mt-1">
                           {profile.personalDetails.summary}
                         </p>
                       </div>
                     ) : (
                       <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
                         <FileText className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        <p className="text-gray-500 dark:text-white text-sm">
                           Add a professional summary to highlight your
                           experience and goals.
                         </p>
@@ -4005,7 +4005,7 @@ export default function Profile() {
                     {profile?.personalDetails?.languagesKnown &&
                       profile.personalDetails.languagesKnown.length > 0 && (
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-sm font-medium text-gray-500 dark:text-white">
                             Languages Known
                           </label>
                           <div className="flex flex-wrap gap-2 mt-1">
@@ -4047,7 +4047,7 @@ export default function Profile() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-sm font-medium text-gray-500 dark:text-white">
                         Email Address
                       </label>
                       <p className="text-lg text-gray-900 dark:text-white">
@@ -4057,7 +4057,7 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-sm font-medium text-gray-500 dark:text-white">
                         Phone Number
                       </label>
                       <p className="text-lg text-gray-900 dark:text-white">
@@ -4065,7 +4065,7 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-sm font-medium text-gray-500 dark:text-white">
                         Website
                       </label>
                       <p className="text-lg text-gray-900 dark:text-white">
@@ -4084,7 +4084,7 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-sm font-medium text-gray-500 dark:text-white">
                         LinkedIn
                       </label>
                       <p className="text-lg text-gray-900 dark:text-white">
@@ -4103,7 +4103,7 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-sm font-medium text-gray-500 dark:text-white">
                         GitHub/Portfolio
                       </label>
                       <p className="text-lg text-gray-900 dark:text-white">
@@ -4122,7 +4122,7 @@ export default function Profile() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-sm font-medium text-gray-500 dark:text-white">
                         Twitter
                       </label>
                       <p className="text-lg text-gray-900 dark:text-white">
@@ -4179,7 +4179,7 @@ export default function Profile() {
                               )}
                             </div>
                             {edu.description && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                              <p className="text-gray-700 dark:text-white mt-2">
                                 {edu.description}
                               </p>
                             )}
@@ -4230,12 +4230,12 @@ export default function Profile() {
                                           className={`w-4 h-4 ${
                                             i < skill.level
                                               ? "text-yellow-400 fill-current"
-                                              : "text-gray-300 dark:text-gray-600"
+                                              : "text-gray-300 dark:text-white"
                                           }`}
                                         />
                                       ))}
                                     </div>
-                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                    <span className="text-sm font-medium text-gray-600 dark:text-white">
                                       {Math.round((skill.level / 5) * 100)}%
                                     </span>
                                   </div>
@@ -4278,26 +4278,26 @@ export default function Profile() {
                               {work.endDate ? `- ${work.endDate}` : "- Present"}
                             </div>
                             {work.description && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                              <p className="text-gray-700 dark:text-white mt-2">
                                 {work.description}
                               </p>
                             )}
                             {work.responsibilities && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                <p className="text-sm font-medium text-gray-600 dark:text-white">
                                   Key Responsibilities:
                                 </p>
-                                <p className="text-gray-700 dark:text-gray-300">
+                                <p className="text-gray-700 dark:text-white">
                                   {work.responsibilities}
                                 </p>
                               </div>
                             )}
                             {work.skillsOrToolsUsed && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                <p className="text-sm font-medium text-gray-600 dark:text-white">
                                   Skills & Tools:
                                 </p>
-                                <p className="text-gray-700 dark:text-gray-300">
+                                <p className="text-gray-700 dark:text-white">
                                   {work.skillsOrToolsUsed}
                                 </p>
                               </div>
@@ -4339,25 +4339,25 @@ export default function Profile() {
                                 {project.endDate ? `- ${project.endDate}` : ""}
                               </div>
                             )}
-                            <p className="text-gray-700 dark:text-gray-300 mt-2">
+                            <p className="text-gray-700 dark:text-white mt-2">
                               {project.description}
                             </p>
                             {project.toolsOrMethods && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                <p className="text-sm font-medium text-gray-600 dark:text-white">
                                   Tools & Methods:
                                 </p>
-                                <p className="text-gray-700 dark:text-gray-300">
+                                <p className="text-gray-700 dark:text-white">
                                   {project.toolsOrMethods}
                                 </p>
                               </div>
                             )}
                             {project.outcome && (
                               <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                <p className="text-sm font-medium text-gray-600 dark:text-white">
                                   Outcome:
                                 </p>
-                                <p className="text-gray-700 dark:text-gray-300">
+                                <p className="text-gray-700 dark:text-white">
                                   {project.outcome}
                                 </p>
                               </div>
@@ -4421,7 +4421,7 @@ export default function Profile() {
                               </div>
                             )}
                             {cert.description && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                              <p className="text-gray-700 dark:text-white mt-2">
                                 {cert.description}
                               </p>
                             )}
@@ -4514,7 +4514,7 @@ export default function Profile() {
                             <div className="text-sm text-gray-500 mt-1">
                               {vol.year}
                             </div>
-                            <p className="text-gray-700 dark:text-gray-300 mt-2">
+                            <p className="text-gray-700 dark:text-white mt-2">
                               {vol.description}
                             </p>
                           </div>
@@ -4538,7 +4538,7 @@ export default function Profile() {
                     {achievementsData.map((achievement: any, index: number) => (
                       <div key={index} className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                        <p className="text-gray-700 dark:text-gray-300">
+                        <p className="text-gray-700 dark:text-white">
                           {achievement.title || achievement}
                         </p>
                       </div>
