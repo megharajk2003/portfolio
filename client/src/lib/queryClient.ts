@@ -9,6 +9,27 @@ function withBase(url: string) {
   return `${API_BASE}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
+const AUTH_TOKEN_KEY = "skillstream_auth_token";
+
+export function getAuthToken() {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setAuthToken(token: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (!token) window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    else window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+  } catch {
+    // ignore storage failures (private mode, etc.)
+  }
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -21,10 +42,15 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {};
+  if (data) headers["Content-Type"] = "application/json";
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(withBase(url), {
     method,
     cache: "no-store",
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -39,9 +65,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const token = getAuthToken();
     const res = await fetch(withBase(queryKey.join("/") as string), {
       credentials: "include",
       cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

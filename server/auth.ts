@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
+import jwt from "jsonwebtoken";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
@@ -15,6 +16,26 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
+
+function getJwtSecret() {
+  return (
+    process.env.JWT_SECRET ||
+    process.env.SESSION_SECRET ||
+    "dev-secret-key"
+  );
+}
+
+function signAuthToken(userId: number) {
+  return jwt.sign({ uid: userId }, getJwtSecret(), { expiresIn: "24h" });
+}
+
+function extractBearerToken(req: any): string | null {
+  const header = req.get?.("authorization") || req.headers?.authorization;
+  if (!header || typeof header !== "string") return null;
+  if (!header.startsWith("Bearer ")) return null;
+  const token = header.slice("Bearer ".length).trim();
+  return token ? token : null;
+}
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -38,12 +59,12 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: true, // always secure; relies on proxy trust in prod
+      secure: isProd, // secure cookies over https in production
       httpOnly: true,
-      sameSite: "none", // required for cross-site (Vercel -> Render)
+      sameSite: isProd ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
-    proxy: true,
+    proxy: isProd,
     name: "connect.sid",
   };
 
@@ -52,6 +73,28 @@ export function setupAuth(app: Express) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // Allow stateless auth via Authorization: Bearer <jwt> as a fallback
+  // (useful when third-party cookies are blocked in local dev).
+  app.use(async (req: any, _res, next) => {
+    if (req.user?.id) return next();
+
+    const token = extractBearerToken(req);
+    if (!token) return next();
+
+    try {
+      const payload = jwt.verify(token, getJwtSecret()) as { uid?: unknown };
+      const userId = payload?.uid;
+      if (typeof userId !== "number") return next();
+
+      const user = await storage.getUserById(userId);
+      if (user) req.user = user;
+    } catch {
+      // ignore invalid/expired tokens
+    }
+
+    next();
+  });
 
   passport.use(
     new LocalStrategy(
@@ -130,6 +173,7 @@ export function setupAuth(app: Express) {
           firstName: user.firstName,
           lastName: user.lastName,
           profileImageUrl: user.profileImageUrl,
+          token: signAuthToken(user.id),
         });
       });
     } catch (error) {
@@ -154,6 +198,7 @@ export function setupAuth(app: Express) {
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         profileImageUrl: req.user.profileImageUrl,
+        token: signAuthToken(req.user.id),
       });
     } else {
       res.status(401).json({ message: "Authentication failed" });
@@ -168,7 +213,7 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user?.id) return res.sendStatus(401);
     res.json({
       id: req.user.id,
       email: req.user.email,

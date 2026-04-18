@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { AICareerService } from "./ai-service";
 import { requireAdmin } from "./adminUtils";
+import { withAuth } from "./withAuth";
 import {
   insertUserSchema,
   insertProfileSchema,
@@ -2327,11 +2328,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const requireAuth = (req: any, res: any, next: any) => {
     console.log("🔐 [AUTH-MIDDLEWARE] Checking authentication for:", req.path);
     console.log(
-      "🔐 [AUTH-MIDDLEWARE] User authenticated:",
-      req.isAuthenticated()
+      "🔐 [AUTH-MIDDLEWARE] User present:",
+      !!req.user?.id
     );
     console.log("🔐 [AUTH-MIDDLEWARE] User object:", req.user);
-    if (!req.isAuthenticated()) {
+    if (!req.user?.id) {
       console.log("❌ [AUTH-MIDDLEWARE] Authentication failed - returning 401");
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -2827,13 +2828,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Goal Tracking API Routes
 
   // Get user's goals
-  app.get("/api/goals", async (req, res) => {
+  app.get("/api/goals",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
-      const goals = await storage.getUserGoalsSummary(req.user.id);
+      const goals = await storage.getUserGoalsSummary((req.user as any).id);
       res.json(goals);
     } catch (error) {
       console.error("Error fetching goals:", error);
@@ -2842,11 +2840,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific goal with categories and topics
-  app.get("/api/goals/:id", async (req, res) => {
+  app.get("/api/goals/:id",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const goalId = req.params.id;
       const goal = await storage.getGoalWithCategories(goalId);
@@ -2856,7 +2851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Ensure the goal belongs to the current user
-      if (goal.userId !== req.user.id) {
+      if (goal.userId !== (req.user as any).id) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -2868,21 +2863,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new goal
-  app.post("/api/goals", async (req, res) => {
+  app.post("/api/goals",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const goalData = insertGoalSchema.parse({
         ...req.body,
-        userId: req.user.id,
+        userId: (req.user as any).id,
       });
 
       const goal = await storage.createGoal(goalData);
 
       // Check for achievement badges after goal creation
-      await storage.checkAndAwardBadges(req.user.id, "achievement");
+      await storage.checkAndAwardBadges((req.user as any).id, "achievement");
 
       res.status(201).json(goal);
     } catch (error) {
@@ -2892,11 +2884,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create goal from CSV upload
-  app.post("/api/goals/from-csv", async (req, res) => {
+  app.post("/api/goals/from-csv",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const { goalName, csvData } = req.body;
 
@@ -2941,7 +2930,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const goal = await storage.createGoalFromCSV(
-        req.user.id,
+        (req.user as any).id,
         goalName,
         csvData
       );
@@ -2956,18 +2945,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update goal
-  app.put("/api/goals/:id", async (req, res) => {
+  app.put("/api/goals/:id",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const goalId = req.params.id;
       const goalData = req.body;
 
       // Verify goal ownership
       const existingGoal = await storage.getGoal(goalId);
-      if (!existingGoal || existingGoal.userId !== req.user.id) {
+      if (!existingGoal || existingGoal.userId !== (req.user as any).id) {
         return res.status(404).json({ message: "Goal not found" });
       }
 
@@ -2980,17 +2966,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete goal
-  app.delete("/api/goals/:id", async (req, res) => {
+  app.delete("/api/goals/:id",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const goalId = req.params.id;
 
       // Verify goal ownership
       const existingGoal = await storage.getGoal(goalId);
-      if (!existingGoal || existingGoal.userId !== req.user.id) {
+      if (!existingGoal || existingGoal.userId !== (req.user as any).id) {
         return res.status(404).json({ message: "Goal not found" });
       }
 
@@ -3003,11 +2986,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update topic status (deprecated - status now at subtopic level)
-  app.put("/api/topics/:id/status", async (req, res) => {
+  app.put("/api/topics/:id/status",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const topicId = req.params.id;
       const { status, notes } = req.body;
@@ -3038,17 +3018,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Additional goal API routes for the new navigation
-  app.get("/api/goals/:goalId/categories/:categoryId", async (req, res) => {
+  app.get("/api/goals/:goalId/categories/:categoryId",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const { goalId, categoryId } = req.params;
 
       // Get category details with goal verification
       const goal = await storage.getGoal(goalId);
-      if (!goal || goal.userId !== req.user.id) {
+      if (!goal || goal.userId !== (req.user as any).id) {
         return res.status(404).json({ message: "Goal not found" });
       }
 
@@ -3064,11 +3041,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/goal-categories/:categoryId/topics", async (req, res) => {
+  app.get("/api/goal-categories/:categoryId/topics",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const { categoryId } = req.params;
       const topics = await storage.getCategoryTopics(categoryId);
@@ -3080,11 +3054,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/goal-topics/:topicId/subtopics", async (req, res) => {
+  app.get("/api/goal-topics/:topicId/subtopics",withAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const { topicId } = req.params;
 
@@ -3117,7 +3088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/goal-subtopics/:subtopicId", async (req, res) => {
+  app.patch("/api/goal-subtopics/:subtopicId",withAuth, async (req, res) => {
     try {
       const { subtopicId } = req.params;
       const { status, notes } = req.body;
