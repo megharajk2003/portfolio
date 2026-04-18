@@ -5,6 +5,7 @@ import { setupAuth } from "./auth";
 import { AICareerService } from "./ai-service";
 import { requireAdmin } from "./adminUtils";
 import { withAuth } from "./withAuth";
+import { buildAuthDebug, shouldIncludeAuthDebug } from "./authDebug";
 import {
   insertUserSchema,
   insertProfileSchema,
@@ -2334,7 +2335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("🔐 [AUTH-MIDDLEWARE] User object:", req.user);
     if (!req.user?.id) {
       console.log("❌ [AUTH-MIDDLEWARE] Authentication failed - returning 401");
-      return res.status(401).json({ message: "Authentication required" });
+      const debug = shouldIncludeAuthDebug(req) ? buildAuthDebug(req) : undefined;
+      return res.status(401).json({ message: "Authentication required", debug });
     }
     console.log(
       "✅ [AUTH-MIDDLEWARE] Authentication successful, proceeding..."

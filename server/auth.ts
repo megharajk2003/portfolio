@@ -8,6 +8,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import { isAdminUser } from "./adminUtils";
+import { buildAuthDebug, shouldIncludeAuthDebug } from "./authDebug";
 
 declare global {
   namespace Express {
@@ -213,7 +214,10 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.user?.id) return res.sendStatus(401);
+    if (!req.user?.id) {
+      const debug = shouldIncludeAuthDebug(req) ? buildAuthDebug(req) : undefined;
+      return res.status(401).json({ message: "Unauthorized", debug });
+    }
     res.json({
       id: req.user.id,
       email: req.user.email,
